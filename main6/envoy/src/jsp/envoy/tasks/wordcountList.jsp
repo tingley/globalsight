@@ -49,7 +49,7 @@
         self.setPageName(pageName);
     }
 
-    boolean isInContextMatch = ((Boolean)request.getAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH));
+    boolean isInContextMatch = (Boolean) sessionMgr.getAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH);
     
     int threshold = 75;
     try
@@ -60,7 +60,7 @@
     {
     }
 
-    boolean hasMtColumnFlag = (Boolean) request.getAttribute(WordCountHandler.MT_COLUMN_FLAG);
+    boolean hasMtColumnFlag = (Boolean) sessionMgr.getAttribute(WordCountHandler.MT_COLUMN_FLAG);
 %>
 
 <HTML>

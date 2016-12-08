@@ -409,7 +409,7 @@ $(document).ready(function(){
 	            <amb:column label="lb_comments" width="45%" style="word-wrap:break-word;word-break:break-all">
 	            <div style='width:45%'>
 	                <%
-	                    String com = comment.getComment();
+	                    String com = EditUtil.encodeHtmlEntities(comment.getComment());
 	                    if (com.length() > 200)
 	                    {
 	                        int idx = com.indexOf(' ', 200);
@@ -420,7 +420,7 @@ $(document).ready(function(){
 	                        out.println("<div id=j" + comment.getId() + " class=\"comment\">" + comment.getComment() + "<div onclick=closeComment('j" + comment.getId() + "');><span style=\"cursor: hand; color:blue\">[Close]</span></div></div>");
 	                    }
 	                    else
-	                        out.println(comment.getComment());
+	                        out.println(com);
 	                %>
 	            </div>
 	            </amb:column>

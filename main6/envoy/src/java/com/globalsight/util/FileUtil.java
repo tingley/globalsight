@@ -981,7 +981,8 @@ public class FileUtil
 		Set<String> newDisableUploadFileTypeSet = new HashSet<String>();
 		for (String str : disableUploadFileTypeSet)
 		{
-			newDisableUploadFileTypeSet.add(str.toLowerCase());
+			newDisableUploadFileTypeSet.add(str.substring(str.indexOf(".")+1)
+					.toLowerCase());
 		}
 		List<File> canNotUploadFiles = new ArrayList<File>();
 		for (int i = 0; i < fileList.size(); i++)
@@ -993,7 +994,7 @@ public class FileUtil
 				{
 					if (isZipFile(fileList.get(i)))
 					{
-						if (newDisableUploadFileTypeSet.contains(".zip"))
+						if (newDisableUploadFileTypeSet.contains("zip"))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							continue;
@@ -1002,7 +1003,7 @@ public class FileUtil
 					}
 					else if (isRarFile(fileList.get(i)))
 					{
-						if (newDisableUploadFileTypeSet.contains(".rar"))
+						if (newDisableUploadFileTypeSet.contains("rar"))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							continue;
@@ -1011,7 +1012,7 @@ public class FileUtil
 					}
 					else if (is7zFile(fileList.get(i)))
 					{
-						if (newDisableUploadFileTypeSet.contains(".7z"))
+						if (newDisableUploadFileTypeSet.contains("7z"))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							continue;
@@ -1022,7 +1023,7 @@ public class FileUtil
 					for (int j = 0; j < extensionList.size(); j++)
 					{
 						if (newDisableUploadFileTypeSet.contains(extensionList
-								.get(i).toLowerCase()))
+								.get(j).toLowerCase()))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							break;
@@ -1066,7 +1067,7 @@ public class FileUtil
 		}
 		return extensionList;
 	}
-    
+  
 	public static List<String> unRarFile(File rarFile) throws Exception
 	{
 		List<String> extensionList = new ArrayList<String>();
@@ -1096,45 +1097,45 @@ public class FileUtil
 		}
 		return extensionList;
 	}
-	
-	 public static boolean isZipFile(File file)
-	    {
-	        String extension = getFileExtension(file.getName());
-	        if (extension != null && extension.equalsIgnoreCase("zip"))
-	        {
-	            return true;
-	        }
-	        else
-	        {
-	            return false;
-	        }
-	    }
-	    
-	    public static boolean isRarFile(File file)
-	    {
-	        String extension = getFileExtension(file.getName());
-	        if (extension != null && extension.equalsIgnoreCase("rar"))
-	        {
-	            return true;
-	        }
-	        else
-	        {
-	            return false;
-	        }
-	    }
-	    
-	    public static boolean is7zFile(File file)
-	    {
-	        String extension = getFileExtension(file.getName());
-	        if (extension != null && extension.equalsIgnoreCase("7z"))
-	        {
-	            return true;
-	        }
-	        else
-	        {
-	            return false;
-	        }
-	    }
+
+	public static boolean isZipFile(File file)
+	{
+		String extension = getFileExtension(file.getName());
+		if (extension != null && extension.equalsIgnoreCase("zip"))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static boolean isRarFile(File file)
+	{
+		String extension = getFileExtension(file.getName());
+		if (extension != null && extension.equalsIgnoreCase("rar"))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static boolean is7zFile(File file)
+	{
+		String extension = getFileExtension(file.getName());
+		if (extension != null && extension.equalsIgnoreCase("7z"))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 	
 	public static boolean isSupportedZipFileFormat(File file)
 	{
@@ -1153,7 +1154,7 @@ public class FileUtil
         String extension = "";
         if (fileName.lastIndexOf(".") != -1)
         {
-            extension = fileName.substring(fileName.lastIndexOf("."));
+            extension = fileName.substring(fileName.lastIndexOf(".")+1);
         }
         return extension;
     }

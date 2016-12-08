@@ -127,7 +127,6 @@ var jsEscapeImport = "<%= bundle.getString("lb_filter_basefilter_escape_import")
 var jsEscapeExport = "<%= bundle.getString("lb_filter_basefilter_escape_export") %>";
 var jsEscape = "<%= bundle.getString("lb_filter_basefilter_escape_escape") %>";
 var jsActiveOrInactive = "<%= bundle.getString("lb_filter_basefilter_escape_activeorinactive") %>";
-var jsPatternMessage = "<%=bundle.getString("lb_filter_basefilter_escape_pattern_message")%>";
 var jsStartPatternMessage = "<%=bundle.getString("lb_filter_basefilter_escape_startPattern_message")%>";
 var jsFinishPatternMessage = "<%=bundle.getString("lb_filter_basefilter_escape_finishPattern_message")%>";
 

@@ -655,13 +655,8 @@ BaseFilter.prototype.saveEscaping = function()
 			 finishIsRegex = document.getElementById("baseFilter_escaping_finishIsRegex").checked;
 			 startPattern = document.getElementById("baseFilter_escaping_startPattern").value.trim();
 			 finishPattern = document.getElementById("baseFilter_escaping_finishPattern").value.trim();
-			 if(startIsRegex != true && finishIsRegex != true && (startPattern == null || startPattern == '') && (finishPattern == null || finishPattern == ''))
-			 {
-				 alert(jsPatternMessage);
-				 return false;
-			 }
 			 
-			 if(startIsRegex == true && (startPattern == null || startPattern == ''))
+			 if(startPattern == null || startPattern == '')
 			 {
 				 alert(jsStartPatternMessage);
 				 return false;
@@ -1287,7 +1282,7 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"baseFilter.addTag('" + radioId + "')\">"+encodedName+"</a></td>");
 					if(typeof(ruleObj.escape) =='undefined' || ruleObj.escape.length != 1)
 					{
-						str.append("<td class='tagValue_td'>" + ("") + "</td>");
+						str.append("<td class='tagValue_td'>" + ("\\") + "</td>");
 					}
 					else
 					{

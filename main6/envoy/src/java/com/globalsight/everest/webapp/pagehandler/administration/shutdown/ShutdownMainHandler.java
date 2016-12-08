@@ -17,21 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.administration.shutdown;
 
 // java
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
-// Envoy packages
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -42,7 +28,23 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
+import org.apache.log4j.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+// Envoy packages
 
 /**
  * Handles setting up data for shutdown.jsp. Has the ability to shut down or
@@ -348,6 +350,8 @@ public class ShutdownMainHandler extends PageHandler
                     s_restartTimer.schedule(new Restarter(), s_restartTime);
                     s_isRestarting = Boolean.TRUE;
                     s_restartMessage = (String) p_request.getParameter(PARAM_RESTART_MSG);
+                    if (StringUtil.isNotEmpty(s_restartMessage))
+                        s_restartMessage = EditUtil.encodeHtmlEntities(s_restartMessage);
                 }
                 else if (PARAM_CHOICE_CANCEL.equals(param))
                 {
@@ -407,6 +411,8 @@ public class ShutdownMainHandler extends PageHandler
                     s_shutdownTimer.schedule(new AmbassadorStopper(), s_shutdownTime);
                     s_isShuttingDown = Boolean.TRUE;
                     s_shutdownMessage = (String) p_request.getParameter(PARAM_MSG);
+                    if (StringUtil.isNotEmpty(s_shutdownMessage))
+                        s_shutdownMessage = EditUtil.encodeHtmlEntities(s_shutdownMessage);
                 }
                 else if (PARAM_CHOICE_CANCEL.equals(param))
                 {

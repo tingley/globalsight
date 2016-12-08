@@ -242,7 +242,6 @@ public class ControlServlet extends HttpServlet
         WebPageDescriptor targetPageDescriptor = null;
         WebPageDescriptor sourcePageDescriptor = null;
         HttpSession userSession = null;
-        p_response.addHeader("x-frame-options","SAMEORIGIN");
 
         // Vincent: Check if parameters contain invaild characters, 2016/08/16
         PageHandler sourcePageHandler = null;

@@ -759,7 +759,7 @@ textarea {
 .error {
     background-color: #ff3300;
 }
-.middle {
+.psmiddle {
     background-color: gold;
 }
 .strong {

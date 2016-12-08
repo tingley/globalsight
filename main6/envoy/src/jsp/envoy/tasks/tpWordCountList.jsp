@@ -56,7 +56,7 @@
     String leverageMatchThreshold = bundle.getString("lb_leverage_match_threshold") + " = "+ lmt + "%";
 
     boolean noWordCountPermission = true;
-    boolean isInContextMatch = ((Boolean)request.getAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH));
+    boolean isInContextMatch = (Boolean) sessionMgr.getAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH);
     boolean hasMtColumnFlag = (wf.getIsSinceVersion87() && wf.getMtTotalWordCount() > 0);
 %>
 <%!

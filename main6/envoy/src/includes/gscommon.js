@@ -82,7 +82,7 @@ function passwordChecking(val) {
 		$progress.attr("class", "vali_pass_inner_progress error");
 		passChecking = false;
 	} else if (result > 50 && result < 100) {
-		$progress.attr("class", "vali_pass_inner_progress middle");
+		$progress.attr("class", "vali_pass_inner_progress psmiddle");
 		passChecking = false;
 	} else if (result == 100) {
 		$progress.attr("class", "vali_pass_inner_progress strong");

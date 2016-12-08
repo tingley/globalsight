@@ -58,6 +58,8 @@ public class MatchState
         = new MatchState(16, "PO_EXACT_MATCH", 14);
     static public final MatchState MACHINE_TRANSLATION
         = new MatchState(16, "MACHINE_TRANSLATION", 15);
+    static public final MatchState FUZZY_MATCH_OLD
+        = new MatchState(17, "FUZZY_MATCH_OLD", 17);
 
     // map for getting MatchState object by looking up its name
     // Key: state name
@@ -85,6 +87,7 @@ public class MatchState
         map.put(TDA_MATCH.getName(), TDA_MATCH);
         map.put(PO_EXACT_MATCH.getName(), PO_EXACT_MATCH);
         map.put(MACHINE_TRANSLATION.getName(), MACHINE_TRANSLATION);
+        map.put(FUZZY_MATCH_OLD.getName(), FUZZY_MATCH_OLD);
 
         return map;
     }

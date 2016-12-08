@@ -60,6 +60,7 @@
 		sampleComments = comments.substring(0, partialComment - 1)
 				+ "...";
 	}
+	sampleComments = EditUtil.encodeHtmlEntities(sampleComments);
 	Comment comment = (Comment) sessionMgr.getAttribute("comment");
 	WorkObject wo = (WorkObject) TaskHelper.retrieveObject(session,
 			WebAppConstants.WORK_OBJECT);

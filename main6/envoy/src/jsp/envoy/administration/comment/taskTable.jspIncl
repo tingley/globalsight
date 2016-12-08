@@ -51,7 +51,7 @@
             <amb:column label="lb_comments" width="35%" style="word-wrap:break-word;word-break:break-all">
             <DIV style='width:40%'>
                 <%
-                    String com = taskcomment.getComment();
+                    String com = EditUtil.encodeHtmlEntities(taskcomment.getComment());
                     if (com.length() > 200)
                     {
                         int idx = com.indexOf(' ', 200);
@@ -62,7 +62,7 @@
                         out.println("<div id=allt" + taskcomment.getCommentId() + " class=\"comment\">" + taskcomment.getComment() + "<div onclick=closeComment('allt" + taskcomment.getCommentId() + "');><span style=\"cursor: hand; color:blue\">[Close]</span></div></div>");
                     }
                     else
-                        out.println(taskcomment.getComment());
+                        out.println(com);
                 %>
             </DIV>
             </amb:column>

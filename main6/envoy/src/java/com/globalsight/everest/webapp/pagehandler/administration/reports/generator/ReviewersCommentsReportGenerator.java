@@ -110,7 +110,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     private boolean cancel = false;
     
     private boolean isDQFEnabled = false;
-    private boolean isScorecradEnabled = false;
+    private boolean isScorecardEnabled = false;
     private String fluencyScore = "";
     private String adequacyScore = "";
     private String dqfComment = "";
@@ -311,7 +311,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             scores = null;
             scoreComment = "";
             isDQFEnabled = false;
-            isScorecradEnabled = false;
+            isScorecardEnabled = false;
             needProtect = false;
             
             DQF_START_ROW = 0;
@@ -388,7 +388,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             DQFReportHelper.writeDQFInfo(needProtect, isDQFEnabled, dqfData, sheet, DQF_START_ROW,  m_bundle);
         }
 
-        if (isScorecradEnabled) {
+        if (isScorecardEnabled) {
             isStored = StringUtil.isNotEmpty(scoreComment);
             
             // Scorecard enabled
@@ -505,7 +505,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 else
                     COMMENT_STATUS_COLUMN = 5;
                 if (scoreShowType > -1 && scoreShowType < 4) {
-                    isScorecradEnabled = true;
+                    isScorecardEnabled = true;
                     scorecardCategories = ScorecardScoreHelper.getScorecardCategories(wf.getCompanyId(), m_bundle);
                     scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());
                     scoreComment = wf.getScorecardComment();
@@ -518,7 +518,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             // Only DQF enabled
             SEGMENT_HEADER_ROW = DQF_START_ROW + 4;
         }
-        if (isScorecradEnabled)
+        if (isScorecardEnabled)
         {
             // Scorecard enabled or both DQF and scorecard are enabled
             SEGMENT_HEADER_ROW = SCORECARD_START_ROW + scorecardCategories.size() + 3;

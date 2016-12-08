@@ -278,9 +278,9 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         { "expression\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL });
         ret.add(new Object[]
         { "(javascript:|vbscript:|view-source:).*", Pattern.CASE_INSENSITIVE });
-        ret.add(new Object[]
-        { "<(\"[^\"]*\"|\'[^\']*\'|[^\'\">]).*>",
-                Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL });
+//        ret.add(new Object[]
+//        { "<(\"[^\"]*\"|\'[^\']*\'|[^\'\">]).*>",
+//                Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL });
         ret.add(new Object[]
         { "(window\\.location|document\\.cookie|alert\\(.*?\\)|window\\.open\\().*",
                 Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL });

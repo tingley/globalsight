@@ -18,6 +18,7 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,8 +29,8 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.cognitran.core.model.util.Collections;
 import com.globalsight.everest.util.comparator.PriorityComparator;
+import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.IFormatNames;
@@ -531,6 +532,7 @@ public class EscapingHelper
 		{
 			return;
 		}
+		boolean isAssociateHtmlFilter = checkAssociatedHtmlFilter(mFilter);
 		boolean isInCDATA = false;
 		boolean isAttr = false;
 		String format = p_output.getDataFormat();
@@ -559,10 +561,36 @@ public class EscapingHelper
 									segment, internalTexts);
 							String contentType = getContentType(segment,
 									format, isAttr, isInCDATA);
+							List<String> segmentList = getHtmlNode(segment);
+							String result = "";
+							if (segmentList != null && segmentList.size() > 0)
+							{
+								StringBuffer buffer = new StringBuffer();
+								for (String str : segmentList)
+								{
+									if (str.startsWith("normal||"))
+									{
+										buffer.append(newHandleString4Import(str.substring(("normal||").length()), es,
+												format, false, processedChars, contentType));
+									}
+									else if (str.startsWith("htmlnode||"))
+									{
+										String newContentType = "";
+										if (isAssociateHtmlFilter)
+											newContentType = "HtmlNode";
+										else
+											newContentType = contentType;
+										
+										buffer.append(newHandleString4Import(str.substring(("htmlnode||").length()), es,
+												format, false, processedChars, newContentType));
+									}
+								}
+								result = buffer.toString();
+							}
 							// String result = handleString4Import(segment, es,
 							// format, false, processedChars);
-							String result = newHandleString4Import(segment, es,
-									format, false, processedChars, contentType);
+//							String result = newHandleString4Import(segment, es,
+//									format, false, processedChars, contentType);
 							result = InternalTextHelper.restoreInternalTexts(
 									result, internalTexts);
 							snode.setSegment(result);
@@ -621,7 +649,7 @@ public class EscapingHelper
 			}
 		}
 	}
-
+	
 	public static String newHandleString4Export(String oriStr,
 			List<Escaping> es, String format, boolean noTag, boolean doDecode,
 			String escapingChars, boolean isInCDATA, String contentType)
@@ -1201,10 +1229,6 @@ public class EscapingHelper
 						}
 					}
 				}
-				else
-				{
-					sub.append(char1);
-				}
 			}
 
 			if (j == length - 1)
@@ -1455,5 +1479,133 @@ public class EscapingHelper
 		}
 
 		return contentList;
+	}
+	
+	public static boolean checkAssociatedHtmlFilter(Filter mFilter)
+	{
+		if (mFilter != null)
+		{
+			String filterName = null;
+			long filterId = -1;
+			if (mFilter instanceof JavaPropertiesFilter)
+			{
+				filterName = ((JavaPropertiesFilter) mFilter).getSecondFilterTableName();
+				filterId = ((JavaPropertiesFilter) mFilter).getSecondFilterId();
+			}
+			else if (mFilter instanceof POFilter)
+			{
+				filterName = ((POFilter) mFilter).getSecondFilterTableName();
+				filterId = ((POFilter) mFilter).getSecondFilterId();
+			}
+			else if (mFilter instanceof JsonFilter)
+			{
+				filterName = ((JsonFilter) mFilter).getElementPostFilterTableName();
+				filterId = ((JsonFilter) mFilter).getElementPostFilterId();
+			}
+			else if (mFilter instanceof PlainTextFilter)
+			{
+                 try
+				{
+                	 PlainTextFilterParser parser = new PlainTextFilterParser(((PlainTextFilter) mFilter));
+					parser.parserXml();
+	                filterName = parser.getElementPostFilterTableName();
+					if (StringUtil.isNotEmptyAndNull(parser
+							.getElementPostFilterId()))
+					{
+						filterId = Long.parseLong(parser
+								.getElementPostFilterId());
+					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+			else if (mFilter instanceof MSOffice2010Filter)
+			{
+				filterName = ((MSOffice2010Filter) mFilter).getContentPostFilterTableName();
+				filterId = ((MSOffice2010Filter) mFilter).getContentPostFilterId();
+			}
+			else if (mFilter instanceof MSOfficeDocFilter)
+			{
+				filterName = ((MSOfficeDocFilter) mFilter).getContentPostFilterTableName();
+				filterId = ((MSOfficeDocFilter) mFilter).getContentPostFilterId();
+			}
+			else if (mFilter instanceof MSOfficeExcelFilter)
+			{
+				filterName = ((MSOfficeExcelFilter) mFilter).getContentPostFilterTableName();
+				filterId = ((MSOfficeExcelFilter) mFilter).getContentPostFilterId();
+			}
+			else if (mFilter instanceof MSOfficePPTFilter)
+			{
+				filterName = ((MSOfficePPTFilter) mFilter).getContentPostFilterTableName();
+				filterId = ((MSOfficePPTFilter) mFilter).getContentPostFilterId();
+			}
+			
+			if (filterName != null
+					&& filterName.equalsIgnoreCase("html_filter")
+					&& filterId != -1)
+			{
+				boolean isFilterExist = FilterHelper.isFilterExist(filterName,
+						filterId);
+				return isFilterExist;
+			}
+		}
+		return false;
+	}
+	
+	public static List<String> getHtmlNode(String p_str)
+	{
+		List<String> returnStr = new ArrayList<String>();
+		HtmlEntities entities = new HtmlEntities();
+		p_str = entities.decodeStringBasic(p_str);
+		int ltIndex = p_str.indexOf("<");
+		int gtIndex = p_str.indexOf(">");
+		if (ltIndex == -1 && gtIndex == -1)
+		{
+			returnStr.add("normal||" + entities.encodeStringBasic(p_str));
+			return returnStr;
+		}
+
+		while (ltIndex > -1 || gtIndex > -1)
+		{
+			String strA = "";
+
+			if (ltIndex > -1 && gtIndex > -1)
+			{
+				if (gtIndex > ltIndex)
+				{
+					strA = p_str.substring(0, gtIndex + 1);
+					p_str = p_str.substring(gtIndex + 1);
+
+					int left = strA.lastIndexOf("<");
+					String leftStr = strA.substring(0, left);
+					leftStr = leftStr.replace("<", "&lt;");
+					returnStr.add("normal||"
+							+ entities.encodeStringBasic(leftStr));
+					String rightStr = strA.substring(left);
+					int newLtIndex = p_str.indexOf("<");
+					int newGtIndex = p_str.indexOf(">");
+
+					if (newLtIndex != -1 && newGtIndex != -1)
+					{
+						strA = p_str.substring(0, newGtIndex + 1);
+						returnStr.add("htmlnode||"
+								+ entities.encodeStringBasic(rightStr + strA));
+						p_str = p_str.substring(newGtIndex + 1);
+						ltIndex = p_str.indexOf("<");
+						gtIndex = p_str.indexOf(">");
+					}
+
+					if (ltIndex == -1 && gtIndex == -1)
+					{
+						returnStr.add("normal||"
+								+ entities.encodeStringBasic(p_str));
+					}
+				}
+			}
+		}
+
+		return returnStr;
 	}
 }

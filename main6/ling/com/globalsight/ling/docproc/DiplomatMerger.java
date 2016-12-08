@@ -18,6 +18,7 @@ package com.globalsight.ling.docproc;
 
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
+import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Escaping;
@@ -909,9 +911,13 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         NativeEnDecoder encoderForSkeleton = getEncoder(getDocumentFormat());
 
         String srcDataType = m_output.getDiplomatAttribute().getDataType();
+        boolean isAssociateHtmlFilter = EscapingHelper.checkAssociatedHtmlFilter(getMainFilter());
         boolean isTuvLocalized = false;
         String localizedBy = new String();
         boolean isInCDATA = false;
+        boolean isHtmlNode = false;
+      //Reverse order export
+        //Collections.reverse(m_escapings);
         for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
             de = (DocumentElement) it.next();
@@ -1008,6 +1014,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 					// Modified GBS-4117
 					String contentType = getContentType(chunk, srcDataType,
 							m_isAttr, isInCDATA);
+					if (isHtmlNode)
+						contentType = "HtmlNode";
 					String newchunk = EscapingHelper.newHandleString4Export(
 							chunk, m_escapings, srcDataType, false, true,
 							escapingChars, isInCDATA, contentType);
@@ -1045,6 +1053,13 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     {
                         isInCDATA = tmp.indexOf("<![CDATA[") > tmp.indexOf("]]");
                     }
+                    
+					if (tmp.indexOf("<") > -1 && tmp.indexOf(">") > -1
+							&& tmp.indexOf("<") < tmp.indexOf(">")
+							&& tmp.indexOf("</") == -1 && isAssociateHtmlFilter)
+					{
+						isHtmlNode = true;
+					}
 
                     if (OfficeContentPostFilterHelper.isOfficeFormat(srcDataType))
                     {
@@ -1148,6 +1163,22 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             }
         }
     }
+    
+	private Filter getMainFilter()
+	{
+		try
+		{
+			if (m_filterId >= 0 && m_filterTableName != null)
+			{
+				return FilterHelper.getFilter(m_filterTableName, m_filterId);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	private static String getContentType(String segment, String format,
 			boolean isAttr, boolean isInCDATA)

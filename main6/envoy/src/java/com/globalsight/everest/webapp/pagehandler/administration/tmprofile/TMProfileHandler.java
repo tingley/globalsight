@@ -564,7 +564,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         
         String oldTuvMatchP = p_request.getParameter("oldTuvMatchPenalty");
         long oldTuvMatchPenalty = 0;
-        if (oldTuvMatchP != null && oldTuvMatchP.trim().length() != 0)
+        if (StringUtil.isNotEmpty(oldTuvMatchP))
         {
             oldTuvMatchPenalty = Long.parseLong(oldTuvMatchP);
         }

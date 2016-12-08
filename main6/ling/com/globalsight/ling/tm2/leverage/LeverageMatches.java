@@ -1113,34 +1113,40 @@ public class LeverageMatches
                 List<BaseTmTuv> tuvList = p_tu.getTuvs();
                 for (BaseTmTuv baseTmTuv : tuvList)
                 {
-                    LeveragedTuv matchedTuv = (LeveragedTuv) baseTmTuv;
+                    LeveragedSegmentTuv matchedTuv = (LeveragedSegmentTuv) baseTmTuv;
                     Timestamp creationDate = matchedTuv.getCreationDate();
                     Timestamp modifyDate = matchedTuv.getModifyDate();
                     Timestamp lastUsageDate = matchedTuv.getLastUsageDate();
                     Timestamp currentDate = new Timestamp(System.currentTimeMillis());
-                    int day1 = 10000;
-                    int day2 = 10000;
-                    int day3 = 10000;
+                    long createTime = 10000*24*60*60*1000;
+                    long modifyTime = 10000*24*60*60*1000;
+                    long lastUsedTime = 10000*24*60*60*1000;
                     if (creationDate != null)
                     {
-                        day1 = (int) ((currentDate.getTime() - creationDate.getTime()) / 1000 / 60 / 60 / 24);
+                        createTime = currentDate.getTime() - creationDate.getTime();
                     }
                     if (modifyDate != null)
                     {
-                        day2 = (int) ((currentDate.getTime() - modifyDate.getTime()) / 1000 / 60 / 60 / 24);
+                        modifyTime = currentDate.getTime() - modifyDate.getTime();
                     }
                     if (lastUsageDate != null)
                     {
-                        day3 = (int) ((currentDate.getTime() - lastUsageDate.getTime()) / 1000 / 60 / 60 / 24);
+                        lastUsedTime =currentDate.getTime() - lastUsageDate.getTime();
                     }
-                    if (day1 > m_leverageOptions.getOldTuvMatchDay()
-                            && day2 > m_leverageOptions.getOldTuvMatchDay()
-                            && day3 > m_leverageOptions.getOldTuvMatchDay())
+                    long oldTuvTime = (m_leverageOptions.getOldTuvMatchDay())*24*60*60*1000;
+                    if (createTime > oldTuvTime && modifyTime > oldTuvTime && lastUsedTime > oldTuvTime)
                     {
                         float score = (matchedTuv.getScore() - m_leverageOptions
                                 .getOldTuvMatchPenalty());
-                        matchedTuv.setScore(score);
-                        matchedTuv.setMatchState(MatchState.FUZZY_MATCH);
+                        if (score > 0)
+                        {
+                            matchedTuv.setScore(score);
+                        }
+                        else
+                        {
+                            matchedTuv.setScore(-10f);
+                        }
+                        matchedTuv.setMatchState(MatchState.FUZZY_MATCH_OLD);
                     }
                 }
             }

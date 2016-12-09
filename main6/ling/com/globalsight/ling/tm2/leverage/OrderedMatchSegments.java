@@ -319,16 +319,28 @@ class OrderedMatchSegments
         {
             GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale.next();
             List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
+            List leveragedTuvList1 = new ArrayList<LeveragedTuv>();
+            leveragedTuvList1.addAll(leveragedTuvList);
+            for (int i = 0; i < leveragedTuvList1.size(); i++)
+            {
+                LeveragedTuv leveragedTuv = (LeveragedTuv) leveragedTuvList1.get(i);
+                MatchState tuvState = leveragedTuv.getMatchState();
+                if (MatchState.FUZZY_MATCH_OLD.equals(tuvState))
+                {
+                    leveragedTuvList1.remove(i);
+                    i--;
+                }
+            }
 
             // If the number of matches is only 1, no need to apply
             // the option.
-            if (leveragedTuvList.size() < 2)
+            if (leveragedTuvList1.size() < 2)
             {
                 continue;
             }
 
-            LeveragedTuv firstTuv = (LeveragedTuv) leveragedTuvList.get(0);
-            LeveragedTuv secondTuv = (LeveragedTuv) leveragedTuvList.get(1);
+            LeveragedTuv firstTuv = (LeveragedTuv) leveragedTuvList1.get(0);
+            LeveragedTuv secondTuv = (LeveragedTuv) leveragedTuvList1.get(1);
             MatchState firstState = firstTuv.getMatchState();
             MatchState secondState = secondTuv.getMatchState();
             GlobalSightLocale firstLocale = firstTuv.getLocale();
@@ -340,11 +352,9 @@ class OrderedMatchSegments
             // the above condition is satisfied, there are multiple
             // translation.
             if ((firstState.equals(MatchState.PAGE_TM_EXACT_MATCH)
-                    || firstState.equals(MatchState.SEGMENT_TM_EXACT_MATCH)
-                    ||firstState.equals(MatchState.FUZZY_MATCH_OLD))
+                    || firstState.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
                     && (secondState.equals(MatchState.PAGE_TM_EXACT_MATCH)
-                            || secondState.equals(MatchState.SEGMENT_TM_EXACT_MATCH)
-                            || secondState.equals(MatchState.FUZZY_MATCH_OLD))
+                            || secondState.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
                     && (!(firstLocale.equals(targetLocale) ^ secondLocale.equals(targetLocale))))
             {
                 if (LeverageUtil.getSidCompareRusult(firstTuv, p_jobId) == 1
@@ -352,7 +362,7 @@ class OrderedMatchSegments
                 {
                     continue;
                 }
-                assignMultiTransStateAndScore(leveragedTuvList, p_leverageOptions);
+                assignMultiTransStateAndScore(leveragedTuvList1, p_leverageOptions);
             }
         }
     }
@@ -394,8 +404,7 @@ class OrderedMatchSegments
         for (int i = 1; i < p_leveragedTuvList.size(); i++)
         {
             LeveragedTuv tuv = (LeveragedTuv) p_leveragedTuvList.get(i);
-            MatchState state = tuv.getMatchState();
-            if (tuv.getScore() != 100 && state != MatchState.FUZZY_MATCH_OLD)
+            if (tuv.getScore() != 100)
             {
                 break;
             }
@@ -403,9 +412,9 @@ class OrderedMatchSegments
             // Demote other 100% matches such as
             // TYPE_DIFFERENCE. Since multiple translations are better
             // matches, the other state of matches cannot be 100%.
+            MatchState state = tuv.getMatchState();
             if ((!state.equals(MatchState.PAGE_TM_EXACT_MATCH))
-                    && (!state.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
-                    &&(!state.equals(MatchState.FUZZY_MATCH_OLD)))
+                    && (!state.equals(MatchState.SEGMENT_TM_EXACT_MATCH)))
             {
                 demoteExact(tuv, p_leverageOptions);
             }

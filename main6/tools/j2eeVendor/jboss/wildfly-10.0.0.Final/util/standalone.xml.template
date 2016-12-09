@@ -34,6 +34,7 @@
         <property name="org.apache.coyote.http11.Http11Protocol.COMPRESSION" value="on"/>
         <property name="org.apache.coyote.http11.Http11Protocol.COMPRESSION_MIME_TYPES" value="text/javascript,text/css,text/html"/>
         <property name="org.apache.coyote.http11.Http11Protocol.SERVER" value="GlobalSightServer"/>
+        <property name="jboss.as.management.blocking.timeout" value="600"/>
     </system-properties>
     <management>
         <security-realms>

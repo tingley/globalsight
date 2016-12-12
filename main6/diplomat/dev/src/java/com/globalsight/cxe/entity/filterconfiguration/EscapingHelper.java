@@ -47,6 +47,8 @@ public class EscapingHelper
 	private static final Logger CATEGORY = Logger
 			.getLogger(EscapingHelper.class);
 	private static XmlEntities m_xmlEncoder = new XmlEntities();
+	private static String statRegexStr = "<bpt([\\s\\S]*)><([\\s\\S]*)></bpt>";
+	private static String endRegexStr = "<ept([\\s\\S]*)></([\\s\\S]*)></ept>";
 
 	public static String handleString4Export(String oriStr, List<Escaping> es,
 			String format, boolean noTag, boolean doDecode, String escapingChars)
@@ -561,36 +563,22 @@ public class EscapingHelper
 									segment, internalTexts);
 							String contentType = getContentType(segment,
 									format, isAttr, isInCDATA);
-							List<String> segmentList = getHtmlNode(segment);
 							String result = "";
-							if (segmentList != null && segmentList.size() > 0)
+							if (isAssociateHtmlFilter)
 							{
-								StringBuffer buffer = new StringBuffer();
-								for (String str : segmentList)
-								{
-									if (str.startsWith("normal||"))
-									{
-										buffer.append(newHandleString4Import(str.substring(("normal||").length()), es,
-												format, false, processedChars, contentType));
-									}
-									else if (str.startsWith("htmlnode||"))
-									{
-										String newContentType = "";
-										if (isAssociateHtmlFilter)
-											newContentType = "HtmlNode";
-										else
-											newContentType = contentType;
-										
-										buffer.append(newHandleString4Import(str.substring(("htmlnode||").length()), es,
-												format, false, processedChars, newContentType));
-									}
-								}
-								result = buffer.toString();
+								result = getEscapeString(segment, es, format,
+										processedChars, contentType);
 							}
+							else
+							{
+								result = newHandleString4Import(segment, es,
+										format, false, processedChars,
+										contentType);
+							}
+
 							// String result = handleString4Import(segment, es,
 							// format, false, processedChars);
-//							String result = newHandleString4Import(segment, es,
-//									format, false, processedChars, contentType);
+
 							result = InternalTextHelper.restoreInternalTexts(
 									result, internalTexts);
 							snode.setSegment(result);
@@ -649,10 +637,11 @@ public class EscapingHelper
 			}
 		}
 	}
-	
+
 	public static String newHandleString4Export(String oriStr,
 			List<Escaping> es, String format, boolean noTag, boolean doDecode,
-			String escapingChars, boolean isInCDATA, String contentType)
+			String escapingChars, boolean isInCDATA, String contentType,
+			boolean isAssociateHtmlFilter)
 	{
 		if (oriStr == null || oriStr.length() == 0)
 			return oriStr;
@@ -679,6 +668,7 @@ public class EscapingHelper
 		{
 			tags = TagIndex.getContentIndexes(oriStr, false);
 		}
+
 		int count = tags.size();
 		for (int i = 0; i < count; i++)
 		{
@@ -688,8 +678,8 @@ public class EscapingHelper
 				if (IFormatNames.FORMAT_XML.equals(format) && isInCDATA)
 				{
 					// Escape tag content is dangerous...
-					sb.append(newHandleTagContent4Export(ti.content, es, doDecode,
-							format, escapingChars, contentType));
+					sb.append(newHandleTagContent4Export(ti.content, es,
+							doDecode, format, escapingChars, contentType));
 				}
 				else
 				{
@@ -698,14 +688,23 @@ public class EscapingHelper
 			}
 			else
 			{
-				sb.append(newHandleString4Export(ti.content, es, doDecode,
-						format, escapingChars, contentType));
+				if (checkHtmlNode(tags, i, isAssociateHtmlFilter)
+						&& StringUtil.isEmpty(contentType))
+				{
+					sb.append(newHandleString4Export(ti.content, es, doDecode,
+							format, escapingChars, "HtmlNode"));
+				}
+				else
+				{
+					sb.append(newHandleString4Export(ti.content, es, doDecode,
+							format, escapingChars, contentType));
+				}
 			}
 		}
 
 		return sb.toString();
 	}
-	
+
 	private static String newHandleTagContent4Export(String content,
 			List<Escaping> es, boolean doDecode, String format,
 			String escapingChars, String contentType)
@@ -785,8 +784,8 @@ public class EscapingHelper
 			boolean finishIsRegex = escaping.isFinishIsRegex();
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
-			List<String> contentList = extractOneLine(ccc, startStr,
-					finishStr, startIsRegex, finishIsRegex);
+			List<String> contentList = extractOneLine(ccc, startStr, finishStr,
+					startIsRegex, finishIsRegex);
 			StringBuffer buffer = new StringBuffer();
 			for (String con : contentList)
 			{
@@ -831,8 +830,8 @@ public class EscapingHelper
 			boolean finishIsRegex = escaping.isFinishIsRegex();
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
-			List<String> contentList = extractOneLine(ccc, startStr,
-					finishStr, startIsRegex, finishIsRegex);
+			List<String> contentList = extractOneLine(ccc, startStr, finishStr,
+					startIsRegex, finishIsRegex);
 			StringBuffer buffer = new StringBuffer();
 			for (String con : contentList)
 			{
@@ -843,9 +842,9 @@ public class EscapingHelper
 				}
 				else if (con.startsWith("notmatch||"))
 				{
-					buffer.append(checkActiveHandleChar4Export(
-							con.substring(("notmatch||").length(), con.length()),
-							escaping, format, escapingChars));
+					buffer.append(checkActiveHandleChar4Export(con.substring(
+							("notmatch||").length(), con.length()), escaping,
+							format, escapingChars));
 				}
 			}
 			ccc = buffer.toString();
@@ -855,7 +854,7 @@ public class EscapingHelper
 			returnStr = checkActiveHandleChar4Export(ccc, escaping, format,
 					escapingChars);
 		}
-		
+
 		if (returnStr == null)
 			returnStr = ccc;
 
@@ -867,7 +866,6 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		String processed = null;
-		String preProcessed = null;
 		int length = ccc.length();
 		for (int j = 0; j < length; j++)
 		{
@@ -877,17 +875,7 @@ public class EscapingHelper
 
 			processed = newHandleChar4Export(escaping, sub.toString(), char1,
 					char2, char3, format, escapingChars);
-			// avoid double escape like "\\'".
-			if ("\\".equals(preProcessed) && !"\\".equals(processed)
-					&& processed.startsWith("\\"))
-			{
-				sub.append(char1);
-			}
-			else
-			{
-				sub.append(processed);
-			}
-			preProcessed = processed;
+			sub.append(processed);
 		}
 
 		return sub.toString();
@@ -993,7 +981,6 @@ public class EscapingHelper
 				}
 			}
 		}
-
 		return sb.toString();
 	}
 
@@ -1042,7 +1029,7 @@ public class EscapingHelper
 				.toString()) : sub.toString();
 		return subStr;
 	}
-	
+
 	private static String checkActiveForImport(String ccc, Escaping escaping,
 			String format, List<Character> processedChars, String contentType)
 	{
@@ -1123,10 +1110,9 @@ public class EscapingHelper
 				}
 				else if (con.startsWith("notmatch||"))
 				{
-					buffer.append(checkActiveHandleChar4Import(
-							con.substring(("notmatch||").length(),
-									con.length()), escaping, format,
-							processedChars));
+					buffer.append(checkActiveHandleChar4Import(con.substring(
+							("notmatch||").length(), con.length()), escaping,
+							format, processedChars));
 				}
 			}
 			ccc = buffer.toString();
@@ -1255,8 +1241,8 @@ public class EscapingHelper
 		return false;
 	}
 
-	private static String getContentType(String segment,
-			String format, boolean isAttr, boolean isInCDATA)
+	private static String getContentType(String segment, String format,
+			boolean isAttr, boolean isInCDATA)
 	{
 		String contentType = "";
 		if (isInCDATA)
@@ -1281,7 +1267,7 @@ public class EscapingHelper
 
 		return contentType;
 	}
-	
+
 	public static List<String> extractOneLine(String ccc, String startStr,
 			String finishStr, boolean startIsRegex, boolean finishRegex)
 	{
@@ -1410,7 +1396,7 @@ public class EscapingHelper
 				}
 			}
 		}
-		
+
 		if (!indexMap.isEmpty())
 		{
 			Set<Integer> keySet = indexMap.keySet();
@@ -1424,17 +1410,17 @@ public class EscapingHelper
 					String con01 = ccc.substring(0, keyList.get(i));
 					if (StringUtil.isNotEmptyAndNull(con01))
 					{
-						contentList.add("notmatch||"+con01);
+						contentList.add("notmatch||" + con01);
 					}
 				}
 				String con02 = ccc.substring(keyList.get(i),
 						indexMap.get(keyList.get(i)));
-				contentList.add("match||"+con02);
+				contentList.add("match||" + con02);
 				String con03 = "";
 				if (i < keyList.size() - 1)
 				{
 					con03 = ccc.substring(indexMap.get(keyList.get(i)),
-							keyList.get(i+1));
+							keyList.get(i + 1));
 				}
 				else
 				{
@@ -1443,7 +1429,7 @@ public class EscapingHelper
 				}
 				if (StringUtil.isNotEmptyAndNull(con03))
 				{
-					contentList.add("notmatch||"+con03);
+					contentList.add("notmatch||" + con03);
 				}
 			}
 		}
@@ -1454,7 +1440,7 @@ public class EscapingHelper
 			{
 				if (StringUtil.isNotEmptyAndNull(finishStr))
 				{
-					contentList.add("notmatch||"+ccc);
+					contentList.add("notmatch||" + ccc);
 				}
 				else
 				{
@@ -1464,23 +1450,23 @@ public class EscapingHelper
 							ccc.length());
 					if (StringUtil.isNotEmptyAndNull(con01))
 					{
-						contentList.add("notmatch||"+con01);
+						contentList.add("notmatch||" + con01);
 					}
 					if (StringUtil.isNotEmptyAndNull(con02))
 					{
-						contentList.add("match||"+con02);
+						contentList.add("match||" + con02);
 					}
 				}
 			}
 			else
 			{
-				contentList.add("notmatch||"+ccc);
+				contentList.add("notmatch||" + ccc);
 			}
 		}
 
 		return contentList;
 	}
-	
+
 	public static boolean checkAssociatedHtmlFilter(Filter mFilter)
 	{
 		if (mFilter != null)
@@ -1489,7 +1475,8 @@ public class EscapingHelper
 			long filterId = -1;
 			if (mFilter instanceof JavaPropertiesFilter)
 			{
-				filterName = ((JavaPropertiesFilter) mFilter).getSecondFilterTableName();
+				filterName = ((JavaPropertiesFilter) mFilter)
+						.getSecondFilterTableName();
 				filterId = ((JavaPropertiesFilter) mFilter).getSecondFilterId();
 			}
 			else if (mFilter instanceof POFilter)
@@ -1497,51 +1484,7 @@ public class EscapingHelper
 				filterName = ((POFilter) mFilter).getSecondFilterTableName();
 				filterId = ((POFilter) mFilter).getSecondFilterId();
 			}
-			else if (mFilter instanceof JsonFilter)
-			{
-				filterName = ((JsonFilter) mFilter).getElementPostFilterTableName();
-				filterId = ((JsonFilter) mFilter).getElementPostFilterId();
-			}
-			else if (mFilter instanceof PlainTextFilter)
-			{
-                 try
-				{
-                	 PlainTextFilterParser parser = new PlainTextFilterParser(((PlainTextFilter) mFilter));
-					parser.parserXml();
-	                filterName = parser.getElementPostFilterTableName();
-					if (StringUtil.isNotEmptyAndNull(parser
-							.getElementPostFilterId()))
-					{
-						filterId = Long.parseLong(parser
-								.getElementPostFilterId());
-					}
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-			else if (mFilter instanceof MSOffice2010Filter)
-			{
-				filterName = ((MSOffice2010Filter) mFilter).getContentPostFilterTableName();
-				filterId = ((MSOffice2010Filter) mFilter).getContentPostFilterId();
-			}
-			else if (mFilter instanceof MSOfficeDocFilter)
-			{
-				filterName = ((MSOfficeDocFilter) mFilter).getContentPostFilterTableName();
-				filterId = ((MSOfficeDocFilter) mFilter).getContentPostFilterId();
-			}
-			else if (mFilter instanceof MSOfficeExcelFilter)
-			{
-				filterName = ((MSOfficeExcelFilter) mFilter).getContentPostFilterTableName();
-				filterId = ((MSOfficeExcelFilter) mFilter).getContentPostFilterId();
-			}
-			else if (mFilter instanceof MSOfficePPTFilter)
-			{
-				filterName = ((MSOfficePPTFilter) mFilter).getContentPostFilterTableName();
-				filterId = ((MSOfficePPTFilter) mFilter).getContentPostFilterId();
-			}
-			
+
 			if (filterName != null
 					&& filterName.equalsIgnoreCase("html_filter")
 					&& filterId != -1)
@@ -1553,7 +1496,7 @@ public class EscapingHelper
 		}
 		return false;
 	}
-	
+
 	public static List<String> getHtmlNode(String p_str)
 	{
 		List<String> returnStr = new ArrayList<String>();
@@ -1595,17 +1538,89 @@ public class EscapingHelper
 						p_str = p_str.substring(newGtIndex + 1);
 						ltIndex = p_str.indexOf("<");
 						gtIndex = p_str.indexOf(">");
+						if (ltIndex == -1 && gtIndex == -1)
+						{
+							returnStr.add("normal||"
+									+ entities.encodeStringBasic(p_str));
+						}
 					}
 
-					if (ltIndex == -1 && gtIndex == -1)
+					if (newLtIndex == -1 && newGtIndex == -1)
 					{
 						returnStr.add("normal||"
-								+ entities.encodeStringBasic(p_str));
+								+ entities.encodeStringBasic(rightStr + p_str));
+						ltIndex = newLtIndex;
+						gtIndex = newGtIndex;
 					}
 				}
+				else
+				{
+					returnStr.add("normal||"
+							+ entities.encodeStringBasic(p_str));
+					ltIndex = -1;
+					gtIndex = -1;
+				}
+			}
+			else
+			{
+				returnStr.add("normal||" + entities.encodeStringBasic(p_str));
+				ltIndex = -1;
+				gtIndex = -1;
 			}
 		}
 
 		return returnStr;
+	}
+
+	private static String getEscapeString(String segment, List<Escaping> es,
+			String format, List<Character> processedChars, String contentType)
+	{
+		StringBuffer buffer = new StringBuffer();
+		List<String> segmentList = getHtmlNode(segment);
+		if (segmentList != null && segmentList.size() > 0)
+		{
+			for (String str : segmentList)
+			{
+				if (str.startsWith("normal||"))
+				{
+					buffer.append(newHandleString4Import(
+							str.substring(("normal||").length()), es, format,
+							false, processedChars, contentType));
+				}
+				else if (str.startsWith("htmlnode||"))
+				{
+					String newContentType = "";
+					if (StringUtil.isEmpty(contentType))
+						newContentType = "HtmlNode";
+					else newContentType = contentType;
+
+					buffer.append(newHandleString4Import(
+							str.substring(("htmlnode||").length()), es, format,
+							false, processedChars, newContentType));
+				}
+			}
+		}
+		return buffer.toString();
+	}
+
+	private static boolean checkHtmlNode(List<TagIndex> tags, int index,
+			boolean isAssociateHtmlFilter)
+	{
+		Pattern startP = Pattern.compile(statRegexStr);
+		Pattern endP = Pattern.compile(endRegexStr);
+		int count = tags.size();
+		if (index > 0
+				&& index < count - 1
+				&& startP
+						.matcher(
+								m_xmlEncoder.decodeStringBasic(tags
+										.get(index - 1).content)).find()
+				&& endP.matcher(
+						m_xmlEncoder.decodeStringBasic(tags.get(index + 1).content))
+						.find() && isAssociateHtmlFilter)
+		{
+			return true;
+		}
+		return false;
 	}
 }

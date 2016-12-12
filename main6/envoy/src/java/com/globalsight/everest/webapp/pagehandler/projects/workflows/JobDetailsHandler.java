@@ -426,9 +426,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
 
         CookieUtil.updateMRU(p_request, p_response, job.getId() + ":" + job.getJobName(),
-                cookieName, JobSearchConstants.MRU_JOBS);
-
-        p_response.addCookie(new Cookie("test", "test1111"));
+                cookieName, JobSearchConstants.MRU_JOBS,
+                SystemConfiguration.getInstance().getBooleanParameter("server.ssl.enable"));
 
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
 

@@ -53,7 +53,10 @@ function showGuide(guide)
 { 
 
    // Set the cookie to the guide selected
-   document.cookie = "guide=" + guide;
+   var cookieString = "guide=" + guide;
+   if (document.location.protocol == 'https:')
+     cookieString += ";secure";
+   document.cookie = cookieString;
 
    if (guideNode == null)
    {
@@ -149,7 +152,10 @@ function hideGuide()
    {
       eval(layersArray[i] + ".style.visibility = \"hidden\"");
    }
-   document.cookie = "guide=none";
+   var cookieString = "guide=none";
+   if (document.location.protocol == 'https:')
+     cookieString += ";secure";
+   document.cookie = cookieString;
 }
 
 function loadUrl(url, wizard) 

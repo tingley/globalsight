@@ -250,9 +250,7 @@ function getJobCookie(cookieName)
 
 function setJobCookie(lastJobs,cookieName)
 {
-    var today = new Date();
-    var expires = new Date(today.getTime() + (90 * 86400000));  //90 days
-    document.cookie = cookieName + lastJobs + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
+    setCookie(cookieName, lastJobs, 90);
 }
 
 function getSelectPageIds()

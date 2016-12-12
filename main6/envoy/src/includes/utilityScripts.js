@@ -270,3 +270,14 @@ function validEmail(s) {
 	var pattern = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 	return pattern.test(s);
 }
+
+function setCookie(name, value, expiresDays) {
+    var today = new Date();
+    if (!isAllDigits(expiresDays))
+        expiresDays = 1;
+    var expires = new Date(today.getTime() + (expiresDays * 86400000));
+    var cookieString = name + "=" + value + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
+    if ('https:' == document.location.protocol)
+        cookieString += ";secure";
+    document.cookie = cookieString;
+}

@@ -232,7 +232,7 @@ public class CookieUtil
     // ==========================================================================
 
     // Adds auto login cookie.
-    public static void addAutoLoginCookie(String userId, String pass, HttpServletResponse response)
+    public static void addAutoLoginCookie(String userId, String pass, HttpServletResponse response, boolean isSSL)
     {
         if (response == null || StringUtil.isBlank(userId))
             return;
@@ -249,7 +249,7 @@ public class CookieUtil
         }
         String cookieValue = userName + "|" + pass;
 
-        setExpireCookie(response, cookieName, cookieValue, 14);
+        setCookie(response, cookieName, cookieValue, DEFAULT_HTTPONLY, isSSL, 60 * 60 * 24 * 14);
     }
 
     /*
@@ -292,7 +292,7 @@ public class CookieUtil
      */
     public static void updateMRU(HttpServletRequest request, HttpServletResponse response,
             String value,
-            String cookieName, String attributeName)
+            String cookieName, String attributeName, boolean isSSL)
     {
         if (request == null || request.getCookies() == null || response == null
                 || StringUtil.isBlank(cookieName) || StringUtil.isBlank(attributeName)
@@ -328,7 +328,7 @@ public class CookieUtil
         cookieValue = newValue.toString();
         
         session.setAttribute(attributeName, cookieValue);
-        setCookie(response, cookieName, cookieValue);
+        setCookie(response, cookieName, cookieValue, true, isSSL, 0);
     }
 
     /**

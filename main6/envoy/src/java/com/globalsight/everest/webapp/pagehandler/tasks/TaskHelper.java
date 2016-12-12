@@ -32,6 +32,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -1060,7 +1061,8 @@ public class TaskHelper
         String jobName = task.getJobName();
         String thisTask = displayLocale + ":" + jobName + ":" + task.getId() + ":" + taskState;
 
-        CookieUtil.updateMRU(request, response, thisTask, cookieName, JobSearchConstants.MRU_TASKS);
+        CookieUtil.updateMRU(request, response, thisTask, cookieName, JobSearchConstants.MRU_TASKS,
+                SystemConfiguration.getInstance().getBooleanParameter("server.ssl.enable"));
     }
 
 }

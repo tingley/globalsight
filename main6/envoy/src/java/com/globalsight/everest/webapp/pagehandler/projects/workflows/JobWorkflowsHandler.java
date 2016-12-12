@@ -562,7 +562,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
                 + httpSession.getAttribute(WebAppConstants.USER_NAME).hashCode();
         CookieUtil.updateMRU(p_request, p_response, job.getId() + ":" + job.getJobName(),
-                cookieName, JobSearchConstants.MRU_JOBS);
+                cookieName, JobSearchConstants.MRU_JOBS,
+                SystemConfiguration.getInstance().getBooleanParameter("server.ssl.enable"));
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 

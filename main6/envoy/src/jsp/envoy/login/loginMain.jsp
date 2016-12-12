@@ -312,14 +312,14 @@ body {
                     var languageSelected = unescape(document.cookie.substring(offset, end));
                 }
             }
-            if (languageSelected == null) return "-1";
-            else return languageSelected;
+            if (languageSelected == null)
+                languageSelected = "-1";
+            setLangCookie(languageSelected);
+            return languageSelected;
         }
 
         function setLangCookie(langSent) {
-            var today = new Date();
-            var expires = new Date(today.getTime() + (365 * 86400000));
-            document.cookie = "localelang=" + langSent + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
+            setCookie("localelang", langSent, 365);
         }
 
         function confirmForm(formSent) {

@@ -414,7 +414,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         session.setAttribute(LOGIN_SERVER, loginServer);
 
         // Adds auto login cookie.
-        CookieUtil.addAutoLoginCookie(p_userId, p_password, m_response);
+        CookieUtil.addAutoLoginCookie(p_userId, p_password, m_response, protocol.equals(PROTOCOL_HTTPS));
 
         // store current logged user info
         try

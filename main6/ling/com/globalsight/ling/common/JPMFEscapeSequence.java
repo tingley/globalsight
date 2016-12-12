@@ -91,7 +91,7 @@ public class JPMFEscapeSequence
             aChar = p_str.charAt(x++);
             switch (aChar)
             {
-            case '\'': result.append("''");  continue;
+//            case '\'': result.append("''");  continue;
             case '{':  result.append("'{'"); continue;
             case '}':  result.append("'}'"); continue;
             default:

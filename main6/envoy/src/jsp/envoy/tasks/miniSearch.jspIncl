@@ -72,8 +72,8 @@ function setSearchCookie()
               "<%=nameField%>=" + searchForm.<%=nameField%>.value + ":" +
               "<%=statusOptions%>=" + getOption(searchForm.<%=statusOptions%>) + ":";
               "<%=companyOptions%>=" + getOption(searchForm.<%=companyOptions%>) + ":";
-              
-    document.cookie = "<%=cookieName%>=" + escape(buf);
+
+     setCookie("<%=cookieName%>",escape(buf),1);
 }
 
 function getOption(field)

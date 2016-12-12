@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.util.system.SystemConfiguration;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.Company;
@@ -219,7 +220,7 @@ public class InContextReviewHelper implements WebAppConstants
         session.setAttribute(LOGIN_SERVER, loginServer);
 
         // Adds auto login cookie.
-        CookieUtil.addAutoLoginCookie(userId, encyptPassword, p_response);
+        CookieUtil.addAutoLoginCookie(userId, encyptPassword, p_response, protocol.equals(PROTOCOL_HTTPS));
         
         // store current logged user info
         try

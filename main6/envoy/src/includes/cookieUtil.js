@@ -45,7 +45,10 @@ function setCookieValue(name, value, duration)
 	expiration.setMonth(expiration.getMonth() + duration);
 	
 	// set the cookie string
-	document.cookie = name + '=' + value + ';' + 'expires=' + expiration.toGMTString() + ';' ;
+	var cookieString = name + '=' + value + ';' + 'expires=' + expiration.toGMTString() + ';' ;
+	if (document.location.protocol == 'https')
+		cookieString += "secure";
+	document.cookie = cookieString;
 }
 
 

@@ -917,7 +917,10 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         boolean isInCDATA = false;
         boolean isHtmlNode = false;
       //Reverse order export
-        Collections.reverse(m_escapings);
+		if (m_escapings != null)
+		{
+			Collections.reverse(m_escapings);
+		}
         for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
             de = (DocumentElement) it.next();

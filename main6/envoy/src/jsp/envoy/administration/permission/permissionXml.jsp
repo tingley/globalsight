@@ -290,6 +290,7 @@
   <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
   <% } %>
   <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
+  <permission id="<%=Permission.CONFIG_EXPORT_IMPORT%>"/>
 </category>
 <category id="lb_connectors">
   <permission id="<%=Permission.BLAISE_CONNECTOR%>"/>

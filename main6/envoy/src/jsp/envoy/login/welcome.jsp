@@ -391,6 +391,9 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.BLAISE_CONNECTOR%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=blaiseConnectorUrl%>"><%=bundle.getString("lb_blaise_connector")%></A><BR>
       	</amb:permission>
+      	<amb:permission name="<%=Permission.CONFIG_EXPORT_IMPORT %>" >
+      	  <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=configExportImportUrl%>"><%=bundle.getString("lb_config_export_import")%></A><BR/>
+      	</amb:permission>
       </TD>
     <%
         }

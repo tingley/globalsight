@@ -1111,6 +1111,7 @@ public class LeverageMatches
             if (m_leverageOptions.getOldTuvMatchPenalty() != 0)
             {
                 List<BaseTmTuv> tuvList = p_tu.getTuvs();
+                long maxDay = 10000;
                 for (BaseTmTuv baseTmTuv : tuvList)
                 {
                     LeveragedSegmentTuv matchedTuv = (LeveragedSegmentTuv) baseTmTuv;
@@ -1118,9 +1119,9 @@ public class LeverageMatches
                     Timestamp modifyDate = matchedTuv.getModifyDate();
                     Timestamp lastUsageDate = matchedTuv.getLastUsageDate();
                     Timestamp currentDate = new Timestamp(System.currentTimeMillis());
-                    long createTime = 10000*24*60*60*1000;
-                    long modifyTime = 10000*24*60*60*1000;
-                    long lastUsedTime = 10000*24*60*60*1000;
+                    long createTime = maxDay*24*60*60*1000;
+                    long modifyTime = maxDay*24*60*60*1000;
+                    long lastUsedTime = maxDay*24*60*60*1000;
                     if (creationDate != null)
                     {
                         createTime = currentDate.getTime() - creationDate.getTime();

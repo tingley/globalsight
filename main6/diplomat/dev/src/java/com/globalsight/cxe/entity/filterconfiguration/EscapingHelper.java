@@ -874,6 +874,7 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		String processed = null;
+		String preProcessed = null;
 		int length = ccc.length();
 		for (int j = 0; j < length; j++)
 		{
@@ -883,7 +884,16 @@ public class EscapingHelper
 
 			processed = newHandleChar4Export(escaping, sub.toString(), char1,
 					char2, char3, format, escapingChars);
+			if ("\\".equals(preProcessed) && !"\\".equals(processed)
+					&& processed.startsWith("\\"))
+			{
+				sub.append(char1);
+			}
+			else
+			{
 				sub.append(processed);
+			}
+			preProcessed = processed;
 		}
 
 		return sub.toString();

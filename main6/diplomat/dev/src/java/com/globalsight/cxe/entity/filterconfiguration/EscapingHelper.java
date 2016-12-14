@@ -1160,6 +1160,10 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		int length = ccc.length() - 1;
+		if (length == 0)
+		{
+			return sub.append(ccc).toString();
+		}
 		int j = 0;
 		for (; j < length; j++)
 		{
@@ -1208,6 +1212,10 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		int length = ccc.length() - 1;
+		if (length == 0)
+		{
+			return sub.append(ccc).toString();
+		}
 		int j = 0;
 		for (; j < length; j++)
 		{

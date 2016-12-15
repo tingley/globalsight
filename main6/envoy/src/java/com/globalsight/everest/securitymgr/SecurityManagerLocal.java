@@ -153,10 +153,13 @@ public class SecurityManagerLocal implements SecurityManager
             }
 
             UserLdapHelper.authenticate(p_password, loginUser.getPassword());
-            if (loginUser.getResetPasswordTimes() > 0 && !SecurityUtil.isStrongPassword(p_password, 8))
+            if (loginUser.getResetPasswordTimes() > 0)
             {
-                //User uses less strong password, decrease user.RESET_PASSWORD_TIMES
-                loginUser.setResetPasswordTimes(loginUser.getResetPasswordTimes() - 1);
+                if (!SecurityUtil.isStrongPassword(p_password, 8))
+                    //User uses less strong password, decrease user.RESET_PASSWORD_TIMES
+                    loginUser.setResetPasswordTimes(loginUser.getResetPasswordTimes() - 1);
+                else
+                    loginUser.setResetPasswordTimes(-1);
                 HibernateUtil.saveOrUpdate(loginUser);
             }
         }

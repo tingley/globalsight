@@ -3303,4 +3303,20 @@
       </WebPage>
     </WebActivity>
   </WebModule>
+  <WebModule webModuleName="configExportImport">
+  	<WebActivity webActivityName="configExportImport">
+  		<WebPage pageName="CONFIGEXPORTIMPORT" isDefault="true" jspName="/envoy/config/configList.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.ConfigExportHandler">
+  			<PageLink linkName="exportConfig" destinationPageName="CONFIGEXPORTIMPORT"></PageLink>
+  			<PageLink linkName="importConfig" destinationPageName="CONFIGIMPORTD"></PageLink>
+  			<PageLink linkName="self" destinationPageName="CONFIGEXPORTIMPORT"></PageLink>
+  		</WebPage>
+  		<WebPage pageName="CONFIGIMPORTD" isDefault="false" jspName="/envoy/config/configImport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.ConfigImportHandler">
+  			<PageLink linkName="startUpload" destinationPageName="CONFIGIMPORT_PROGRESS"></PageLink>
+  		</WebPage>
+      <WebPage pageName="CONFIGIMPORT_PROGRESS" isDefault="false" jspName="/envoy/config/import_progress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.ConfigImportHandler">
+        <PageLink linkName="refresh" destinationPageName="CONFIGIMPORT_PROGRESS"/>
+        <PageLink linkName="done" destinationPageName="CONFIGEXPORTIMPORT"/>
+      </WebPage>
+  	</WebActivity>
+  </WebModule>
 </WebApplication>

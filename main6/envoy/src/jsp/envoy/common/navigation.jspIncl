@@ -67,7 +67,8 @@
         userPerms.getPermissionFor(Permission.EXPORT_LOC_VIEW) || 
         userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET) ||
         userPerms.getPermissionFor(Permission.ELOQUA) ||
-        userPerms.getPermissionFor(Permission.GIT_CONNECTOR))
+        userPerms.getPermissionFor(Permission.GIT_CONNECTOR)||
+        userPerms.getPermissionFor(Permission.CONFIG_EXPORT_IMPORT))
             hasDataSourceMenu = true;
 
     boolean hasGuidesMenu = false;
@@ -174,7 +175,7 @@
    String mtProfilesUrl = LinkHelper.getWebActivityURL(request,"mtProfiles");
    String tmSearchUrl = homeURL+"linkName=tmSearch&pageName=TM&action=tmSearchPage";
    String tbSearchUrl = homeURL+"linkName=termSearch&pageName=TB1&action=termSearch";
-
+   String configExportImportUrl = LinkHelper.getWebActivityURL(request, "configExportImport");
    //It's a very ugly implementation for multicompany prototype. Modify it in real version.
    boolean isSuperAdmin3 = UserUtil.isSuperAdmin(
         (String) request.getSession().getAttribute(WebAppConstants.USER_NAME));
@@ -466,6 +467,10 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_git_conne
 
 <% if (userPerms.getPermissionFor(Permission.BLAISE_CONNECTOR)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_blaise_connector")%>", "javascript:goToUrl('<%=blaiseConnectorUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.CONFIG_EXPORT_IMPORT)) { %>
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_config_export_import")%>", "javascript:goToUrl('<%=configExportImportUrl%>');", ""));  
 <% } %>
 
 <% } //end if hasDataSourceMenu %>

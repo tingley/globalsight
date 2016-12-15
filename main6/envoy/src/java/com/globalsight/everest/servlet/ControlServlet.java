@@ -21,6 +21,7 @@ package com.globalsight.everest.servlet;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.AppletDirectory;
+import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.AmbassadorServer;
@@ -255,6 +256,7 @@ public class ControlServlet extends HttpServlet
                     null, p_request, p_response, m_servletContext, userSession, sourcePageHandler);
             return;
         }
+        CookieUtil.secureCookies(p_request, p_response);
 
         String isApplet = p_request.getParameter(WebAppConstants.APPLET);
         if (isApplet == null)

@@ -391,6 +391,9 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.BLAISE_CONNECTOR%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=blaiseConnectorUrl%>"><%=bundle.getString("lb_blaise_connector")%></A><BR>
       	</amb:permission>
+      	<amb:permission name="<%=Permission.CONFIG_EXPORT_IMPORT %>" >
+      	  <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=configExportImportUrl%>"><%=bundle.getString("lb_config_export_import")%></A><BR/>
+      	</amb:permission>
       </TD>
     <%
         }
@@ -459,9 +462,9 @@ function openWizardWindow(url)
     $(document).ready(function () {
         var resetTimes = <%=userWelcome.getResetPasswordTimes()%>;
         if (resetTimes > 1) {
-            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYou can log in " + resetTimes + " times before you reset your password.");
+            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYou can log in " + resetTimes + " times before reset the password.");
         } else if (resetTimes == 1) {
-            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYOU NEED TO CHANGE YOUR PASSWORD IN THIS LAST TIME.\r\nOtherwise you will not logged in with the weakness password.");
+            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYOU NEED TO CHANGE YOUR PASSWORD IN THIS LAST TIME.\r\nOtherwise you will NOT be allowed to log in.");
         }
     });
 </script>

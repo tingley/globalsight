@@ -670,34 +670,42 @@ public class EscapingHelper
 		}
 
 		int count = tags.size();
-		for (int i = 0; i < count; i++)
+		if (count > 2)
 		{
-			TagIndex ti = tags.get(i);
-			if (ti.isTag)
+			sb.append(getSpecialContentForExport(tags, es, format, doDecode,
+					escapingChars, contentType, isInCDATA));
+		}
+		else
+		{
+			for (int i = 0; i < count; i++)
 			{
-				if (IFormatNames.FORMAT_XML.equals(format) && isInCDATA)
+				TagIndex ti = tags.get(i);
+				if (ti.isTag)
 				{
-					// Escape tag content is dangerous...
-					sb.append(newHandleTagContent4Export(ti.content, es,
-							doDecode, format, escapingChars, contentType));
+					if (IFormatNames.FORMAT_XML.equals(format) && isInCDATA)
+					{
+						// Escape tag content is dangerous...
+						sb.append(newHandleTagContent4Export(ti.content, es,
+								doDecode, format, escapingChars, contentType));
+					}
+					else
+					{
+						sb.append(ti.content);
+					}
 				}
 				else
 				{
-					sb.append(ti.content);
-				}
-			}
-			else
-			{
-				if (checkHtmlNode(tags, i, isAssociateHtmlFilter)
-						&& StringUtil.isEmpty(contentType))
-				{
-					sb.append(newHandleString4Export(ti.content, es, doDecode,
-							format, escapingChars, "HtmlNode"));
-				}
-				else
-				{
-					sb.append(newHandleString4Export(ti.content, es, doDecode,
-							format, escapingChars, contentType));
+					if (checkHtmlNode(tags, i, isAssociateHtmlFilter)
+							&& StringUtil.isEmpty(contentType))
+					{
+						sb.append(newHandleString4Export(ti.content, es, doDecode,
+								format, escapingChars, "HtmlNode"));
+					}
+					else
+					{
+						sb.append(newHandleString4Export(ti.content, es, doDecode,
+								format, escapingChars, contentType));
+					}
 				}
 			}
 		}
@@ -866,6 +874,7 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		String processed = null;
+		String preProcessed = null;
 		int length = ccc.length();
 		for (int j = 0; j < length; j++)
 		{
@@ -875,7 +884,16 @@ public class EscapingHelper
 
 			processed = newHandleChar4Export(escaping, sub.toString(), char1,
 					char2, char3, format, escapingChars);
-			sub.append(processed);
+			if ("\\".equals(preProcessed) && !"\\".equals(processed)
+					&& processed.startsWith("\\"))
+			{
+				sub.append(char1);
+			}
+			else
+			{
+				sub.append(processed);
+			}
+			preProcessed = processed;
 		}
 
 		return sub.toString();
@@ -948,36 +966,44 @@ public class EscapingHelper
 		StringBuffer sb = new StringBuffer();
 		List<TagIndex> tags = TagIndex.getContentIndexes(oriStr, isPureText);
 		int count = tags.size();
-		for (int i = 0; i < count; i++)
+		if (count > 2 && !isPureText)
 		{
-			TagIndex ti = tags.get(i);
-
-			if (ti.isTag)
+			sb.append(getSpecialContentForImport(tags, es, format, isPureText,
+					processedChars, contentType));
+		}
+		else
+		{
+			for (int i = 0; i < count; i++)
 			{
-				if (isPureText)
+				TagIndex ti = tags.get(i);
+				
+				if (ti.isTag)
 				{
-					String ccc = ti.content;
-					String subStr = newHandleString4Import(ccc, es, doDecode,
-							format, processedChars, contentType);
-					sb.append(subStr);
+					if (isPureText)
+					{
+						String ccc = ti.content;
+						String subStr = newHandleString4Import(ccc, es, doDecode,
+								format, processedChars, contentType);
+						sb.append(subStr);
+					}
+					else
+					{
+						sb.append(ti.content);
+					}
 				}
 				else
 				{
-					sb.append(ti.content);
-				}
-			}
-			else
-			{
-				if (isPureText)
-				{
-					sb.append(ti.content);
-				}
-				else
-				{
-					String ccc = ti.content;
-					String subStr = newHandleString4Import(ccc, es, doDecode,
-							format, processedChars, contentType);
-					sb.append(subStr);
+					if (isPureText)
+					{
+						sb.append(ti.content);
+					}
+					else
+					{
+						String ccc = ti.content;
+						String subStr = newHandleString4Import(ccc, es, doDecode,
+								format, processedChars, contentType);
+						sb.append(subStr);
+					}
 				}
 			}
 		}
@@ -1134,6 +1160,10 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		int length = ccc.length() - 1;
+		if (length == 0)
+		{
+			return sub.append(ccc).toString();
+		}
 		int j = 0;
 		for (; j < length; j++)
 		{
@@ -1182,6 +1212,10 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		int length = ccc.length() - 1;
+		if (length == 0)
+		{
+			return sub.append(ccc).toString();
+		}
 		int j = 0;
 		for (; j < length; j++)
 		{
@@ -1622,5 +1656,167 @@ public class EscapingHelper
 			return true;
 		}
 		return false;
+	}
+	
+	private static String getSpecialContentForImport(List<TagIndex> tags,
+			List<Escaping> es, String format, boolean isPureText,
+			List<Character> processedChars, String contentType)
+	{
+		StringBuffer sb = new StringBuffer();
+		boolean doDecode = !isPureText;
+		List<String> orderKey = new ArrayList<String>();
+		Map<String, String> tagMap = new HashMap<String, String>();
+		Map<String, String> contentMap = new HashMap<String, String>();
+		for (int i = 0; i < tags.size(); i++)
+		{
+			TagIndex ti = tags.get(i);
+			if (ti.isTag)
+			{
+				orderKey.add("tag" + i);
+				tagMap.put("tag" + i, ti.content);
+			}
+			else
+			{
+				orderKey.add("content" + i);
+				contentMap.put("content" + i, ti.content);
+			}
+		}
+
+		if (!contentMap.isEmpty())
+		{
+			Map<String, String> newContentMap = new HashMap<String, String>();
+			String content = "";
+			Set<String> keySet = contentMap.keySet();
+			List<String> keyList = new ArrayList<String>();
+			keyList.addAll(keySet);
+			Collections.sort(keyList);
+			for (String key : keyList)
+			{
+				content += contentMap.get(key) + "|";
+			}
+			if (content.endsWith("|"))
+			{
+				content = content.substring(0, content.lastIndexOf("|"));
+			}
+			String returnStr = newHandleString4Import(content, es, doDecode,
+					format, processedChars, contentType);
+			String[] arrStr = returnStr.split("\\|");
+			if (keyList.size() == arrStr.length)
+			{
+				for (int i = 0; i < keyList.size(); i++)
+				{
+					newContentMap.put(keyList.get(i), arrStr[i]);
+				}
+				for (String orderStr : orderKey)
+				{
+					if (tagMap.get(orderStr) != null)
+					{
+						sb.append(tagMap.get(orderStr));
+					}
+					if (newContentMap.get(orderStr) != null)
+					{
+						sb.append(newContentMap.get(orderStr));
+					}
+				}
+			}
+		}
+		return sb.toString();
+	}
+	
+	private static String getSpecialContentForExport(List<TagIndex> tags,
+			List<Escaping> es, String format, boolean doDecode,
+			String escapingChars, String contentType, boolean isInCDATA)
+	{
+		StringBuffer sb = new StringBuffer();
+		List<String> orderKey = new ArrayList<String>();
+		Map<String, String> tagMap = new HashMap<String, String>();
+		Map<String, String> contentMap = new HashMap<String, String>();
+		for (int i = 0; i < tags.size(); i++)
+		{
+			TagIndex ti = tags.get(i);
+			if (ti.isTag)
+			{
+				orderKey.add("tag" + i);
+				tagMap.put("tag" + i, ti.content);
+			}
+			else
+			{
+				orderKey.add("content" + i);
+				contentMap.put("content" + i, ti.content);
+			}
+		}
+
+		if (!contentMap.isEmpty() && !tagMap.isEmpty())
+		{
+			Map<String, String> newContentMap = new HashMap<String, String>();
+			Map<String, String> newTagMap = new HashMap<String, String>();
+			String content = "";
+			Set<String> keySet = contentMap.keySet();
+			List<String> keyList = new ArrayList<String>();
+			keyList.addAll(keySet);
+			Collections.sort(keyList);
+			for (String key : keyList)
+			{
+				content += contentMap.get(key) + "|";
+			}
+			if (content.endsWith("|"))
+			{
+				content = content.substring(0, content.lastIndexOf("|"));
+			}
+			String returnStr = newHandleString4Export(content, es, doDecode,
+					format, escapingChars, contentType);
+			String[] arrStr = returnStr.split("\\|");
+			if (keyList.size() == arrStr.length)
+			{
+				for (int i = 0; i < keyList.size(); i++)
+				{
+					newContentMap.put(keyList.get(i), arrStr[i]);
+				}
+			}
+
+			Set<String> tagKeySet = tagMap.keySet();
+			List<String> tagKeyList = new ArrayList<String>();
+			tagKeyList.addAll(tagKeySet);
+			Collections.sort(tagKeyList);
+			if (IFormatNames.FORMAT_XML.equals(format) && isInCDATA)
+			{
+				// Escape tag content is dangerous...
+				for (String tagKey : tagKeyList)
+				{
+					newTagMap.put(
+							tagKey,
+							newHandleTagContent4Export(tagMap.get(tagKey), es,
+									doDecode, format, escapingChars,
+									contentType));
+				}
+				for (String orderStr : orderKey)
+				{
+					if (newTagMap.get(orderStr) != null)
+					{
+						sb.append(newTagMap.get(orderStr));
+					}
+					if (newContentMap.get(orderStr) != null)
+					{
+						sb.append(newContentMap.get(orderStr));
+					}
+				}
+
+			}
+			else
+			{
+				for (String orderStr : orderKey)
+				{
+					if (tagMap.get(orderStr) != null)
+					{
+						sb.append(tagMap.get(orderStr));
+					}
+					if (newContentMap.get(orderStr) != null)
+					{
+						sb.append(newContentMap.get(orderStr));
+					}
+				}
+			}
+		}
+		return sb.toString();
 	}
 }

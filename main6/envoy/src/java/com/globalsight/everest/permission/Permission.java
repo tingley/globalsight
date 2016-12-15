@@ -494,6 +494,8 @@ public class Permission
     // For Job creation
     static public final String CREATE_JOB = "createjob";
     static public final String CREATE_JOB_NO_APPLET = "createJobNoApplet";
+    //For System configuration
+    static public final String CONFIG_EXPORT_IMPORT = "configExportAndImport";
 
     // For Job Scorecard
     static public final String EDIT_SCORECARD = "editScorecard";
@@ -1018,6 +1020,7 @@ public class Permission
         added = addPermission(429, LOCPROFILES_REPORT) || added;
         // GBS-4534
         added = addPermission(430, RESTART_SYSTEM) || added;
+        added = addPermission(431, CONFIG_EXPORT_IMPORT)||added;
 
         return added;
     }

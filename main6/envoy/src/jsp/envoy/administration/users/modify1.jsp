@@ -415,27 +415,26 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
         }
 
 		if (formSent.password) {
+            var thePassword = formSent.password.value;
+            var theRepeat = formSent.passwordConfirm.value;
 			if (pwdChanged) {
-				var thePassword = formSent.password.value;
 				thePassword = stripBlanks(thePassword);
 				if (thePassword != "") {
 					if ("1" == "<%=needStrongPassword%>" && !passCheck) {
 						alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
 						return false;
 					}
-					var theRepeat = formSent.passwordConfirm.value;
 					theRepeat = stripBlanks(theRepeat);
-
-					// Make sure the repeated password matches the first
-					if (theRepeat != thePassword) {
-						alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
-						return false;
-					}
 				}
 			} else {
 				formSent.password.value = "";
 				formSent.passwordConfirm.value = "";
 			}
+            // Make sure the repeated password matches the first
+            if (theRepeat != thePassword) {
+                alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
+                return false;
+            }
 		}
 
         if (formSent.firstName)

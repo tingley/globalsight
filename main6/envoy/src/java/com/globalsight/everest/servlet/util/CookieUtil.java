@@ -44,11 +44,9 @@ public class CookieUtil
     /**
      * Get value from cookie If value contains XSS attacking strings, they will
      * be removed.
-     * 
-     * @param request
-     *            HTTP request
-     * @param name
-     *            Cookie name
+     *
+     * @param request HTTP request
+     * @param name    Cookie name
      * @return String Cookie value
      */
     public static String getCookieValue(HttpServletRequest request, String name)
@@ -59,14 +57,11 @@ public class CookieUtil
     /**
      * Get value from cookie If noStrip is true, the original value will be
      * return. If false, return stripped value
-     * 
-     * @param request
-     *            HTTP request
-     * @param name
-     *            Cookie name
-     * @param noStrip
-     *            Set true to return original value, false to strip invalid
-     *            characters
+     *
+     * @param request HTTP request
+     * @param name    Cookie name
+     * @param noStrip Set true to return original value, false to strip invalid
+     *                characters
      * @return String Cookie value
      */
     public static String getCookieValue(HttpServletRequest request, String name, boolean noStrip)
@@ -94,11 +89,9 @@ public class CookieUtil
 
     /**
      * Get cookie object with special cookie name
-     * 
-     * @param request
-     *            HTTP request
-     * @param name
-     *            Cookie name
+     *
+     * @param request HTTP request
+     * @param name    Cookie name
      * @return Cookie Cookie object
      */
     public static Cookie getCookie(HttpServletRequest request, String name)
@@ -118,13 +111,10 @@ public class CookieUtil
 
     /**
      * Set cookie to HTTP response
-     * 
-     * @param response
-     *            HTTP response
-     * @param name
-     *            Cookie name
-     * @param value
-     *            Cookie value
+     *
+     * @param response HTTP response
+     * @param name     Cookie name
+     * @param value    Cookie value
      * @return boolean Return true if setting is correctly done
      */
     public static boolean setCookie(HttpServletResponse response, String name, String value)
@@ -135,57 +125,45 @@ public class CookieUtil
 
     /**
      * Set cookie to HTTP response
-     * 
-     * @param response
-     *            HTTP response
-     * @param name
-     *            Cookie name
-     * @param value
-     *            Cookie value
-     * @param isHttpOnly
-     *            HttpOnly attribute
+     *
+     * @param response   HTTP response
+     * @param name       Cookie name
+     * @param value      Cookie value
+     * @param isHttpOnly HttpOnly attribute
      * @return boolean Return true if setting is correctly done
      */
     public static boolean setCookie(HttpServletResponse response, String name, String value,
-            boolean isHttpOnly)
+                                    boolean isHttpOnly)
     {
         return setCookie(response, name, value, isHttpOnly, DEFAULT_SECURE, DEFAULT_EXPIRE_DAYS);
     }
 
     /**
      * Set cookie to HTTP response with setting secure attribute
-     * 
-     * @param response
-     *            HTTP response
-     * @param name
-     *            Cookie name
-     * @param value
-     *            Cookie value
-     * @param isHttpOnly
-     *            HttpOnly attribute
+     *
+     * @param response   HTTP response
+     * @param name       Cookie name
+     * @param value      Cookie value
+     * @param isHttpOnly HttpOnly attribute
      * @return boolean Return true if setting is correctly done
      */
     public static boolean setSecureCookie(HttpServletResponse response, String name, String value,
-            boolean isHttpOnly)
+                                          boolean isHttpOnly)
     {
         return setCookie(response, name, value, isHttpOnly, true, DEFAULT_EXPIRE_DAYS);
     }
 
     /**
      * Set cookie to HTTP response with expire days
-     * 
-     * @param response
-     *            HTTP response
-     * @param name
-     *            Cookie name
-     * @param value
-     *            Cookie value
-     * @param expireDays
-     *            Expire days
+     *
+     * @param response   HTTP response
+     * @param name       Cookie name
+     * @param value      Cookie value
+     * @param expireDays Expire days
      * @return boolean Return true if setting is correctly done
      */
     public static boolean setExpireCookie(HttpServletResponse response, String name, String value,
-            int expireDays)
+                                          int expireDays)
     {
         int expireTime = 0;
         if (expireDays > 0)
@@ -195,23 +173,17 @@ public class CookieUtil
 
     /**
      * Set cookie to HTTP response with setting secure attribute
-     * 
-     * @param response
-     *            HTTP response
-     * @param name
-     *            Cookie name
-     * @param value
-     *            Cookie value
-     * @param isHttpOnly
-     *            HttpOnly attribute
-     * @param isSecure
-     *            Secure attribute
-     * @param expireTimes
-     *            Expire times (unit is second)
+     *
+     * @param response    HTTP response
+     * @param name        Cookie name
+     * @param value       Cookie value
+     * @param isHttpOnly  HttpOnly attribute
+     * @param isSecure    Secure attribute
+     * @param expireTimes Expire times (unit is second)
      * @return boolean Return true if setting is correctly done
      */
     public static boolean setCookie(HttpServletResponse response, String name, String value,
-            boolean isHttpOnly, boolean isSecure, int expireTimes)
+                                    boolean isHttpOnly, boolean isSecure, int expireTimes)
     {
         if (response == null || StringUtil.isBlank(name))
             return false;
@@ -261,7 +233,7 @@ public class CookieUtil
      * attribute name to store the info
      */
     public static void loadJobIds(HttpSession session, String userId, String cookieName,
-            String sessionConstant, HttpServletRequest request)
+                                  String sessionConstant, HttpServletRequest request)
     {
         if (request == null || session == null || StringUtil.isBlank(userId)
                 || StringUtil.isBlank(cookieName))
@@ -291,16 +263,16 @@ public class CookieUtil
      * already in the list. Don't allow more than 3 items in the list.
      */
     public static void updateMRU(HttpServletRequest request, HttpServletResponse response,
-            String value,
-            String cookieName, String attributeName, boolean isSSL)
+                                 String value,
+                                 String cookieName, String attributeName, boolean isSSL)
     {
         if (request == null || request.getCookies() == null || response == null
                 || StringUtil.isBlank(cookieName) || StringUtil.isBlank(attributeName)
                 || StringUtil.isBlank(value) || ":".equals(value.trim()))
             return;
-        
+
         HttpSession session = request.getSession(false);
-        
+
         int DEFAULT_ITEMS_COUNT = 3;
 
         String info = getInfo(attributeName, value);
@@ -320,13 +292,13 @@ public class CookieUtil
                 if (StringUtil.isBlank(oldValues[i])
                         || oldValues[i].startsWith(info)
                         || oldValues[i].equals(value))
-                        continue;
+                    continue;
                 newValue.append("|").append(oldValues[i]);
                 count++;
             }
         }
         cookieValue = newValue.toString();
-        
+
         session.setAttribute(attributeName, cookieValue);
         setCookie(response, cookieName, cookieValue, true, isSSL, 0);
     }
@@ -335,7 +307,7 @@ public class CookieUtil
      * remove from MRU list
      */
     public static void removeMRU(HttpServletRequest request, HttpServletResponse response,
-            HttpSession session, String value, String cookieName, String attributeName)
+                                 HttpSession session, String value, String cookieName, String attributeName)
     {
         if (request == null || request.getCookies() == null || response == null
                 || StringUtil.isBlank(cookieName) || StringUtil.isBlank(attributeName)
@@ -374,4 +346,20 @@ public class CookieUtil
         return info;
     }
 
+    public static void secureCookies(HttpServletRequest request, HttpServletResponse response)
+    {
+        if (request == null)
+            return;
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null || cookies.length == 0)
+            return;
+        String name, value;
+        for (Cookie cookie : cookies)
+        {
+            name = cookie.getName();
+            value = cookie.getValue();
+            if (ServletUtil.containXSS(value))
+                response.addCookie(new Cookie(name, ""));
+        }
+    }
 }

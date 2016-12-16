@@ -39,7 +39,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 /**
  * 
- * import property file locale pair info
+ * imports property file locale pair info
  */
 public class LocalePairImport extends MultiCompanySupportedThread implements ConfigConstants
 {
@@ -63,7 +63,10 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
         this.analysisAndImport(uploadedFile);
     }
 
-    // analysis and import uploads file
+    /**
+     *  analysis and imports upload file
+     * @param uploadedFile
+     */
     private void analysisAndImport(File uploadedFile)
     {
         Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
@@ -165,7 +168,7 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
             if (dataMap.containsKey("Locale"))
             {
                 i++;
-                // store locale info
+                // stores locale info
                 storeGlobalSightLocaleData(dataMap);
                 Thread.sleep(100);
             }
@@ -173,7 +176,7 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
             if (dataMap.containsKey("LocalPairs"))
             {
                 i++;
-                // store locale pair info
+                // stores locale pair info
                 storeLocalePairData(dataMap);
                 Thread.sleep(100);
             }

@@ -98,7 +98,10 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
         this.analysisAndImport(uploadedFile);
     }
 
-    // analysis and import file
+    /**
+     *  analysis and imports upload file
+     * @param uploadedFile
+     */
     private void analysisAndImport(File uploadedFile)
     {
         Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
@@ -351,126 +354,126 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
 
         try
         {
-            // store "base_filter" data to database
+            // stores "base_filter" data to database
             if (dataMap.containsKey("base_filter"))
             {
                 i++;
                 storeBaseFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "html_filter" data to database
+            // stores "html_filter" data to database
             if (dataMap.containsKey("html_filter"))
             {
                 i++;
                 storeHtmlFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "java_script_filter" data to database
+            // stores "java_script_filter" data to database
             if (dataMap.containsKey("java_script_filter"))
             {
                 i++;
                 storeJavaScriptFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "json_filter" data to database
+            // stores "json_filter" data to database
             if (dataMap.containsKey("json_filter"))
             {
                 i++;
                 storeJsonFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "xml_rule" data to database
+            // stores "xml_rule" data to database
             if (dataMap.containsKey("xml_rule"))
             {
                 i++;
                 storeXmlRuleFileImplData(dataMap);
                 Thread.sleep(100);
             }
-            // store "xml_rule_filter" data to database
+            // stores "xml_rule_filter" data to database
             if (dataMap.containsKey("xml_rule_filter"))
             {
                 i++;
                 storeXMLRuleFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "java_properties_filter" data to database
+            // stores "java_properties_filter" data to database
             if (dataMap.containsKey("java_properties_filter"))
             {
                 i++;
                 storeJavaPropertiesFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "office2010_filter" data to database
+            // stores "office2010_filter" data to database
             if (dataMap.containsKey("office2010_filter"))
             {
                 i++;
                 storeMSOffice2010FilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "ms_office_doc_filter" data to database
+            // stores "ms_office_doc_filter" data to database
             if (dataMap.containsKey("ms_office_doc_filter"))
             {
                 i++;
                 storeMSOfficeDocFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "ms_office_excel_filter" data to database
+            // stores "ms_office_excel_filter" data to database
             if (dataMap.containsKey("ms_office_excel_filter"))
             {
                 i++;
                 storeMSOfficeExcelFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "ms_office_ppt_filter" data to database
+            // stores "ms_office_ppt_filter" data to database
             if (dataMap.containsKey("ms_office_ppt_filter"))
             {
                 i++;
                 storeMSOfficePPTFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "frame_maker_filter" data
+            // stores "frame_maker_filter" data
             if (dataMap.containsKey("frame_maker_filter"))
             {
                 i++;
                 storeFMFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "jsp_filter" data
+            // stores "jsp_filter" data
             if (dataMap.containsKey("jsp_filter"))
             {
                 i++;
                 storeJSPFilter(dataMap);
                 Thread.sleep(100);
             }
-            // store "openoffice_filter" data
+            // stores "openoffice_filter" data
             if (dataMap.containsKey("openoffice_filter"))
             {
                 i++;
                 storeOpenOfficeFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "indd_filter" data
+            // stores "indd_filter" data
             if (dataMap.containsKey("indd_filter"))
             {
                 i++;
                 storeInddFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "po_filter" data
+            // stores "po_filter" data
             if (dataMap.containsKey("po_filter"))
             {
                 i++;
                 storePOFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "plain_text_filter" data
+            // stores "plain_text_filter" data
             if (dataMap.containsKey("plain_text_filter"))
             {
                 i++;
                 storePlainTextFilterData(dataMap);
                 Thread.sleep(100);
             }
-            // store "base_filter_mapping" data
+            // stores "base_filter_mapping" data
             if (dataMap.containsKey("base_filter_mapping"))
             {
                 i++;
@@ -478,7 +481,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 Thread.sleep(100);
             }
 
-            // store "qa_filter" data
+            // stores "qa_filter" data
             if (dataMap.containsKey(FilterConstants.QA_TABLENAME))
             {
                 i++;
@@ -502,7 +505,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
         {
             for (QAFilter qaFilter : qaFilterList)
             {
-                // store data to database
+                // stores data to database
                 String name = qaFilter.getFilterName();
                 if (!checkFilterNameExists(name, "QAFilter"))
                 {
@@ -522,7 +525,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store base_filter data
+     * stores base_filter data
      * 
      * @param dataMap
      * */
@@ -534,14 +537,14 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
         {
             for (int i = 0; i < baseFilterList.size(); i++)
             {
-                // store data to database
+                // stores data to database
                 baseFilter = baseFilterList.get(i);
                 Long id = baseFilter.getId();
                 String name = baseFilter.getFilterName();
                 if (!checkFilterNameExists(name, "BaseFilter"))
                 {
                     HibernateUtil.save(baseFilter);
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "BaseFilter");
                     baseFilterIdMap.put(id, newId);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
@@ -559,7 +562,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store html_filter data
+     * stores html_filter data
      * 
      * @param dataMap
      * */
@@ -576,10 +579,10 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = htmlFilter.getFilterName();
                 if (!checkFilterNameExists(name, "HtmlFilter"))
                 {
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(htmlFilter);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "HtmlFilter");
                     htmlFilterIdMap.put(id, newId);
                     OperationLog.log(userId, OperationLog.EVENT_ADD,
@@ -596,7 +599,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store java_script_filter data
+     * stores java_script_filter data
      * 
      * @param dataMap
      * */
@@ -618,7 +621,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 }
 
                 addMessage("<b>" + name + "</b>  is imported successfully !");
-                // get new id
+                // gets new id
                 Long newId = selectNewId(name, "JavaScriptFilter");
                 javaScriptFilterIdMap.put(id, newId);
                 OperationLog.log(userId, OperationLog.EVENT_ADD,
@@ -634,7 +637,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store xml_rule data
+     * stores xml_rule data
      * 
      * @param dataMap
      * */
@@ -654,7 +657,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 {
                     HibernateUtil.save(newXmlRuleFileImpl);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "XmlRuleFileImpl");
                     xmlRuleFileImplIdMap.put(xmlRuleId, newId);
                 }
@@ -679,7 +682,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store xml_rule_filter data
+     * stores xml_rule_filter data
      * 
      * @param dataMap
      * */
@@ -697,7 +700,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = xmlRuleFilter.getFilterName();
                 if (!checkFilterNameExists(name, "XMLRuleFilter"))
                 {
-                    // Judgment "Xml_Filter" are references "xml_Rule"
+                    // Judgments "Xml_Filter" are references "xml_Rule"
                     if (xmlRuleFileImplIdMap.containsKey(xmlRuleFilter.getXmlRuleId()))
                     {
                         xmlRuleFilter.setXmlRuleId(xmlRuleFileImplIdMap.get(xmlRuleFilter
@@ -712,7 +715,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     String postFilterTableName = xmlFilterConfigParser
                             .getElementPostFilterTableName();
                     String postFilterTableID = xmlFilterConfigParser.getElementPostFilterId();
-                    // Judgment "Xml_Filter" are references "html_filter"
+                    // Judgments "Xml_Filter" are references "html_filter"
                     if (postFilterTableName.equalsIgnoreCase("html_filter")
                             && htmlFilterIdMap.containsKey(Long.parseLong(postFilterTableID)))
                     {
@@ -721,7 +724,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                                         .parseLong(postFilterTableID))));
                         xmlRuleFilter.setConfigXml(newconfigXmlStr);
                     }
-                    // Judgment "Xml_Filter" are references "java_script_filter"
+                    // Judgments "Xml_Filter" are references "java_script_filter"
                     else if (postFilterTableName.equalsIgnoreCase("java_script_filter")
                             && javaScriptFilterIdMap.containsKey(Long.parseLong(postFilterTableID)))
                     {
@@ -752,7 +755,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                                         .parseLong(cdataPostFilterID))));
                         xmlRuleFilter.setConfigXml(newconfigXmlStr);
                     }
-                    // Judgment "Xml_Filter" are references "java_script_filter"
+                    // Judgments "Xml_Filter" are references "java_script_filter"
                     else if (cdataPostFilterTableName.equalsIgnoreCase("java_script_filter")
                             && javaScriptFilterIdMap.containsKey(Long.parseLong(cdataPostFilterID)))
                     {
@@ -775,10 +778,10 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                             .getNewConfigXmlStr(htmlFilterIdMap);
                     xmlRuleFilter.setConfigXml(newConfigXmlStr);
 
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(xmlRuleFilter);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "XMLRuleFilter");
                     xmlRuleFilterIdMap.put(id, newId);
                     OperationLog.log(userId, OperationLog.EVENT_ADD,
@@ -796,7 +799,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store json_filter data
+     * stores json_filter data
      * 
      * @param dataMap
      * */
@@ -819,14 +822,14 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                                 .setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
                     }
 
-                    // Judgment "json_Filter" are references "html_filter"
+                    // Judgments "json_Filter" are references "html_filter"
                     if (jsonFilter.getElementPostFilterTableName().equalsIgnoreCase("html_filter")
                             && htmlFilterIdMap.containsKey(jsonFilter.getElementPostFilterId()))
                     {
                         jsonFilter.setElementPostFilterId(htmlFilterIdMap.get(jsonFilter
                                 .getElementPostFilterId()));
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(jsonFilter);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
                     Long newId = selectNewId(name, "JsonFilter");
@@ -846,7 +849,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store java_properties_filter data
+     * stores java_properties_filter data
      * 
      * @param dataMap
      * */
@@ -864,7 +867,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = javaPropertiesFilter.getFilterName();
                 if (!checkFilterNameExists(name, "JavaPropertiesFilter"))
                 {
-                    // Judgment "Xml_Filter" are references "html_filter"
+                    // Judgments "Xml_Filter" are references "html_filter"
                     if (javaPropertiesFilter.getSecondFilterTableName().equalsIgnoreCase(
                             "html_filter")
                             && htmlFilterIdMap
@@ -873,9 +876,9 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                         javaPropertiesFilter.setSecondFilterId(htmlFilterIdMap
                                 .get(javaPropertiesFilter.getSecondFilterId()));
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(javaPropertiesFilter);
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "JavaPropertiesFilter");
                     javaPropertiesFilterIdMap.put(id, newId);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
@@ -894,7 +897,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store office2010_filter data
+     * stores office2010_filter data
      * 
      * @param dataMap
      * */
@@ -912,7 +915,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = msOffice2010Filter.getFilterName();
                 if (!checkFilterNameExists(name, "MSOffice2010Filter"))
                 {
-                    // Judgment "office2010_filter" are references "html_filter"
+                    // Judgments "office2010_filter" are references "html_filter"
                     if (msOffice2010Filter.getContentPostFilterTableName().equalsIgnoreCase(
                             "html_filter")
                             && htmlFilterIdMap.containsKey(msOffice2010Filter
@@ -921,9 +924,9 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                         msOffice2010Filter.setContentPostFilterId(htmlFilterIdMap
                                 .get(msOffice2010Filter.getContentPostFilterId()));
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(msOffice2010Filter);
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "MSOffice2010Filter");
                     msOffice2010FilterIdMap.put(id, newId);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
@@ -942,7 +945,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store ms_office_doc_filter data
+     * stores ms_office_doc_filter data
      * 
      * @param dataMap
      * */
@@ -960,7 +963,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = msOfficeDocFilter.getFilterName();
                 if (!checkFilterNameExists(name, "MSOfficeDocFilter"))
                 {
-                    // Judgment "ms_office_doc_filter" are references
+                    // Judgments "ms_office_doc_filter" are references
                     // "html_filter"
                     if (msOfficeDocFilter.getContentPostFilterTableName().equalsIgnoreCase(
                             "html_filter")
@@ -970,9 +973,9 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                         msOfficeDocFilter.setContentPostFilterId(htmlFilterIdMap
                                 .get(msOfficeDocFilter.getContentPostFilterId()));
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(msOfficeDocFilter);
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "MSOfficeDocFilter");
                     msOfficeDocFilterIdMap.put(id, newId);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
@@ -991,7 +994,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store ms_office_excel_filter data
+     * stores ms_office_excel_filter data
      * 
      * @param dataMap
      * */
@@ -1009,7 +1012,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = msOfficeExcelFilter.getFilterName();
                 if (!checkFilterNameExists(name, "MSOfficeExcelFilter"))
                 {
-                    // Judgment "ms_office_excel_filter" are references
+                    // Judgments "ms_office_excel_filter" are references
                     // "html_filter"
                     if (msOfficeExcelFilter.getContentPostFilterTableName().equalsIgnoreCase(
                             "html_filter")
@@ -1019,9 +1022,9 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                         msOfficeExcelFilter.setContentPostFilterId(htmlFilterIdMap
                                 .get(msOfficeExcelFilter.getContentPostFilterId()));
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(msOfficeExcelFilter);
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "MSOfficeExcelFilter");
                     msOfficeExcelFilterIdMap.put(id, newId);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
@@ -1040,7 +1043,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store ms_office_ppt_filter data
+     * stores ms_office_ppt_filter data
      * 
      * @param dataMap
      * */
@@ -1059,7 +1062,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
 
                 if (!checkFilterNameExists(name, "MSOfficePPTFilter"))
                 {
-                    // Judgment "ms_office_ppt_filter" are references
+                    // Judgments "ms_office_ppt_filter" are references
                     // "html_filter"
                     if (msOfficePPTFilter.getContentPostFilterTableName().equalsIgnoreCase(
                             "html_filter")
@@ -1069,10 +1072,10 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                         msOfficePPTFilter.setContentPostFilterId(htmlFilterIdMap
                                 .get(msOfficePPTFilter.getContentPostFilterId()));
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(msOfficePPTFilter);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "MSOfficePPTFilter");
                     msOfficePPTFilterIdMap.put(id, newId);
                     OperationLog.log(userId, OperationLog.EVENT_ADD,
@@ -1090,7 +1093,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store frame_maker_filter data
+     * stores frame_maker_filter data
      * 
      * @param dataMap
      * */
@@ -1122,7 +1125,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store jsp_filter data
+     * stores jsp_filter data
      * 
      * @param dataMap
      * */
@@ -1138,7 +1141,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = jspFilter.getFilterName();
                 if (!checkFilterNameExists(name, "JSPFilter"))
                 {
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(jspFilter);
                     OperationLog.log(userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION, name);
@@ -1155,7 +1158,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store openoffice_filter data
+     * stores openoffice_filter data
      * 
      * @param dataMap
      * */
@@ -1172,7 +1175,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 String name = openOfficeFilter.getFilterName();
                 if (!checkFilterNameExists(name, "OpenOfficeFilter"))
                 {
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(openOfficeFilter);
                     OperationLog.log(userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION, name);
@@ -1189,7 +1192,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store indd_filter data
+     * stores indd_filter data
      * 
      * @param dataMap
      * */
@@ -1222,7 +1225,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store po_filter data
+     * stores po_filter data
      * 
      * @param dataMap
      * */
@@ -1239,13 +1242,13 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 Long id = poFilter.getId();
                 if (!checkFilterNameExists(name, "POFilter"))
                 {
-                    // Judgment "po_filter" are references "html_filter"
+                    // Judgments "po_filter" are references "html_filter"
                     if (poFilter.getSecondFilterTableName().equalsIgnoreCase("html_filter")
                             && htmlFilterIdMap.containsKey(poFilter.getSecondFilterId()))
                     {
                         poFilter.setSecondFilterId(htmlFilterIdMap.get(poFilter.getSecondFilterId()));
                     }
-                    // Judgment "po_filter" are references "xml_rule_filter"
+                    // Judgments "po_filter" are references "xml_rule_filter"
                     else if (poFilter.getSecondFilterTableName()
                             .equalsIgnoreCase("xml_rule_filter")
                             && xmlRuleFilterIdMap.containsKey(poFilter.getSecondFilterId()))
@@ -1253,10 +1256,10 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                         poFilter.setSecondFilterId(xmlRuleFilterIdMap.get(poFilter
                                 .getSecondFilterId()));
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(poFilter);
                     addMessage("<b>" + name + "</b>  is imported successfully !");
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "POFilter");
                     poFilterIdMap.put(id, newId);
                     OperationLog.log(userId, OperationLog.EVENT_ADD,
@@ -1274,7 +1277,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store plain_text_filter data
+     * stores plain_text_filter data
      * 
      * @param dataMap
      * */
@@ -1304,10 +1307,10 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                                 String.valueOf(htmlFilterIdMap.get(Long.parseLong(postFilterId))));
                         plainTextFilter.setConfigXml(newconfigXml);
                     }
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(plainTextFilter);
                     addMessage("<b>" + name + "</b> is imported successfully !");
-                    // get new id
+                    // gets new id
                     Long newId = selectNewId(name, "PlainTextFilter");
                     plainTextFilterIdMap.put(id, newId);
                     OperationLog.log(userId, OperationLog.EVENT_ADD,
@@ -1325,7 +1328,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
     }
 
     /**
-     * store base_filter_mapping data
+     * stores base_filter_mapping data
      * 
      * @param dataMap
      * */
@@ -1346,7 +1349,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (htmlFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(htmlFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1355,7 +1358,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (javaPropertiesFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(javaPropertiesFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1364,7 +1367,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (jsonFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(jsonFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1373,7 +1376,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (msOffice2010FilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(msOffice2010FilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1382,7 +1385,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (msOfficeDocFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(msOfficeDocFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1391,7 +1394,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (msOfficeExcelFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(msOfficeExcelFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1400,7 +1403,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (msOfficePPTFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(msOfficePPTFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1409,7 +1412,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (plainTextFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(plainTextFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1419,7 +1422,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (xmlRuleFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(xmlRuleFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1428,7 +1431,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                     if (poFilterIdMap.containsKey(filterId))
                     {
                         baseFilterMapping.setFilterId(poFilterIdMap.get(filterId));
-                        // store data to database
+                        // stores data to database
                         HibernateUtil.save(baseFilterMapping);
                     }
                 }
@@ -1436,7 +1439,7 @@ public class FilterConfigImport extends MultiCompanySupportedThread implements C
                 {
                     baseFilterMapping.setBaseFilterId(baseFilterIdMap.get(baseFilterMapping
                             .getBaseFilterId()));
-                    // store data to database
+                    // stores data to database
                     HibernateUtil.save(baseFilterMapping);
                 }
 

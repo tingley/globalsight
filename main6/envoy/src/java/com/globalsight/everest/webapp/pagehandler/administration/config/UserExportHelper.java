@@ -54,7 +54,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * export system user info
+ * exports system user info
  *
  */
 public class UserExportHelper implements ConfigConstants
@@ -279,7 +279,7 @@ public class UserExportHelper implements ConfigConstants
     }
 
     /**
-     * Get a locale ID to LANG_COUNTRY code map for performance purpose.
+     * Gets a locale ID to LANG_COUNTRY code map for performance purpose.
      */
     private static HashMap<Long, String> getAllLocales() throws Exception
     {

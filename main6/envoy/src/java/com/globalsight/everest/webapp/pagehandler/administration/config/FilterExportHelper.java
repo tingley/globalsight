@@ -94,7 +94,13 @@ public class FilterExportHelper implements ConfigConstants
         return propertiesFile;
     }
 
-    // export filters
+    /**
+     *  exports filters
+     * @param filterPropertyFile
+     * @param specialFilterToExport
+     * @param companyId
+     * @return
+     */
     public static File exportFilters(File filterPropertyFile,
             SpecialFilterToExport specialFilterToExport, long companyId)
     {
@@ -125,7 +131,7 @@ public class FilterExportHelper implements ConfigConstants
             }
             else if (FilterConstants.JAVAPROPERTIES_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determine whether to use htmlFilter and interanlTextFilter
+                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputJavaPropertiesFilter(filterPropertyFile, tableName, filterId,
                         companyId);
             }
@@ -139,23 +145,23 @@ public class FilterExportHelper implements ConfigConstants
             }
             else if (FilterConstants.OFFICE2010_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determine whether to use htmlFilter and interanlTextFilter
+                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputOffice2010Filter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.MSOFFICEDOC_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determine whether to use htmlFilter and interanlTextFilter
+                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputMsOfficeDocFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.MSOFFICEEXCEL_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determine whether to use htmlFilter and interanlTextFilter
+                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputMsOfficeExcelFilter(filterPropertyFile, tableName, filterId,
                         companyId);
             }
             else if (FilterConstants.MSOFFICEPPT_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determine whether to use htmlFilter and interanlTextFilter
+                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputMsOfficePptFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.OPENOFFICE_TABLENAME.equalsIgnoreCase(tableName))
@@ -164,12 +170,12 @@ public class FilterExportHelper implements ConfigConstants
             }
             else if (FilterConstants.PLAINTEXT_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determine whether to use Internal filter
+                // Determines whether to use Internal filter
                 propertiesInputPlainTextFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.PO_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determine whether to use htmlFilter and xmlRulefilter
+                // Determines whether to use htmlFilter and xmlRulefilter
                 propertiesInputPOFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.XMLRULE_TABLENAME.equalsIgnoreCase(tableName))
@@ -197,7 +203,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write openOfficeFilter the properties file
+     * Writes openOfficeFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -257,7 +263,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write jspFilter the properties file
+     * Writes jspFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -295,7 +301,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write javaScriptFilter the properties file
+     * Writes javaScriptFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -339,7 +345,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write frameMakerFilter the properties file
+     * Writes frameMakerFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -392,7 +398,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write frameMakerFilter the properties file
+     * Writes frameMakerFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -440,7 +446,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write msOffice2010Filter the properties file
+     * Writes msOffice2010Filter the properties file
      * 
      * @param prop
      * @param filter
@@ -549,7 +555,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write msOfficeDocFilter the properties file
+     * Writes msOfficeDocFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -616,7 +622,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write msOfficeDocFilter the properties file
+     * Writes msOfficeDocFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -669,7 +675,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write msOfficePptFilter the properties file
+     * Writes msOfficePptFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -720,7 +726,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write poFilter the properties file
+     * Writes poFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -760,7 +766,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write msOfficePptFilter the properties file
+     * Writes msOfficePptFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -800,7 +806,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write jsonFilter the properties file
+     * Writes jsonFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -846,7 +852,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write javaPropertiesFilter the properties file
+     * Writes javaPropertiesFilter the properties file
      * 
      * @param prop
      * @param filter
@@ -960,7 +966,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write internalFilter the properties file
+     * Writes internalFilter the properties file
      * 
      * @param prop
      * @param filterId
@@ -997,7 +1003,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Write htmlFilter the properties file
+     * Writes htmlFilter the properties file
      * 
      * @param prop
      * @param filterId
@@ -1216,7 +1222,7 @@ public class FilterExportHelper implements ConfigConstants
                 filterSet.add(javaPropertiesFilter.getSecondFilterTableName() + "."
                         + javaPropertiesFilter.getSecondFilterId());
 
-                // Judge whether the html_filter reference base_filter
+                // Judges whether the html_filter reference base_filter
                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                         javaPropertiesFilter.getSecondFilterTableName(),
                         javaPropertiesFilter.getSecondFilterId());
@@ -1237,7 +1243,7 @@ public class FilterExportHelper implements ConfigConstants
                 filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
                         + jsonFilter.getElementPostFilterId());
 
-                // Judge whether the html_filter reference base_filter
+                // Judges whether the html_filter reference base_filter
                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                         jsonFilter.getElementPostFilterTableName(),
                         jsonFilter.getElementPostFilterId());
@@ -1289,7 +1295,7 @@ public class FilterExportHelper implements ConfigConstants
                 filterSet.add(msOffice2010Filter.getContentPostFilterTableName() + "."
                         + msOffice2010Filter.getContentPostFilterId());
 
-                // Judge whether the html_filter reference base_filter
+                // Judges whether the html_filter reference base_filter
                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                         msOffice2010Filter.getContentPostFilterTableName(),
                         msOffice2010Filter.getContentPostFilterId());
@@ -1309,7 +1315,7 @@ public class FilterExportHelper implements ConfigConstants
                 filterSet.add(msOfficeDocFilter.getContentPostFilterTableName() + "."
                         + msOfficeDocFilter.getContentPostFilterId());
 
-                // Judge whether the html_filter reference base_filter
+                // Judges whether the html_filter reference base_filter
                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                         msOfficeDocFilter.getContentPostFilterTableName(),
                         msOfficeDocFilter.getContentPostFilterId());
@@ -1329,7 +1335,7 @@ public class FilterExportHelper implements ConfigConstants
                 filterSet.add(msOfficeExcelFilter.getContentPostFilterTableName() + "."
                         + msOfficeExcelFilter.getContentPostFilterId());
 
-                // Judge whether the html_filter reference base_filter
+                // Judges whether the html_filter reference base_filter
                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                         msOfficeExcelFilter.getContentPostFilterTableName(),
                         msOfficeExcelFilter.getContentPostFilterId());
@@ -1349,7 +1355,7 @@ public class FilterExportHelper implements ConfigConstants
                 filterSet.add(msOfficePPTFilter.getContentPostFilterTableName() + "."
                         + msOfficePPTFilter.getContentPostFilterId());
 
-                // Judge whether the html_filter reference base_filter
+                // Judges whether the html_filter reference base_filter
                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                         msOfficePPTFilter.getContentPostFilterTableName(),
                         msOfficePPTFilter.getContentPostFilterId());
@@ -1370,11 +1376,11 @@ public class FilterExportHelper implements ConfigConstants
                 filterSet.add(poFilter.getSecondFilterTableName() + "."
                         + poFilter.getSecondFilterId());
 
-                // Judge whether the po_filter reference html_filter
+                // Judges whether the po_filter reference html_filter
                 if (poFilter.getSecondFilterTableName().equalsIgnoreCase(
                         FilterConstants.HTML_TABLENAME))
                 {
-                    // Judge whether the html_filter reference base_filter
+                    // Judges whether the html_filter reference base_filter
                     BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                             poFilter.getSecondFilterTableName(), poFilter.getSecondFilterId());
 
@@ -1384,11 +1390,11 @@ public class FilterExportHelper implements ConfigConstants
                         filterSet.add(FilterConstants.BASE_TABLENAME + "." + bfm.getBaseFilterId());
                     }
                 }
-                // Judge whether the po_filter reference xml_rule_filter
+                // Judges whether the po_filter reference xml_rule_filter
                 else if (poFilter.getSecondFilterTableName().equalsIgnoreCase(
                         FilterConstants.XMLRULE_TABLENAME))
                 {
-                    // Judge whether the xml_rule_filter reference
+                    // Judge whethers the xml_rule_filter reference
                     // base_filter
                     BaseFilterMapping bfmXmlRuleFilter = checkInternalFilterIsUsedByFilter(
                             poFilter.getSecondFilterTableName(), poFilter.getSecondFilterId());
@@ -1427,7 +1433,7 @@ public class FilterExportHelper implements ConfigConstants
                                 if (postFilterTableName
                                         .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                                 {
-                                    // Judge whether the html_filter
+                                    // Judges whether the html_filter
                                     // reference base_filter
                                     BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                             postFilterTableName, Long.parseLong(postFilterTableID));
@@ -1453,7 +1459,7 @@ public class FilterExportHelper implements ConfigConstants
                                 if (cdataPostFilterTableName
                                         .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                                 {
-                                    // Judge whether the html_filter
+                                    // Judges whether the html_filter
                                     // reference base_filter
                                     BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                             cdataPostFilterTableName,
@@ -1482,7 +1488,7 @@ public class FilterExportHelper implements ConfigConstants
                                     if (postFilterName
                                             .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                                     {
-                                        // Judge whether the html_filter
+                                        // Judges whether the html_filter
                                         // reference base_filter
                                         BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                                 postFilterName, Long.parseLong(postFilterId));
@@ -1530,7 +1536,7 @@ public class FilterExportHelper implements ConfigConstants
                         filterSet.add(postFilterTableName + "." + postFilterTableID);
                         if (postFilterTableName.equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                         {
-                            // Judge whether the html_filter
+                            // Judges whether the html_filter
                             // reference base_filter
                             BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                     postFilterTableName, Long.parseLong(postFilterTableID));
@@ -1564,7 +1570,7 @@ public class FilterExportHelper implements ConfigConstants
                                 filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
                                         + jsonFilter.getElementPostFilterId());
 
-                                // Judge whether the html_filter
+                                // Judges whether the html_filter
                                 // reference base_filter
                                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                         jsonFilter.getElementPostFilterTableName(),
@@ -1592,7 +1598,7 @@ public class FilterExportHelper implements ConfigConstants
                         if (cdataPostFilterTableName
                                 .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                         {
-                            // Judge whether the html_filter
+                            // Judges whether the html_filter
                             // reference base_filter
                             BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                     cdataPostFilterTableName, Long.parseLong(cdataPostFilterId));
@@ -1625,7 +1631,7 @@ public class FilterExportHelper implements ConfigConstants
                                 filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
                                         + jsonFilter.getElementPostFilterId());
 
-                                // Judge whether the html_filter
+                                // Judges whether the html_filter
                                 // reference base_filter
                                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                         jsonFilter.getElementPostFilterTableName(),
@@ -1654,7 +1660,7 @@ public class FilterExportHelper implements ConfigConstants
 
                             if (postFilterName.equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                             {
-                                // Judge whether the html_filter
+                                // Judges whether the html_filter
                                 // reference base_filter
                                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                         postFilterName, Long.parseLong(postFilterId));
@@ -1675,7 +1681,7 @@ public class FilterExportHelper implements ConfigConstants
                 }
             }
         }
-        // Judge whether the filter reference base_filter
+        // Judges whether the filter reference base_filter
         if (baseFilterMapping != null)
         {
             filterSet.add("base_filter_mapping" + "." + baseFilterMapping.getId());
@@ -1686,7 +1692,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Find xmlRuleFilter data according to filterId and companyId
+     * Finds xmlRuleFilter data according to filterId and companyId
      * 
      * @param filterId
      * @param companyId

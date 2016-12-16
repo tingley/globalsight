@@ -46,7 +46,7 @@ import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
- * import mt profile info to system
+ * imports mt profile info to system
  */
 public class MTProfileImport extends MultiCompanySupportedThread implements ConfigConstants
 {

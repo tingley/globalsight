@@ -55,7 +55,11 @@ public class LocalePairExportHelper implements ConfigConstants
         return propertiesFile;
     }
 
-    // get locale pair info
+    /**
+     *  gets locale pair info
+     * @param propertyFile
+     * @param idArr
+     */
     public static void propertiesInputLocalePair(File propertyFile, String idArr)
     {
         localeIdList = new ArrayList<Long>();
@@ -109,7 +113,12 @@ public class LocalePairExportHelper implements ConfigConstants
         }
     }
 
-    // get locale info
+    /**
+     *  gets locale info
+     * @param propertyFile
+     * @param locale
+     * @param companyId
+     */
     private static void propertiesInputLocale(File propertyFile, GlobalSightLocale locale,
             Long companyId)
     {
@@ -131,7 +140,11 @@ public class LocalePairExportHelper implements ConfigConstants
         writeToFile(propertyFile, buffer.toString().getBytes());
     }
 
-    // Write locale pair the properties file
+    /**
+     *  Writes locale pair the properties file
+     * @param writeInFile
+     * @param bytes
+     */
     private static void writeToFile(File writeInFile, byte[] bytes)
     {
         writeInFile.getParentFile().mkdirs();

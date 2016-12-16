@@ -52,7 +52,12 @@ public class MTExportHelper implements ConfigConstants
         return propertiesFile;
     }
 
-    // put mt profile info to property
+    /**
+     *  puts mt profile info to property
+     * @param mtPropertyFile
+     * @param mtp
+     * @return
+     */
     public static File propertiesInputMTP(File mtPropertyFile, MachineTranslationProfile mtp)
     {
         StringBuffer buffer = new StringBuffer();
@@ -130,7 +135,12 @@ public class MTExportHelper implements ConfigConstants
         return mtPropertyFile;
     }
 
-    // mt profile extent info
+    /**
+     * puts mt profile extent info
+     * @param mtPropertyFile
+     * @param mteInfo
+     * @param companyId
+     */
     private static void propertiesInputMTEInfo(File mtPropertyFile,
             MachineTranslationExtentInfo mteInfo, String companyId)
     {

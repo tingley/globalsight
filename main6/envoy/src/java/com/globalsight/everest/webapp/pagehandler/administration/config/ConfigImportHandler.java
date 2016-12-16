@@ -203,7 +203,9 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
         }
     }
 
-    // get all upload files
+    /**
+     *  gets all upload files
+     */
     private List<File> getUploadFiles(HttpServletRequest p_request) throws Exception
     {
         ArrayList<File> uploadFiles = new ArrayList<File>();
@@ -239,7 +241,12 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
         return uploadFiles;
     }
 
-    // get files in 7z compressed package
+    /**
+     *  gets files in 7z compressed package
+     * @param uploadedFile
+     * @return
+     * @throws Exception
+     */
     private ArrayList<File> getFilesIn7ZFile(File uploadedFile) throws Exception
     {
         ArrayList<File> files = new ArrayList<File>();
@@ -264,7 +271,12 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
         return files;
     }
 
-    // get files in rar compressed package
+    /**
+     *  gets files in rar compressed package
+     * @param uploadedFile
+     * @return
+     * @throws Exception
+     */
     private ArrayList<File> getFilesInRarFile(File uploadedFile) throws Exception
     {
         ArrayList<File> files = new ArrayList<File>();
@@ -294,7 +306,12 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
         return files;
     }
 
-    // get files in zip compressed package
+    /**
+     *  gets files in zip compressed package
+     * @param uploadedFile
+     * @return
+     * @throws Exception
+     */
     private ArrayList<File> getFilesInZipFile(File uploadedFile) throws Exception
     {
         ArrayList<File> files = new ArrayList<File>();

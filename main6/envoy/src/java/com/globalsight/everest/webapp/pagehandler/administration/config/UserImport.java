@@ -72,7 +72,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * import user info into system
+ * imports user info into system
  */
 public class UserImport extends MultiCompanySupportedThread implements ConfigConstants
 {
@@ -122,13 +122,13 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                 Element userNode = (Element) userNodes.get(i);
                 if (validateData(userNode, allUserNameSet))
                 {
-                    // overwrite
+                    // overwrites
                     if (isUserAlreadyExisted(userNode, allUserNameSet))
                     {
                         _updateExistedUser(userNode, allUserNameSet, i, size);
                     }
                     else
-                    // add new
+                    // adds new
                     {
                         _addNewUser(userNode, i, size);
                     }
@@ -146,7 +146,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Add a new user into system.
+     * Adds a new user into system.
      * 
      * @param userNode
      * @param i
@@ -180,7 +180,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         List<Long> permissionGroupIds = initPermissionGroups(userNode);
         // user parameters
         List<UserParameterImpl> userParameterList = initUserParameter(userNode, user.getUserId());
-        // save user
+        // saves user
         saveUserInfo(user, companyUserBelongTo, projectIds, fs, rolesList, permissionGroupIds,
                 userParameterList);
         SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(), defaultRolesList);
@@ -237,7 +237,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Save data to database
+     * Saves data to database
      * 
      * @param user
      * @param company
@@ -289,7 +289,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Get all permission groups from file
+     * Gets all permission groups from file
      * 
      * @param userNode
      * @return
@@ -367,7 +367,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Get user project ids
+     * Gets user project ids
      * 
      * @param userNode
      * @param user
@@ -604,7 +604,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Add new data into "permissiongroup_user" table.
+     * Adds new data into "permissiongroup_user" table.
      * 
      * @param permissionGroupIds
      * @param userId
@@ -714,7 +714,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Check data before import
+     * Checks data before import
      * 
      * @param userNode
      * @return
@@ -725,14 +725,14 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         String userName = userNode.element("BasicInfo").element("UserName").getText();
         String companyNameFromUserNode = userNode.element("BasicInfo").element("CompanyName")
                 .getText();
-        // check email address
+        // checks email address
         String email = userNode.element("ContactInfo").element("EmailAddress").getText()
                 .replaceAll(" ", "");
         String ccEmail = userNode.element("ContactInfo").element("CCEmailAddress").getText()
                 .replaceAll(" ", "");
         String bccEmail = userNode.element("ContactInfo").element("BCCEmailAddress").getText()
                 .replaceAll(" ", "");
-        // check company existence
+        // checks company existence
         Company company = ServerProxy.getJobHandler().getCompany(companyNameFromUserNode);
         if (company == null)
         {
@@ -913,7 +913,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Get the permission group IDs that are newly added.
+     * Gets the permission group IDs that are newly added.
      * 
      * @param allPermissionGroupIds
      * @param userId

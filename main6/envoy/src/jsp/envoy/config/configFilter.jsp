@@ -849,7 +849,7 @@
         			<td>
         				<select id="qaFilterFrom" name="qaFilterFrom" multiple class="standardText" size="10" style="width:250">
         				<c:forEach var="op" items="${qafilter}">
-	      					<option title="${op.name}" value="filter-qa_filter-${op.id}">${op.filterName}</option>
+	      					<option title="${op.filterName}" value="filter-qa_filter-${op.id}">${op.filterName}</option>
 	    				</c:forEach>
         				</select>
         			</td>

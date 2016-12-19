@@ -1,23 +1,15 @@
 <%@ page 
      	contentType="text/html; charset=UTF-8"
 		errorPage="/envoy/common/error.jsp"
-		import="java.util.*,com.globalsight.util.resourcebundle.ResourceBundleConstants,
-				 com.globalsight.util.resourcebundle.SystemResourceBundle,
-				 java.util.Locale, 
-				 java.util.Vector,
-				 java.util.ResourceBundle,
-				 com.globalsight.util.GlobalSightLocale,
-                 com.globalsight.everest.permission.Permission,
-                 com.globalsight.everest.permission.PermissionSet,
-                 com.globalsight.everest.servlet.util.SessionManager,
-				 com.globalsight.everest.webapp.pagehandler.PageHandler,
-				 com.globalsight.everest.foundation.User,
-				 com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
-				 com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants,
+		import="com.globalsight.everest.foundation.User,com.globalsight.everest.permission.Permission,
+				 com.globalsight.everest.permission.PermissionSet,
+				 com.globalsight.everest.servlet.util.SessionManager,
 				 com.globalsight.everest.webapp.WebAppConstants,
-				 com.globalsight.everest.permission.Permission,                                  
+				 com.globalsight.everest.webapp.pagehandler.PageHandler,
+				 com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants,
                  com.globalsight.everest.workflow.EventNotificationHelper,
-				 com.globalsight.everest.webapp.javabean.NavigationBean" 
+                 java.util.Locale,
+                 java.util.ResourceBundle"
 		session="true" 
 %>
 <jsp:useBean id="save" scope="request"
@@ -266,8 +258,8 @@ $(document).ready(function(){
 	<TD>
         <div class="vali_pass">
             <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
-            <div class="vali_pass_progress">
-                <span class="vali_pass_inner_progress"></span>
+            <div class="vali_pass_progress" style="display:inline-flex;">
+                <span class="vali_pass_inner_progress"></span><span class="standardText" id="pvText"></span>
             </div>
         </div>
     </TD>

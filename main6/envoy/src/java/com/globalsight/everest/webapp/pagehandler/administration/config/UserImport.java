@@ -72,7 +72,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * imports user info into system
+ * Imports user info into system.
  */
 public class UserImport extends MultiCompanySupportedThread implements ConfigConstants
 {
@@ -147,11 +147,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
 
     /**
      * Adds a new user into system.
-     * 
-     * @param userNode
-     * @param i
-     * @param size
-     * @throws Exception
      */
     private void _addNewUser(Element userNode, int i, int size) throws Exception
     {
@@ -237,16 +232,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Saves data to database
-     * 
-     * @param user
-     * @param company
-     * @param projectIds
-     * @param fs
-     * @param rolesList
-     * @param permissionGroupIds
-     * @param userParameterList
-     * @throws Exception
+     * Saves data to database.
      */
     private void saveUserInfo(User user, Company company, List<Long> projectIds,
             UserFieldSecurity fs, List<UserRoleImpl> rolesList, List<Long> permissionGroupIds,
@@ -266,11 +252,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Init the user basic info
-     * 
-     * @param userNode
-     * @param userName
-     * @return
+     * Init the user basic info.
      */
     private List<UserParameterImpl> initUserParameter(Element userNode, String userId)
     {
@@ -289,10 +271,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Gets all permission groups from file
-     * 
-     * @param userNode
-     * @return
+     * Gets all permission groups from file.
      */
     @SuppressWarnings("rawtypes")
     private List<Long> initPermissionGroups(Element userNode)
@@ -332,10 +311,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Init user security info
-     * 
-     * @param userNode
-     * @return
+     * Init user security info.
      */
     private UserFieldSecurity initSecurity(Element userNode)
     {
@@ -367,15 +343,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Gets user project ids
-     * 
-     * @param userNode
-     * @param user
-     * @return
-     * @throws NamingException
-     * @throws GeneralException
-     * @throws RemoteException
-     * @throws ProjectHandlerException
+     * Gets user project ids.
      */
     private List<Long> initProjectIds(Element userNode, User user) throws ProjectHandlerException,
             RemoteException, GeneralException, NamingException
@@ -605,9 +573,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
 
     /**
      * Adds new data into "permissiongroup_user" table.
-     * 
-     * @param permissionGroupIds
-     * @param userId
      */
     private synchronized void saveNewPermissionGroupUser(List<Long> permissionGroupIds,
             String userId)
@@ -643,10 +608,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
      * When save data from file into "project_user", to avoid user's mapped
      * project is overwritten, add them in the list to ensure the map will not
      * be lost.
-     * 
-     * @param projectIds
-     * @param userID
-     * @throws Exception
      */
     private void addProjectsUserAlreadyIn(List<Long> projectIds, String userID) throws Exception
     {
@@ -667,10 +628,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     /**
      * When save user role data from file into "user_role", need merge file data
      * and DB data before save to avoid user's current data is overwritten.
-     * 
-     * @param rolesList
-     * @param user
-     * @throws Exception
      */
     @SuppressWarnings("rawtypes")
     private void addRolesUserAlreadyHave(List<UserRoleImpl> rolesList, User user) throws Exception
@@ -714,10 +671,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Checks data before import
-     * 
-     * @param userNode
-     * @return
+     * Checks data before import.
      */
     private boolean validateData(Element userNode, Set<String> allUserNameSet) throws Exception
     {
@@ -914,9 +868,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
 
     /**
      * Gets the permission group IDs that are newly added.
-     * 
-     * @param allPermissionGroupIds
-     * @param userId
      */
     private List<Long> getNewlyAddedPermissionGroups(List<Long> allPermissionGroupIds, String userId)
     {

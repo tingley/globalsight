@@ -28,16 +28,16 @@ import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 /**
- * export system mt profile info to property
+ * Exports system mt profile info to property.
  */
 public class MTExportHelper implements ConfigConstants
 {
     private final static String NEW_LINE = "\r\n";
 
-    public static File createPropertyfile(String userName)
+    public static File createPropertyfile(String userName, long companyId)
     {
         StringBuffer filePath = new StringBuffer();
-        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath()).append(File.separator)
+        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId)).append(File.separator)
                 .append("GlobalSight").append(File.separator).append("config")
                 .append(File.separator).append("export").append(File.separator)
                 .append("MachineTranslationProfiles");
@@ -53,10 +53,7 @@ public class MTExportHelper implements ConfigConstants
     }
 
     /**
-     *  puts mt profile info to property
-     * @param mtPropertyFile
-     * @param mtp
-     * @return
+     *  Puts mt profile info to property.
      */
     public static File propertiesInputMTP(File mtPropertyFile, MachineTranslationProfile mtp)
     {
@@ -136,10 +133,7 @@ public class MTExportHelper implements ConfigConstants
     }
 
     /**
-     * puts mt profile extent info
-     * @param mtPropertyFile
-     * @param mteInfo
-     * @param companyId
+     * Puts mt profile extent info to property.
      */
     private static void propertiesInputMTEInfo(File mtPropertyFile,
             MachineTranslationExtentInfo mteInfo, String companyId)

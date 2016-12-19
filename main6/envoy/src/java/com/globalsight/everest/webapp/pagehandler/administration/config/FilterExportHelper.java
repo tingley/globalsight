@@ -59,7 +59,7 @@ import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
- * filter configuration export
+ * Exports filter configurations.
  */
 public class FilterExportHelper implements ConfigConstants
 {
@@ -73,12 +73,11 @@ public class FilterExportHelper implements ConfigConstants
     private static final String SQL_SELECT_BASE_FILTER_MAPPING_DATA = "select * from base_filter_mapping "
             + " where id = ?";
     private final static String NEW_LINE = "\r\n";
-    private static EditUtil editUtil = new EditUtil();
 
     public static File createPropertyfile(String userName, long companyId)
     {
         StringBuffer filePath = new StringBuffer();
-        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath()).append(File.separator)
+        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId)).append(File.separator)
                 .append("GlobalSight").append(File.separator).append("config")
                 .append(File.separator).append("export").append(File.separator)
                 .append("FilterConfigurations");
@@ -95,11 +94,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     *  exports filters
-     * @param filterPropertyFile
-     * @param specialFilterToExport
-     * @param companyId
-     * @return
+     *  Exports all filters.
      */
     public static File exportFilters(File filterPropertyFile,
             SpecialFilterToExport specialFilterToExport, long companyId)
@@ -131,7 +126,6 @@ public class FilterExportHelper implements ConfigConstants
             }
             else if (FilterConstants.JAVAPROPERTIES_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputJavaPropertiesFilter(filterPropertyFile, tableName, filterId,
                         companyId);
             }
@@ -145,23 +139,19 @@ public class FilterExportHelper implements ConfigConstants
             }
             else if (FilterConstants.OFFICE2010_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputOffice2010Filter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.MSOFFICEDOC_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputMsOfficeDocFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.MSOFFICEEXCEL_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputMsOfficeExcelFilter(filterPropertyFile, tableName, filterId,
                         companyId);
             }
             else if (FilterConstants.MSOFFICEPPT_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determines whether to use htmlFilter and interanlTextFilter
                 propertiesInputMsOfficePptFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.OPENOFFICE_TABLENAME.equalsIgnoreCase(tableName))
@@ -170,12 +160,10 @@ public class FilterExportHelper implements ConfigConstants
             }
             else if (FilterConstants.PLAINTEXT_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determines whether to use Internal filter
                 propertiesInputPlainTextFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.PO_TABLENAME.equalsIgnoreCase(tableName))
             {
-                // Determines whether to use htmlFilter and xmlRulefilter
                 propertiesInputPOFilter(filterPropertyFile, tableName, filterId, companyId);
             }
             else if (FilterConstants.XMLRULE_TABLENAME.equalsIgnoreCase(tableName))
@@ -203,10 +191,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes openOfficeFilter the properties file
-     * 
-     * @param prop
-     * @param filter
+     * Writes openOfficeFilter the properties file.
      * */
     private static void propertiesInpuOpenOfficeFiltert(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -226,10 +211,10 @@ public class FilterExportHelper implements ConfigConstants
                     .append(NEW_LINE);
             buffer.append("openoffice_filter.").append(openOfficeFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(openOfficeFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(openOfficeFilter.getFilterName())).append(NEW_LINE);
             buffer.append("openoffice_filter.").append(openOfficeFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(openOfficeFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(openOfficeFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("openoffice_filter.").append(openOfficeFilter.getId())
                     .append(".IS_HEADER_TRANSLATE = ").append(openOfficeFilter.isHeaderTranslate())
@@ -239,11 +224,11 @@ public class FilterExportHelper implements ConfigConstants
                     .append(openOfficeFilter.isFileinfoTranslate()).append(NEW_LINE);
             buffer.append("openoffice_filter.").append(openOfficeFilter.getId())
                     .append(".UNEXTRACTABLE_WORD_PARAGRAPH_STYLES = ")
-                    .append(editUtil.removeCRLF(openOfficeFilter.getParagraphStyles()))
+                    .append(EditUtil.removeCRLF(openOfficeFilter.getParagraphStyles()))
                     .append(NEW_LINE);
             buffer.append("openoffice_filter.").append(openOfficeFilter.getId())
                     .append(".UNEXTRACTABLE_WORD_CHARACTER_STYLES = ")
-                    .append(editUtil.removeCRLF(openOfficeFilter.getCharacterStyles()))
+                    .append(EditUtil.removeCRLF(openOfficeFilter.getCharacterStyles()))
                     .append(NEW_LINE);
             buffer.append("openoffice_filter.").append(openOfficeFilter.getId())
                     .append(".XML_FILTER_ID = ").append(openOfficeFilter.getXmlFilterId())
@@ -253,7 +238,7 @@ public class FilterExportHelper implements ConfigConstants
                     .append(NEW_LINE);
             buffer.append("openoffice_filter.").append(openOfficeFilter.getId())
                     .append(".SECOND_FILTER_TABLE_NAME = ")
-                    .append(editUtil.removeCRLF(openOfficeFilter.getSecondFilterTableName()))
+                    .append(EditUtil.removeCRLF(openOfficeFilter.getSecondFilterTableName()))
                     .append(NEW_LINE);
             buffer.append("##openoffice_filter.").append(openOfficeFilter.getId()).append(".end")
                     .append(NEW_LINE).append(NEW_LINE);
@@ -263,10 +248,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes jspFilter the properties file
-     * 
-     * @param prop
-     * @param filter
+     * Writes jspFilter the properties file.
      * */
     private static void propertiesInputJspFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -285,9 +267,9 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("jsp_filter.").append(jspFilter.getId()).append(".COMPANY_ID = ")
                     .append(jspFilter.getCompanyId()).append(NEW_LINE);
             buffer.append("jsp_filter.").append(jspFilter.getId()).append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(jspFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(jspFilter.getFilterName())).append(NEW_LINE);
             buffer.append("jsp_filter.").append(jspFilter.getId()).append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(jspFilter.getFilterDescription())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(jspFilter.getFilterDescription())).append(NEW_LINE);
             buffer.append("jsp_filter.").append(jspFilter.getId())
                     .append(".IS_ADDITIONAL_HEAD_ADDED = ")
                     .append(jspFilter.getAddAdditionalHead()).append(NEW_LINE);
@@ -301,10 +283,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes javaScriptFilter the properties file
-     * 
-     * @param prop
-     * @param filter
+     * Writes javaScriptFilter the properties file.
      * */
     private static void propertiesInputJavaScriptFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -325,14 +304,14 @@ public class FilterExportHelper implements ConfigConstants
                     .append(NEW_LINE);
             buffer.append("java_script_filter.").append(javaScriptFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(javaScriptFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(javaScriptFilter.getFilterName())).append(NEW_LINE);
             buffer.append("java_script_filter.").append(javaScriptFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(javaScriptFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(javaScriptFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("java_script_filter.").append(javaScriptFilter.getId())
                     .append(".JS_FUNCTION_FILTER = ")
-                    .append(editUtil.removeCRLF(javaScriptFilter.getJsFunctionText()))
+                    .append(EditUtil.removeCRLF(javaScriptFilter.getJsFunctionText()))
                     .append(NEW_LINE);
             buffer.append("java_script_filter.").append(javaScriptFilter.getId())
                     .append(".ENABLE_UNICODE_ESCAPE = ")
@@ -345,10 +324,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes frameMakerFilter the properties file
-     * 
-     * @param prop
-     * @param filter
+     * Writes inDesignFilter the properties file.
      * */
     private static void propertiesInputInDesignFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -367,10 +343,10 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("indd_filter.").append(inddFilter.getId()).append(".COMPANY_ID = ")
                     .append(inddFilter.getCompanyId()).append(NEW_LINE);
             buffer.append("indd_filter.").append(inddFilter.getId()).append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(inddFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(inddFilter.getFilterName())).append(NEW_LINE);
             buffer.append("indd_filter.").append(inddFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(inddFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(inddFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("indd_filter.").append(inddFilter.getId())
                     .append(".TRANSLATE_HIDDEN_LAYER = ")
@@ -398,10 +374,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes frameMakerFilter the properties file
-     * 
-     * @param prop
-     * @param filter
+     * Writes frameMakerFilter the properties file.
      * */
     private static void propertiesInputFrameMakerFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -419,10 +392,10 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("frame_maker_filter.").append(fmFilter.getId()).append(".COMPANY_ID = ")
                     .append(fmFilter.getCompanyId()).append(NEW_LINE);
             buffer.append("frame_maker_filter.").append(fmFilter.getId()).append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(fmFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(fmFilter.getFilterName())).append(NEW_LINE);
             buffer.append("frame_maker_filter.").append(fmFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(fmFilter.getFilterDescription())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(fmFilter.getFilterDescription())).append(NEW_LINE);
             buffer.append("frame_maker_filter.").append(fmFilter.getId())
                     .append(".TRANSLATE_FOOT_NOTE = ").append(fmFilter.isExposeFootNote())
                     .append(NEW_LINE);
@@ -446,11 +419,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes msOffice2010Filter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes msOffice2010Filter the properties file.
      * */
     private static void propertiesInputOffice2010Filter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -468,31 +437,31 @@ public class FilterExportHelper implements ConfigConstants
                     .append(msOffice2010Filter.getId()).append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getFilterName()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getFilterName()))
                     .append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".UNEXTRACTABLE_WORD_PARAGRAPH_STYLES = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getParagraphStyles()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getParagraphStyles()))
                     .append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".UNEXTRACTABLE_WORD_CHARACTER_STYLES = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getCharacterStyles()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getCharacterStyles()))
                     .append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".UNEXTRACTABLE_EXCEL_CELL_STYLES = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getExcelCellStyles()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getExcelCellStyles()))
                     .append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".WORD_INTERNAL_TEXT_STYLES = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getWordInternalTextStyles()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getWordInternalTextStyles()))
                     .append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".EXCEL_INTERNAL_TEXT_STYLES = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getExcelInternalTextStyles()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getExcelInternalTextStyles()))
                     .append(NEW_LINE);
             buffer.append("office2010_filter.").append(msOffice2010Filter.getId())
                     .append(".IS_HEADER_TRANSLATE = ")
@@ -545,7 +514,7 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("office2010_filter.")
                     .append(msOffice2010Filter.getId())
                     .append(".CONTENT_POST_FILTER_TABLE_NAME = ")
-                    .append(editUtil.removeCRLF(msOffice2010Filter.getContentPostFilterTableName()))
+                    .append(EditUtil.removeCRLF(msOffice2010Filter.getContentPostFilterTableName()))
                     .append(NEW_LINE);
             buffer.append("##office2010_filter.").append(msOffice2010Filter.getId()).append(".end")
                     .append(NEW_LINE).append(NEW_LINE);
@@ -555,11 +524,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes msOfficeDocFilter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes msOfficeDocFilter the properties file.
      * */
     private static void propertiesInputMsOfficeDocFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -577,23 +542,23 @@ public class FilterExportHelper implements ConfigConstants
                     .append(".ID = ").append(msOfficeDocFilter.getId()).append(NEW_LINE);
             buffer.append("ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(msOfficeDocFilter.getFilterName()))
+                    .append(EditUtil.removeCRLF(msOfficeDocFilter.getFilterName()))
                     .append(NEW_LINE);
             buffer.append("ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(msOfficeDocFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(msOfficeDocFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".UNEXTRACTABLE_WORD_PARAGRAPH_STYLES = ")
-                    .append(editUtil.removeCRLF(msOfficeDocFilter.getParagraphStyles()))
+                    .append(EditUtil.removeCRLF(msOfficeDocFilter.getParagraphStyles()))
                     .append(NEW_LINE);
             buffer.append("ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".UNEXTRACTABLE_WORD_CHARACTER_STYLES = ")
-                    .append(editUtil.removeCRLF(msOfficeDocFilter.getCharacterStyles()))
+                    .append(EditUtil.removeCRLF(msOfficeDocFilter.getCharacterStyles()))
                     .append(NEW_LINE);
             buffer.append("ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".INTERNAL_TEXT_CHARACTER_STYLES = ")
-                    .append(editUtil.removeCRLF(msOfficeDocFilter.getInternalTextStyles()))
+                    .append(EditUtil.removeCRLF(msOfficeDocFilter.getInternalTextStyles()))
                     .append(NEW_LINE);
             buffer.append("ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".IS_HEADER_TRANSLATE = ")
@@ -612,7 +577,7 @@ public class FilterExportHelper implements ConfigConstants
                     .append(msOfficeDocFilter.getContentPostFilterId()).append(NEW_LINE);
             buffer.append("ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".CONTENT_POST_FILTER_TABLE_NAME = ")
-                    .append(editUtil.removeCRLF(msOfficeDocFilter.getContentPostFilterTableName()))
+                    .append(EditUtil.removeCRLF(msOfficeDocFilter.getContentPostFilterTableName()))
                     .append(NEW_LINE);
             buffer.append("##ms_office_doc_filter.").append(msOfficeDocFilter.getId())
                     .append(".end").append(NEW_LINE).append(NEW_LINE);
@@ -622,11 +587,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes msOfficeDocFilter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes msOfficeExcelFilter the properties file.
      * */
     private static void propertiesInputMsOfficeExcelFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -644,11 +605,11 @@ public class FilterExportHelper implements ConfigConstants
                     .append(".ID = ").append(msOfficeExcelFilter.getId()).append(NEW_LINE);
             buffer.append("ms_office_excel_filter.").append(msOfficeExcelFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(msOfficeExcelFilter.getFilterName()))
+                    .append(EditUtil.removeCRLF(msOfficeExcelFilter.getFilterName()))
                     .append(NEW_LINE);
             buffer.append("ms_office_excel_filter.").append(msOfficeExcelFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(msOfficeExcelFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(msOfficeExcelFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("ms_office_excel_filter.").append(msOfficeExcelFilter.getId())
                     .append(".COMPANY_ID = ").append(msOfficeExcelFilter.getCompanyId())
@@ -665,7 +626,7 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("ms_office_excel_filter.")
                     .append(msOfficeExcelFilter.getId())
                     .append(".CONTENT_POST_FILTER_TABLE_NAME = ")
-                    .append(editUtil.removeCRLF(msOfficeExcelFilter.getContentPostFilterTableName()))
+                    .append(EditUtil.removeCRLF(msOfficeExcelFilter.getContentPostFilterTableName()))
                     .append(NEW_LINE);
             buffer.append("##ms_office_excel_filter.").append(msOfficeExcelFilter.getId())
                     .append(".end").append(NEW_LINE).append(NEW_LINE);
@@ -675,11 +636,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes msOfficePptFilter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes msOfficePptFilter the properties file.
      * */
     private static void propertiesInputMsOfficePptFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -696,11 +653,11 @@ public class FilterExportHelper implements ConfigConstants
                     .append(".ID = ").append(msOfficePPTFilter.getId()).append(NEW_LINE);
             buffer.append("ms_office_ppt_filter.").append(msOfficePPTFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(msOfficePPTFilter.getFilterName()))
+                    .append(EditUtil.removeCRLF(msOfficePPTFilter.getFilterName()))
                     .append(NEW_LINE);
             buffer.append("ms_office_ppt_filter.").append(msOfficePPTFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(msOfficePPTFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(msOfficePPTFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("ms_office_ppt_filter.").append(msOfficePPTFilter.getId())
                     .append(".IS_ALT_TRANSLATE = ").append(msOfficePPTFilter.isAltTranslate())
@@ -716,7 +673,7 @@ public class FilterExportHelper implements ConfigConstants
                     .append(msOfficePPTFilter.getContentPostFilterId()).append(NEW_LINE);
             buffer.append("ms_office_ppt_filter.").append(msOfficePPTFilter.getId())
                     .append(".CONTENT_POST_FILTER_TABLE_NAME = ")
-                    .append(editUtil.removeCRLF(msOfficePPTFilter.getContentPostFilterTableName()))
+                    .append(EditUtil.removeCRLF(msOfficePPTFilter.getContentPostFilterTableName()))
                     .append(NEW_LINE);
             buffer.append("##ms_office_ppt_filter.").append(msOfficePPTFilter.getId())
                     .append(".end").append(NEW_LINE).append(NEW_LINE);
@@ -726,11 +683,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes poFilter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes poFilter the properties file.
      * */
     private static void propertiesInputPOFilter(File propertyFile, String tableName, Long filterId,
             Long companyId)
@@ -747,16 +700,16 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("po_filter.").append(poFilter.getId()).append(".ID = ")
                     .append(poFilter.getId()).append(NEW_LINE);
             buffer.append("po_filter.").append(poFilter.getId()).append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(poFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(poFilter.getFilterName())).append(NEW_LINE);
             buffer.append("po_filter.").append(poFilter.getId()).append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(poFilter.getFilterDescription())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(poFilter.getFilterDescription())).append(NEW_LINE);
             buffer.append("po_filter.").append(poFilter.getId()).append(".COMPANY_ID = ")
                     .append(Long.toString(poFilter.getCompanyId())).append(NEW_LINE);
             buffer.append("po_filter.").append(poFilter.getId()).append(".SECOND_FILTER_ID = ")
                     .append(poFilter.getSecondFilterId()).append(NEW_LINE);
             buffer.append("po_filter.").append(poFilter.getId())
                     .append(".SECOND_FILTER_TABLE_NAME = ")
-                    .append(editUtil.removeCRLF(poFilter.getSecondFilterTableName()))
+                    .append(EditUtil.removeCRLF(poFilter.getSecondFilterTableName()))
                     .append(NEW_LINE);
             buffer.append("##po_filter.").append(poFilter.getId()).append(".end").append(NEW_LINE)
                     .append(NEW_LINE);
@@ -766,11 +719,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes msOfficePptFilter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes plainTextFilter the properties file.
      * */
     private static void propertiesInputPlainTextFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -787,10 +736,10 @@ public class FilterExportHelper implements ConfigConstants
                     .append(plainTextFilter.getId()).append(NEW_LINE);
             buffer.append("plain_text_filter.").append(plainTextFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(plainTextFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(plainTextFilter.getFilterName())).append(NEW_LINE);
             buffer.append("plain_text_filter.").append(plainTextFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(plainTextFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(plainTextFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("plain_text_filter.").append(plainTextFilter.getId())
                     .append(".COMPANY_ID = ").append(plainTextFilter.getCompanyId())
@@ -806,11 +755,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes jsonFilter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes jsonFilter the properties file.
      * */
     private static void propertiesInputJsonFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -826,10 +771,10 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("json_filter.").append(jsonsFilter.getId()).append(".ID = ")
                     .append(jsonsFilter.getId()).append(NEW_LINE);
             buffer.append("json_filter.").append(jsonsFilter.getId()).append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(jsonsFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(jsonsFilter.getFilterName())).append(NEW_LINE);
             buffer.append("json_filter.").append(jsonsFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(jsonsFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(jsonsFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("json_filter.").append(jsonsFilter.getId())
                     .append(".ENABLE_SID_SUPPORT = ").append(jsonsFilter.isEnableSidSupport())
@@ -852,11 +797,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes javaPropertiesFilter the properties file
-     * 
-     * @param prop
-     * @param filter
-     * @param baseFilterMapping
+     * Writes javaPropertiesFilter the properties file.
      * */
     private static void propertiesInputJavaPropertiesFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -873,11 +814,11 @@ public class FilterExportHelper implements ConfigConstants
                     .append(".ID = ").append(javaPropertiesFilter.getId()).append(NEW_LINE);
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(javaPropertiesFilter.getFilterName()))
+                    .append(EditUtil.removeCRLF(javaPropertiesFilter.getFilterName()))
                     .append(NEW_LINE);
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(javaPropertiesFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(javaPropertiesFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".ENABLE_SID_SUPPORT = ")
@@ -893,11 +834,11 @@ public class FilterExportHelper implements ConfigConstants
                     .append(javaPropertiesFilter.getSecondFilterId()).append(NEW_LINE);
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".SECOND_FILTER_TABLE_NAME = ")
-                    .append(editUtil.removeCRLF(javaPropertiesFilter.getSecondFilterTableName()))
+                    .append(EditUtil.removeCRLF(javaPropertiesFilter.getSecondFilterTableName()))
                     .append(NEW_LINE);
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".INTERNAL_TEXTS = ")
-                    .append(editUtil.removeCRLF(javaPropertiesFilter.getInternalText()))
+                    .append(EditUtil.removeCRLF(javaPropertiesFilter.getInternalText()))
                     .append(NEW_LINE);
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".COMPANY_ID = ").append(javaPropertiesFilter.getCompanyId())
@@ -909,6 +850,9 @@ public class FilterExportHelper implements ConfigConstants
         }
     }
 
+      /**
+     * Writes baseFilterMapping the properties file.
+     * */
     private static void propertiesInputBaseFilterMapping(File propertyFile, Long id)
     {
         StringBuffer buffer = new StringBuffer();
@@ -953,7 +897,7 @@ public class FilterExportHelper implements ConfigConstants
             sb.append("qa_filter.").append(qaFilter.getId()).append(".FILTER_NAME = ")
                     .append(qaFilter.getFilterName()).append(NEW_LINE);
             sb.append("qa_filter.").append(qaFilter.getId()).append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(qaFilter.getFilterDescription())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(qaFilter.getFilterDescription())).append(NEW_LINE);
             sb.append("qa_filter.").append(qaFilter.getId()).append(".COMPANY_ID = ")
                     .append(Long.toString(qaFilter.getCompanyId())).append(NEW_LINE);
             sb.append("qa_filter.").append(qaFilter.getId()).append(".CONFIG_XML = ")
@@ -966,11 +910,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes internalFilter the properties file
-     * 
-     * @param prop
-     * @param filterId
-     * @param companyId
+     * Writes internalFilter the properties file.
      * */
     private static void propertiesInputInternalFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -989,7 +929,7 @@ public class FilterExportHelper implements ConfigConstants
                     .append(baseFilter.getFilterName()).append(NEW_LINE);
             buffer.append("base_filter.").append(baseFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(baseFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(baseFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("base_filter.").append(baseFilter.getId()).append(".COMPANY_ID = ")
                     .append(Long.toString(baseFilter.getCompanyId())).append(NEW_LINE);
@@ -1003,11 +943,7 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Writes htmlFilter the properties file
-     * 
-     * @param prop
-     * @param filterId
-     * @param companyId
+     * Writes htmlFilter the properties file.
      * */
     private static void propertiesInputHtmlFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
@@ -1024,21 +960,21 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".ID = ")
                     .append(htmlFilter.getId()).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getFilterName())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".EMBEDDABLE_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getEmbeddableTags())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getEmbeddableTags())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".PLACEHOLD_TRIMMING = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getPlaceHolderTrim())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getPlaceHolderTrim())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".COMPANY_ID = ")
                     .append(Long.toString(htmlFilter.getCompanyId())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_EMBEDDABLE_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultEmbeddableTags()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultEmbeddableTags()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".CONVERT_HTML_ENTRY = ").append(htmlFilter.isConvertHtmlEntry())
@@ -1054,63 +990,63 @@ public class FilterExportHelper implements ConfigConstants
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".JS_FUNCTION_FILTER = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getJsFunctionText())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getJsFunctionText())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_PAIRED_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultPairedTags()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultPairedTags()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".PAIRED_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getPairedTags())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getPairedTags())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_UNPAIRED_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultUnpairedTags()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultUnpairedTags()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".UNPAIRED_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getUnpairedTags())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getUnpairedTags())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_SWITCH_TAG_MAPS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultSwitchTagMaps()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultSwitchTagMaps()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".SWITCH_TAG_MAPS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getSwitchTagMaps())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getSwitchTagMaps())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_WHITE_PRESERVING_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultWhitePreservingTags()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultWhitePreservingTags()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_INTERNAL_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultInternalTagMaps()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultInternalTagMaps()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId()).append(".INTERNAL_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getInternalTagMaps())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(htmlFilter.getInternalTagMaps())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".WHITE_PRESERVING_TAGS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getWhitePreservingTags()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getWhitePreservingTags()))
                     .append(NEW_LINE);
             buffer.append("html_filter.")
                     .append(htmlFilter.getId())
                     .append(".DEFAULT_NON_TRANSLATABLE_META_ATTRIBUTES = ")
-                    .append(editUtil.removeCRLF(htmlFilter
+                    .append(EditUtil.removeCRLF(htmlFilter
                             .getDefaultNonTranslatableMetaAttributes())).append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".NON_TRANSLATABLE_META_ATTRIBUTES = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getNonTranslatableMetaAttributes()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getNonTranslatableMetaAttributes()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_TRANSLATABLE_ATTRIBUTES = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultTranslatableAttributes()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultTranslatableAttributes()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".TRANSLATABLE_ATTRIBUTES = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getTranslatableAttributes()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getTranslatableAttributes()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".DEFAULT_LOCALIZABLE_ATTRIBUTE_MAPS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getDefaultLocalizableAttributeMaps()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getDefaultLocalizableAttributeMaps()))
                     .append(NEW_LINE);
             buffer.append("html_filter.").append(htmlFilter.getId())
                     .append(".LOCALIZABLE_ATTRIBUTE_MAPS = ")
-                    .append(editUtil.removeCRLF(htmlFilter.getLocalizableAttributeMaps()))
+                    .append(EditUtil.removeCRLF(htmlFilter.getLocalizableAttributeMaps()))
                     .append(NEW_LINE);
             buffer.append("##html_filter.").append(htmlFilter.getId()).append(".end")
                     .append(NEW_LINE).append(NEW_LINE);
@@ -1119,6 +1055,9 @@ public class FilterExportHelper implements ConfigConstants
         }
     }
 
+    /**
+     * Writes xmlRuleFilter the properties file.
+     * */
     private static void propertiesInputxmlRuleFilter(File propertyFile, String tableName,
             Long filterId, Long companyId)
     {
@@ -1137,31 +1076,20 @@ public class FilterExportHelper implements ConfigConstants
                     .append(".COMPANY_ID = ").append(xmlRuleFilter.getCompanyId()).append(NEW_LINE);
             buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
                     .append(".FILTER_NAME = ")
-                    .append(editUtil.removeCRLF(xmlRuleFilter.getFilterName())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(xmlRuleFilter.getFilterName())).append(NEW_LINE);
             buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
                     .append(".FILTER_DESCRIPTION = ")
-                    .append(editUtil.removeCRLF(xmlRuleFilter.getFilterDescription()))
+                    .append(EditUtil.removeCRLF(xmlRuleFilter.getFilterDescription()))
                     .append(NEW_LINE);
             buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
                     .append(".XML_RULE_ID = ").append(xmlRuleFilter.getXmlRuleId())
                     .append(NEW_LINE);
-            // buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
-            // .append(".ENABLE_CONVERT_HTML_ENTITY = ")
-            // .append(xmlRuleFilter.isConvertHtmlEntity()).append(NEW_LINE);
-            // buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
-            // .append(".SECOND_FILTER_ID = ")
-            // .append(xmlRuleFilter.getSecondFilterId()).append(NEW_LINE);
-            // buffer.append("xml_rule_filter.")
-            // .append(xmlRuleFilter.getId())
-            // .append(".SECOND_FILTER_TABLE_NAME = ")
-            // .append(deleteNewline(xmlRuleFilter
-            // .getSecondFilterTableName())).append(NEW_LINE);
             buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
                     .append(".USE_XML_RULE = ").append(xmlRuleFilter.isUseXmlRule())
                     .append(NEW_LINE);
             buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
                     .append(".CONFIG_XML = ")
-                    .append(editUtil.removeCRLF(xmlRuleFilter.getConfigXml())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(xmlRuleFilter.getConfigXml())).append(NEW_LINE);
             buffer.append("##xml_rule_filter.").append(xmlRuleFilter.getId()).append(".end")
                     .append(NEW_LINE).append(NEW_LINE);
 
@@ -1169,6 +1097,9 @@ public class FilterExportHelper implements ConfigConstants
         }
     }
 
+    /**
+     * Writes xmlRule the properties file.
+     * */
     private static void propertiesInputxmlRule(File propertyFile, Long ruleId, Long companyId)
     {
         StringBuffer buffer = new StringBuffer();
@@ -1184,9 +1115,9 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("xml_rule.").append(xmlRuleFileImpl.getId()).append(".COMPANY_ID=")
                     .append(xmlRuleFileImpl.getCompanyId()).append(NEW_LINE);
             buffer.append("xml_rule.").append(xmlRuleFileImpl.getId()).append(".DESCRIPTION=")
-                    .append(editUtil.removeCRLF(xmlRuleFileImpl.getDescription())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(xmlRuleFileImpl.getDescription())).append(NEW_LINE);
             buffer.append("xml_rule.").append(xmlRuleFileImpl.getId()).append(".RULE_TEXT=")
-                    .append(editUtil.removeCRLF(xmlRuleFileImpl.getRuleText())).append(NEW_LINE);
+                    .append(EditUtil.removeCRLF(xmlRuleFileImpl.getRuleText())).append(NEW_LINE);
             buffer.append("##xml_rule.").append(xmlRuleFileImpl.getId()).append(".end")
                     .append(NEW_LINE).append(NEW_LINE);
 
@@ -1394,8 +1325,7 @@ public class FilterExportHelper implements ConfigConstants
                 else if (poFilter.getSecondFilterTableName().equalsIgnoreCase(
                         FilterConstants.XMLRULE_TABLENAME))
                 {
-                    // Judge whethers the xml_rule_filter reference
-                    // base_filter
+                    // Judges whether the xml_rule_filter reference base_filter
                     BaseFilterMapping bfmXmlRuleFilter = checkInternalFilterIsUsedByFilter(
                             poFilter.getSecondFilterTableName(), poFilter.getSecondFilterId());
                     if (bfmXmlRuleFilter != null)
@@ -1433,8 +1363,7 @@ public class FilterExportHelper implements ConfigConstants
                                 if (postFilterTableName
                                         .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                                 {
-                                    // Judges whether the html_filter
-                                    // reference base_filter
+                                    // Judges whether the html_filter reference base_filter
                                     BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                             postFilterTableName, Long.parseLong(postFilterTableID));
 
@@ -1459,8 +1388,7 @@ public class FilterExportHelper implements ConfigConstants
                                 if (cdataPostFilterTableName
                                         .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                                 {
-                                    // Judges whether the html_filter
-                                    // reference base_filter
+                                    // Judges whether the html_filter reference base_filter
                                     BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                             cdataPostFilterTableName,
                                             Long.parseLong(cdataPostFilterId));
@@ -1488,8 +1416,7 @@ public class FilterExportHelper implements ConfigConstants
                                     if (postFilterName
                                             .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                                     {
-                                        // Judges whether the html_filter
-                                        // reference base_filter
+                                        // Judges whether the html_filter reference base_filter
                                         BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                                 postFilterName, Long.parseLong(postFilterId));
 
@@ -1536,8 +1463,7 @@ public class FilterExportHelper implements ConfigConstants
                         filterSet.add(postFilterTableName + "." + postFilterTableID);
                         if (postFilterTableName.equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                         {
-                            // Judges whether the html_filter
-                            // reference base_filter
+                            // Judges whether the html_filter reference base_filter
                             BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                     postFilterTableName, Long.parseLong(postFilterTableID));
 
@@ -1570,8 +1496,7 @@ public class FilterExportHelper implements ConfigConstants
                                 filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
                                         + jsonFilter.getElementPostFilterId());
 
-                                // Judges whether the html_filter
-                                // reference base_filter
+                                // Judges whether the html_filter reference base_filter
                                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                         jsonFilter.getElementPostFilterTableName(),
                                         jsonFilter.getElementPostFilterId());
@@ -1598,8 +1523,7 @@ public class FilterExportHelper implements ConfigConstants
                         if (cdataPostFilterTableName
                                 .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                         {
-                            // Judges whether the html_filter
-                            // reference base_filter
+                            // Judges whether the html_filter reference base_filter
                             BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                     cdataPostFilterTableName, Long.parseLong(cdataPostFilterId));
 
@@ -1631,8 +1555,7 @@ public class FilterExportHelper implements ConfigConstants
                                 filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
                                         + jsonFilter.getElementPostFilterId());
 
-                                // Judges whether the html_filter
-                                // reference base_filter
+                                // Judges whether the html_filter reference base_filter
                                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                         jsonFilter.getElementPostFilterTableName(),
                                         jsonFilter.getElementPostFilterId());
@@ -1660,8 +1583,7 @@ public class FilterExportHelper implements ConfigConstants
 
                             if (postFilterName.equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
                             {
-                                // Judges whether the html_filter
-                                // reference base_filter
+                                // Judges whether the html_filter reference base_filter
                                 BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                                         postFilterName, Long.parseLong(postFilterId));
 
@@ -1692,12 +1614,9 @@ public class FilterExportHelper implements ConfigConstants
     }
 
     /**
-     * Finds xmlRuleFilter data according to filterId and companyId
-     * 
-     * @param filterId
-     * @param companyId
-     * @return HtmlFilter
+     * Finds xmlRuleFilter data according to filterId and companyId.
      * */
+    @SuppressWarnings("unchecked")
     private static XMLRuleFilter selectXmlRuleFilterDataFromDatabase(Long filterId, Long companyId)
     {
         Filter filter = MapOfTableNameAndSpecialFilter
@@ -1712,6 +1631,7 @@ public class FilterExportHelper implements ConfigConstants
             return null;
     }
 
+    @SuppressWarnings("unchecked")
     private static Filter selectFilterDataFromDataBase(String tableName, Long filterId,
             long companyId)
     {

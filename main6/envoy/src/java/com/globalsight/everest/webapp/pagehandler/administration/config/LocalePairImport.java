@@ -39,7 +39,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 /**
  * 
- * imports property file locale pair info
+ * Imports property file locale pair info.
  */
 public class LocalePairImport extends MultiCompanySupportedThread implements ConfigConstants
 {
@@ -64,8 +64,7 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
     }
 
     /**
-     *  analysis and imports upload file
-     * @param uploadedFile
+     *  Analysis and imports upload file.
      */
     private void analysisAndImport(File uploadedFile)
     {
@@ -160,14 +159,11 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
     {
         if (dataMap.isEmpty())
             return;
-        int i = 0;
-        int size = dataMap.keySet().size();
 
         try
         {
             if (dataMap.containsKey("Locale"))
             {
-                i++;
                 // stores locale info
                 storeGlobalSightLocaleData(dataMap);
                 Thread.sleep(100);
@@ -175,7 +171,6 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
 
             if (dataMap.containsKey("LocalPairs"))
             {
-                i++;
                 // stores locale pair info
                 storeLocalePairData(dataMap);
                 Thread.sleep(100);
@@ -190,6 +185,7 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void storeGlobalSightLocaleData(Map<String, List> dataMap)
     {
         List<GlobalSightLocale> globalSightLocaleList = dataMap.get("Locale");
@@ -213,6 +209,7 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void storeLocalePairData(Map<String, List> dataMap)
     {
         LocalePair localePair = null;

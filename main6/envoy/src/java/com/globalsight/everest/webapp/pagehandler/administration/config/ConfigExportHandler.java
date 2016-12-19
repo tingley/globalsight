@@ -20,11 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -79,22 +77,14 @@ import com.globalsight.util.SortUtil;
 import com.globalsight.util.zip.ZipIt;
 
 /**
- * handler for export system configuration file
- *
+ * This handler for export system configuration file.
  */
 public class ConfigExportHandler extends PageHandler
 {
     static public final String ZIP_FILE_NAME = "DownloadAllConfigFiles.zip";
 
     /**
-     * @param pageDescriptor
-     *            the description of the page to be produced
-     * @param request
-     *            the original request sent from the browser
-     * @param response
-     *            original response object
-     * @param context
-     *            the Servlet context
+     * Invokes this PageHandler.
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
             HttpServletResponse p_response, ServletContext p_context) throws ServletException,
@@ -184,7 +174,7 @@ public class ConfigExportHandler extends PageHandler
     }
 
     /**
-     * gets zip file
+     * Gets zip file.
      */
     private File getZip(User user, String ids, long companyId)
     {
@@ -193,11 +183,12 @@ public class ConfigExportHandler extends PageHandler
         try
         {
             String[] idsArr = null;
-            File localePropertyFile = LocalePairExportHelper.createPropertyFile(user.getUserName());
+            File localePropertyFile = LocalePairExportHelper.createPropertyFile(user.getUserName(),
+                    companyId);
 
-            File userPropertyFile = UserExportHelper.createPropertyfile();
+            File userPropertyFile = UserExportHelper.createPropertyfile(companyId);
 
-            File mtPropertyFile = MTExportHelper.createPropertyfile(user.getUserName());
+            File mtPropertyFile = MTExportHelper.createPropertyfile(user.getUserName(), companyId);
 
             File filterPropertyFile = FilterExportHelper.createPropertyfile(user.getUserName(),
                     companyId);
@@ -263,7 +254,7 @@ public class ConfigExportHandler extends PageHandler
                 entryFiles.add(filterPropertyFile);
             }
             downLoadFile = new File(ZIP_FILE_NAME);
-            String configPath = getQAReportWorkflowPath();
+            String configPath = getQAReportWorkflowPath(companyId);
             if (File.separator.equals("\\"))
             {
                 configPath = configPath.replace("/", File.separator);
@@ -278,11 +269,11 @@ public class ConfigExportHandler extends PageHandler
         return downLoadFile;
     }
 
-    private String getQAReportWorkflowPath()
+    private String getQAReportWorkflowPath(long companyId)
     {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(AmbFileStoragePathUtils.getFileStorageDirPath());
+        sb.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId));
         sb.append(File.separator);
         sb.append("GlobalSight");
         sb.append(File.separator);
@@ -292,6 +283,7 @@ public class ConfigExportHandler extends PageHandler
         return sb.toString();
     }
 
+    @SuppressWarnings("unchecked")
     private void getFileProfiles(HttpServletRequest p_request)
     {
         try
@@ -307,7 +299,7 @@ public class ConfigExportHandler extends PageHandler
     }
 
     /**
-     * gets all filters
+     * Gets all filter configurations.
      */
     private void getFilters(HttpServletRequest p_request)
     {
@@ -417,6 +409,7 @@ public class ConfigExportHandler extends PageHandler
         p_request.setAttribute("wfstatePostProfiles", wfStatePostProfiles);
     }
 
+    @SuppressWarnings("unchecked")
     private void getWorkflows(HttpServletRequest p_request, Locale uiLocale)
     {
         List<WorkflowTemplateInfo> wfTemplates = WorkflowTemplateHandlerHelper

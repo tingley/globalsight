@@ -46,7 +46,7 @@ import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
- * imports mt profile info to system
+ * Imports mt profile info to system.
  */
 public class MTProfileImport extends MultiCompanySupportedThread implements ConfigConstants
 {
@@ -175,21 +175,17 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
     {
         if (dataMap.isEmpty())
             return;
-        int i = 0;
-        int size = dataMap.keySet().size();
 
         try
         {
             if (dataMap.containsKey("MachineTranslationProfile"))
             {
-                i++;
                 storeMTPData(dataMap);
                 Thread.sleep(100);
             }
 
             if (dataMap.containsKey("MachineTranslationExtentInfo"))
             {
-                i++;
                 storeMTPExtentInfoData(dataMap);
                 Thread.sleep(100);
             }
@@ -203,6 +199,7 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void storeMTPData(Map<String, List> dataMap)
     {
         List<MachineTranslationProfile> mtpList = dataMap.get("MachineTranslationProfile");
@@ -228,6 +225,7 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void storeMTPExtentInfoData(Map<String, List> dataMap)
     {
         MachineTranslationExtentInfo extenInfo = null;
@@ -419,6 +417,7 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
         return extenInfo;
     }
 
+    @SuppressWarnings("unchecked")
     private boolean isMtProfileExisted(String mtProfileName, Long companyId)
     {
         String hql = "select mtp.mtProfileName from MachineTranslationProfile "

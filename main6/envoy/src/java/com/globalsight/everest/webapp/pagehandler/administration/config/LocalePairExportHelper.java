@@ -30,17 +30,17 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * locale pair export
+ * Exports locale pairs.
  */
 public class LocalePairExportHelper implements ConfigConstants
 {
     private final static String NEW_LINE = "\r\n";
     private static List<Long> localeIdList;
 
-    public static File createPropertyFile(String userName)
+    public static File createPropertyFile(String userName, long companyId)
     {
         StringBuffer filePath = new StringBuffer();
-        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath()).append(File.separator)
+        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId)).append(File.separator)
                 .append("GlobalSight").append(File.separator).append("config")
                 .append(File.separator).append("export").append(File.separator)
                 .append("LocalePairs");
@@ -56,9 +56,7 @@ public class LocalePairExportHelper implements ConfigConstants
     }
 
     /**
-     *  gets locale pair info
-     * @param propertyFile
-     * @param idArr
+     *  Gets locale pairs info.
      */
     public static void propertiesInputLocalePair(File propertyFile, String idArr)
     {
@@ -114,10 +112,7 @@ public class LocalePairExportHelper implements ConfigConstants
     }
 
     /**
-     *  gets locale info
-     * @param propertyFile
-     * @param locale
-     * @param companyId
+     *  Gets locale info.
      */
     private static void propertiesInputLocale(File propertyFile, GlobalSightLocale locale,
             Long companyId)
@@ -141,9 +136,7 @@ public class LocalePairExportHelper implements ConfigConstants
     }
 
     /**
-     *  Writes locale pair the properties file
-     * @param writeInFile
-     * @param bytes
+     *  Writes locale pair the properties file.
      */
     private static void writeToFile(File writeInFile, byte[] bytes)
     {

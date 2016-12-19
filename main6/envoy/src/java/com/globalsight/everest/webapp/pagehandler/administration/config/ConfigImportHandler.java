@@ -49,13 +49,17 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import de.innosystec.unrar.rarfile.FileHeader;
 
 /**
- * handler for import system configuration file
+ * This handler for import system configuration file.
  *
  */
 public class ConfigImportHandler extends PageHandler implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(ConfigImportHandler.class);
 
+    /**
+     * Invokes this PageHandler.
+     */
+    @SuppressWarnings("unchecked")
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
             HttpServletResponse p_response, ServletContext p_context) throws ServletException,
             IOException, EnvoyServletException
@@ -99,7 +103,7 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
             }
             if (session.getAttribute("uploading_filter") != null)
             {
-                config_error_map.clear();// .remove(sessionId);
+                config_error_map.clear();
                 List<File> uploadFiles = (List<File>) session.getAttribute("uploading_filter");
 
                 session.removeAttribute("importToCompId");
@@ -204,7 +208,7 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
     }
 
     /**
-     *  gets all upload files
+     * Gets all upload files.
      */
     private List<File> getUploadFiles(HttpServletRequest p_request) throws Exception
     {
@@ -242,10 +246,7 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
     }
 
     /**
-     *  gets files in 7z compressed package
-     * @param uploadedFile
-     * @return
-     * @throws Exception
+     * Gets files in 7z compressed package.
      */
     private ArrayList<File> getFilesIn7ZFile(File uploadedFile) throws Exception
     {
@@ -272,10 +273,7 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
     }
 
     /**
-     *  gets files in rar compressed package
-     * @param uploadedFile
-     * @return
-     * @throws Exception
+     * Gets files in rar compressed package.
      */
     private ArrayList<File> getFilesInRarFile(File uploadedFile) throws Exception
     {
@@ -307,10 +305,7 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
     }
 
     /**
-     *  gets files in zip compressed package
-     * @param uploadedFile
-     * @return
-     * @throws Exception
+     * Gets files in zip compressed package.
      */
     private ArrayList<File> getFilesInZipFile(File uploadedFile) throws Exception
     {
@@ -366,17 +361,17 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
     }
 
     /**
-     * uploads configuration files
-     * 
-     * @param p_request
+     * Uploads configuration files.
      */
     private File uploadFile(HttpServletRequest p_request)
     {
         File f = null;
         try
         {
-            String tmpDir = AmbFileStoragePathUtils.getFileStorageDirPath() + File.separator
-                    + "GlobalSight" + File.separator + "config" + File.separator + "import";
+            String companyId = CompanyThreadLocal.getInstance().getValue();
+            String tmpDir = AmbFileStoragePathUtils.getFileStorageDirPath(companyId)
+                    + File.separator + "GlobalSight" + File.separator + "config" + File.separator
+                    + "import";
             boolean isMultiPart = ServletFileUpload.isMultipartContent(p_request);
             if (isMultiPart)
             {

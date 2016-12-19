@@ -154,31 +154,25 @@ function submitForm(button) {
 
 function confirmForm(formSent) {
     if (formSent.password) {
+        var thePassword = formSent.password.value;
+        var theRepeat = formSent.passwordConfirm.value;
         if (pwdChanged) {
-            //Validate password
-            var thePassword = formSent.password.value;
             thePassword = stripBlanks(thePassword);
-
             if (thePassword != "") {
-                //If password field has value, it means that user like to set/modify user's password
-                //First to check if password fit for strong password policy if user's company switch on strong password checking
                 if ("1" == "<%=needStrongPassword%>" && !passCheck) {
                     alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
                     return false;
                 }
-                var theRepeat = formSent.passwordConfirm.value;
                 theRepeat = stripBlanks(theRepeat);
-                if (theRepeat != thePassword) {
-                    alert(" <%= bundle.getString("jsmsg_users_repeat_password")%>");
-                    formSent.passwordConfirm.value = "";
-                    formSent.password.value = "";
-                    formSent.password.focus();
-                    return false;
-                }
             }
         } else {
             formSent.password.value = "";
             formSent.passwordConfirm.value = "";
+        }
+        // Make sure the repeated password matches the first
+        if (theRepeat != thePassword) {
+            alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
+            return false;
         }
     }
 

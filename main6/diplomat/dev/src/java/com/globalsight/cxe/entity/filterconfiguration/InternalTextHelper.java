@@ -766,11 +766,12 @@ public class InternalTextHelper
             Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
             Matcher matcher = pattern.matcher(src);
 
-            while (matcher.find())
-            {
-                String s = matcher.group();
-                internalTexts.add(s);
-            }
+			while (matcher.find())
+			{
+				String s = matcher.group();
+				if (countStr(s, "</bpt>"))
+					internalTexts.add(s);
+			}
 
             String regex2 = MessageFormat.format(REGEX_ALL_2, ob);
             Pattern pattern2 = Pattern.compile(regex2, Pattern.DOTALL);
@@ -779,6 +780,8 @@ public class InternalTextHelper
             while (matcher2.find())
             {
                 String s = matcher2.group();
+                if (countStr(s, "</bpt>"))
+					continue;
                 internalTexts.add(s);
             }
         }
@@ -792,6 +795,18 @@ public class InternalTextHelper
 
         return internalTexts;
     }
+
+	/**
+	 * Determine the number of strings containing a string
+	 * */
+	private static boolean countStr(String source, String str)
+	{
+		if (source.indexOf(str) == source.lastIndexOf(str))
+		{
+			return true;
+		}
+		return false;
+	}
 
     private static List<Integer> getInternalIndex(String src)
     {

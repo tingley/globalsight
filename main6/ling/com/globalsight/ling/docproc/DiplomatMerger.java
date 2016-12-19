@@ -911,7 +911,10 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         NativeEnDecoder encoderForSkeleton = getEncoder(getDocumentFormat());
 
         String srcDataType = m_output.getDiplomatAttribute().getDataType();
-        boolean isAssociateHtmlFilter = EscapingHelper.checkAssociatedHtmlFilter(getMainFilter());
+		boolean isJavaOrPoAssociateHtmlFilter = EscapingHelper
+				.checkJavaOrPoAssociatedHtmlFilter(getMainFilter());
+		boolean isJsonOrTextAssociateHtmlFilter = EscapingHelper
+				.checkJsonOrTextAssociatedHtmlFilter(getMainFilter());
         boolean isTuvLocalized = false;
         String localizedBy = new String();
         boolean isInCDATA = false;
@@ -1019,12 +1022,16 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 							m_isAttr, isInCDATA);
 					if (isHtmlNode)
 						contentType = "HtmlNode";
+					List<String> internalTexts = new ArrayList<String>();
+					chunk = InternalTextHelper.protectInternalTexts(
+							chunk, internalTexts);
 					String newchunk = EscapingHelper.newHandleString4Export(
 							chunk, m_escapings, srcDataType, false, true,
-							escapingChars, isInCDATA, contentType,isAssociateHtmlFilter);
-                    
-//                    String newchunk = EscapingHelper.handleString4Export(chunk, m_escapings,
-//                    		srcDataType, false, true, escapingChars, isInCDATA);
+							escapingChars, isInCDATA, contentType,
+							isJavaOrPoAssociateHtmlFilter,
+							isJsonOrTextAssociateHtmlFilter);
+					newchunk = InternalTextHelper.restoreInternalTexts(
+							newchunk, internalTexts);
                     // GBS-3997&GBS-4066
                     newchunk = EmojiUtil.parseEmojiTagToAlias(newchunk);
 
@@ -1057,11 +1064,19 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                         isInCDATA = tmp.indexOf("<![CDATA[") > tmp.indexOf("]]");
                     }
                     
-					if (tmp.indexOf("<") > -1 && tmp.indexOf(">") > -1
+					if ((isJavaOrPoAssociateHtmlFilter || isJsonOrTextAssociateHtmlFilter)
+							&& tmp.indexOf("<") > -1
+							&& tmp.indexOf(">") > -1
 							&& tmp.indexOf("<") < tmp.indexOf(">")
-							&& tmp.indexOf("</") == -1 && isAssociateHtmlFilter)
+							&& tmp.indexOf("</") == -1
+							&& !EscapingHelper.protectInvalidTags(tmp))
 					{
 						isHtmlNode = true;
+					}
+					else if ((isJavaOrPoAssociateHtmlFilter || isJsonOrTextAssociateHtmlFilter)
+							&& tmp.indexOf("</") > -1 && tmp.indexOf(">") > -1)
+					{
+						isHtmlNode = false;
 					}
 
                     if (OfficeContentPostFilterHelper.isOfficeFormat(srcDataType))

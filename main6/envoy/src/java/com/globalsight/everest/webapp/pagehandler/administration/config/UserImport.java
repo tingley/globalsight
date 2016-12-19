@@ -72,7 +72,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * import user info into system
+ * Imports user info into system.
  */
 public class UserImport extends MultiCompanySupportedThread implements ConfigConstants
 {
@@ -122,13 +122,13 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                 Element userNode = (Element) userNodes.get(i);
                 if (validateData(userNode, allUserNameSet))
                 {
-                    // overwrite
+                    // overwrites
                     if (isUserAlreadyExisted(userNode, allUserNameSet))
                     {
                         _updateExistedUser(userNode, allUserNameSet, i, size);
                     }
                     else
-                    // add new
+                    // adds new
                     {
                         _addNewUser(userNode, i, size);
                     }
@@ -146,12 +146,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Add a new user into system.
-     * 
-     * @param userNode
-     * @param i
-     * @param size
-     * @throws Exception
+     * Adds a new user into system.
      */
     private void _addNewUser(Element userNode, int i, int size) throws Exception
     {
@@ -180,7 +175,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         List<Long> permissionGroupIds = initPermissionGroups(userNode);
         // user parameters
         List<UserParameterImpl> userParameterList = initUserParameter(userNode, user.getUserId());
-        // save user
+        // saves user
         saveUserInfo(user, companyUserBelongTo, projectIds, fs, rolesList, permissionGroupIds,
                 userParameterList);
         SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(), defaultRolesList);
@@ -237,16 +232,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Save data to database
-     * 
-     * @param user
-     * @param company
-     * @param projectIds
-     * @param fs
-     * @param rolesList
-     * @param permissionGroupIds
-     * @param userParameterList
-     * @throws Exception
+     * Saves data to database.
      */
     private void saveUserInfo(User user, Company company, List<Long> projectIds,
             UserFieldSecurity fs, List<UserRoleImpl> rolesList, List<Long> permissionGroupIds,
@@ -266,11 +252,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Init the user basic info
-     * 
-     * @param userNode
-     * @param userName
-     * @return
+     * Init the user basic info.
      */
     private List<UserParameterImpl> initUserParameter(Element userNode, String userId)
     {
@@ -289,10 +271,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Get all permission groups from file
-     * 
-     * @param userNode
-     * @return
+     * Gets all permission groups from file.
      */
     @SuppressWarnings("rawtypes")
     private List<Long> initPermissionGroups(Element userNode)
@@ -332,10 +311,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Init user security info
-     * 
-     * @param userNode
-     * @return
+     * Init user security info.
      */
     private UserFieldSecurity initSecurity(Element userNode)
     {
@@ -367,15 +343,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Get user project ids
-     * 
-     * @param userNode
-     * @param user
-     * @return
-     * @throws NamingException
-     * @throws GeneralException
-     * @throws RemoteException
-     * @throws ProjectHandlerException
+     * Gets user project ids.
      */
     private List<Long> initProjectIds(Element userNode, User user) throws ProjectHandlerException,
             RemoteException, GeneralException, NamingException
@@ -604,10 +572,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Add new data into "permissiongroup_user" table.
-     * 
-     * @param permissionGroupIds
-     * @param userId
+     * Adds new data into "permissiongroup_user" table.
      */
     private synchronized void saveNewPermissionGroupUser(List<Long> permissionGroupIds,
             String userId)
@@ -643,10 +608,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
      * When save data from file into "project_user", to avoid user's mapped
      * project is overwritten, add them in the list to ensure the map will not
      * be lost.
-     * 
-     * @param projectIds
-     * @param userID
-     * @throws Exception
      */
     private void addProjectsUserAlreadyIn(List<Long> projectIds, String userID) throws Exception
     {
@@ -667,10 +628,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     /**
      * When save user role data from file into "user_role", need merge file data
      * and DB data before save to avoid user's current data is overwritten.
-     * 
-     * @param rolesList
-     * @param user
-     * @throws Exception
      */
     @SuppressWarnings("rawtypes")
     private void addRolesUserAlreadyHave(List<UserRoleImpl> rolesList, User user) throws Exception
@@ -714,10 +671,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Check data before import
-     * 
-     * @param userNode
-     * @return
+     * Checks data before import.
      */
     private boolean validateData(Element userNode, Set<String> allUserNameSet) throws Exception
     {
@@ -725,14 +679,14 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         String userName = userNode.element("BasicInfo").element("UserName").getText();
         String companyNameFromUserNode = userNode.element("BasicInfo").element("CompanyName")
                 .getText();
-        // check email address
+        // checks email address
         String email = userNode.element("ContactInfo").element("EmailAddress").getText()
                 .replaceAll(" ", "");
         String ccEmail = userNode.element("ContactInfo").element("CCEmailAddress").getText()
                 .replaceAll(" ", "");
         String bccEmail = userNode.element("ContactInfo").element("BCCEmailAddress").getText()
                 .replaceAll(" ", "");
-        // check company existence
+        // checks company existence
         Company company = ServerProxy.getJobHandler().getCompany(companyNameFromUserNode);
         if (company == null)
         {
@@ -913,10 +867,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * Get the permission group IDs that are newly added.
-     * 
-     * @param allPermissionGroupIds
-     * @param userId
+     * Gets the permission group IDs that are newly added.
      */
     private List<Long> getNewlyAddedPermissionGroups(List<Long> allPermissionGroupIds, String userId)
     {

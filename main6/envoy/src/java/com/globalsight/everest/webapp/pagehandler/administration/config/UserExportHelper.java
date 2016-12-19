@@ -54,7 +54,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * export system user info
+ * Exports system user info.
  *
  */
 public class UserExportHelper implements ConfigConstants
@@ -108,8 +108,7 @@ public class UserExportHelper implements ConfigConstants
             contactInfoNode.addContent(new Element("EmailLanguage").setText(user
                     .getDefaultUILocale()));
             userNode.addContent(contactInfoNode);
-            // ======================= default roles
-            // ==========================
+            // ======================= default roles==========================
             List<UserDefaultRole> defaultRoles = SetDefaultRoleUtil.getDefaultRolesByUser(userId);
             if (defaultRoles != null && defaultRoles.size() > 0)
             {
@@ -279,7 +278,7 @@ public class UserExportHelper implements ConfigConstants
     }
 
     /**
-     * Get a locale ID to LANG_COUNTRY code map for performance purpose.
+     * Gets a locale ID to LANG_COUNTRY code map for performance purpose.
      */
     private static HashMap<Long, String> getAllLocales() throws Exception
     {
@@ -293,10 +292,10 @@ public class UserExportHelper implements ConfigConstants
         return result;
     }
 
-    public static File createPropertyfile()
+    public static File createPropertyfile(long companyId)
     {
         StringBuffer filePath = new StringBuffer();
-        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath()).append(File.separator)
+        filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId)).append(File.separator)
                 .append("GlobalSight").append(File.separator).append("config")
                 .append(File.separator).append("export").append(File.separator).append("Users");
 

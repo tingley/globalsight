@@ -1,35 +1,24 @@
 <%@page import="com.globalsight.everest.company.CompanyWrapper"%>
-<%@page import="com.globalsight.everest.company.CompanyThreadLocal"%>
-<%@page import="com.globalsight.everest.servlet.util.ServerProxy"%>
+<%@page import="com.globalsight.everest.foundation.SSOUserUtil"%>
+<%@page import="com.globalsight.everest.foundation.User"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,
-            com.globalsight.everest.foundation.User,
-            com.globalsight.calendar.CalendarManagerLocal,
+    import="com.globalsight.everest.permission.Permission,
+            com.globalsight.everest.permission.PermissionSet,
             com.globalsight.everest.securitymgr.FieldSecurity,
             com.globalsight.everest.securitymgr.UserSecureFields,
             com.globalsight.everest.servlet.util.SessionManager,
-            com.globalsight.everest.util.system.SystemConfigParamNames,
-            com.globalsight.everest.util.system.SystemConfiguration,
-            com.globalsight.everest.vendormanagement.VendorManagementLocal,
-            com.globalsight.everest.permission.Permission,
-            com.globalsight.everest.permission.PermissionSet,                
             com.globalsight.everest.webapp.WebAppConstants,
-            com.globalsight.everest.webapp.javabean.NavigationBean,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
+            com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants,
             com.globalsight.everest.webapp.pagehandler.administration.users.ModifyUserWrapper,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
-            com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants,
-            com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
-            com.globalsight.util.GlobalSightLocale,
             com.globalsight.util.edit.EditUtil,
-            java.util.Iterator,
             java.util.Locale,
-            java.util.ResourceBundle,
-            com.globalsight.everest.foundation.SSOUserUtil"
+            java.util.ResourceBundle"
     session="true"
 %>
 <jsp:useBean id="roles" scope="request"
@@ -237,8 +226,8 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
     <TD>
 	  <div class="vali_pass">
 		  <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
-		  <div class="vali_pass_progress">
-			<span class="vali_pass_inner_progress"></span>
+		  <div class="vali_pass_progress" style="display:inline-flex;">
+			<span class="vali_pass_inner_progress"></span><span class="standardText" id="pvText"></span>
 		  </div>
 	  </div>
     </TD>
@@ -415,27 +404,26 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
         }
 
 		if (formSent.password) {
+            var thePassword = formSent.password.value;
+            var theRepeat = formSent.passwordConfirm.value;
 			if (pwdChanged) {
-				var thePassword = formSent.password.value;
 				thePassword = stripBlanks(thePassword);
 				if (thePassword != "") {
 					if ("1" == "<%=needStrongPassword%>" && !passCheck) {
 						alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
 						return false;
 					}
-					var theRepeat = formSent.passwordConfirm.value;
 					theRepeat = stripBlanks(theRepeat);
-
-					// Make sure the repeated password matches the first
-					if (theRepeat != thePassword) {
-						alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
-						return false;
-					}
 				}
 			} else {
 				formSent.password.value = "";
 				formSent.passwordConfirm.value = "";
 			}
+            // Make sure the repeated password matches the first
+            if (theRepeat != thePassword) {
+                alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
+                return false;
+            }
 		}
 
         if (formSent.firstName)

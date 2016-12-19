@@ -39,7 +39,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 /**
  * 
- * import property file locale pair info
+ * Imports property file locale pair info.
  */
 public class LocalePairImport extends MultiCompanySupportedThread implements ConfigConstants
 {
@@ -63,7 +63,9 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
         this.analysisAndImport(uploadedFile);
     }
 
-    // analysis and import uploads file
+    /**
+     *  Analysis and imports upload file.
+     */
     private void analysisAndImport(File uploadedFile)
     {
         Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
@@ -157,23 +159,19 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
     {
         if (dataMap.isEmpty())
             return;
-        int i = 0;
-        int size = dataMap.keySet().size();
 
         try
         {
             if (dataMap.containsKey("Locale"))
             {
-                i++;
-                // store locale info
+                // stores locale info
                 storeGlobalSightLocaleData(dataMap);
                 Thread.sleep(100);
             }
 
             if (dataMap.containsKey("LocalPairs"))
             {
-                i++;
-                // store locale pair info
+                // stores locale pair info
                 storeLocalePairData(dataMap);
                 Thread.sleep(100);
             }
@@ -187,6 +185,7 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void storeGlobalSightLocaleData(Map<String, List> dataMap)
     {
         List<GlobalSightLocale> globalSightLocaleList = dataMap.get("Locale");
@@ -210,6 +209,7 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void storeLocalePairData(Map<String, List> dataMap)
     {
         LocalePair localePair = null;

@@ -20,11 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -79,22 +77,14 @@ import com.globalsight.util.SortUtil;
 import com.globalsight.util.zip.ZipIt;
 
 /**
- * handler for export system configuration file
- *
+ * This handler for export system configuration file.
  */
 public class ConfigExportHandler extends PageHandler
 {
     static public final String ZIP_FILE_NAME = "DownloadAllConfigFiles.zip";
 
     /**
-     * @param pageDescriptor
-     *            the description of the page to be produced
-     * @param request
-     *            the original request sent from the browser
-     * @param response
-     *            original response object
-     * @param context
-     *            the Servlet context
+     * Invokes this PageHandler.
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
             HttpServletResponse p_response, ServletContext p_context) throws ServletException,
@@ -183,7 +173,9 @@ public class ConfigExportHandler extends PageHandler
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
-    // get zip file
+    /**
+     * Gets zip file.
+     */
     private File getZip(User user, String ids, long companyId)
     {
         File downLoadFile = null;
@@ -191,11 +183,12 @@ public class ConfigExportHandler extends PageHandler
         try
         {
             String[] idsArr = null;
-            File localePropertyFile = LocalePairExportHelper.createPropertyFile(user.getUserName());
+            File localePropertyFile = LocalePairExportHelper.createPropertyFile(user.getUserName(),
+                    companyId);
 
-            File userPropertyFile = UserExportHelper.createPropertyfile();
+            File userPropertyFile = UserExportHelper.createPropertyfile(companyId);
 
-            File mtPropertyFile = MTExportHelper.createPropertyfile(user.getUserName());
+            File mtPropertyFile = MTExportHelper.createPropertyfile(user.getUserName(), companyId);
 
             File filterPropertyFile = FilterExportHelper.createPropertyfile(user.getUserName(),
                     companyId);
@@ -212,13 +205,13 @@ public class ConfigExportHandler extends PageHandler
                         String[] idArr = idsArr[n].split("-");
                         if ("localePair".equals(idArr[0]))
                         {
-                            // get locale pair property file
+                            // gets locale pair property file
                             LocalePairExportHelper.propertiesInputLocalePair(localePropertyFile,
                                     idArr[1]);
                         }
                         else if ("user".equals(idArr[0]))
                         {
-                            // get user property file
+                            // gets user property file
                             userPropertyFile = UserExportHelper.exportUsers(userPropertyFile, root,
                                     Doc, user, idArr[1]);
                         }
@@ -228,14 +221,14 @@ public class ConfigExportHandler extends PageHandler
                                     .getMTProfileById(idArr[1]);
                             if (mtp != null)
                             {
-                                // get mt profile property file
+                                // gets mt profile property file
                                 mtPropertyFile = MTExportHelper.propertiesInputMTP(mtPropertyFile,
                                         mtp);
                             }
                         }
                         else if ("filter".equals(idArr[0]))
                         {
-                            // get filter property file
+                            // gets filter property file
                             SpecialFilterToExport specialFilterToExport = new SpecialFilterToExport(
                                     Long.parseLong(idArr[2]), idArr[1]);
                             filterPropertyFile = FilterExportHelper.exportFilters(
@@ -261,7 +254,7 @@ public class ConfigExportHandler extends PageHandler
                 entryFiles.add(filterPropertyFile);
             }
             downLoadFile = new File(ZIP_FILE_NAME);
-            String configPath = getQAReportWorkflowPath();
+            String configPath = getQAReportWorkflowPath(companyId);
             if (File.separator.equals("\\"))
             {
                 configPath = configPath.replace("/", File.separator);
@@ -276,11 +269,11 @@ public class ConfigExportHandler extends PageHandler
         return downLoadFile;
     }
 
-    private String getQAReportWorkflowPath()
+    private String getQAReportWorkflowPath(long companyId)
     {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(AmbFileStoragePathUtils.getFileStorageDirPath());
+        sb.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId));
         sb.append(File.separator);
         sb.append("GlobalSight");
         sb.append(File.separator);
@@ -290,6 +283,7 @@ public class ConfigExportHandler extends PageHandler
         return sb.toString();
     }
 
+    @SuppressWarnings("unchecked")
     private void getFileProfiles(HttpServletRequest p_request)
     {
         try
@@ -304,28 +298,89 @@ public class ConfigExportHandler extends PageHandler
         }
     }
 
+    /**
+     * Gets all filter configurations.
+     */
     private void getFilters(HttpServletRequest p_request)
     {
         String currentId = CompanyThreadLocal.getInstance().getValue();
         long companyId = Long.parseLong(currentId);
         ArrayList<FilterConfiguration> filterConfigurations = FilterHelper
                 .getAllFilterConfiguration(companyId);
-        Map<String, ArrayList<Filter>> map = new HashMap<String, ArrayList<Filter>>();
         for (FilterConfiguration filterConfig : filterConfigurations)
         {
-            String filterName = filterConfig.getName();
-            if ("JavaScript Object Notation Filter ".equals(filterName))
-            {
-                filterName = "JSON Filter";
-            }
+            String filterTableName = filterConfig.getFilterTableName();
             ArrayList<Filter> specialFilters = filterConfig.getSpecialFilters();
-            if (specialFilters.size() > 0)
+            if ("base_filter".equals(filterTableName))
             {
-                map.put(filterName, specialFilters);
+                p_request.setAttribute("basefilter", specialFilters);
+            }
+            else if ("frame_maker_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("fmfilter", specialFilters);
+            }
+            else if ("html_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("htmlfilter", specialFilters);
+            }
+            else if ("indd_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("inddfilter", specialFilters);
+            }
+            else if ("java_properties_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("javapropertiesfilter", specialFilters);
+            }
+            else if ("java_script_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("javascriptfilter", specialFilters);
+            }
+            else if ("filter_json".equals(filterTableName))
+            {
+                p_request.setAttribute("jsonfilter", specialFilters);
+            }
+            else if ("jsp_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("jspfilter", specialFilters);
+            }
+            else if ("office2010_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("office2010filter", specialFilters);
+            }
+            else if ("ms_office_doc_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("msdocfilter", specialFilters);
+            }
+            else if ("ms_office_excel_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("msexcelfilter", specialFilters);
+            }
+            else if ("ms_office_ppt_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("mspptfilter", specialFilters);
+            }
+            else if ("openoffice_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("oofilter", specialFilters);
+            }
+            else if ("plain_text_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("plainfilter", specialFilters);
+            }
+            else if ("po_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("pofilter", specialFilters);
+            }
+            else if ("qa_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("qafilter", specialFilters);
+            }
+            else if ("xml_rule_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("xmlfilter", specialFilters);
             }
         }
 
-        p_request.setAttribute("filters", map);
     }
 
     private void getXMLRules(HttpServletRequest p_request)
@@ -354,6 +409,7 @@ public class ConfigExportHandler extends PageHandler
         p_request.setAttribute("wfstatePostProfiles", wfStatePostProfiles);
     }
 
+    @SuppressWarnings("unchecked")
     private void getWorkflows(HttpServletRequest p_request, Locale uiLocale)
     {
         List<WorkflowTemplateInfo> wfTemplates = WorkflowTemplateHandlerHelper

@@ -80,12 +80,15 @@ function passwordChecking(val) {
 	$progress.css("width", result + "%");
 	if(result >= 0 && result <= 50){
 		$progress.attr("class", "vali_pass_inner_progress error");
+		$("#pvText").text("Weak");
 		passChecking = false;
 	} else if (result > 50 && result < 100) {
 		$progress.attr("class", "vali_pass_inner_progress psmiddle");
+        $("#pvText").text("Good");
 		passChecking = false;
 	} else if (result == 100) {
 		$progress.attr("class", "vali_pass_inner_progress strong");
+        $("#pvText").text("Strong");
 		passChecking = true;
 	}
 	return passChecking;

@@ -153,7 +153,15 @@ str_segmengFilter.append(bundle.getString("segment_filter")).append(":&nbsp;&nbs
 str_segmengFilter.append("<select id='segmentFilter' ");
 str_segmengFilter.append("onchange='doSegmentFilter(this[this.selectedIndex].value)' ");
 str_segmengFilter.append("style='font-size: 8pt;'>");
-for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
+
+List<String> fs = new ArrayList<>();
+fs.addAll(OnlineEditorConstants.SEGMENT_FILTERS);
+if (CompanyWrapper.isUsePerplexity())
+{
+	fs.add(OnlineEditorConstants.SEGMENT_FILTER_PERPLEXITY);
+}
+
+for(String segFilter : fs)
 {
     str_segmengFilter.append("<option ");
     if (segFilter.equals(selSegFilter))
@@ -162,21 +170,6 @@ for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
     }
     str_segmengFilter.append("value=\""+segFilter+"\">")
                      .append(bundle.getString(segFilter))
-                     .append("</option>");
-}
-
-String companyId = CompanyThreadLocal.getInstance().getValue();
-boolean usePerplexity = CompanyWrapper.getCompanyById(companyId).isEnablePerplexity();
-if (usePerplexity)
-{
-	String perpleFilter = OnlineEditorConstants.SEGMENT_FILTER_PERPLEXITY;
-	str_segmengFilter.append("<option ");
-    if (perpleFilter.equals(selSegFilter))
-    {
-        str_segmengFilter.append("selected ");
-    }
-    str_segmengFilter.append("value=\""+perpleFilter+"\">")
-                     .append(bundle.getString(perpleFilter))
                      .append("</option>");
 }
 

@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.company.CompanyWrapper"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page
     contentType="text/html; charset=UTF-8"
@@ -3076,8 +3077,15 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
   	<span style="white-space:nowrap;">&nbsp;&nbsp;|&nbsp;&nbsp;Filter:&nbsp;&nbsp;
 	  	<select id="segmentFilter" onchange="doSegmentFilter(this[this.selectedIndex].value)" style="font-size: 8pt;">
 			<%
+			    List<String> fs = new ArrayList();
+				fs.addAll(OnlineEditorConstants.SEGMENT_FILTERS);
+				if (CompanyWrapper.isUsePerplexity())
+			    {
+			    	fs.add(OnlineEditorConstants.SEGMENT_FILTER_PERPLEXITY);
+			    }
+			    
 				String selectedFilter = (String)request.getAttribute("segmentFilter");
-				for(String segmentFilter : OnlineEditorConstants.SEGMENT_FILTERS)
+				for(String segmentFilter : fs)
 				{
 				    out.write("<option ");
 				    if (segmentFilter.equals(selectedFilter))
@@ -3088,6 +3096,8 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 				    out.write(bundle.getString(segmentFilter));
 				    out.write("</option>");
 				}
+				
+				
 			%>
 	  	</select>
   	</span>

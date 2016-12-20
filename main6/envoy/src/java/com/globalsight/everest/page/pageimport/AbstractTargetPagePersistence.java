@@ -1025,7 +1025,10 @@ public abstract class AbstractTargetPagePersistence implements
                 t.setState(com.globalsight.everest.tuv.TuvState.LOCALIZED);
                 
                 // For GBS-4495 perplexity score on MT. 
-                counter.score(sourceTuv, t);
+                if (counter != null)
+                {
+                    counter.score(sourceTuv, t);
+                }
             }
 
             // save MT match into "leverage_match"

@@ -1029,7 +1029,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 							chunk, m_escapings, srcDataType, false, true,
 							escapingChars, isInCDATA, contentType,
 							isJavaOrPoAssociateHtmlFilter,
-							isJsonOrTextAssociateHtmlFilter);
+							isJsonOrTextAssociateHtmlFilter, internalTexts);
 					newchunk = InternalTextHelper.restoreInternalTexts(
 							newchunk, internalTexts);
                     // GBS-3997&GBS-4066

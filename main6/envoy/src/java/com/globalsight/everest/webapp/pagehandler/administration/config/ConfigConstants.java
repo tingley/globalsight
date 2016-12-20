@@ -27,7 +27,7 @@ public interface ConfigConstants
     Map<String, String> config_error_map = new HashMap<String, String>();
 
     public static final String LOCALEPAIR_FILE_NAME = "LocalePairs_";
-    public static final String USER_FILE_NAME = "User_information_";
+    public static final String USER_FILE_NAME = "User_";
     public static final String MT_FILE_NAME = "MachineTranslationProfiles_";
     public static final String FILTER_FILE_NAME = "FilterConfiguration_";
 }

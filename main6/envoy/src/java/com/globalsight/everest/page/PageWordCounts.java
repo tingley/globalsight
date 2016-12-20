@@ -76,6 +76,8 @@ public class PageWordCounts extends PersistentObject
     private Integer m_thresholdMedFuzzyWordCount = new Integer(0);
     private Integer m_thresholdLowFuzzyWordCount = new Integer(0);
     private Integer m_thresholdNoMatchWordCount = new Integer(0);
+    // For GBS-4495 perplexity score on MT
+    private Integer m_mt_perplexity = new Integer(0);
 
     //////////////////////////////////////////////////////////////////
     // Constructors
@@ -490,5 +492,15 @@ public class PageWordCounts extends PersistentObject
         sb.append("]");
 
         return sb.toString();
+    }
+
+    public Integer getPerplexity()
+    {
+        return m_mt_perplexity;
+    }
+
+    public void setPerplexity(Integer perplexity)
+    {
+        this.m_mt_perplexity = perplexity;
     }
 }

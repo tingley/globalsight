@@ -208,6 +208,8 @@ public class ParamTmMatchesPair extends ParamObjectPair
         p_workflowData.setMedFuzzyMatchWordCount(p_workflow.getThresholdMedFuzzyWordCount());
         p_workflowData.setMedHiFuzzyMatchWordCount(p_workflow.getThresholdMedHiFuzzyWordCount());
         p_workflowData.setHiFuzzyMatchWordCount(p_workflow.getThresholdHiFuzzyWordCount());
+        // For GBS-4495 perplexity score on MT
+        p_workflowData.setPerplexityWordCount(p_workflow.getPerplexityWordCount());
         
         //the Dell fuzzyMatchWordCount is the sum of the top 3 categories
         long tmFuzzyMatchWordCount = 

@@ -13,6 +13,7 @@
             com.globalsight.everest.company.Company,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.foundation.User,
+            com.globalsight.everest.permission.PermissionSet,
             java.util.ResourceBundle"
     session="true"%>
 <%
@@ -48,8 +49,12 @@
     
     boolean isEnableWorkflowStatePosts = false;
     Company company = CompanyWrapper.getCurrentCompany();
-	if (company != null)
-		isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
+    isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
+    
+    PermissionSet userPerms2 = (PermissionSet) session.getAttribute(
+            WebAppConstants.PERMISSIONS);
+    boolean hasRemoveService = userPerms2.getPermissionFor(Permission.REMOTE_SERVICE);
+
 %>
 <HTML>
 <!-- This JSP is envoy/login/welcome.jsp -->
@@ -280,9 +285,15 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.TMP_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tmProfilesUrl%>"><%=bundle.getString("lb_tm_profiles")%></A><BR>
         </amb:permission>
-        <amb:permission name="<%=Permission.MTP_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=mtProfilesUrl%>"><%=bundle.getString("lb_mt_profiles")%></A><BR>
-        </amb:permission>
+     
+         <% if (userPerms.getPermissionFor(Permission.REMOTE_SERVICE)) { %>
+		    <% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
+		        <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=mtProfilesUrl%>"><%=bundle.getString("lb_remote_service")%></A><BR>
+		    <%} else if(userPerms.getPermissionFor(Permission.PS_VIEW)){%>
+		        <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=perplexityServiceUrl%>"><%=bundle.getString("lb_remote_service")%></A><BR>
+		     <%}%>
+         <%}%>  
+     
         <amb:permission name="<%=Permission.TERMINOLOGY_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=terminologyUrl%>"><%=bundle.getString("lb_terminology")%></A><BR>
         </amb:permission>

@@ -17,6 +17,8 @@
 			type="yes_no" not-null="false" unique="false" />
 		<property name="enableTMAccessControl" column="ENABLE_TM_ACCESS_CONTROL"
 			type="yes_no" not-null="false" unique="false" />
+		<property name="enablePerplexity" column="ENABLE_PERPLEXITY"
+			type="yes_no" not-null="false" unique="false" />	
 		<property name="enableTBAccessControl" column="ENABLE_TB_ACCESS_CONTROL"
 			type="yes_no" not-null="false" unique="false" />
 		<property name="enableQAChecks" column="ENABLE_QA_CHECKS"

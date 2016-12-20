@@ -25,6 +25,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.edit.offline.download.DownloadParams;
+import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
+import com.globalsight.everest.edit.offline.xliff.xliff20.document.YesNo;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -302,5 +304,90 @@ public class OfflineEditHelper
                 p_tmpFile.deleteOnExit();
             }
         }
+    }
+    
+    /**
+     * For GBS-4495 perplexity score on MT.
+     */
+    public static YesNo isTranslate(OfflineSegmentData osd, int TMEditType)
+    {
+        boolean lockIncontext = true;
+        boolean lockExact = true;
+        boolean lockPerplexity = true;
+        
+        if (TMEditType == 1 || TMEditType == 2 || TMEditType == 5 || TMEditType == 7)
+        {
+            lockIncontext = false;
+        }
+        
+        if (TMEditType == 1 || TMEditType == 3 || TMEditType == 5 || TMEditType == 7)
+        {
+            lockExact = false;
+        }
+        
+        if (TMEditType == 5 || TMEditType == 6 || TMEditType == 7 || TMEditType == 8)
+        {
+            lockPerplexity = false;
+        }
+        
+        YesNo translate = YesNo.YES;
+        if (lockIncontext && isInContextMatch(osd))
+        {
+            translate = YesNo.NO;
+        }
+        else if (lockExact && isExactMatch(osd))
+        {
+            translate = YesNo.NO;
+        } 
+        else if (lockPerplexity && isPerplexityPass(osd))
+        {
+            translate = YesNo.NO;
+        }
+        
+        return translate;
+    }
+    
+    public static boolean isInContextMatch(OfflineSegmentData data)  
+    {
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.startsWith("Context Exact Match"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    public static boolean isExactMatch(OfflineSegmentData data)
+    {
+        return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(data
+                .getDisplayMatchType());
+    }
+    
+    public static boolean isMTFuzzyMatch(OfflineSegmentData data)
+    {
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.toLowerCase().indexOf("machine translation") > -1)
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    public static boolean isFuzzyMatch(OfflineSegmentData data)
+    {
+        return data.getMatchTypeId() == AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
+    }
+    
+    public static boolean isPerplexityPass(OfflineSegmentData data)
+    {
+        return isMTFuzzyMatch(data) && data.getPerplexityResult();
+    }
+    
+    public static boolean isSidMatch(OfflineSegmentData data)
+    {
+        return "Context Exact Match(SID Promotion)".equals(data
+                .getDisplayMatchType());
     }
 }

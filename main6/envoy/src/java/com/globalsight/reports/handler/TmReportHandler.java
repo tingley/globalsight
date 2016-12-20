@@ -92,6 +92,8 @@ public class TmReportHandler extends BasicReportHandler
     private Map<Long, Boolean> useInContexts = new HashMap<Long, Boolean>();
 
     private Map<Long, String> noUseContextValues = new HashMap<Long, String>();
+    // For GBS-4495 perplexity score on MT
+    private boolean usePerplexity = false;
 
     public TmReportHandler()
     {
@@ -250,6 +252,11 @@ public class TmReportHandler extends BasicReportHandler
             fieldnameList.add(ReportsPackage.getMessage(m_bundle,
                     "in_context_match"));
         }
+        // For GBS-4495 perplexity score on MT
+        if (usePerplexity)
+        {
+            fieldnameList.add(ReportsPackage.getMessage(m_bundle, "perplexity"));
+        }
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "no_match"));
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "repitition"));
         fieldnameList.add(ReportsPackage.getMessage(m_bundle,
@@ -355,6 +362,12 @@ public class TmReportHandler extends BasicReportHandler
                     curRowList.set(9, noUseInContextValues.get(jobId)
                             .toString());
                 }
+                // For GBS-4495 perplexity score on MT
+                if (usePerplexity)
+                {
+                    int n = useContextMatch ? 10 : 9;
+                    curRowList.set(10, curRowList.get(n));
+                }
 
                 allDataForJsp.add(curRowList);
             }
@@ -450,18 +463,20 @@ public class TmReportHandler extends BasicReportHandler
             m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"")
                     .append(inContextTm).append("\",");
         }
-
         // 9 | 10
+        m_select.append(" target_page.MT_PERPLEXITY AS \"perplexity\", ");
+
+        // 10 | 11
         String nomatch = this.commonBundle.getString("lb_no_match");
         m_select.append(" target_page.NO_MATCH_WORD_COUNT as \"")
                 .append(nomatch).append("\",");
-        // 10 | 11
+        // 11 | 12
+        // For GBS-4495 perplexity score on MT
         String repet = this.commonBundle.getString("lb_repetition");
         m_select.append(" target_page.REPETITION_WORD_COUNT as \"")
                 .append(repet).append("\",");
-        // 11 | 12
+        // 12 | 13
         m_select.append(" target_page.TOTAL_WORD_COUNT as \"Total Word Count\" ");
-
     }
 
     private void makeFromClause()
@@ -482,13 +497,13 @@ public class TmReportHandler extends BasicReportHandler
             m_where.append(" AND workflow.COMPANY_ID = ?");
         }
 
-		m_where.append(" AND workflow.target_locale_id = locale.id");
-		m_where.append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
-		m_where.append(" AND source_page.id = target_page.SOURCE_PAGE_ID");
-		m_where.append(" AND job.l10n_profile_id = l10n_profile.id");
-		m_where.append(" AND l10n_profile.project_id = project_user.project_id");
-		m_where.append(" AND workflow.state != 'CANCELLED'");
-		m_where.append(" AND project_user.user_id = ?");
+        m_where.append(" AND workflow.target_locale_id = locale.id");
+        m_where.append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
+        m_where.append(" AND source_page.id = target_page.SOURCE_PAGE_ID");
+        m_where.append(" AND job.l10n_profile_id = l10n_profile.id");
+        m_where.append(" AND l10n_profile.project_id = project_user.project_id");
+        m_where.append(" AND workflow.state != 'CANCELLED'");
+        m_where.append(" AND project_user.user_id = ?");
     }
 
     private void makeOrderClause()
@@ -564,7 +579,7 @@ public class TmReportHandler extends BasicReportHandler
             }
             else
             {
-				noUseContextValues.put(jobId, "N/A");
+                noUseContextValues.put(jobId, "N/A");
                 noUseExactMatchValues.put(jobId, noUseExactMatchWordCount);
                 noUseInContextValues.put(jobId, "N/A");
             }
@@ -608,5 +623,7 @@ public class TmReportHandler extends BasicReportHandler
         noUseInContextValues = new HashMap<Long, String>();
         noUseExactMatchValues = new HashMap<Long, Integer>();
         useInContexts = new HashMap<Long, Boolean>();
+        // For GBS-4495 perplexity score on MT
+        usePerplexity = CompanyWrapper.isUsePerplexity();
     }
 }

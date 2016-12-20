@@ -60,6 +60,10 @@
 
         <property name="repeated" column="IS_REPEATED" type="yes_no"
         	not-null="false" />
+        	
+        <property name="perplexitySource" column="PERPLEXITY_SOURCE" type="double"/>	
+        <property name="perplexityTarget" column="PERPLEXITY_TARGET" type="double"/>	
+        <property name="perplexityResult" column="PERPLEXITY_RESULT" type="yes_no"/>			
 
 	    <set name="xliffAlt" table="xliff_alt" inverse="true" cascade="save-update">
 	       <key column="TUV_ID"/>

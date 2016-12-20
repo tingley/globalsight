@@ -281,3 +281,7 @@ function setCookie(name, value, expiresDays) {
         cookieString += ";secure";
     document.cookie = cookieString;
 }
+
+function isPositiveNumber(value){
+	 return((/^(\+|-)?\d+$/.test( value ))&&value>0);
+}

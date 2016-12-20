@@ -1,3 +1,5 @@
+<%@page import="com.globalsight.everest.company.CompanyWrapper"%>
+<%@page import="com.globalsight.everest.company.CompanyThreadLocal"%>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="error.jsp"
@@ -162,6 +164,22 @@ for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
                      .append(bundle.getString(segFilter))
                      .append("</option>");
 }
+
+String companyId = CompanyThreadLocal.getInstance().getValue();
+boolean usePerplexity = CompanyWrapper.getCompanyById(companyId).isEnablePerplexity();
+if (usePerplexity)
+{
+	String perpleFilter = OnlineEditorConstants.SEGMENT_FILTER_PERPLEXITY;
+	str_segmengFilter.append("<option ");
+    if (perpleFilter.equals(selSegFilter))
+    {
+        str_segmengFilter.append("selected ");
+    }
+    str_segmengFilter.append("value=\""+perpleFilter+"\">")
+                     .append(bundle.getString(perpleFilter))
+                     .append("</option>");
+}
+
 str_segmengFilter.append("</select>");
 
 StringBuffer tHead = new StringBuffer();

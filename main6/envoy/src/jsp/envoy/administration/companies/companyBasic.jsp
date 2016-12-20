@@ -58,6 +58,7 @@
     String desc = "";
     String checked = "checked";//default
     String tmAccessControl = "";//default
+    String perplexity = "";//default
     String tbAccessControl = "";//default
     String ssoChecked = "";//default
     String isSsoChecked = "false";//default
@@ -107,6 +108,10 @@
         boolean enableTMAcessControl = company.getEnableTMAccessControl();
         if (enableTMAcessControl) {
             tmAccessControl = "checked";
+        }
+        
+        if (company.isEnablePerplexity()) {
+        	perplexity = "checked";
         }
         
         boolean enableTBAcessControl = company.getEnableTBAccessControl();
@@ -246,6 +251,12 @@
             <td valign="top"><%=bundle.getString("lb_enableTMAccessControl")%>:</td>
             <td colspan="2">
                 <input class="standardText" type="checkbox" id="enableTMAccessControl" name="<%=CompanyConstants.ENABLE_TM_ACCESS_CONTROL%>" <%=tmAccessControl%>/>
+            </td>
+        </tr>
+        <tr>
+            <td valign="top"><%=bundle.getString("lb_enablePerplexity")%>:</td>
+            <td colspan="2">
+                <input class="standardText" type="checkbox" id="enablePerplexity" name="<%=CompanyConstants.ENABLE_PERPLEXITY%>" <%=perplexity%>/>
             </td>
         </tr>
         

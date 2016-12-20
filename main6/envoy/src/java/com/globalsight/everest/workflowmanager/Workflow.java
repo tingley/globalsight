@@ -684,4 +684,9 @@ public interface Workflow extends WorkObject
     public boolean requiredDQF();
 
     public boolean requiredScorecard();
+    
+    // For GBS-4495 perplexity score on MT
+    public Integer getPerplexityWordCount();
+    
+    public void setPerplexityWordCount(Integer perplexityWordCount);
 }

@@ -108,6 +108,9 @@ public class ProjectWorkflowData {
     private long hiFuzzyMatchWordCount = 0;
 
     private long totalWordCount = 0;
+    // For GBS-4495 perplexity score on MT
+    private long perplexityWordCount = 0;
+    private long perplexityWordCountAmount = 0;
     
     // workflow cost
     private BigDecimal estimatedCost = new BigDecimal(
@@ -806,5 +809,21 @@ public class ProjectWorkflowData {
 
     public BigDecimal getTradosInContextWordCountCostAmount() {
         return tradosInContextWordCountCostAmount;
+    }
+
+    public long getPerplexityWordCount()
+    {
+        return perplexityWordCount;
+    }
+
+    public void setPerplexityWordCount(long perplexityWordCount)
+    {
+        this.perplexityWordCount = perplexityWordCount;
+        this.perplexityWordCountAmount += perplexityWordCount;
+    }
+
+    public long getPerplexityWordCountAmount()
+    {
+        return perplexityWordCountAmount;
     }
 }

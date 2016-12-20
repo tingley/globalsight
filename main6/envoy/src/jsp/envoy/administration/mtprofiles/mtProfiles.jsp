@@ -51,7 +51,7 @@
     SessionManager sessionManager =
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
 
-    String title= bundle.getString("lb_mt_profiles");
+    String title= bundle.getString("lb_remote_service");
     String helperText = bundle.getString("helper_text_mt_profile_main");
     String confirm = bundle.getString("mt_remove_confirm");
     String newButton = bundle.getString("lb_new");
@@ -235,9 +235,32 @@ function findSelectedMTP()
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
 <amb:header title="<%=title%>" helperText="<%=helperText%>" />
-
+  <div style="width: 860px; border-bottom: 1px groove #0C1476; padding-top: 10px">
+       <table cellpadding="0" cellspacing="0" border="0">
+           <tr>
+               <td class="tableHeadingListOn">
+                   <img src="/globalsight/images/tab_left_blue.gif" border="0" /> 
+                   <a class="sortHREFWhite" href="<%=selfUrl%>"> 
+                      <%=bundle.getString("lb_mt_profiles") %>
+                    </a> 
+                  <img src="/globalsight/images/tab_right_blue.gif" border="0" />
+               </td>
+               <%if (userPermissions.getPermissionFor(Permission.PS_VIEW)){%>
+               <td width="2"></td>
+               <td class="tableHeadingListOff">
+                   <img src="/globalsight/images/tab_left_gray.gif" border="0" /> 
+                   <a class="sortHREFWhite" href="<%=perplexityServiceUrl%>"> 
+                     <%=bundle.getString("lb_perplexity_services") %>
+                   </a> 
+                   <img src="/globalsight/images/tab_right_gray.gif" border="0" />
+               </td>
+               <%} %>
+           </tr>
+       </table>
+   </div>
+            
 <FORM NAME="mtProfileForm" id="mtProfileForm" METHOD="POST">
-<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" align="left" style="min-width:1024px;">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" align="left" style="min-width:1024px; margin-top: 10px;">
     <tr valign="top">
         <td align="right">
             <amb:tableNav bean="mtProfiles" key="<%=MTProfileConstants.MTP_KEY%>" pageUrl="self" />

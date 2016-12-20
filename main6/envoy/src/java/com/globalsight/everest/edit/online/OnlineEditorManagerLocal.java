@@ -157,6 +157,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     public static final String STYLE_LOCKED = "editorSegmentLocked";
     public static final String STYLE_EXCLUDED = "editorSegmentExcluded";
     public static final String STYLE_MT = "editorSegmentMT";
+    public static final String STYLE_MT_PERPLEXITY = "editorSegmentMTPerplexity";
     public static final String STYLE_UNVERIFIED = "editorSegmentUnverified";
     public static final String STYLE_REPETITION = "editorSegmentRepetition";
     public static final String STYLE_CONTEXT = "segmentContext";
@@ -4614,6 +4615,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String modifiedUser = p_trgTuv.getLastModifiedUser();
         if (modifiedUser != null && modifiedUser.endsWith("_MT"))
         {
+            // For GBS-4495 perplexity score on MT
+            if (p_trgTuv instanceof TuvImpl){
+                TuvImpl t = (TuvImpl) p_trgTuv;
+                if (t.getPerplexityResult())
+                    return STYLE_MT_PERPLEXITY;
+            }
+            
             return STYLE_MT;
         }
 
@@ -4693,6 +4701,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String modifiedUser = p_trgTuv.getLastModifiedUser();
         if (modifiedUser != null && modifiedUser.endsWith("_MT"))
         {
+            if (p_trgTuv instanceof TuvImpl){
+                TuvImpl t = (TuvImpl) p_trgTuv;
+                if (t.getPerplexityResult())
+                    return STYLE_MT_PERPLEXITY;
+            }
+            
             return STYLE_MT;
         }
         // If the target tuv has been localized, i.e. previously been

@@ -38,11 +38,13 @@ import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
+import com.globalsight.everest.edit.offline.xliff.xliff20.document.YesNo;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.TemplatePart;
@@ -597,23 +599,41 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                     .getDisplaySegmentID())));
             m_outputStream.write(" translate=");
 
-            // Handle edit type
-            if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
+           // Handle edit type
+            YesNo r = OfflineEditHelper.isTranslate(p_osd, TMEditType);
+            if (YesNo.YES.equals(r))
             {
-                if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100
-                        && isInContextMatch(p_osd))
-                    m_outputStream.write(str2DoubleQuotation("no"));
-                else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
-                        && isExactMatch(p_osd))
-                    m_outputStream.write(str2DoubleQuotation("no"));
-                else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
-                        && (isExactMatch(p_osd) || isInContextMatch(p_osd)))
-                    m_outputStream.write(str2DoubleQuotation("no"));
-                else
-                    m_outputStream.write(str2DoubleQuotation("yes"));
+                m_outputStream.write(str2DoubleQuotation("yes"));
             }
             else
-                m_outputStream.write(str2DoubleQuotation("yes"));
+            {
+                m_outputStream.write(str2DoubleQuotation("no"));
+            }
+            
+            // For GBS-4495 perplexity score on MT
+            if (OfflineEditHelper.isSidMatch(p_osd))
+            {
+                m_outputStream.write(" state-qualifier=\"id-match\"");
+            }
+            else if (OfflineEditHelper.isInContextMatch(p_osd) || OfflineEditHelper.isExactMatch(p_osd))
+            {
+                m_outputStream.write(" state-qualifier=\"exact-match\"");
+            } 
+            else if (p_osd.isUsePerplexity() && OfflineEditHelper.isMTFuzzyMatch(p_osd))
+            {
+                if (OfflineEditHelper.isPerplexityPass(p_osd))
+                {
+                    m_outputStream.write(" state-qualifier=\"leveraged-mt\"");
+                }
+                else
+                {
+                    m_outputStream.write(" state-qualifier=\"mt-suggestion\"");
+                }
+            }
+            else if (OfflineEditHelper.isFuzzyMatch(p_osd))
+            {
+                m_outputStream.write(" state-qualifier=\"fuzzy-match\"");
+            }
 
             // SID
             if (sid != null && sid.length() > 0)

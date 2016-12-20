@@ -406,6 +406,13 @@ public class Permission
     static public final String MTP_REMOVE = "mtp.remove";
     static public final String MTP_EXPORT = "mtp.export";
     static public final String MTP_IMPORT = "mtp.import";
+    
+    // For GBS-4495 perplexity score on MT
+    static public final String REMOTE_SERVICE = "remoteServices";
+    static public final String PS_VIEW = "ps.view";
+    static public final String PS_NEW = "ps.new";
+    static public final String PS_EDIT = "ps.edit";
+    static public final String PS_REMOVE = "ps.remove";
 
     static public final String SERVICE_TM_GET_ALL_TMPROFILES = "service.tm.getAllTMProfiles";
     static public final String SERVICE_TB_CREATE_ENTRY = "service.tb.createEntries";
@@ -1021,6 +1028,13 @@ public class Permission
         // GBS-4534
         added = addPermission(430, RESTART_SYSTEM) || added;
         added = addPermission(431, CONFIG_EXPORT_IMPORT)||added;
+        
+        // For GBS-4495 perplexity score on MT
+        added = addPermission(432, PS_VIEW) || added;
+        added = addPermission(433, PS_NEW) || added;
+        added = addPermission(434, PS_EDIT) || added;
+        added = addPermission(435, PS_REMOVE) || added;
+        added = addPermission(436, REMOTE_SERVICE) || added;
 
         return added;
     }

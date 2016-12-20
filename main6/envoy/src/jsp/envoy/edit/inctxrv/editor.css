@@ -30,6 +30,11 @@
 	color: #FFA500 !important;
 }
 
+.editorSegmentMTPerplexity{
+	color: #FFA500 !important;
+	text-shadow: 3px 3px 2px #666;
+}
+
 .editorSegmentInternalbackup {
 	color: #808080 !important;
 	font-style: italic;

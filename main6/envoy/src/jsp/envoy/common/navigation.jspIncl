@@ -173,6 +173,7 @@
    String tasksSearchUrl = LinkHelper.getWebActivityURL(request, "myactivities");
    String tmProfilesUrl = LinkHelper.getWebActivityURL(request,"tmProfiles");
    String mtProfilesUrl = LinkHelper.getWebActivityURL(request,"mtProfiles");
+   String perplexityServiceUrl = LinkHelper.getWebActivityURL(request,"perplexityService");
    String tmSearchUrl = homeURL+"linkName=tmSearch&pageName=TM&action=tmSearchPage";
    String tbSearchUrl = homeURL+"linkName=termSearch&pageName=TB1&action=termSearch";
    String configExportImportUrl = LinkHelper.getWebActivityURL(request, "configExportImport");
@@ -331,8 +332,12 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_tm")%>", "javas
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_tm_profiles")%>", "javascript:goToUrl('<%=tmProfilesUrl%>');", ""));
 <% } %>
 
-<% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
-setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_mt_profiles")%>", "javascript:goToUrl('<%=mtProfilesUrl%>');", ""));
+<% if (userPerms.getPermissionFor(Permission.REMOTE_SERVICE)) { %>
+    <% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
+        setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_remote_service")%>", "javascript:goToUrl('<%=mtProfilesUrl%>');", ""));
+    <%} else if(userPerms.getPermissionFor(Permission.PS_VIEW)){%>
+        setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_remote_service")%>", "javascript:goToUrl('<%=perplexityServiceUrl%>');", ""));
+     <%}%>
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.TERMINOLOGY_VIEW)) { %>

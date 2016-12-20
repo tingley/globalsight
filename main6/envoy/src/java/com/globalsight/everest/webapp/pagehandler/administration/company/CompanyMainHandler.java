@@ -716,6 +716,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         String enableIPFilter = req.getParameter(CompanyConstants.ENABLE_IP_FILTER);
         String enableTMAccessControl = req
                 .getParameter(CompanyConstants.ENABLE_TM_ACCESS_CONTROL);
+        String enablePerplexity = req
+                .getParameter(CompanyConstants.ENABLE_PERPLEXITY);
         String enableTBAccessControl = req
                 .getParameter(CompanyConstants.ENABLE_TB_ACCESS_CONTROL);
         String enableQAChecks = req.getParameter(CompanyConstants.ENABLE_QA_CHECKS);
@@ -732,6 +734,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
 
         company.setEnableIPFilter("on".equalsIgnoreCase(enableIPFilter));
         company.setEnableTMAccessControl("on".equalsIgnoreCase(enableTMAccessControl));
+        company.setEnablePerplexity("on".equalsIgnoreCase(enablePerplexity));
         company.setEnableTBAccessControl("on".equalsIgnoreCase(enableTBAccessControl));
         company.setEnableQAChecks("on".equalsIgnoreCase(enableQAChecks));
         company.setEnableStrongPassword("on".equalsIgnoreCase(enableStrongPassword));

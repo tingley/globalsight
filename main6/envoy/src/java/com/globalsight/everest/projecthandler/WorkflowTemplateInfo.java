@@ -27,6 +27,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.LeverageLocales;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityService;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -65,6 +66,11 @@ public class WorkflowTemplateInfo extends PersistentObject
     private long m_companyId = -1;
     private int m_scorecardShowType = -1;//-1:Not Showing,0:Optional,1:Required  
 
+    // For GBS-4495 perplexity score on MT
+    private PerplexityService perplexityService;
+    private String perplexityKey;
+    private double perplexitySourceThreshold;
+    private double perplexityTargetThreshold;
 
     // non-persistence variables
     private WorkflowTemplate m_workflowTemplate = null;
@@ -484,6 +490,12 @@ public class WorkflowTemplateInfo extends PersistentObject
                 this.m_description, this.m_project, this.m_notifyPm,
                 this.m_wfManagerIds, this.m_sourceLocale, this.m_targetLocale,
                 this.m_encoding, this.m_leveragingLocales, this.m_scorecardShowType);
+        
+        // For GBS-4495 perplexity score on MT
+        wf.setPerplexityKey(this.perplexityKey);
+        wf.setPerplexityService(this.perplexityService);
+        wf.setPerplexitySourceThreshold(this.perplexitySourceThreshold);
+        wf.setPerplexityTargetThreshold(this.perplexityTargetThreshold);
 
         return wf;
     }
@@ -515,4 +527,44 @@ public class WorkflowTemplateInfo extends PersistentObject
 	public int getScorecardShowType() {
 		return m_scorecardShowType;
 	}
+	
+    public PerplexityService getPerplexityService()
+    {
+        return perplexityService;
+    }
+
+    public void setPerplexityService(PerplexityService perplexityService)
+    {
+        this.perplexityService = perplexityService;
+    }
+
+    public String getPerplexityKey()
+    {
+        return perplexityKey;
+    }
+
+    public void setPerplexityKey(String perplexityKey)
+    {
+        this.perplexityKey = perplexityKey;
+    }
+
+    public double getPerplexitySourceThreshold()
+    {
+        return perplexitySourceThreshold;
+    }
+
+    public void setPerplexitySourceThreshold(double perplexitySourceThreshold)
+    {
+        this.perplexitySourceThreshold = perplexitySourceThreshold;
+    }
+
+    public double getPerplexityTargetThreshold()
+    {
+        return perplexityTargetThreshold;
+    }
+
+    public void setPerplexityTargetThreshold(double perplexityTargetThreshold)
+    {
+        this.perplexityTargetThreshold = perplexityTargetThreshold;
+    }
 }

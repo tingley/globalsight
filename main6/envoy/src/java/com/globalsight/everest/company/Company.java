@@ -67,6 +67,8 @@ public class Company extends PersistentObject
 
     private String m_diableUploadFileTypes = "";
     private boolean enableStrongPassword;
+    // For GBS-4495 perplexity score on MT
+    private boolean enablePerplexity = false;
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -385,6 +387,16 @@ public class Company extends PersistentObject
         this.m_diableUploadFileTypes = disableUploadFileTypes;
     }
 
+    public boolean isEnablePerplexity()
+    {
+        return enablePerplexity;
+    }
+
+    public void setEnablePerplexity(boolean enablePerplexity)
+    {
+        this.enablePerplexity = enablePerplexity;
+    }
+    
     public boolean isEnableStrongPassword()
     {
         return enableStrongPassword;
@@ -394,5 +406,4 @@ public class Company extends PersistentObject
     {
         this.enableStrongPassword = enableStrongPassword;
     }
-
 }

@@ -108,6 +108,11 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 
     private long previousHash = -1;
     private long nextHash = -1;
+    
+    // For GBS-4495 perplexity score on MT
+    private double perplexitySource;
+    private double perplexityTarget;
+    private boolean perplexityResult;
 
     /**
      * Holds the LeverageMatchType.
@@ -170,6 +175,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         this.m_repeated = p_other.m_repeated;
         this.m_repetitionOfId = p_other.m_repetitionOfId;
         this.sid = p_other.sid;
+        // For GBS-4495 perplexity score on MT
+        this.perplexityResult = p_other.perplexityResult;
+        this.perplexitySource = p_other.perplexitySource;
+        this.perplexityTarget = p_other.perplexityTarget;
     }
 
     //
@@ -1553,4 +1562,34 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 	public void setNextHash(long nextHash) {
 		this.nextHash = nextHash;
 	}
+
+    public double getPerplexitySource()
+    {
+        return perplexitySource;
+    }
+
+    public void setPerplexitySource(Double perplexitySource)
+    {
+        this.perplexitySource = perplexitySource;
+    }
+
+    public double getPerplexityTarget()
+    {
+        return perplexityTarget;
+    }
+
+    public void setPerplexityTarget(Double perplexityTarget)
+    {
+        this.perplexityTarget = perplexityTarget;
+    }
+
+    public boolean getPerplexityResult()
+    {
+        return perplexityResult;
+    }
+
+    public void setPerplexityResult(boolean perplexityResult)
+    {
+        this.perplexityResult = perplexityResult;
+    }
 }

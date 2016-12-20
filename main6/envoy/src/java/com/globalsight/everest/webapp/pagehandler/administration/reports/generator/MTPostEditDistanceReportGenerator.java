@@ -54,6 +54,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.SourcePage;
@@ -101,6 +102,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
     private NumberFormat twoDigitFormater = null;
     private NumberFormat threeDigitFormater = null;
+    private boolean usePerplexity = false;
 
     private static final String GET_DETAILED_DATA_SQL1 =
             "SELECT t1.Id as tuvId, t2.tuId, t2.source, t2.MT, t1.segment_string AS target, t2.mt_name, t1.state "
@@ -153,6 +155,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             HttpServletResponse p_response) throws LocaleManagerException,
             RemoteException, GeneralException
     {
+        usePerplexity = CompanyWrapper.isUsePerplexity();
         HttpSession session = p_request.getSession();
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         m_bundle = PageHandler.getBundle(p_request.getSession());
@@ -350,6 +353,15 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         cell_F.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
+        
+        if (usePerplexity)
+        {
+            Cell cell = getCell(summaryHeaderRow, col);
+            cell.setCellValue(m_bundle.getString("lb_perplexity_wordcount"));
+            cell.setCellStyle(getHeaderStyle(p_workBook));
+            p_sheet.setColumnWidth(col, 20 * 256);
+            col++;
+        }
 
         Cell cell_G = getCell(summaryHeaderRow, col);
         cell_G.setCellValue(m_bundle.getString("lb_total_word_count"));
@@ -836,6 +848,15 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         cell_F.setCellValue(workflow.getMtTotalWordCount());
         cell_F.setCellStyle(getContentStyle(workBook));
         col++;
+        
+        // Perplexity passed word count
+        if (usePerplexity)
+        {
+            Cell cell = getCell(curRow, col);
+            cell.setCellValue(workflow.getPerplexityWordCount());
+            cell.setCellStyle(getContentStyle(workBook));
+            col++;
+        }
 
         // Total Word Count
         Cell cell_G = getCell(curRow, col);

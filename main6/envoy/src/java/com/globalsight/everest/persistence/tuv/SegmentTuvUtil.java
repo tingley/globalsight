@@ -77,7 +77,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + "tuv.segment_clob, tuv.segment_string, tuv.word_count, tuv.exact_match_key, tuv.state, "
             + "tuv.merge_state, tuv.timestamp, tuv.last_modified, tuv.modify_user, tuv.creation_date, "
             + "tuv.creation_user, tuv.updated_by_project, tuv.sid, tuv.src_comment, tuv.repetition_of_id, "
-            + "tuv.is_repeated FROM ";
+            + "tuv.is_repeated, tuv.PERPLEXITY_SOURCE, tuv.PERPLEXITY_TARGET, tuv.PERPLEXITY_RESULT FROM ";
 
     private static final String GET_TUV_BY_TUV_ID_SQL = SELECT_COLUMNS
             + TUV_TABLE_PLACEHOLDER + " tuv " 
@@ -171,8 +171,9 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + "id, order_num, locale_id, tu_id, is_indexed, "
             + "segment_clob, segment_string, word_count, exact_match_key, state, "
             + "merge_state, timestamp, last_modified, modify_user, creation_date, "
-            + "creation_user, updated_by_project, sid, src_comment, repetition_of_id, is_repeated) "
-            + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "creation_user, updated_by_project, sid, src_comment, repetition_of_id, is_repeated, "
+            + "PERPLEXITY_SOURCE, PERPLEXITY_TARGET, PERPLEXITY_RESULT) "
+            + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String GET_REP_TUVS_BY_TU_ID_LOCALE_ID_SQL = SELECT_COLUMNS
             + TUV_TABLE_PLACEHOLDER
@@ -309,6 +310,11 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 ps.setString(19, tuv.getSrcComment());
                 ps.setLong(20, tuv.getRepetitionOfId());
                 ps.setString(21, tuv.isRepeated() ? "Y" : "N");
+                
+                // For GBS-4495 perplexity score on MT
+                ps.setDouble(22, tuv.getPerplexitySource());
+                ps.setDouble(23, tuv.getPerplexityTarget());
+                ps.setString(24, tuv.getPerplexityResult() ? "Y" : "N");
 
                 ps.addBatch();
                 batchUpdate++;
@@ -1214,7 +1220,11 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             sql.append("sid = ?, ");// 17
             sql.append("src_comment = ?, "); // 18
             sql.append("repetition_of_id = ?, "); // 19
-            sql.append("is_repeated = ? where id = ?");// 20,21
+            sql.append("is_repeated = ?, "); // 20
+            sql.append("PERPLEXITY_SOURCE = ?, "); // 21
+            sql.append("PERPLEXITY_TARGET = ?, "); // 22
+            sql.append("PERPLEXITY_RESULT = ? "); // 23
+            sql.append("where id = ?");// 24
 
             tuvUpdateStmt = p_connection.prepareStatement(sql.toString());
 
@@ -1268,7 +1278,12 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 tuvUpdateStmt.setString(18, tuv.getSrcComment());
                 tuvUpdateStmt.setLong(19, tuv.getRepetitionOfId());
                 tuvUpdateStmt.setString(20, tuv.isRepeated() ? "Y" : "N");
-                tuvUpdateStmt.setLong(21, tuv.getId());
+                
+                // For GBS-4495 perplexity score on MT
+                tuvUpdateStmt.setDouble(21, tuv.getPerplexitySource());
+                tuvUpdateStmt.setDouble(22, tuv.getPerplexityTarget());
+                tuvUpdateStmt.setString(23, tuv.getPerplexityResult() ? "Y" : "N");
+                tuvUpdateStmt.setLong(24, tuv.getId());
 
                 tuvUpdateStmt.addBatch();
 
@@ -1369,6 +1384,12 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             tuv.setSrcComment(rs.getString(19));
             tuv.setRepetitionOfId(rs.getLong(20));
             tuv.setRepeated("Y".equalsIgnoreCase(rs.getString(21)) ? true
+                    : false);
+            
+            // For GBS-4495 perplexity score on MT
+            tuv.setPerplexitySource(rs.getDouble(22));
+            tuv.setPerplexityTarget(rs.getDouble(23));
+            tuv.setPerplexityResult("Y".equalsIgnoreCase(rs.getString(24)) ? true
                     : false);
 
             if (loadExtraInfo)

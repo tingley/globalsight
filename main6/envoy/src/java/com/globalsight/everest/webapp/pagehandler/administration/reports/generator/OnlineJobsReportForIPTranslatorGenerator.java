@@ -586,19 +586,16 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
         cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
         cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
 
+        int n = 4;
         if (m_data.useInContext)
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 5));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 5),
-                    getHeaderStyle(p_workbook));
-        }
-        else
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 4));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 4),
-                    getHeaderStyle(p_workbook));
-        }
-
+            n++;
+        if (m_data.usePerplexity)
+            n++;
+        
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                getHeaderStyle(p_workbook));
+        
         Cell cell_MorN = getCell(fourRow, col);
         cell_MorN.setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.internalreps"));
         cell_MorN.setCellStyle(getHeaderStyle(p_workbook));
@@ -614,6 +611,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
             Cell cell_InContext = getCell(fourRow, col);
             cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+        }
+        
+        if (m_data.usePerplexity)
+        {
+            col++;
+            Cell cell_perplexity = getCell(fourRow, col);
+            cell_perplexity.setCellValue(m_bundle.getString("lb_perplexity"));
+            cell_perplexity.setCellStyle(getHeaderStyle(p_workbook));
         }
 
         col++;
@@ -900,18 +905,15 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
         cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
         cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
 
+        int n = 7;
         if (m_data.useInContext)
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
-                    getHeaderStyle(p_workbook));
-        }
-        else
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                    getHeaderStyle(p_workbook));
-        }
+            n++;
+        if (m_data.usePerplexity)
+            n++;
+        
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                getHeaderStyle(p_workbook));
 
         Cell cell_MorN = getCell(fourRow, col);
         cell_MorN.setCellValue(m_bundle.getString("jobinfo.tradosmatches.invoice.per100matches"));
@@ -948,6 +950,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
             Cell cell_InContext = getCell(fourRow, col);
             cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+        }
+        
+        if (m_data.usePerplexity)
+        {
+            col++;
+            Cell cell_perplexity = getCell(fourRow, col);
+            cell_perplexity.setCellValue(m_bundle.getString("lb_perplexity"));
+            cell_perplexity.setCellStyle(getHeaderStyle(p_workbook));
         }
 
         col++;
@@ -1349,6 +1359,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
                     cell_InContext.setCellStyle(temp_normalStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 }
+                
+                if (m_data.usePerplexity)
+                {
+                    Cell cell_perplexity = getCell(theRow, col++);
+                    cell_perplexity.setCellValue(data.perplexityWordCount);
+                    cell_perplexity.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
 
                 Cell cell_FuzzyMatch = getCell(theRow, col++);
                 cell_FuzzyMatch.setCellValue(data.fuzzyMatchWordCount);
@@ -1581,6 +1599,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
                         Cell cell_InContext = getCell(theRow, col++);
                         cell_InContext.setCellValue(data.inContextMatchWordCount);
                         cell_InContext.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                    }
+                    
+                    if (m_data.usePerplexity)
+                    {
+                        Cell cell_perplexity = getCell(theRow, col++);
+                        cell_perplexity.setCellValue(data.perplexityWordCount);
+                        cell_perplexity.setCellStyle(temp_normalStyle);
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     }
 
@@ -1924,6 +1950,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
                     cell_InContext.setCellStyle(temp_normalStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 }
+                
+                if (m_data.usePerplexity)
+                {
+                    Cell cell_perplexity = getCell(theRow, col++);
+                    cell_perplexity.setCellValue(data.perplexityWordCount);
+                    cell_perplexity.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
 
                 Cell cell_MT = getCell(theRow, col++);
                 cell_MT.setCellValue(data.mtTotalWordCount);
@@ -2181,7 +2215,15 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
                         cell_InContext.setCellStyle(temp_normalStyle);
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     }
-
+                    
+                    if (m_data.usePerplexity)
+                    {
+                        Cell cell_perplexity = getCell(theRow, col++);
+                        cell_perplexity.setCellValue(data.perplexityWordCount);
+                        cell_perplexity.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                    }
+                    
                     Cell cell_FuzzyMatch_Review = getCell(theRow, col++);
                     cell_FuzzyMatch_Review.setCellValue(data.fuzzyMatchWordCount);
                     cell_FuzzyMatch_Review.setCellStyle(temp_normalStyle);
@@ -2462,6 +2504,15 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
             cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
             sumStartCol = getColumnName(c);
         }
+        
+        if (m_data.usePerplexity)
+        {
+            Cell cell_perplexity = getCell(theRow, c++);
+            cell_perplexity
+                    .setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
+            cell_perplexity.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
 
         Cell cell_Score = getCell(theRow, c++);
         cell_Score.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
@@ -2717,6 +2768,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
             throws CostingException, RemoteException, GeneralException
     {
         m_data.useInContext = getUseInContext(p_jobs);
+        m_data.usePerplexity = CompanyWrapper.isUsePerplexity();
 
         // first iterate through the Jobs and group by Project/workflow because
         // Dell doesn't want to see actual Jobs
@@ -2872,6 +2924,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
                         : w.getTotalExactMatchWordCount();
                 data.inContextMatchWordCount = (isInContextMatch) ? w.getInContextMatchWordCount()
                         : w.getNoUseInContextMatchWordCount();
+                data.perplexityWordCount = w.getPerplexityWordCount();
                 data.totalWordCount = w.getTotalWordCount();
                 data.mtTotalWordCount = w.getMtTotalWordCount();
                 int mtExactMatchWordCount = w.getMtExactMatchWordCount();
@@ -3209,6 +3262,8 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
         public long hiFuzzyMatchWordCount = 0;
 
         public long inContextMatchWordCount = 0;
+        
+        public long perplexityWordCount = 0;
 
         public long segmentTmWordCount = 0;
 
@@ -3331,6 +3386,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
         ArrayList<Job> ignoreJobs = new ArrayList<Job>();
 
         boolean useInContext = false;
+        boolean usePerplexity = false;
 
         // Summary Start column
         int sumStartCol = 0;

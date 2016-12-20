@@ -14718,6 +14718,16 @@ public class Ambassador extends AbstractWebService
             // 75%-84%
             xml.append("\t\t<75%-84%>").append(wf.getThresholdMedFuzzyWordCount())
                     .append("</75%-84%>\r\n");
+            
+            // perplexity
+            // For GBS-4495 perplexity score on MT
+            long cId = wf.getCompanyId();
+            Company c = CompanyWrapper.getCompanyById(cId);
+            if (c.isEnablePerplexity())
+            {
+                xml.append("\t\t<perplexityCount>").append(wf.getPerplexityWordCount())
+                .append("</perplexityCount>\r\n");
+            }
 
             // noMatch (50%-74% & < 50)
             int noMatch = wf.getThresholdLowFuzzyWordCount() + wf.getThresholdNoMatchWordCount();
@@ -15071,6 +15081,16 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
+        
+        // perplexity
+        // For GBS-4495 perplexity score on MT
+        long cId = workflow.getCompanyId();
+        Company c = CompanyWrapper.getCompanyById(cId);
+        if (c.isEnablePerplexity())
+        {
+            xml.append("\t\t<perplexityCount>").append(workflow.getPerplexityWordCount())
+            .append("</perplexityCount>\r\n");
+        }
 
         // noMatch (50%-74% & < 50)
         int noMatch = workflow.getThresholdNoMatchWordCount()
@@ -16644,7 +16664,18 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
-
+        
+        // perplexity
+        // For GBS-4495 perplexity score on MT
+        long cId = workflow.getCompanyId();
+        Company c = CompanyWrapper.getCompanyById(cId);
+        if (c.isEnablePerplexity())
+        {
+            xml.append(tab).append("\t\t<perplexityCount>")
+            .append(workflow.getPerplexityWordCount())
+            .append("</perplexityCount>\r\n");
+        }
+        
         // noMatch (50%-74% & < 50)
         int noMatch = workflow.getThresholdNoMatchWordCount()
                 + workflow.getThresholdLowFuzzyWordCount();

@@ -11,6 +11,15 @@
 
 		<property name="description" length="200" column="DESCRIPTION"
 			type="string" not-null="false" unique="false" />
+			
+		<property name="perplexityKey" length="200" column="PERPLEXITY_KEY"
+			type="string" not-null="false" unique="false" />
+		
+		<property name="perplexitySourceThreshold" length="200" column="PERPLEXITY_SOURCE_THRESHOLD"
+			type="double" unique="false" />
+		
+		<property name="perplexityTargetThreshold" length="200" column="PERPLEXITY_TARGET_THRESHOLD"
+			type="double" unique="false" />			
 
 		<many-to-one name="project" column="PROJECT_ID"
 			class="com.globalsight.everest.projecthandler.ProjectImpl" not-null="true"
@@ -21,6 +30,10 @@
 
 		<many-to-one name="targetLocale" column="TARGET_LOCALE_ID"
 			class="com.globalsight.util.GlobalSightLocale" not-null="true" lazy="false" />
+			
+		<many-to-one name="perplexityService" column="PERPLEXITY_ID"
+			class="com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityService" not-null="true"
+			lazy="false" />	
 
 		<property name="encoding" length="30" column="CHAR_SET" type="string"
 			not-null="false" unique="false" />

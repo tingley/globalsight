@@ -221,7 +221,7 @@ function initConfigShow(id, dif)
 						</table>
         			</td>
         			<td>
-        				<select id="userTo" name="target" multiple class="standardText" size="10" style="width:250" mytype="to">
+        				<select id="userTo" name="userTo" multiple class="standardText" size="10" style="width:250" mytype="to">
         				</select>
         			</td>
         		</tr>

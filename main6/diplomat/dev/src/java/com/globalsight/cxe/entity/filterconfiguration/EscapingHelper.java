@@ -1854,6 +1854,7 @@ public class EscapingHelper
 		List<String> orderKey = new ArrayList<String>();
 		Map<String, String> tagMap = new HashMap<String, String>();
 		Map<String, String> contentMap = new HashMap<String, String>();
+		List<String> contentKeyList = new ArrayList<String>();
 		for (int i = 0; i < tags.size(); i++)
 		{
 			TagIndex ti = tags.get(i);
@@ -1865,6 +1866,7 @@ public class EscapingHelper
 			else
 			{
 				orderKey.add("content" + i);
+				contentKeyList.add("content" + i);
 				contentMap.put("content" + i, ti.content);
 			}
 		}
@@ -1873,11 +1875,7 @@ public class EscapingHelper
 		{
 			Map<String, String> newContentMap = new HashMap<String, String>();
 			String content = "";
-			Set<String> keySet = contentMap.keySet();
-			List<String> keyList = new ArrayList<String>();
-			keyList.addAll(keySet);
-			Collections.sort(keyList);
-			for (String key : keyList)
+			for (String key : contentKeyList)
 			{
 				content += contentMap.get(key) + CONTENT_SPLICING_SIGN;
 			}
@@ -1888,11 +1886,11 @@ public class EscapingHelper
 			String returnStr = newHandleString4Import(content, escaping,
 					doDecode, format, processedChars, contentType, internalTexts);
 			String[] arrStr = returnStr.split(CONTENT_SPLICING_SIGN);
-			if (keyList.size() == arrStr.length)
+			if (contentKeyList.size() == arrStr.length)
 			{
-				for (int i = 0; i < keyList.size(); i++)
+				for (int i = 0; i < contentKeyList.size(); i++)
 				{
-					newContentMap.put(keyList.get(i), arrStr[i]);
+					newContentMap.put(contentKeyList.get(i), arrStr[i]);
 				}
 				for (String orderStr : orderKey)
 				{
@@ -1919,17 +1917,21 @@ public class EscapingHelper
 		List<String> orderKey = new ArrayList<String>();
 		Map<String, String> tagMap = new HashMap<String, String>();
 		Map<String, String> contentMap = new HashMap<String, String>();
+		List<String> contentKeyList = new ArrayList<String>();
+		List<String> tagKeyList = new ArrayList<String>();
 		for (int i = 0; i < tags.size(); i++)
 		{
 			TagIndex ti = tags.get(i);
 			if (ti.isTag)
 			{
 				orderKey.add("tag" + i);
+				tagKeyList.add("tag" + i);
 				tagMap.put("tag" + i, ti.content);
 			}
 			else
 			{
 				orderKey.add("content" + i);
+				contentKeyList.add("content" + i);
 				contentMap.put("content" + i, ti.content);
 			}
 		}
@@ -1939,11 +1941,7 @@ public class EscapingHelper
 			Map<String, String> newContentMap = new HashMap<String, String>();
 			Map<String, String> newTagMap = new HashMap<String, String>();
 			String content = "";
-			Set<String> keySet = contentMap.keySet();
-			List<String> keyList = new ArrayList<String>();
-			keyList.addAll(keySet);
-			Collections.sort(keyList);
-			for (String key : keyList)
+			for (String key : contentKeyList)
 			{
 				content += contentMap.get(key) + CONTENT_SPLICING_SIGN;
 			}
@@ -1954,18 +1952,14 @@ public class EscapingHelper
 			String returnStr = newHandleString4Export(content, escaping,
 					doDecode, format, escapingChars, contentType, internalTexts);
 			String[] arrStr = returnStr.split(CONTENT_SPLICING_SIGN);
-			if (keyList.size() == arrStr.length)
+			if (contentKeyList.size() == arrStr.length)
 			{
-				for (int i = 0; i < keyList.size(); i++)
+				for (int i = 0; i < contentKeyList.size(); i++)
 				{
-					newContentMap.put(keyList.get(i), arrStr[i]);
+					newContentMap.put(contentKeyList.get(i), arrStr[i]);
 				}
 			}
 
-			Set<String> tagKeySet = tagMap.keySet();
-			List<String> tagKeyList = new ArrayList<String>();
-			tagKeyList.addAll(tagKeySet);
-			Collections.sort(tagKeyList);
 			if (IFormatNames.FORMAT_XML.equals(format) && isInCDATA)
 			{
 				// Escape tag content is dangerous...

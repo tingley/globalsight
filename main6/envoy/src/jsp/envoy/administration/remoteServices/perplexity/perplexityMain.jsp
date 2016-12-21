@@ -2,6 +2,7 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 <%@ page contentType="text/html; charset=UTF-8" errorPage="/envoy/common/error.jsp"
 	import="com.globalsight.everest.webapp.javabean.NavigationBean,
+	        com.globalsight.util.edit.EditUtil,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
             com.globalsight.util.resourcebundle.SystemResourceBundle,
             com.globalsight.everest.permission.Permission, 
@@ -258,7 +259,7 @@ function filterItems(e)
                                 </amb:column>
 								<amb:column label="lb_description" sortBy="<%=PerplexityComparator.DESC%>" filter="descriptionFilter"
 									filterValue="<%=descriptionFilter%>" width="24%">
-									<%=perplexity.getDescription() == null ? "" : perplexity.getDescription()%>
+									<%=perplexity.getDescription() == null ? "" : EditUtil.encodeHtmlEntities(perplexity.getDescription())%>
 								</amb:column>
 								<amb:column label="lb_url" sortBy="<%=PerplexityComparator.URL%>" filter="urlFilter"
 									filterValue="<%=urlFilter%>">

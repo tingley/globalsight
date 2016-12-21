@@ -882,14 +882,14 @@ $(function(){
                               <td><%=bundle.getString("lb_perplexity_source_threshold")%>: </td>
                               <td>
                                  <input type="text" name="perplexitySourceThreshold" disabled="disabled" style="width:100px;" id="perplexitySource" 
-                                 <%if (wfti.getPerplexitySourceThreshold() > 0){ %> value="<%=wfti.getPerplexitySourceThreshold() %>" <%} %>>
+                                 <%if (wfti != null && wfti.getPerplexitySourceThreshold() > 0){ %> value="<%=wfti.getPerplexitySourceThreshold() %>" <%} %>>
                               </td>
                           </tr>
                           <tr>
                               <td><%=bundle.getString("lb_perplexity_target_threshold")%>: </td>
                               <td>
                                  <input type="text" name="perplexityTargetThreshold" disabled="disabled" style="width:100px;" id="perplexityTarget"
-                                 <%if (wfti.getPerplexityTargetThreshold() > 0){ %> value="<%=wfti.getPerplexityTargetThreshold() %>" <%} %>>
+                                 <%if (wfti != null && wfti.getPerplexityTargetThreshold() > 0){ %> value="<%=wfti.getPerplexityTargetThreshold() %>" <%} %>>
                               </td>
                           </tr>
                       </table>

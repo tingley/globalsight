@@ -725,12 +725,6 @@ public class BigTableUtil implements TuvQueryConstants
         sb.append(" SRC_COMMENT TEXT,");
         sb.append(" REPETITION_OF_ID BIGINT DEFAULT NULL,");
         sb.append(" IS_REPEATED CHAR(1) DEFAULT 'N' CHECK (IS_REPEATED IN ('Y', 'N')),");
-        
-        // For GBS-4495 perplexity score on MT
-        sb.append(" PERPLEXITY_SOURCE double,");
-        sb.append(" PERPLEXITY_TARGET double,");
-        sb.append(" PERPLEXITY_RESULT CHAR(1),");
-        
         sb.append(" KEY `REPETITION_OF_ID` (`REPETITION_OF_ID`)");
         sb.append(");");
         String sql2 = sb.toString();

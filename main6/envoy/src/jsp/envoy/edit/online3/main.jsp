@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.company.CompanyWrapper"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page
     contentType="text/html; charset=UTF-8"

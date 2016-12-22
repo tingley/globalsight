@@ -259,10 +259,10 @@ function switchRadio(penalizedReferenceTmRadio)
                   <option value="1"><%=bundle.getString("lb_l10nprofile_tm_edit_type_both") %></option>
                   <option value="2"><%=bundle.getString("lb_l10nprofile_tm_edit_type_ice") %></option>
                   <option value="3"><%=bundle.getString("lb_l10nprofile_tm_edit_type_100") %></option>
-                  <option value="4"><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>
                   <%if (CompanyWrapper.isUsePerplexity()){ %>
                   <option value="8"><%=bundle.getString("lb_l10nprofile_tm_edit_type_8") %></option>
                   <%} %>
+                  <option value="4"><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>
                 </SELECT>
               </SPAN></TD>
             </TR>   

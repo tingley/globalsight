@@ -1375,10 +1375,10 @@ $(document).ready(function(){
                   <option value="1" <%=userOptionOfTMEdit == 1 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_both") %></option>
                   <option value="2" <%=userOptionOfTMEdit == 2 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_ice") %></option>
                   <option value="3" <%=userOptionOfTMEdit == 3 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_100") %></option>
-                  <option value="4" <%=userOptionOfTMEdit == 4 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>
                   <%if (CompanyWrapper.isUsePerplexity()){ %>
                   <option value="8" <%=userOptionOfTMEdit == 8 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_8") %></option>
                   <%} %>
+                  <option value="4" <%=userOptionOfTMEdit == 4 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>                  
                 </SELECT>
               </SPAN></TD>
             </TR>   

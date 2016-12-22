@@ -219,7 +219,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         // altFlag to flag the leverageMatch form alt-trans
         int altFlag = -100;
         float scoreNum = leverageMatch.getScoreNum();
-        if (leverageMatch.isMtLeverageMatch())
+        // For GBS-4495 perplexity score on MT
+        if (leverageMatch.isMtLeverageMatch() && scoreNum != 65)
         {
             scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
         }

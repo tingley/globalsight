@@ -1297,7 +1297,7 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         {
             LeverageMatch lm = (LeverageMatch) l1.get(i);
             float scoreNum = lm.getScoreNum();
-            if (lm.isMtLeverageMatch())
+            if (lm.isMtLeverageMatch() && scoreNum != 65)
             {
                 scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
             }

@@ -59,7 +59,7 @@ import com.globalsight.everest.tuv.PageSegments;
 import com.globalsight.everest.tuv.PageSegmentsException;
 import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvImplVo;
+import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
@@ -580,6 +580,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
         Tuv srcTuv = p_pair.getSourceTuv();
         Tuv trgTuv = p_pair.getTargetTuv();
+        
+        // only used for perplexity
+        TuvImpl tuv = new TuvImpl();
+        tuv.setId(trgTuv.getId());
 
         ArrayList fmList = null;
         ArrayList fmRefTmsList = null;
@@ -720,7 +724,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     || isDownloadForXliff12() || isDownloadForXliff20())
                     && isMtTranslated(trgTuv))
             {
-                trgScore = 60;
+                
+                if (tuv.getPerplexityResult())
+                    trgScore = 65;
+                else
+                    trgScore = 60;
             }
 
             // This segment has been touched by a human but we want to
@@ -805,7 +813,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             }
             else if (populateMT && (isMtTranslated(trgTuv) || trgScore == 60))
             {
-
+                if (tuv.getPerplexityResult())
+                    trgScore = 65;
             }
             else if (populate100 && trgScore == 100)
             {
@@ -857,9 +866,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             result.setPageId(m_srcPage.getId());
         }
         // For GBS-4495 perplexity score on MT
-        TuvImplVo vo = (TuvImplVo) trgTuv;
-        result.setUsePerplexity(vo.getPerplexitySource() > 0);
-        result.setPerplexityResult(vo.getPerplexityResult());
+        result.setPerplexityResult(tuv.getPerplexityResult());
+        result.setUsePerplexity(tuv.getPerplexity().getPerplexitySource() > 0);
 
         return result;
     }

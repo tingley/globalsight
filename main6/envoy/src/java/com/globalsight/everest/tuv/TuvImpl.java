@@ -1573,7 +1573,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     }
 
     // For GBS-4495 perplexity score on MT
-    private TuvPerplexity loadPerplexity()
+    public TuvPerplexity loadPerplexity()
     {
         if (perplexity == null)
         {

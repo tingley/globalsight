@@ -62,6 +62,8 @@ import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.tuv.TuvPerplexity;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.util.comparator.JobComparator;
@@ -441,6 +443,28 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         cell_H.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 80 * 256);
         col++;
+        
+        // For GBS-4495 perplexity score on MT
+        if (usePerplexity)
+        {
+            Cell cell_I = getCell(detailHeaderRow, col);
+            cell_I.setCellValue(m_bundle.getString("lb_source_perplexity"));
+            cell_I.setCellStyle(getHeaderStyle(p_workBook));
+            p_sheet.setColumnWidth(col, 80 * 256);
+            col++;
+            
+            Cell cell_J = getCell(detailHeaderRow, col);
+            cell_J.setCellValue(m_bundle.getString("lb_target_perplexity"));
+            cell_J.setCellStyle(getHeaderStyle(p_workBook));
+            p_sheet.setColumnWidth(col, 80 * 256);
+            col++;
+            
+            Cell cell_K = getCell(detailHeaderRow, col);
+            cell_K.setCellValue(m_bundle.getString("lb_pass_fail"));
+            cell_K.setCellStyle(getHeaderStyle(p_workBook));
+            p_sheet.setColumnWidth(col, 80 * 256);
+            col++;
+        }
     }
 
     private void addPostEditDetail(Workbook p_workBook, Sheet p_sheet, List<Job> jobs,
@@ -735,6 +759,39 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             CellStyle targetStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                     : getContentStyle(p_workBook);
             cell_H.setCellStyle(targetStyle);
+            col++;
+            
+            // For GBS-4495 perplexity score on MT
+            if (usePerplexity)
+            {
+                TuvImpl tuv = new TuvImpl();
+                tuv.setId(data.getTuvId());
+                TuvPerplexity perplexity = tuv.loadPerplexity();
+                
+                Cell cell_I = getCell(curRow, col);
+                String sourcePreplexity = Double.toString(perplexity.getPerplexitySource());
+                cell_I.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(sourcePreplexity) : sourcePreplexity);
+                CellStyle sourcePreplexityStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                        : getContentStyle(p_workBook);
+                cell_I.setCellStyle(sourcePreplexityStyle);
+                col++;
+                
+                Cell cell_J = getCell(curRow, col);
+                String targetPreplexity = Double.toString(perplexity.getPerplexityTarget());
+                cell_J.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(targetPreplexity) : targetPreplexity);
+                CellStyle targetPreplexityStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                        : getContentStyle(p_workBook);
+                cell_J.setCellStyle(targetPreplexityStyle);
+                col++;
+                
+                Cell cell_K = getCell(curRow, col);
+                String passFail = perplexity.getPerplexityResult() ? m_bundle.getString("lb_pass") : m_bundle.getString("lb_fail");
+                cell_K.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(passFail) : passFail);
+                CellStyle passFailStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                        : getContentStyle(p_workBook);
+                cell_K.setCellStyle(passFailStyle);
+                col++;
+            }
 
             row.inc();
         }

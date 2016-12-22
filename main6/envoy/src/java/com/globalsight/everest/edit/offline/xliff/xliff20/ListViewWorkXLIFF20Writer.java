@@ -984,7 +984,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             Source s = new Source();
             m.setSource(s);
             float scoreNum = leverageMatch.getScoreNum();
-            if (leverageMatch.isMtLeverageMatch())
+            // For GBS-4495 perplexity score on MT
+            if (leverageMatch.isMtLeverageMatch() && scoreNum != 65)
             {
                 scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
             }

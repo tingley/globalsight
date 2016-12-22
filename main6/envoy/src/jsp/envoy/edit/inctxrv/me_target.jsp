@@ -161,7 +161,7 @@ if (CompanyWrapper.isUsePerplexity())
 	fs.add(OnlineEditorConstants.SEGMENT_FILTER_PERPLEXITY);
 }
 
-for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
+for(String segFilter : fs)
 {
     str_segmengFilter.append("<option ");
     if (segFilter.equals(selSegFilter))

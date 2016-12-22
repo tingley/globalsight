@@ -24,11 +24,11 @@ CREATE PROCEDURE PROC_ALTER_REPETITION_COLUMNS_I()
 		FETCH company_cur INTO companyId;
 
 		IF done = 1 THEN
-			SELECT 'Finished to create perplexity tables, end loop.' AS MESSAGE;
+			SELECT 'Done creating perplexity tables, end loop.' AS MESSAGE;
 			LEAVE companyLoop;
 		END IF;
 
-		SELECT CONCAT('Trying to create table translation_unit_variant_perplexity_', companyId, '.') AS MESSAGE;
+		SELECT CONCAT('Creating table translation_unit_variant_perplexity_', companyId, '.') AS MESSAGE;
 		SET @a = CONCAT('create TABLE translation_unit_variant_perplexity_', companyId, ' (ID BIGINT AUTO_INCREMENT PRIMARY KEY, tuv_id BIGINT, source_score double DEFAULT "-1", target_score double DEFAULT "-1",  result char(1) DEFAULT "N")ENGINE=INNODB;');
 		PREPARE s FROM @a; EXECUTE s;
 

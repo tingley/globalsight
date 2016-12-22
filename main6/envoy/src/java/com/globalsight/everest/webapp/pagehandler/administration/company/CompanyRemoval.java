@@ -3568,6 +3568,11 @@ public class CompanyRemoval
             execOnce(conn, SQL_DROP + tableName);
             logEnd(tableName);
         }
+        
+        String tableName = "translation_unit_variant_perplexity_" + companyId;
+        logStart(tableName);
+        execOnce(conn, SQL_DROP + tableName);
+        logEnd(tableName);
     }
 
     private void removeUpdatedSourcePage(Connection conn,

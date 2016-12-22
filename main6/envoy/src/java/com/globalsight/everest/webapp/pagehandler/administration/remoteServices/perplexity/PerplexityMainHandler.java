@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity;
 
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.util.comparator.PerplexityComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
@@ -35,6 +37,8 @@ import com.globalsight.util.Assert;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
+
+import net.sf.json.JSONObject;
 
 /**
  * For GBS-4495 perplexity score on MT.
@@ -107,12 +111,49 @@ public class PerplexityMainHandler extends PageActionHandler
         request.setAttribute("urlFilter", filter.getUrlFilter());
         request.setAttribute("descriptionFilter", filter.getDescriptionFilter());
     }
+    
+    @ActionHandler(action = "canRemove", formClass = "")
+    public void canRemove(HttpServletRequest request, HttpServletResponse response, Object form)
+            throws Exception
+    {
+        String idAll = request.getParameter("ids");
+        String[] ids = idAll.split(",");
+        
+        StringBuffer names = new StringBuffer();
+        
+        String hql = "from WorkflowTemplateInfo w where w.perplexityService.id = ?";
+        for (String id : ids)
+        {
+            WorkflowTemplateInfo wf = (WorkflowTemplateInfo) HibernateUtil.getFirst(hql, Long.parseLong(id));
+            if (wf == null)
+                continue;
+            
+            PerplexityService perplexityService = HibernateUtil.get(PerplexityService.class, Long.parseLong(id));
+            if (perplexityService != null)
+            {
+                if (names.length() > 0)
+                    names.append("\n");
+                
+                names.append(perplexityService.getName() + ": " + wf.getName());
+            }
+        }
+        
+        JSONObject ob = new JSONObject();
+        ob.put("canRemove", names.length() == 0);
+        ob.put("names", names.toString());
+        
+        response.setContentType("text/xml;charset=utf-8");
+        PrintWriter out = response.getWriter();  
+        out.print(ob.toString());  
+        out.flush();  
+        pageReturn();
+    }
 
     @ActionHandler(action = AttributeConstant.REMOVE, formClass = "")
     public void remove(HttpServletRequest request, HttpServletResponse response, Object form)
             throws Exception
     {
-        String[] ids = request.getParameterValues("selectAttributeIds");
+        String[] ids = request.getParameterValues("selectPerplexityIds");
         for (String id : ids)
         {
             delete(id);

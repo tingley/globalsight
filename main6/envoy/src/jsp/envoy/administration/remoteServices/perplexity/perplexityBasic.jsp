@@ -196,9 +196,7 @@ function confirmForm()
 <div id="idDiv" style="POSITION: ABSOLUTE;height:100%;width: 100%;  TOP: 0px; LEFT: 0px; RIGHT: 0px;">
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
 <amb:header title="<%=title%>" helperText="" /> 
-<span class=errorMsg></span>
-
-<div style="float: left;">
+<div style="float: left; margin-top: -55px;">
 <FORM name="form" id="form" method="post" action="<%=saveURL%>">
 <input type="hidden" name="id" value="<%=id%>"> 
 
@@ -217,9 +215,13 @@ function confirmForm()
             <%=bundle.getString("lb_description")%>:
           </td>
           <td>
-            <textarea rows="4" cols="40" name="description"><%=desc%></textarea>
+            <textarea rows="4" cols="40" name="description" maxlength="150"><%=desc%></textarea>
           </td>
-        </tr>    
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_url")%><span class="asterisk">*</span>:</td>
+        <td><input type="text" name="url" id="url" style="width: 360px;" value="<%=url%>" maxLength="200"></td>
+    </tr>    
      <tr>
         <td><%=bundle.getString("lb_user_name")%><span class="asterisk">*</span>:</td>
         <td><input type="text" name="userName" id="userName" style="width: 360px;" value="<%=username%>" maxLength="200"></td>
@@ -227,10 +229,6 @@ function confirmForm()
     <tr>
         <td><%=bundle.getString("lb_password")%><span class="asterisk">*</span>:</td>
         <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200"></td>
-    </tr>
-	<tr>
-        <td><%=bundle.getString("lb_url")%><span class="asterisk">*</span>:</td>
-        <td><input type="text" name="url" id="url" style="width: 360px;" value="<%=url%>" maxLength="200"></td>
     </tr>
     <tr>
         <td colspan="2" align="left">

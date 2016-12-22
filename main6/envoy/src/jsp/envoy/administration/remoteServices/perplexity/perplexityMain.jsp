@@ -76,32 +76,51 @@ function submitForm(button)
     if (button == "New")
     {
         form.action = "<%=newURL%>";
+        form.submit();
     }
     else
     {
-        value = getRadioValue(form.selectEloquaConnectorIds);
-
-        if (button == "Edit")
+        if (button == "Remove")
         {
-            form.action = "<%=editURL%>" + "&id=" + value;
+        	if (!confirm('<%=confirmRemove%>')){
+        		return;
+        	}
+        	
+        	var obj = document.getElementsByName("selectPerplexityIds");
+        	var ids=''; 
+        	for(var i=0; i<obj.length; i++){ 
+        	    if(obj[i].checked){
+        	    	if (ids != ''){
+        	    		ids += ',';
+        	    	}
+        	    	ids+=obj[i].value
+        	    } 
+        	} 
+        	
+        	var data = {
+        			ids : ids
+        	}
+        	
+        	$.ajax({
+        		type : "POST",
+        		url : '<%=selfUrl%>&action=canRemove',
+        		cache : false,
+        		dataType : 'text',
+        		data : data,
+        		success : function(data) {
+        			var result = eval("(" + data + ")");
+        			if (result.canRemove){
+        				form.action = "<%=remURL%>";
+        				form.submit();
+        			} else {
+        				alert('<%=bundle.getString("msg_remove_used_perplexity_service")%>\n'.concat(result.names));
+        			}
+        		},
+        		error : function(request, error, status) {        	
+        			alert(error);
+        		}
+        	});
         }
-        if (button == "Connect")
-        {
-        	testConntect();
-            return;
-        }
-        else if (button == "Remove")
-        {
-        	var referencedNames = "";
-            var ids = document.getElementsByName("selectEloquaConnectorIds");
-            isOk = confirm('<%=confirmRemove%>');        
-            form.action = "<%=remURL%>";
-        }
-    }
-
-    if (isOk)
-    {
-        form.submit();
     }
 }
 
@@ -109,8 +128,6 @@ function enableButtons()
 {
     if (form.editBtn)
         form.editBtn.disabled = false;
-    if (form.dupBtn)
-        form.dupBtn.disabled = false;
     if (form.remBtn)
         form.remBtn.disabled = false;    
 }
@@ -119,7 +136,7 @@ function enableButtons()
 function setButtonState()
 {
     var selectedIndex = new Array();
-    var boxes = form.selectEloquaConnectorIds;
+    var boxes = form.selectPerplexityIds;
     if (boxes != null) 
     {
         if (boxes.length) 
@@ -142,17 +159,6 @@ function setButtonState()
         }
     }
 
-    if (selectedIndex.length != 1)
-    {
-        form.editBtn.disabled = true;
-        form.connectBtn.disabled = true;        
-    }
-    else
-    {
-        form.editBtn.disabled = false;
-        form.connectBtn.disabled = false;
-    }
-
     if (selectedIndex.length > 0)
     {
         form.remBtn.disabled = false;
@@ -166,7 +172,7 @@ function setButtonState()
 function handleSelectAll() {
 	if (form && form.selectAll) {
 		if (form.selectAll.checked) {
-			checkAllWithName('form', 'selectEloquaConnectorIds'); 
+			checkAllWithName('form', 'selectPerplexityIds'); 
 			setButtonState();
 	    }
 	    else {

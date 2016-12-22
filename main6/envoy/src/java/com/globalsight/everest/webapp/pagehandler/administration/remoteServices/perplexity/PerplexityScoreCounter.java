@@ -19,9 +19,13 @@ package com.globalsight.everest.webapp.pagehandler.administration.remoteServices
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.tuv.TuvPerplexity;
 import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.vo.PerplexityScores;
 
 /**
@@ -81,9 +85,13 @@ public class PerplexityScoreCounter
                 Long.parseLong(key), srcs, trgs);
         List<Double> ss = result.getSources();
         List<Double> ts = result.getTargets();
-
-        trg.setPerplexitySource(ss.get(0));
-        trg.setPerplexityTarget(ts.get(0));
-        trg.setPerplexityResult(ss.get(0) <= sourceThreshold && ts.get(0) <= targetThreshold);
+        
+        TuvPerplexity perplexity = new TuvPerplexity();
+        perplexity.setPerplexitySource(ss.get(0));
+        perplexity.setPerplexityTarget(ts.get(0));
+        perplexity.setPerplexityResult(ss.get(0) <= sourceThreshold && ts.get(0) <= targetThreshold);
+        perplexity.setCompanyId(CompanyWrapper.getCurrentCompanyIdAsLong());
+        
+        trg.setPerplexity(perplexity);
     }
 }

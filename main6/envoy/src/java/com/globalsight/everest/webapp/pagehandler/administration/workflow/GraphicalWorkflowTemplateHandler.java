@@ -365,6 +365,24 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                 sessionMgr
                         .setAttribute(WF_TEMPLATE_INFO_ID, wfti.getIdAsLong());
             }
+            
+            // For GBS-4495 perplexity score on MT
+            String perplexityId = p_request.getParameter("perplexityId");
+            if (null == perplexityId || "-1".equals(perplexityId))
+            {
+                wfti.setPerplexityService(null);
+                wfti.setPerplexityKey(null);
+                wfti.setPerplexitySourceThreshold(-1);
+                wfti.setPerplexityTargetThreshold(-1);
+            }
+            else
+            {
+                PerplexityService ps = HibernateUtil.get(PerplexityService.class, Long.parseLong(perplexityId));
+                wfti.setPerplexityService(ps);
+                wfti.setPerplexityKey(p_request.getParameter("perplexityKey"));
+                wfti.setPerplexitySourceThreshold(Double.parseDouble(p_request.getParameter("perplexitySourceThreshold")));
+                wfti.setPerplexityTargetThreshold(Double.parseDouble(p_request.getParameter("perplexityTargetThreshold")));
+            }
         }
         // partial store is done when the locale pair id has not been
         // change on UI (when user clicks on "Next" and then "Previous"

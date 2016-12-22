@@ -283,5 +283,8 @@ function setCookie(name, value, expiresDays) {
 }
 
 function isPositiveNumber(value){
-	 return((/^(\+|-)?\d+$/.test( value ))&&value>0);
+	if (isNaN(value))
+		return false;
+	
+	 return value>0;
 }

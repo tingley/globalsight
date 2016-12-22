@@ -109,11 +109,8 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     private long previousHash = -1;
     private long nextHash = -1;
     
-    // For GBS-4495 perplexity score on MT
-    private double perplexitySource;
-    private double perplexityTarget;
-    private boolean perplexityResult;
-
+    private TuvPerplexity perplexity = null;
+    
     /**
      * Holds the LeverageMatchType.
      * 
@@ -175,10 +172,6 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         this.m_repeated = p_other.m_repeated;
         this.m_repetitionOfId = p_other.m_repetitionOfId;
         this.sid = p_other.sid;
-        // For GBS-4495 perplexity score on MT
-        this.perplexityResult = p_other.perplexityResult;
-        this.perplexitySource = p_other.perplexitySource;
-        this.perplexityTarget = p_other.perplexityTarget;
     }
 
     //
@@ -1563,33 +1556,36 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 		this.nextHash = nextHash;
 	}
 
-    public double getPerplexitySource()
-    {
-        return perplexitySource;
-    }
-
-    public void setPerplexitySource(Double perplexitySource)
-    {
-        this.perplexitySource = perplexitySource;
-    }
-
-    public double getPerplexityTarget()
-    {
-        return perplexityTarget;
-    }
-
-    public void setPerplexityTarget(Double perplexityTarget)
-    {
-        this.perplexityTarget = perplexityTarget;
-    }
-
+	// For GBS-4495 perplexity score on MT
     public boolean getPerplexityResult()
     {
-        return perplexityResult;
+        return loadPerplexity().getPerplexityResult();
     }
 
-    public void setPerplexityResult(boolean perplexityResult)
+    public TuvPerplexity getPerplexity()
     {
-        this.perplexityResult = perplexityResult;
+        return perplexity;
+    }
+
+    public void setPerplexity(TuvPerplexity perplexity)
+    {
+        this.perplexity = perplexity;
+    }
+
+    // For GBS-4495 perplexity score on MT
+    private TuvPerplexity loadPerplexity()
+    {
+        if (perplexity == null)
+        {
+            perplexity = SegmentTuvUtil.getTuvPerplexityByTuvId(this.getId());
+            if (perplexity == null)
+            {
+                perplexity = new TuvPerplexity();
+                perplexity.setPerplexityResult(false);
+                perplexity.setPerplexitySource(-1);
+                perplexity.setPerplexityTarget(-1);
+            }
+        }
+        return perplexity;
     }
 }

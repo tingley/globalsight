@@ -23,6 +23,7 @@ public interface TuvQueryConstants
 {
     public static final String TU_TABLE_PLACEHOLDER = "\uE000" + "_TRANSLATION_UNIT_TABLE_" + "\uE000";
     public static final String TUV_TABLE_PLACEHOLDER = "\uE000" + "_TRANSLATION_UNIT_VARIANT_TABLE_" + "\uE000";
+    public static final String COMPANY_ID_PLACEHOLDER = "\uE000" + "_COMPANY_ID_" + "\uE000";
     public static final String LM_TABLE_PLACEHOLDER = "\uE000" + "_LEVERAGE_MATCH_TABLE_" + "\uE000";
     public static final String LM_EXT_TABLE_PLACEHOLDER = "\uE000" + "_LEVERAGE_MATCH_EXT_TABLE_" + "\uE000";
     public static final String TEMPLATE_PART_TABLE_PLACEHOLDER = "\uE000" + "_TEMPLATE_PART_TABLE_" + "\uE000";

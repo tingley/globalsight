@@ -212,6 +212,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
             Map<String, String> data = new HashMap<String, String>();
             data.put("companyId", String.valueOf(companyId));
             data.put("creatorId", user.getUserId());
+            
+            BigTableUtil.createTuvPerplexityTable(companyId);
             // GBS-4400
             CreateCompanyUtil.createCompanyWithThread(data);
         }

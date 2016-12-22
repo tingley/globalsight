@@ -54,8 +54,7 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 			+ "tuv.merge_state merge_state, tuv.timestamp timestamp, "
 			+ "tuv.creation_user creation_user, tuv.creation_date creation_date, "
 	        + "tuv.modify_user modify_user, tuv.last_modified last_modified, "
-			+ "tuv.updated_by_project, tuv.sid, tuv.repetition_of_id, tuv.is_repeated, "
-			+ "tuv.PERPLEXITY_SOURCE, tuv.PERPLEXITY_TARGET, tuv.PERPLEXITY_RESULT ";
+			+ "tuv.updated_by_project, tuv.sid, tuv.repetition_of_id, tuv.is_repeated ";
 
 	private static final String CONDITION_BY_SOURCE_PAGE_AND_LOCALE = "FROM "
 	        + TU_TABLE_PLACEHOLDER + " tu, "
@@ -204,11 +203,6 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 		{
 			tuv.makeIndexed();
 		}
-	    // For GBS-4495 perplexity score on MT		
-		tuv.setPerplexitySource(p_rs.getDouble("PERPLEXITY_SOURCE"));
-        tuv.setPerplexityTarget(p_rs.getDouble("PERPLEXITY_TARGET"));
-        tuv.setPerplexityResult("Y".equalsIgnoreCase(p_rs.getString("PERPLEXITY_RESULT")) ? true
-                : false);
 
 		return tuv;
 	}

@@ -49,10 +49,10 @@ public class EscapingHelper
 	private static XmlEntities m_xmlEncoder = new XmlEntities();
 	private static String statRegexStr = "<bpt([\\s\\S]*)><([\\s\\S]*)></bpt>";
 	private static String endRegexStr = "<ept([\\s\\S]*)></([\\s\\S]*)></ept>";
-	private static String CONTENT_SPLICING_SIGN="~##~";
-    private static String[] invalidHtmlTagCharacters = new String[]
-    { "{", "}", "%", "^", "~", "!", "&", "*", "(", ")", "?" };
-    
+	private static String CONTENT_SPLICING_SIGN = "~##~";
+	private static String[] invalidHtmlTagCharacters = new String[] { "{", "}",
+			"%", "^", "~", "!", "&", "*", "(", ")", "?" };
+
 	public static String handleString4Export(String oriStr, List<Escaping> es,
 			String format, boolean noTag, boolean doDecode, String escapingChars)
 	{
@@ -490,13 +490,21 @@ public class EscapingHelper
 		return "" + char1;
 	}
 
-	private static boolean isSpecialFormat(String format)
+	private static boolean isSpecialFormatcc(String format)
 	{
 		return IFormatNames.FORMAT_JAVAPROP.equals(format)
 				|| IFormatNames.FORMAT_HTML.equals(format)
 				|| IFormatNames.FORMAT_PLAINTEXT.equals(format)
 				|| IFormatNames.FORMAT_JSON.equals(format)
-				|| IFormatNames.FORMAT_PO.equals(format);
+				|| IFormatNames.FORMAT_PO.equals(format)
+				|| IFormatNames.FORMAT_XML.equals(format);
+	}
+
+	private static boolean isSpecialFormat(String format)
+	{
+		return IFormatNames.FORMAT_JAVAPROP.equals(format)
+				|| IFormatNames.FORMAT_HTML.equals(format)
+				|| IFormatNames.FORMAT_PLAINTEXT.equals(format);
 	}
 
 	public static void newHandleOutput4Import(Output p_output, Filter mFilter)
@@ -629,7 +637,7 @@ public class EscapingHelper
 					{
 						isAttr = true;
 					}
-					
+
 					if ((isJavaOrPoAssociateHtmlFilter || isJsonOrTextAssociateHtmlFilter)
 							&& tmp.indexOf("<") > -1
 							&& tmp.indexOf(">") > -1
@@ -639,7 +647,7 @@ public class EscapingHelper
 					{
 						isHtmlNode = true;
 					}
-					else if ((isJavaOrPoAssociateHtmlFilter || isJsonOrTextAssociateHtmlFilter)
+					else if ((isHtmlNode && isJavaOrPoAssociateHtmlFilter || isJsonOrTextAssociateHtmlFilter)
 							&& tmp.indexOf("</") > -1 && tmp.indexOf(">") > -1)
 					{
 						isHtmlNode = false;
@@ -686,8 +694,8 @@ public class EscapingHelper
 		}
 
 		StringBuffer finalBuffer = new StringBuffer();
-		Escaping escaping= null;
-		for (int k=0;k < es.size();k++)
+		Escaping escaping = null;
+		for (int k = 0; k < es.size(); k++)
 		{
 			StringBuffer sb = new StringBuffer();
 			escaping = es.get(k);
@@ -696,7 +704,8 @@ public class EscapingHelper
 							"startFinishes"))
 			{
 				sb.append(getSpecialContentForExport(tags, escaping, format,
-						doDecode, escapingChars, contentType, isInCDATA,internalTexts));
+						doDecode, escapingChars, contentType, isInCDATA,
+						internalTexts));
 			}
 			else
 			{
@@ -715,7 +724,20 @@ public class EscapingHelper
 						}
 						else
 						{
-							sb.append(ti.content);
+							// In order to process XML attribute, if xml filter
+							// set up "Embeddable Tags"
+							if (escaping.isCheckActive()
+									&& escaping.getPartConentValue()
+											.equalsIgnoreCase("xmlAttribute"))
+							{
+								sb.append(escapeXmlAtrributeForExport(
+										ti.content, escaping, doDecode, format,
+										escapingChars, internalTexts));
+							}
+							else
+							{
+								sb.append(ti.content);
+							}
 						}
 					}
 					else
@@ -752,7 +774,7 @@ public class EscapingHelper
 					}
 				}
 			}
-			if (k < es.size()-1)
+			if (k < es.size() - 1)
 			{
 				if (noTag)
 				{
@@ -788,8 +810,8 @@ public class EscapingHelper
 		while (splits.size() == 3)
 		{
 			sub.append(splits.get(0));
-			sub.append(newHandleString4Export(splits.get(1), escaping, doDecode,
-					format, escapingChars, contentType,internalTexts));
+			sub.append(newHandleString4Export(splits.get(1), escaping,
+					doDecode, format, escapingChars, contentType, internalTexts));
 			splitContent(splits.get(2), splits);
 		}
 		// splits.size == 1 or 2
@@ -803,7 +825,7 @@ public class EscapingHelper
 
 	private static String newHandleString4Export(String ccc, Escaping escaping,
 			boolean doDecode, String format, String escapingChars,
-			String contenType,List<String> internalTexts)
+			String contenType, List<String> internalTexts)
 	{
 		StringBuffer sub = new StringBuffer();
 		ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
@@ -856,7 +878,7 @@ public class EscapingHelper
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
 			List<String> contentList = extractOneLine(ccc, startStr, finishStr,
-					startIsRegex, finishIsRegex,internalTexts);
+					startIsRegex, finishIsRegex, internalTexts);
 			StringBuffer buffer = new StringBuffer();
 			for (String con : contentList)
 			{
@@ -903,7 +925,7 @@ public class EscapingHelper
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
 			List<String> contentList = extractOneLine(ccc, startStr, finishStr,
-					startIsRegex, finishIsRegex,internalTexts);
+					startIsRegex, finishIsRegex, internalTexts);
 			StringBuffer buffer = new StringBuffer();
 			for (String con : contentList)
 			{
@@ -975,7 +997,7 @@ public class EscapingHelper
 		if ((char1 + "").equals(escaping.getCharacter()))
 		{
 			// process special chars in special format
-			if (isSpecialFormat(format) && char1 == '\\')
+			if (char1 == '\\')
 			{
 				if (escapingChars != null && escapingChars.contains("" + char2))
 				{
@@ -1030,9 +1052,9 @@ public class EscapingHelper
 
 		boolean doDecode = !isPureText;
 		List<TagIndex> tags = TagIndex.getContentIndexes(oriStr, isPureText);
-		
+
 		StringBuffer finalBuffer = new StringBuffer();
-		Escaping escaping= null;
+		Escaping escaping = null;
 		for (int k = 0; k < es.size(); k++)
 		{
 			StringBuffer sb = new StringBuffer();
@@ -1042,7 +1064,7 @@ public class EscapingHelper
 							"startFinishes"))
 			{
 				sb.append(getSpecialContentForImport(tags, escaping, format,
-						isPureText, processedChars, contentType,internalTexts));
+						isPureText, processedChars, contentType, internalTexts));
 			}
 			else
 			{
@@ -1055,14 +1077,25 @@ public class EscapingHelper
 						if (isPureText)
 						{
 							String ccc = ti.content;
-							String subStr = newHandleString4Import(ccc, escaping,
+							sb.append(newHandleString4Import(ccc, escaping,
 									doDecode, format, processedChars,
-									contentType,internalTexts);
-							sb.append(subStr);
+									contentType, internalTexts));
 						}
 						else
 						{
-							sb.append(ti.content);
+							//In order to process XML attribute, if xml filter set up "Embeddable Tags"
+							if (escaping.isCheckActive()
+									&& escaping.getPartConentValue()
+											.equalsIgnoreCase("xmlAttribute"))
+							{
+								sb.append(escapeXmlAtrributeForImport(
+										ti.content, escaping, doDecode, format,
+										processedChars, internalTexts));
+							}
+							else
+							{
+								sb.append(ti.content);
+							}
 						}
 					}
 					else
@@ -1125,10 +1158,10 @@ public class EscapingHelper
 				break;
 			}
 		}
-		
+
 		return finalBuffer.toString();
 	}
-
+	
 	private static String newHandleString4Import(String ccc, Escaping escaping,
 			boolean doDecode, String format, List<Character> processedChars,
 			String contentType, List<String> internalTexts)
@@ -1153,7 +1186,7 @@ public class EscapingHelper
 				else if (escaping.getActiveValue().equalsIgnoreCase("inactive"))
 				{
 					ccc = checkInActiveForImport(ccc, escaping, format,
-							processedChars, contentType,internalTexts);
+							processedChars, contentType, internalTexts);
 				}
 			}
 			else
@@ -1194,7 +1227,7 @@ public class EscapingHelper
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
 			List<String> contentList = extractOneLine(ccc, startStr, finishStr,
-					startIsRegex, finishIsRegex,internalTexts);
+					startIsRegex, finishIsRegex, internalTexts);
 			StringBuffer buffer = new StringBuffer();
 			for (String con : contentList)
 			{
@@ -1294,8 +1327,7 @@ public class EscapingHelper
 			}
 			else
 			{
-				if (isSpecialFormat(format)
-						&& (char1 + "").equals(escaping.getEscape())
+				if ((char1 + "").equals(escaping.getEscape())
 						&& (char2 + "").equals(escaping.getEscape()))
 				{
 					sub.append(char1);
@@ -1346,8 +1378,7 @@ public class EscapingHelper
 			}
 			else
 			{
-				if (isSpecialFormat(format)
-						&& (char1 + "").equals(escaping.getEscape())
+				if ((char1 + "").equals(escaping.getEscape())
 						&& (char2 + "").equals(escaping.getEscape()))
 				{
 					sub.append(char1);
@@ -1430,12 +1461,12 @@ public class EscapingHelper
 		List<String> contentList = new ArrayList<String>();
 		int extractIndexStart = -1;
 		int extractIndexFinish = -1;
-		//If Start and Finish Patterns are internal text
+		// If Start and Finish Patterns are internal text
 		if (internalTexts != null && internalTexts.size() > 0)
 		{
 			ccc = InternalTextHelper.restoreInternalTexts(ccc, internalTexts);
 		}
-		
+
 		if (StringUtil.isNotEmptyAndNull(startStr))
 		{
 			if (startIsRegex)
@@ -1570,10 +1601,11 @@ public class EscapingHelper
 				}
 				String con02 = ccc.substring(keyList.get(i),
 						indexMap.get(keyList.get(i)));
-				//If Start and Finish Patterns are internal text
+				// If Start and Finish Patterns are internal text
 				if (internalTexts != null && internalTexts.size() > 0)
 				{
-					con02 = InternalTextHelper.protectInternalTexts(con02, internalTexts);
+					con02 = InternalTextHelper.protectInternalTexts(con02,
+							internalTexts);
 				}
 				contentList.add("match||" + con02);
 				String con03 = "";
@@ -1600,10 +1632,11 @@ public class EscapingHelper
 			{
 				if (StringUtil.isNotEmptyAndNull(finishStr))
 				{
-					//If Start and Finish Patterns are internal text
+					// If Start and Finish Patterns are internal text
 					if (internalTexts != null && internalTexts.size() > 0)
 					{
-						ccc = InternalTextHelper.protectInternalTexts(ccc, internalTexts);
+						ccc = InternalTextHelper.protectInternalTexts(ccc,
+								internalTexts);
 					}
 					contentList.add("notmatch||" + ccc);
 				}
@@ -1619,10 +1652,11 @@ public class EscapingHelper
 					}
 					if (StringUtil.isNotEmptyAndNull(con02))
 					{
-						//If Start and Finish Patterns are internal text
+						// If Start and Finish Patterns are internal text
 						if (internalTexts != null && internalTexts.size() > 0)
 						{
-							con02 = InternalTextHelper.protectInternalTexts(con02, internalTexts);
+							con02 = InternalTextHelper.protectInternalTexts(
+									con02, internalTexts);
 						}
 						contentList.add("match||" + con02);
 					}
@@ -1630,10 +1664,11 @@ public class EscapingHelper
 			}
 			else
 			{
-				//If Start and Finish Patterns are internal text
+				// If Start and Finish Patterns are internal text
 				if (internalTexts != null && internalTexts.size() > 0)
 				{
-					ccc = InternalTextHelper.protectInternalTexts(ccc, internalTexts);
+					ccc = InternalTextHelper.protectInternalTexts(ccc,
+							internalTexts);
 				}
 				contentList.add("notmatch||" + ccc);
 			}
@@ -1670,7 +1705,7 @@ public class EscapingHelper
 		}
 		return false;
 	}
-	
+
 	public static boolean checkJsonOrTextAssociatedHtmlFilter(Filter mFilter)
 	{
 		if (mFilter != null)
@@ -1679,16 +1714,18 @@ public class EscapingHelper
 			long filterId = -1;
 			if (mFilter instanceof JsonFilter)
 			{
-				filterName = ((JsonFilter) mFilter).getElementPostFilterTableName();
+				filterName = ((JsonFilter) mFilter)
+						.getElementPostFilterTableName();
 				filterId = ((JsonFilter) mFilter).getElementPostFilterId();
 			}
 			else if (mFilter instanceof PlainTextFilter)
 			{
-                 try
+				try
 				{
-                	 PlainTextFilterParser parser = new PlainTextFilterParser(((PlainTextFilter) mFilter));
+					PlainTextFilterParser parser = new PlainTextFilterParser(
+							((PlainTextFilter) mFilter));
 					parser.parserXml();
-	                filterName = parser.getElementPostFilterTableName();
+					filterName = parser.getElementPostFilterTableName();
 					if (StringUtil.isNotEmptyAndNull(parser
 							.getElementPostFilterId()))
 					{
@@ -1803,8 +1840,9 @@ public class EscapingHelper
 				if (str.startsWith("normal||"))
 				{
 					buffer.append(newHandleString4Import(
-							str.substring(("normal||").length()), escaping, doDecode,
-							format, processedChars, contentType,internalTexts));
+							str.substring(("normal||").length()), escaping,
+							doDecode, format, processedChars, contentType,
+							internalTexts));
 				}
 				else if (str.startsWith("htmlnode||"))
 				{
@@ -1843,7 +1881,7 @@ public class EscapingHelper
 		}
 		return false;
 	}
-	
+
 	private static String getSpecialContentForImport(List<TagIndex> tags,
 			Escaping escaping, String format, boolean isPureText,
 			List<Character> processedChars, String contentType,
@@ -1881,10 +1919,12 @@ public class EscapingHelper
 			}
 			if (content.endsWith(CONTENT_SPLICING_SIGN))
 			{
-				content = content.substring(0, content.lastIndexOf(CONTENT_SPLICING_SIGN));
+				content = content.substring(0,
+						content.lastIndexOf(CONTENT_SPLICING_SIGN));
 			}
 			String returnStr = newHandleString4Import(content, escaping,
-					doDecode, format, processedChars, contentType, internalTexts);
+					doDecode, format, processedChars, contentType,
+					internalTexts);
 			String[] arrStr = returnStr.split(CONTENT_SPLICING_SIGN);
 			if (contentKeyList.size() == arrStr.length)
 			{
@@ -1907,7 +1947,7 @@ public class EscapingHelper
 		}
 		return sb.toString();
 	}
-	
+
 	private static String getSpecialContentForExport(List<TagIndex> tags,
 			Escaping escaping, String format, boolean doDecode,
 			String escapingChars, String contentType, boolean isInCDATA,
@@ -1947,7 +1987,8 @@ public class EscapingHelper
 			}
 			if (content.endsWith(CONTENT_SPLICING_SIGN))
 			{
-				content = content.substring(0, content.lastIndexOf(CONTENT_SPLICING_SIGN));
+				content = content.substring(0,
+						content.lastIndexOf(CONTENT_SPLICING_SIGN));
 			}
 			String returnStr = newHandleString4Export(content, escaping,
 					doDecode, format, escapingChars, contentType, internalTexts);
@@ -2001,7 +2042,7 @@ public class EscapingHelper
 		}
 		return sb.toString();
 	}
-	
+
 	public static boolean protectInvalidTags(String content)
 	{
 		Pattern p = Pattern.compile("<([^>]*?)>");
@@ -2029,5 +2070,60 @@ public class EscapingHelper
 			}
 		}
 		return isInvalidTag;
+	}
+	
+	private static String escapeXmlAtrributeForImport(String ccc,
+			Escaping escaping, boolean doDecode, String format,
+			List<Character> processedChars, List<String> internalTexts)
+	{
+		StringBuffer buffer = new StringBuffer();
+		Pattern start = Pattern
+				.compile("<sub[\\s|\\t|\\r|\\n]*locType=\"translatable\"[\\s|\\t|\\r|\\n]*>");
+		Pattern end = Pattern.compile("</sub>");
+		Matcher mStart = start.matcher(ccc);
+		Matcher mEnd = end.matcher(ccc);
+		if (mStart.find() && mEnd.find())
+		{
+			String tag01 = ccc.substring(0, mStart.end());
+			buffer.append(tag01);
+			String xmlAtrribute = ccc.substring(mStart.end(), mEnd.start());
+			buffer.append(newHandleString4Import(xmlAtrribute, escaping,
+					doDecode, format, processedChars, "xmlAttribute",
+					internalTexts));
+			String tag02 = ccc.substring(mEnd.start(), ccc.length());
+			buffer.append(tag02);
+		}
+		else
+		{
+			buffer.append(ccc);
+		}
+		return buffer.toString();
+	}
+	
+	private static String escapeXmlAtrributeForExport(String ccc,
+			Escaping escaping, boolean doDecode, String format,
+			String escapingChars, List<String> internalTexts)
+	{
+		StringBuffer buffer = new StringBuffer();
+		Pattern start = Pattern.compile("<sub [^>]*locType=\"translatable\"[^>]*>");
+		Pattern end = Pattern.compile("</sub>");
+		Matcher mStart = start.matcher(ccc);
+		Matcher mEnd = end.matcher(ccc);
+		if (mStart.find() && mEnd.find())
+		{
+			String tag01 = ccc.substring(0, mStart.end());
+			buffer.append(tag01);
+			String xmlAtrribute = ccc.substring(mStart.end(), mEnd.start());
+			buffer.append(newHandleString4Export(xmlAtrribute, escaping,
+					doDecode, format, escapingChars, "xmlAttribute",
+					internalTexts));
+			String tag02 = ccc.substring(mEnd.start(), ccc.length());
+			buffer.append(tag02);
+		}
+		else
+		{
+			buffer.append(ccc);
+		}
+		return buffer.toString();
 	}
 }

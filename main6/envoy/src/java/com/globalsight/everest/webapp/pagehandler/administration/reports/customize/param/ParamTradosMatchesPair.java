@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.CostingEngine;
@@ -93,7 +94,17 @@ public class ParamTradosMatchesPair extends ParamObjectPair
                 result.add(new Long(workflowData.getTradosMTWordCount()));
                 workflowData.setTradosMTWordCount(0l);
             }
-            if (children[8].getValue())
+            // For GBS-4495 perplexity score on MT
+            int n = 8;
+            if (CompanyWrapper.isUsePerplexity())
+            {
+                if (children[n++].getValue())
+                {
+                    result.add(workflowData.getPerplexityWordCount());
+                }
+            }
+            
+            if (children[n].getValue())
             {
                 result.add(new Long(workflowData.getTradosTotalWordCount()));
                 workflowData.setTradosTotalWordCount(0l);
@@ -195,7 +206,17 @@ public class ParamTradosMatchesPair extends ParamObjectPair
             {
                 result.add(new Long(workflowData.getTradosMTWordCountAmount()));
             }
-            if (children[8].getValue())
+            // For GBS-4495 perplexity score on MT
+            int n = 8;
+            if (CompanyWrapper.isUsePerplexity())
+            {
+                if (children[n++].getValue())
+                {
+                    result.add(workflowData.getPerplexityWordCountAmount());
+                }
+            }
+            
+            if (children[n].getValue())
             {
                 result.add(new Long(workflowData.getTradosTotalWordCountAmount()));
             }

@@ -17,6 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -30,6 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.localemgr.CodeSetImpl;
@@ -42,12 +45,15 @@ import com.globalsight.everest.util.comparator.LocaleComparator;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityScoreHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+
+import net.sf.json.JSONArray;
 
 /**
  * This class handles the Basic Info screen for Workflows
@@ -56,7 +62,8 @@ import com.globalsight.util.SortUtil;
 public class BasicWorkflowTemplateHandler extends PageHandler implements
         WorkflowTemplateConstants
 {
-
+    static private final Logger logger = Logger.getLogger(BasicWorkflowTemplateHandler.class);
+    
     // ////////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // ////////////////////////////////////////////////////////////////////
@@ -93,6 +100,36 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
                 .getAttribute(SESSION_MANAGER);
         String action = (String) p_request
                 .getParameter(WorkflowTemplateConstants.ACTION);
+        // For GBS-4495 perplexity score on MT
+        // This is a ajax request. 
+        //  Return a json object with all language module pairs ids depends the gave id.
+        if ("getPerplexity".equals(action))
+        {
+            String id = p_request.getParameter("id");
+            String lpId = p_request.getParameter("lpId");
+            PerplexityScoreHelper helper = new PerplexityScoreHelper();
+            List<Long> lms = new ArrayList<>();
+            try
+            {
+                lms = helper.getLanguageModulePairsByPerplexity(Long.parseLong(id), Long.parseLong(lpId));
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+            
+            JSONArray gs = new JSONArray();
+            for (Long lm : lms){
+                gs.add(lm);
+            }
+            
+            p_response.setContentType("text/xml;charset=utf-8");
+            PrintWriter out = p_response.getWriter();  
+            out.print(gs.toString());  
+            out.flush();
+            return;
+        }
+        
         p_request.setAttribute(WorkflowTemplateConstants.ACTION, action);
 
         if (action != null

@@ -14,6 +14,7 @@ import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -256,6 +257,11 @@ public class SegmentFilter
         {
             return p_tuvMatchTypes.isMachineTranslation(p_srcTuv);
         }
+        else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_PERPLEXITY))
+        {
+            TuvImpl t = (TuvImpl) p_trgTuv;
+            return t.getPerplexityResult();
+        }
 
         return false;
     }
@@ -337,7 +343,7 @@ public class SegmentFilter
             return false;
         }
         
-        return OnlineEditorConstants.SEGMENT_FILTERS.contains(segFilter);
+        return OnlineEditorConstants.SEGMENT_FILTERS_ALL.contains(segFilter);
     }
 
 }

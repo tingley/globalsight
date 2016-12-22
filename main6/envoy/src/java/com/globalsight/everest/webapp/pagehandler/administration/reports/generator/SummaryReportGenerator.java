@@ -44,6 +44,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
@@ -91,10 +92,12 @@ public class SummaryReportGenerator implements
     private  CellStyle percentSumStyle = null;
     private boolean isHidden;
     private String userId = null;
+    private boolean usePerplexity = false;
 
     public SummaryReportGenerator()
     {
         isHidden = true; // set hidden
+        usePerplexity = CompanyWrapper.isUsePerplexity();
     }
 
     /**
@@ -301,6 +304,13 @@ public class SummaryReportGenerator implements
         cell_G.setCellValue(bundle.getString("lb_repetition_word_cnt"));
         cell_G.setCellStyle(getHeaderOrangeStyle(p_workbook));
 
+        if (usePerplexity)
+        {
+            p_sheet.setColumnWidth(column, 10 * 256);
+            Cell cell = getCell(thirRow, column++);
+            cell.setCellValue(bundle.getString("lb_perplexity"));
+            cell.setCellStyle(getHeaderOrangeStyle(p_workbook));
+        }
         if (headers[0] != null)
         {
             p_sheet.setColumnWidth(column, 10 * 256);
@@ -388,7 +398,12 @@ public class SummaryReportGenerator implements
                 addNumberCell(p_sheet, column++, row,
                         sumWordCount.getTradosRepsWordCount(), 
                         getHeaderStyle(p_workbook));
-                
+                if (usePerplexity)
+                {
+                    addNumberCell(p_sheet, column++, row,
+                            sumWordCount.getPerplexity(),
+                            getHeaderStyle(p_workbook));
+                }
                 if (headers[0] != null)
                 {
                     addNumberCell(p_sheet, column++, row,
@@ -467,8 +482,13 @@ public class SummaryReportGenerator implements
             theRow.removeCell(getCell(theRow, column));
         }
         p_sheet.removeColumnBreak(column);
+        
+        int totle = colLen - 3;
+        if (usePerplexity)
+            totle--;
+        
         // Rates Columns
-        for (int dis = column - 1; column < colLen + dis - 3; column++)
+        for (int dis = column - 1; column < totle + dis; column++)
         {
             Cell cell_From = p_sheet.getRow(row).getCell(column - dis);
             Cell cell_To = getCell(p_sheet.getRow(row), column);
@@ -813,6 +833,8 @@ public class SummaryReportGenerator implements
                 int mtExactMatchWordCount = w.getMtExactMatchWordCount();
                 int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
                 int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
+                reportWordCount.setPerplexity(w.getPerplexityWordCount());
+                
                 if (PageHandler.isInContextMatch(w.getJob()))
                 {
                     trados100WordCount= w.getSegmentTmWordCount();

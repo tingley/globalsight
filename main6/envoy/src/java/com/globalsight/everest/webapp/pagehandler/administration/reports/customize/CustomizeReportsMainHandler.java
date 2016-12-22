@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
@@ -89,6 +90,11 @@ public class CustomizeReportsMainHandler extends PageHandler
 
             // Prepare for job info param in customize report
             String xml = CustomizeReportsParamXmlHandler.getJobInfoParamXml();
+            // For GBS-4495 perplexity score on MT
+            if (!CompanyWrapper.isUsePerplexity())
+            {
+                xml = xml.replace("<param id=\"jobinfo.tradosmatches.wordcounts.perplexity\"/>", "");
+            }
 
             xml = CustomizeReportsParamXmlHandler.parseParamXml(bundle, xml);
 

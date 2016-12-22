@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -54,7 +55,6 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.document.StateType;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Target;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Unit;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Xliff;
-import com.globalsight.everest.edit.offline.xliff.xliff20.document.YesNo;
 import com.globalsight.everest.edit.offline.xliff.xliff20.match.Match;
 import com.globalsight.everest.edit.offline.xliff.xliff20.match.Matches;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -616,25 +616,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
         Unit unit = new Unit();
         file.getUnitOrGroup().add(unit);
-
-        // Handle edit type
-        YesNo translate = YesNo.YES;
-        if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
-        {
-            if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100
-                    && isInContextMatch(osd))
-                translate = YesNo.NO;
-            else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
-                    && isExactMatch(osd))
-                translate = YesNo.NO;
-			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
-					&& (isExactMatch(osd) || isInContextMatch(osd))
-					&& osd.isWriteAsProtectedSegment())
-                translate = YesNo.NO;
-            else
-                translate = YesNo.YES;
-        }
-        unit.setTranslate(translate);
+        // For GBS-4495 perplexity score on MT
+        unit.setTranslate(OfflineEditHelper.isTranslate(osd, TMEditType));
         unit.setId("u" + getXliffId(osd.getDisplaySegmentID()));
 
         OriginalData od = new OriginalData();
@@ -646,6 +629,19 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         {
             seg.setId(getXliffId(osd.getDisplaySegmentID()));
         }
+        // For GBS-4495 perplexity score on MT
+        if (osd.isUsePerplexity() && OfflineEditHelper.isMTFuzzyMatch(osd))
+        {
+            if (OfflineEditHelper.isPerplexityPass(osd))
+            {
+                seg.setSubState("GlobalSight:perplexityPassed");
+            }
+            else
+            {
+                seg.setSubState("GlobalSight:perplexityFailed");
+            }
+        }
+        
 
         // Add SID
         String sid = osd.getSourceTuv().getSid();
@@ -988,7 +984,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             Source s = new Source();
             m.setSource(s);
             float scoreNum = leverageMatch.getScoreNum();
-            if (leverageMatch.isMtLeverageMatch())
+            // For GBS-4495 perplexity score on MT
+            if (leverageMatch.isMtLeverageMatch() && scoreNum != 65)
             {
                 scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
             }

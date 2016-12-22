@@ -74,7 +74,11 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
     private String sid = null;
     private Long m_repetitionOfId = new Long(0);
     private boolean m_repeated = false;
-
+    // For GBS-4495 perplexity score on MT
+    private double perplexitySource;
+    private double perplexityTarget;
+    private boolean perplexityResult;
+    
     /**
      * TUV orders range from 1 - n. The default value is 0.
      */
@@ -1261,4 +1265,34 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
 	@Override
 	public void setNextHash(long nextHash) {
 	}
+
+    public double getPerplexitySource()
+    {
+        return perplexitySource;
+    }
+
+    public void setPerplexitySource(double perplexitySource)
+    {
+        this.perplexitySource = perplexitySource;
+    }
+
+    public double getPerplexityTarget()
+    {
+        return perplexityTarget;
+    }
+
+    public void setPerplexityTarget(double perplexityTarget)
+    {
+        this.perplexityTarget = perplexityTarget;
+    }
+
+    public boolean getPerplexityResult()
+    {
+        return perplexityResult;
+    }
+
+    public void setPerplexityResult(boolean perplexityResult)
+    {
+        this.perplexityResult = perplexityResult;
+    }
 }

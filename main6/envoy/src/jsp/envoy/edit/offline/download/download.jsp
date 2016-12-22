@@ -1367,10 +1367,18 @@ $(document).ready(function(){
               <TD><SPAN CLASS="standardText"><%= exactMatchesEditable %></SPAN></TD>
               <TD><SPAN CLASS="standardText">
                 <SELECT NAME="TMEditType" CLASS="standardText">
+                  <%if (CompanyWrapper.isUsePerplexity()){ %>
+                  <option value="5" <%=userOptionOfTMEdit == 5 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_5") %></option>
+                  <option value="6" <%=userOptionOfTMEdit == 6 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_6") %></option>
+                  <option value="7" <%=userOptionOfTMEdit == 7 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_7") %></option>
+                  <%} %>
                   <option value="1" <%=userOptionOfTMEdit == 1 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_both") %></option>
                   <option value="2" <%=userOptionOfTMEdit == 2 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_ice") %></option>
                   <option value="3" <%=userOptionOfTMEdit == 3 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_100") %></option>
-                  <option value="4" <%=userOptionOfTMEdit == 4 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>
+                  <%if (CompanyWrapper.isUsePerplexity()){ %>
+                  <option value="8" <%=userOptionOfTMEdit == 8 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_8") %></option>
+                  <%} %>
+                  <option value="4" <%=userOptionOfTMEdit == 4 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>                  
                 </SELECT>
               </SPAN></TD>
             </TR>   

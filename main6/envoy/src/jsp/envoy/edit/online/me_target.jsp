@@ -1,3 +1,5 @@
+<%@page import="com.globalsight.everest.company.CompanyWrapper"%>
+<%@page import="com.globalsight.everest.company.CompanyThreadLocal"%>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="error.jsp"
@@ -151,7 +153,15 @@ str_segmengFilter.append(bundle.getString("segment_filter")).append(":&nbsp;&nbs
 str_segmengFilter.append("<select id='segmentFilter' ");
 str_segmengFilter.append("onchange='doSegmentFilter(this[this.selectedIndex].value)' ");
 str_segmengFilter.append("style='font-size: 8pt;'>");
-for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
+
+List<String> fs = new ArrayList<>();
+fs.addAll(OnlineEditorConstants.SEGMENT_FILTERS);
+if (CompanyWrapper.isUsePerplexity())
+{
+	fs.add(OnlineEditorConstants.SEGMENT_FILTER_PERPLEXITY);
+}
+
+for(String segFilter : fs)
 {
     str_segmengFilter.append("<option ");
     if (segFilter.equals(selSegFilter))
@@ -162,6 +172,7 @@ for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
                      .append(bundle.getString(segFilter))
                      .append("</option>");
 }
+
 str_segmengFilter.append("</select>");
 
 StringBuffer tHead = new StringBuffer();

@@ -335,6 +335,9 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                     numCols += 3;
                 if (hasCostInfo)
                     numCols++;
+                // For GBS-4495 perplexity score on MT
+                if (isUsePerplexity())
+                    numCols++;
                 int subcols[] = new int[numCols];
                 int l = 0;
                 subcols[l++] = WorkflowTableModel.TRGLOCALE;
@@ -349,6 +352,11 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                 if (PageHandler.isInContextMatch(job))
                 {
                     subcols[l++] = WorkflowTableModel.IN_CONTEXT_WC;
+                }
+                // For GBS-4495 perplexity score on MT
+                if (isUsePerplexity())
+                {
+                    subcols[l++] = WorkflowTableModel.PERPLEXITY;
                 }
                 subcols[l++] = WorkflowTableModel.FUZZY_HI_WC;
                 subcols[l++] = WorkflowTableModel.FUZZY_MED_HI_WC;

@@ -26,6 +26,9 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpSession;
 import javax.swing.table.AbstractTableModel;
 
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.page.PageWordCounts;
@@ -60,24 +63,33 @@ public class WorkflowTableModel extends AbstractTableModel
 
     public static final int SEGMENT_TM_WC = 4;
     public static final int IN_CONTEXT_WC = 5;
-    public static final int CONTEXT_WC = 6;
-    public static final int FUZZY_LOW_WC = 7;
-    public static final int FUZZY_MED_WC = 8;
-    public static final int FUZZY_MED_HI_WC = 9;
-    public static final int FUZZY_HI_WC = 10;
+    public static final int PERPLEXITY = 6;
+    public static final int CONTEXT_WC = 7;
+    public static final int FUZZY_LOW_WC = 8;
+    public static final int FUZZY_MED_WC = 9;
+    public static final int FUZZY_MED_HI_WC = 10;
+    public static final int FUZZY_HI_WC = 11;
 
-    public static final int NO_MATCH = 11;
-    public static final int REP_WC = 12;
-    public static final int PER_COMPLETE = 13;
-    public static final int DURATION = 14;
-    public static final int COST = 15;
-    public static final int REVENUE = 16;
+    public static final int NO_MATCH = 12;
+    public static final int REP_WC = 13;
+    public static final int PER_COMPLETE = 14;
+    public static final int DURATION = 15;
+    public static final int COST = 16;
+    public static final int REVENUE = 17;
+    
 
     public String[] COLUMN_NAMES =
     { "TRGLOCALE", "WFSTATE", "CURACTIVITY", "ACCEPTER", "SEGMENT_TM_WC",
             "IN_CONTEXT_WC", "CONTEXT_WC", "FUZZY_LOW_WC", "FUZZY_MED_WC",
             "FUZZY_MED_HI_WC", "FUZZY_HI_WC", "NO_MATCH", "REP_WC",
             "PER_COMPLETE", "DURATION", "COST", "REVENUE" };
+    
+    public String[] COLUMN_NAMES_2 =
+    { "TRGLOCALE", "WFSTATE", "CURACTIVITY", "ACCEPTER", "SEGMENT_TM_WC",
+            "IN_CONTEXT_WC","PERPLEXITY", "CONTEXT_WC", "FUZZY_LOW_WC", "FUZZY_MED_WC",
+            "FUZZY_MED_HI_WC", "FUZZY_HI_WC", "NO_MATCH", "REP_WC",
+            "PER_COMPLETE", "DURATION", "COST", "REVENUE" };
+
 
     private static final Object EMPTY = new String("");
     private static final String NOT_ACCEPTED_YET = "notAcceptedYet";
@@ -85,6 +97,7 @@ public class WorkflowTableModel extends AbstractTableModel
             + "workflowTable";
 
     private boolean useInContext = false;
+    private boolean usePerplexity = false;
 
     public WorkflowTableModel()
     {
@@ -114,6 +127,35 @@ public class WorkflowTableModel extends AbstractTableModel
             String p_wfstate, HttpSession p_session, Currency p_currency,
             boolean fillAllData)
     {
+        m_uilocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+        m_bundle = ResourceBundle.getBundle(MY_MESSAGES, m_uilocale);
+        m_datarows = new ArrayList<Map<Integer, Object>>(p_workflows.size());
+        m_currency = p_currency;
+
+        if (m_currency != null)
+            m_jobCosting = true;
+
+        if (p_wfstate == null || p_wfstate.equals(GlobalSightReplet.DISPATCHED))
+            m_containsActivityInfo = true;
+        else
+            m_containsActivityInfo = false;
+        
+        // For GBS-4495 perplexity score on MT
+        String currentId = CompanyThreadLocal.getInstance().getValue();
+        Company c = CompanyWrapper.getCompanyById(Long.parseLong(currentId));
+        usePerplexity = c.isEnablePerplexity();
+
+        if (fillAllData)
+        {
+            fillAllData(p_wfstate, p_workflows);
+        }
+    }
+    
+    public WorkflowTableModel(ArrayList<Workflow> p_workflows,
+            String p_wfstate, HttpSession p_session, Currency p_currency,
+            boolean fillAllData, boolean usePerplexity)
+    {
+        this.usePerplexity = usePerplexity;
         m_uilocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         m_bundle = ResourceBundle.getBundle(MY_MESSAGES, m_uilocale);
         m_datarows = new ArrayList<Map<Integer, Object>>(p_workflows.size());
@@ -190,6 +232,12 @@ public class WorkflowTableModel extends AbstractTableModel
                 {
                     datacolumns.put(IN_CONTEXT_WC,
                             getWorkflowValue(w, IN_CONTEXT_WC));
+                }
+                // For GBS-4495 perplexity score on MT
+                if (usePerplexity)
+                {
+                    datacolumns.put(PERPLEXITY,
+                            getWorkflowValue(w, PERPLEXITY));
                 }
 
                 datacolumns.put(FUZZY_HI_WC, getWorkflowValue(w, FUZZY_HI_WC));
@@ -386,6 +434,9 @@ public class WorkflowTableModel extends AbstractTableModel
                                                 "lb_abbreviation_minute"));
                     }
                     break;
+                case PERPLEXITY:    // For GBS-4495 perplexity score on MT
+                    o = w.getPerplexityWordCount();
+                    break;
                 default:
                     o = EMPTY;
                     break;
@@ -475,23 +526,27 @@ public class WorkflowTableModel extends AbstractTableModel
         int colCount = 0;
         if (BasicReportHandler.isJobRevenueOn())
         {
-            colCount = COLUMN_NAMES.length;
+            colCount = getColumnNames().length;
         }
         else
         {
             // skip the revenue columns
-            colCount = COLUMN_NAMES.length - 1;
+            colCount = getColumnNames().length - 1;
         }
         return colCount;
     }
 
     public String getColumnName(int c)
     {
-        return ReportsPackage.getMessage(m_bundle, COLUMN_NAMES[c]);
+        return ReportsPackage.getMessage(m_bundle, getColumnNames()[c]);
     }
 
     public String[] getColumnNames()
     {
+        // For GBS-4495 perplexity score on MT
+        if (usePerplexity)
+            return COLUMN_NAMES_2;
+                    
         return COLUMN_NAMES;
     }
 

@@ -144,12 +144,19 @@
      <permission id="<%=Permission.IN_CONTEXT_MATCH%>"/>
      <permission id="<%=Permission.SERVICE_TM_GET_ALL_TMPROFILES%>"/>
   </permission>
-   <permission id="<%=Permission.MTP_VIEW%>">
+  <permission id="<%=Permission.REMOTE_SERVICE%>">
+    <permission id="<%=Permission.MTP_VIEW%>">
      <permission id="<%=Permission.MTP_EDIT%>"/>
      <permission id="<%=Permission.MTP_NEW%>"/>
      <permission id="<%=Permission.MTP_REMOVE%>"/>
      <permission id="<%=Permission.MTP_EXPORT%>"/>
      <permission id="<%=Permission.MTP_IMPORT%>"/>
+   </permission>
+   <permission id="<%=Permission.PS_VIEW%>">
+     <permission id="<%=Permission.PS_EDIT%>"/>
+     <permission id="<%=Permission.PS_NEW%>"/>
+     <permission id="<%=Permission.PS_REMOVE%>"/>
+   </permission>
   </permission>
   <permission id="<%=Permission.TERMINOLOGY_VIEW%>">
      <permission id="<%=Permission.TERMINOLOGY_STATS%>"/>

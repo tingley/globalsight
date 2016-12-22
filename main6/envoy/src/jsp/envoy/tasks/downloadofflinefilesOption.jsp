@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.company.CompanyWrapper"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page
     contentType="text/html; charset=UTF-8"
@@ -250,9 +251,17 @@ function switchRadio(penalizedReferenceTmRadio)
               <TD><SPAN CLASS="standardText"><%= exactMatchesEditable %></SPAN></TD>
               <TD><SPAN CLASS="standardText">
                 <SELECT NAME="TMEditType" CLASS="standardText">
+                  <%if (CompanyWrapper.isUsePerplexity()){ %>
+                  <option value="5" ><%=bundle.getString("lb_l10nprofile_tm_edit_type_5") %></option>
+                  <option value="6"><%=bundle.getString("lb_l10nprofile_tm_edit_type_6") %></option>
+                  <option value="7"><%=bundle.getString("lb_l10nprofile_tm_edit_type_7") %></option>
+                  <%} %>
                   <option value="1"><%=bundle.getString("lb_l10nprofile_tm_edit_type_both") %></option>
                   <option value="2"><%=bundle.getString("lb_l10nprofile_tm_edit_type_ice") %></option>
                   <option value="3"><%=bundle.getString("lb_l10nprofile_tm_edit_type_100") %></option>
+                  <%if (CompanyWrapper.isUsePerplexity()){ %>
+                  <option value="8"><%=bundle.getString("lb_l10nprofile_tm_edit_type_8") %></option>
+                  <%} %>
                   <option value="4"><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>
                 </SELECT>
               </SPAN></TD>

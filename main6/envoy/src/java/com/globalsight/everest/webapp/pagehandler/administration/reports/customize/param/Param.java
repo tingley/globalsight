@@ -72,6 +72,7 @@ public interface Param {
     static public final String TRADOS_MATCHES_WORD_COUNTS_NOMATCH = "jobinfo.tradosmatches.wordcounts.nomatch";
     static public final String TRADOS_MATCHES_WORD_COUNTS_REPETITION = "jobinfo.tradosmatches.wordcounts.repetition";
     static public final String TRADOS_MATCHES_WORD_COUNTS_MT = "jobinfo.tradosmatches.wordcounts.mt";
+    static public final String TRADOS_MATCHES_WORD_COUNTS_PERPLEXITY = "jobinfo.tradosmatches.wordcounts.perplexity";
     static public final String TRADOS_MATCHES_WORD_COUNTS_TOTAL = "jobinfo.tradosmatches.wordcounts.total";
     static public final String TRADOS_MATCHES_INVOICE = "jobinfo.tradosmatches.invoice";
     static public final String TRADOS_MATCHES_INVOICE_PER100 = "jobinfo.tradosmatches.invoice.per100matches";
@@ -137,6 +138,7 @@ public interface Param {
         TRADOS_MATCHES_WORD_COUNTS_REPETITION,
         TRADOS_MATCHES_WORD_COUNTS_PERINCONTEXT,
         TRADOS_MATCHES_WORD_COUNTS_MT,
+        TRADOS_MATCHES_WORD_COUNTS_PERPLEXITY,
         TRADOS_MATCHES_WORD_COUNTS_TOTAL,
         TRADOS_MATCHES_INVOICE,
         TRADOS_MATCHES_INVOICE_PER100,

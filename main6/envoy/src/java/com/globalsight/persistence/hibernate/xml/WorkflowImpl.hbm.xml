@@ -66,6 +66,8 @@
             column="MT_REPETITIONS" type="int" not-null="false" unique="false" />
         <property name="mtEngineWordCount" length="10"
             column="MT_ENGINE_WORD_COUNT" type="int" not-null="false" unique="false" />
+         <property name="perplexityWordCount" length="10"
+            column="MT_PERPLEXITY_WORD_COUNT" type="int" not-null="false" unique="false" />    
 
 		<property name="thresholdHiFuzzyWordCountAsInteger" length="10"
 			column="THRESHOLD_FUZZY_HI_WORD_COUNT" type="int" not-null="false" />

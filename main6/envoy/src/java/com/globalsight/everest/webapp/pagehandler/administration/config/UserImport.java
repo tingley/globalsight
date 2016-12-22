@@ -125,12 +125,12 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                     // overwrites
                     if (isUserAlreadyExisted(userNode, allUserNameSet))
                     {
-                        _updateExistedUser(userNode, allUserNameSet, i, size);
+                        _updateExistedUser(userNode, allUserNameSet);
                     }
                     else
                     // adds new
                     {
-                        _addNewUser(userNode, i, size);
+                        _addNewUser(userNode);
                     }
                 }
 
@@ -148,7 +148,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     /**
      * Adds a new user into system.
      */
-    private void _addNewUser(Element userNode, int i, int size) throws Exception
+    private void _addNewUser(Element userNode) throws Exception
     {
         User user = new UserImpl();
         Element basicInfoNode = userNode.element("BasicInfo");
@@ -181,7 +181,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(), defaultRolesList);
     }
 
-    private void _updateExistedUser(Element userNode, Set<String> allUserNameSet, int i, int size)
+    private void _updateExistedUser(Element userNode, Set<String> allUserNameSet)
             throws Exception
     {
         Element basicInfoNode = userNode.element("BasicInfo");

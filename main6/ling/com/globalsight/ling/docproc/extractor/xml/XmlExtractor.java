@@ -282,7 +282,8 @@ public class XmlExtractor extends AbstractExtractor
                 // files
                 preserveEmptyTag();
             }
-            Reader reader = readInput(m_baseFilter);
+//            Reader reader = readInput(m_baseFilter);
+            Reader reader = readInput();
             if (m_checkWellFormed)
             {
                 XmlFilterChecker.checkWellFormed(reader);

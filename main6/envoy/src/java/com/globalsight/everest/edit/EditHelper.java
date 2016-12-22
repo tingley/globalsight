@@ -20,6 +20,7 @@ package com.globalsight.everest.edit;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 
@@ -75,6 +76,13 @@ public class EditHelper
         // LeverageGroupExactMatches.
 
         // return p_tuv.isLeverageGroupExactMatchLocalized();
+        if (p_tuv instanceof TuvImpl)
+        {
+            TuvImpl t = (TuvImpl) p_tuv;
+            if (t.getPerplexityResult())
+                return true;
+        }
+        
         return p_tuv.isExactMatchLocalized(p_jobId);
     }
 

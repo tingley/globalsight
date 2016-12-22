@@ -407,6 +407,21 @@
       </WebPage>
    </WebActivity>
   </WebModule>
+  <WebModule webModuleName="perplexityService">
+    <WebActivity webActivityName="perplexityService">
+      <WebPage pageName="PS" isDefault="true" jspName="/envoy/administration/remoteServices/perplexity/perplexityMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityMainHandler">
+        <PageLink linkName="new1" destinationPageName="PSD"></PageLink>
+        <PageLink linkName="modify" destinationPageName="PSD"></PageLink>
+        <PageLink linkName="self" destinationPageName="PS"></PageLink>
+        <PageLink linkName="remove" destinationPageName="PS"></PageLink>
+      </WebPage>
+      <WebPage pageName="PSD" isDefault="false" jspName="/envoy/administration/remoteServices/perplexity/perplexityBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityBasicHandler">  
+        <PageLink linkName="cancel" destinationPageName="PS"></PageLink>
+        <PageLink linkName="save" destinationPageName="PS"></PageLink>
+        <PageLink linkName="self" destinationPageName="PSD"></PageLink>
+      </WebPage>
+   </WebActivity>
+  </WebModule>
   
   <WebModule webModuleName="tm">
     <WebActivity webActivityName="tm">

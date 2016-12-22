@@ -758,6 +758,32 @@ public class BigTableUtil implements TuvQueryConstants
             logger.error("Failed to create table " + tuvTableName, e);
         }
     }
+    
+    public static void createTuvPerplexityTable(long companyId)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TABLE translation_unit_variant_perplexity_").append(companyId).append(" ");
+        sb.append("(");
+        sb.append(" ID BIGINT PRIMARY KEY,");
+        sb.append(" tuv_id BIGINT,");
+        sb.append(" source_score double DEFAULT \"-1\",");
+        sb.append(" target_score double DEFAULT \"-1\",");
+        sb.append(" result char(1) DEFAULT \"N\")ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;");
+        String sql1 = sb.toString();
+        
+        String sql2 = "CREATE INDEX INDEX_ID_LOCALE_STATE ON translation_unit_variant_perplexity_" + companyId
+                + "(tuv_id);";
+        
+        try
+        {
+            HibernateUtil.executeSql(sql1);
+            HibernateUtil.executeSql(sql2);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to create table translation_unit_variant_perplexity_" + companyId, e);
+        }
+    }
 
     /**
      * Create leverage match table with specified leverage match table name.

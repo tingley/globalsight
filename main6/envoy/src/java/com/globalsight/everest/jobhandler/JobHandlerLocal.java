@@ -568,6 +568,8 @@ public class JobHandlerLocal implements JobHandler
                 isPasswordSettingChanged = c.isEnableStrongPassword() != p_company.isEnableStrongPassword();
                 c.setEnableStrongPassword(p_company.isEnableStrongPassword());
                 c.setDisableUploadFileTypes(p_company.getDisableUploadFileTypes());
+                //For GBS-4495 perplexity score on MT
+                c.setEnablePerplexity(p_company.isEnablePerplexity());
                 HibernateUtil.update(c);
 
                 if (p_company.getTmVersion().getValue() == 3)
@@ -1006,7 +1008,7 @@ public class JobHandlerLocal implements JobHandler
                         + "151|152|154|155|156|157|158|159|160|162|163|164|165|166|167|168|170|171|172|173|174|188|190|191|192|193|194|195|196|197|200|"
                         + "201|202|203|204|205|206|208|209|210|212|213|214|215|216|217|218|219|220|221|223|224|227|228|229|230|235|244|247|"
                         + "255|256|257|258|259|260|262|263|264|265|266|267|268|269|270|291|292|293|294|295|296|297|298|299|"
-                        + "321|322|330|362|365|368|369|371|375|378|379|380|381|382|383|385|388|389|390|393|424|425|426|");
+                        + "321|322|330|362|365|368|369|371|375|378|379|380|381|382|383|385|388|389|390|393|424|425|426|436|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1019,7 +1021,7 @@ public class JobHandlerLocal implements JobHandler
                         + "104|127|128|129|130|131|132|133|134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
                         + "151|152|154|155|156|157|158|159|160|163|164|165|166|167|168|169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
                         + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|226|227|228|229|230|236|237|238|239|240|242|243|245|246|247|248|"
-                        + "252|253|254|255|256|259|261|270|362|368|385|388|389|390|393|394|");
+                        + "252|253|254|255|256|259|261|270|362|368|385|388|389|390|393|394|436|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 

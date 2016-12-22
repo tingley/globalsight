@@ -134,6 +134,18 @@ public class StatisticsService
                     // Update "Segment-TM,allExactMatch,ICE" word counts.
                     updateExtraColumnWordCountsForTargetPage(targetPage,
                             splittedTuvs, matches, p_excludedTuTypes);
+                    // For GBS-4495 perplexity score on MT
+                    int perplexity = 0;
+                    List<TuvImpl> tuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
+                    for (TuvImpl t : tuvs)
+                    {
+                        if (t.getPerplexityResult())
+                        {
+                            perplexity += t.getWordCount();
+                        }
+                        
+                    }
+                    targetPage.getWordCount().setPerplexity(perplexity);
 
                     HibernateUtil.update(targetPage);
 
@@ -1219,6 +1231,8 @@ public class StatisticsService
                         .getThresholdMedHiFuzzyWordCount());
                 wf.setThresholdNoMatchWordCount(wfWordCounts
                         .getThresholdNoMatchWordCount());
+                // For GBS-4495 perplexity score on MT
+                wf.setPerplexityWordCount(wfWordCounts.getPerplexity());
 
                 session.update(wf);
             }
@@ -1281,6 +1295,8 @@ public class StatisticsService
         int medHighFuzzyWordCount = 0;
         // 95%--99%
         int highFuzzyWordCount = 0;
+        
+        int perplexityWordCount = 0;
 
         int thresholdHiFuzzyWordCount = 0;
         int thresholdMedHiFuzzyWordCount = 0;
@@ -1329,6 +1345,8 @@ public class StatisticsService
                         .getThresholdLowFuzzyWordCount();
                 thresholdNoMatchWordCount += tpWordCount
                         .getThresholdNoMatchWordCount();
+                // For GBS-4495 perplexity score on MT
+                perplexityWordCount += tpWordCount.getPerplexity();
             }
         }
 
@@ -1363,6 +1381,8 @@ public class StatisticsService
         pageWordCounts
                 .setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
         pageWordCounts.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
+        // For GBS-4495 perplexity score on MT
+        pageWordCounts.setPerplexity(perplexityWordCount);
 
         return pageWordCounts;
     }

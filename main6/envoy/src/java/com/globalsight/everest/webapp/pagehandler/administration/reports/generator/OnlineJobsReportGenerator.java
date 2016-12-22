@@ -576,18 +576,16 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
         cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
 
+        int n = 4;
         if (m_data.useInContext)
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 5));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 5),
-                    getHeaderStyle(p_workbook));
-        }
-        else
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 4));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 4),
-                    getHeaderStyle(p_workbook));
-        }
+            n++;
+        
+        if (m_data.usePerplexity)
+            n++;
+        
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                getHeaderStyle(p_workbook));
 
         Cell cell_MorN = getCell(fourRow, col);
         cell_MorN.setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.internalreps"));
@@ -603,6 +601,14 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             col++;
             Cell cell_InContext = getCell(fourRow, col);
             cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+            cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+        }
+        
+        if (m_data.usePerplexity)
+        {
+            col++;
+            Cell cell_InContext = getCell(fourRow, col);
+            cell_InContext.setCellValue(m_bundle.getString("lb_perplexity"));
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
 
@@ -629,18 +635,13 @@ public class OnlineJobsReportGenerator implements ReportGenerator
 
         if (p_sheetCategory == MONTH_SHEET)
         {
+            n = 6;
             if (m_data.useInContext)
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                        getHeaderStyle(p_workbook));
-            }
-            else
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6),
-                        getHeaderStyle(p_workbook));
-            }
+                n++;           
+            
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                    getHeaderStyle(p_workbook));        
 
             Cell cell_InternalReps = getCell(fourRow, col);
             cell_InternalReps
@@ -658,7 +659,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
                 cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
-            }
+            }            
 
             Cell cell_FM_Invoice = getCell(fourRow, col);
             cell_FM_Invoice
@@ -701,18 +702,16 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         }
         else if (p_sheetCategory == MONTH_REVIEW_SHEET)
         {
+            n = 6;
             if (m_data.useInContext)
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                        getHeaderStyle(p_workbook));
-            }
-            else
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6),
-                        getHeaderStyle(p_workbook));
-            }
+                n++;
+            
+            if (m_data.usePerplexity)
+                n++;
+            
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                    getHeaderStyle(p_workbook));
 
             Cell cell_InternalReps = getCell(fourRow, col);
             cell_InternalReps
@@ -730,7 +729,8 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
                 cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
-            }
+            }            
+
 
             Cell cell_FM_Invoice = getCell(fourRow, col);
             cell_FM_Invoice
@@ -884,18 +884,16 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
         cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
 
+        int n = 7;
         if (m_data.useInContext)
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
-                    getHeaderStyle(p_workbook));
-        }
-        else
-        {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                    getHeaderStyle(p_workbook));
-        }
+            n++;
+        
+        if (m_data.usePerplexity)
+            n++;
+        
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                getHeaderStyle(p_workbook));
 
         Cell cell_MorN = getCell(fourRow, col);
         cell_MorN.setCellValue(m_bundle.getString("jobinfo.tradosmatches.invoice.per100matches"));
@@ -934,11 +932,19 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
         
+        if (m_data.usePerplexity)
+        {
+            col++;
+            Cell cell_Perplexity = getCell(fourRow, col);
+            cell_Perplexity.setCellValue(m_bundle.getString("lb_perplexity"));
+            cell_Perplexity.setCellStyle(getHeaderStyle(p_workbook));
+        }
+        
         col++;
         Cell cell_MT = getCell(fourRow, col);
         cell_MT.setCellValue(m_bundle.getString("lb_tm_mt"));
         cell_MT.setCellStyle(getHeaderStyle(p_workbook));
-
+        
         col++;
         Cell cell_Total = getCell(fourRow, col);
         cell_Total.setCellValue(m_bundle.getString("lb_total"));
@@ -951,18 +957,13 @@ public class OnlineJobsReportGenerator implements ReportGenerator
 
         if (p_sheetCategory == MONTH_SHEET)
         {
+            n = 8;
             if (m_data.useInContext)
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 9),
-                        getHeaderStyle(p_workbook));
-            }
-            else
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
-                        getHeaderStyle(p_workbook));
-            }
+                n++;        
+            
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                    getHeaderStyle(p_workbook));
 
             Cell cell_Per100Matches = getCell(fourRow, col);
             cell_Per100Matches.setCellValue(
@@ -1002,7 +1003,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
             }
-
+            
             Cell cell_Total_Invoice = getCell(fourRow, col);
             cell_Total_Invoice
                     .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.total"));
@@ -1032,18 +1033,13 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         }
         else if (p_sheetCategory == MONTH_REVIEW_SHEET)
         {
+            n = 7;
             if (m_data.useInContext)
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 9),
-                        getHeaderStyle(p_workbook));
-            }
-            else
-            {
-                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
-                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                        getHeaderStyle(p_workbook));
-            }
+                n+=2;            
+            
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
+                    getHeaderStyle(p_workbook));
 
             Cell cell_Per100Matches = getCell(fourRow, col);
             cell_Per100Matches.setCellValue(
@@ -1082,7 +1078,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
                 cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
-            }
+            }         
 
             Cell cell_TranTotal = getCell(fourRow, col);
             cell_TranTotal.setCellValue(m_bundle.getString("lb_translation_total"));
@@ -1315,6 +1311,14 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                     Cell cell_InContext = getCell(theRow, col++);
                     cell_InContext.setCellValue(data.inContextMatchWordCount);
                     cell_InContext.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
+                
+                if (m_data.usePerplexity)
+                {
+                    Cell cell_perplexity = getCell(theRow, col++);
+                    cell_perplexity.setCellValue(data.perplexityWordCount);
+                    cell_perplexity.setCellStyle(temp_normalStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 }
 
@@ -1552,6 +1556,14 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     }
 
+                    if (m_data.usePerplexity)
+                    {
+                        Cell cell_perplexity = getCell(theRow, col++);
+                        cell_perplexity.setCellValue(data.perplexityWordCount);
+                        cell_perplexity.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                    }
+                    
                     Cell cell_FuzzyMatch_Review = getCell(theRow, col++);
                     cell_FuzzyMatch_Review.setCellValue(data.fuzzyMatchWordCount);
                     cell_FuzzyMatch_Review.setCellStyle(temp_normalStyle);
@@ -1888,11 +1900,19 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 }
                 
+                if (m_data.usePerplexity)
+                {
+                    Cell cell_Perplexity = getCell(theRow, col++);
+                    cell_Perplexity.setCellValue(data.perplexityWordCount);
+                    cell_Perplexity.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
+                
                 Cell cell_MT = getCell(theRow, col++);
                 cell_MT.setCellValue(data.mtTotalWordCount);
                 cell_MT.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
-
+                
                 Cell cell_Total = getCell(theRow, col++);
                 cell_Total.setCellValue(data.totalWordCount);
                 cell_Total.setCellStyle(temp_normalStyle);
@@ -2132,6 +2152,14 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                         Cell cell_InContext = getCell(theRow, col++);
                         cell_InContext.setCellValue(data.inContextMatchWordCount);
                         cell_InContext.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                    }
+                    
+                    if (m_data.usePerplexity)
+                    {
+                        Cell cell_perplexity = getCell(theRow, col++);
+                        cell_perplexity.setCellValue(data.perplexityWordCount);
+                        cell_perplexity.setCellStyle(temp_normalStyle);
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     }
 
@@ -2397,6 +2425,14 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
             sumStartCol = getColumnName(c);
         }
+        
+        if (m_data.usePerplexity)
+        {
+            Cell cell_Perplexity = getCell(theRow, c++);
+            cell_Perplexity.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
+            cell_Perplexity.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
 
         // word count costs
         Cell cell_K = getCell(theRow, c++);
@@ -2639,6 +2675,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             throws CostingException, RemoteException, GeneralException
     {
         m_data.useInContext = getUseInContext(p_jobs);
+        m_data.usePerplexity = CompanyWrapper.isUsePerplexity();
 
         // first iterate through the Jobs and group by Project/workflow because
         // Dell doesn't want to see actual Jobs
@@ -2779,6 +2816,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 data.medHiFuzzyMatchWordCount = w.getThresholdMedHiFuzzyWordCount();
                 data.hiFuzzyMatchWordCount = w.getThresholdHiFuzzyWordCount();
                 data.mtTotalWordCount = w.getMtTotalWordCount();
+                data.perplexityWordCount = w.getPerplexityWordCount();
                 // the fuzzyMatchWordCount is the sum of the top 3 categories
                 data.fuzzyMatchWordCount = data.medFuzzyMatchWordCount
                         + data.medHiFuzzyMatchWordCount + data.hiFuzzyMatchWordCount;
@@ -3146,6 +3184,8 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         public long totalWordCount = 0;
         
         public long mtTotalWordCount = 0;
+        
+        public long perplexityWordCount = 0;
 
         // Dell wants to see anything 75% and above as a fuzzy match
         // so this is the sum of all except the lowest band
@@ -3258,6 +3298,8 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         ArrayList<Job> ignoreJobs = new ArrayList<Job>();
 
         boolean useInContext = false;
+        
+        boolean usePerplexity = false;
 
         // Summary Start column
         int sumStartCol = 0;

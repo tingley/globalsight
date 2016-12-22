@@ -42,10 +42,10 @@ import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -99,6 +99,8 @@ public abstract class BasicReportHandler
     protected String reportKey = "BasicReport";
 
     private boolean useInContext = false;
+    // For GBS-4495 perplexity score on MT
+    private boolean usePerplexity = false;
 
     // for pagination
     public static final int PAGE_CONTENT_HEIGTH_PX = 700;
@@ -122,6 +124,8 @@ public abstract class BasicReportHandler
 
         theUsername = DEFAULT_USERNAME;
         loadCommonBundle();
+        // For GBS-4495 perplexity score on MT
+        setUsePerplexity(CompanyWrapper.isUsePerplexity());
     }
 
     public void invokeHandler(HttpServletRequest req, HttpServletResponse res,
@@ -750,5 +754,15 @@ public abstract class BasicReportHandler
         {
             useInContext = true;
         }
+    }
+
+    public boolean isUsePerplexity()
+    {
+        return usePerplexity;
+    }
+
+    public void setUsePerplexity(boolean usePerplexity)
+    {
+        this.usePerplexity = usePerplexity;
     }
 }

@@ -43,6 +43,8 @@ public class ReportWordCount implements Cloneable
     private long tradosRepsWordCount = 0;
     private long tradosMTWordCount = 0;
     private long tradosTotalWordCount = 0;
+    // For GBS-4495 perplexity score on MT
+    private long perplexity = 0;
 
     public int getMonth()
     {
@@ -270,6 +272,8 @@ public class ReportWordCount implements Cloneable
         addTradosNoMatchWordCount(p_reportWordCount.getTradosNoMatchWordCount());
         addTradosRepsWordCount(p_reportWordCount.getTradosRepsWordCount());
         addTradosMTWordCount(p_reportWordCount.getTradosMTWordCount());
+        // For GBS-4495 perplexity score on MT
+        setPerplexity(p_reportWordCount.getPerplexity());
     }
 
     public ReportWordCount clone() 
@@ -284,5 +288,15 @@ public class ReportWordCount implements Cloneable
         }
         
         return new ReportWordCount();
+    }
+
+    public long getPerplexity()
+    {
+        return perplexity;
+    }
+
+    public void setPerplexity(long perplexity)
+    {
+        this.perplexity = perplexity;
     }
 }

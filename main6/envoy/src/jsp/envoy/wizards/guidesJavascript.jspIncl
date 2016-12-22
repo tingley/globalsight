@@ -219,7 +219,7 @@ function activateNodes(obj, guide)
 <%}%>
                  obj_tm,
                  obj_tmProfiles,
-<% if (userPers.getPermissionFor(Permission.MTP_VIEW)) { %>                 
+<% if (userPers.getPermissionFor(Permission.REMOTE_SERVICE) && (userPers.getPermissionFor(Permission.MTP_VIEW) || userPers.getPermissionFor(Permission.PS_VIEW))) { %>                 
                  obj_mtProfiles,
 <%}%>                 
                  obj_terminology,

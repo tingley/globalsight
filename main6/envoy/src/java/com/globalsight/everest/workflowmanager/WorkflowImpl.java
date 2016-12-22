@@ -126,6 +126,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     private Integer segmentTmWordCount = new Integer(0);
     private Integer incontextMatchWordCount = new Integer(0);
     private Integer mtExactMatchWordCount = new Integer(0);
+    // For GBS-4495 perplexity score on MT
+    private Integer perplexityWordCount = new Integer(0);
 
     /**
      * This includes ALL exact match word counts(segment-TM,context,MT,XLF and
@@ -1746,4 +1748,15 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     {
         return StringUtil.isNotEmpty(scorecardComment);
     }
+
+    public Integer getPerplexityWordCount()
+    {
+        return perplexityWordCount;
+    }
+
+    public void setPerplexityWordCount(Integer perplexityWordCount)
+    {
+        this.perplexityWordCount = perplexityWordCount;
+    }
+
 }

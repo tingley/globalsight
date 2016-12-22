@@ -46,6 +46,7 @@ public interface CompanyConstants
     public static final String SESSIONTIME = "sessionTimeField";
     public static final String ENABLE_IP_FILTER = "enableIPFilterField";
     public static final String ENABLE_TM_ACCESS_CONTROL = "enableTMAccessControlFiled";
+    public static final String ENABLE_PERPLEXITY = "enablePerplexityField";
     public static final String ENABLE_TB_ACCESS_CONTROL = "enableTBAccessControlFiled";
     public static final String ENABLE_QA_CHECKS = "enableQAChecksField";
     public static final String ENABLE_SSO_LOGON = "enableSsoLogonField";

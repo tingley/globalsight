@@ -1,3 +1,8 @@
+<%@page import="com.globalsight.everest.company.CompanyWrapper"%>
+<%@page import="com.globalsight.everest.company.Company"%>
+<%@page import="com.globalsight.everest.company.CompanyThreadLocal"%>
+<%@page import="com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityService"%>
+<%@page import="com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityManager"%>
 <%@ page contentType="text/html; charset=UTF-8"
 		errorPage="/envoy/common/error.jsp"
 		import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -69,6 +74,18 @@
    // get the newly created or existing workflow template info
    WorkflowTemplateInfo wfti = (WorkflowTemplateInfo)
       sessionMgr.getAttribute(WorkflowTemplateConstants.WF_TEMPLATE_INFO);
+   
+   long companyId = -1;
+   if (wfti == null)
+   {
+	   companyId = Long.parseLong(CompanyThreadLocal.getInstance().getValue());
+   }
+   else
+   {
+	   companyId = wfti.getCompanyId();
+   }
+   
+   boolean usePerplexity = CompanyWrapper.getCompanyById(companyId).isEnablePerplexity();
 
    List templates = null;
    int cnt=0;
@@ -198,6 +215,8 @@
                      + WorkflowTemplateConstants.ACTION 
                      + "=" + WorkflowTemplateConstants.LEVERAGE_ACTION;
    
+   List<PerplexityService> perplexitys = PerplexityManager.getAllPerplexity();
+   
    // Titles                                 
    String newTitle = bundle.getString("msg_wf_template_new_title1");
    String modifyTitle = bundle.getString("msg_wf_template_edit_title1");
@@ -214,6 +233,7 @@
 <TITLE><%= wizardTitle %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT SRC="/globalsight/jquery/jquery-1.11.3.min.js" type="text/javascript"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT language="JavaScript">
@@ -377,15 +397,46 @@ function confirmForm(formSent) {
 	   alert("<%= bundle.getString("jsmsg_wf_template_leveraging") %>");
 	   return false;
 	}
+	
+	if (formSent.perplexityId.selectedIndex > 0)
+	{
+	   if (formSent.perplexityKey.selectedIndex < 0)
+	   {
+		   alert("<%= bundle.getString("jsmsg_wf_template_perplexity_key") %>");
+		   return false;
+	   }
+	   
+	   if (!isPositiveNumber(formSent.perplexitySourceThreshold.value)) 
+	   {
+		   alert("<%= bundle.getString("jsmsg_wf_template_perplexity_source") %>");
+		   return false;
+	   }
+	   
+	   if (!isPositiveNumber(formSent.perplexityTargetThreshold.value)) 
+	   {
+		   alert("<%= bundle.getString("jsmsg_wf_template_perplexity_target") %>");
+		   return false;
+	   }
+	}
 
 	return true;
 }
 
 function populateLeverageFromList(localePairComboBox)
 {
+   $("#perplexityIds").val(-1);
+   $("#perplexityKey").val(-1); 
+
    if (!isSelectionMade(localePairComboBox)) {
+	   $("#perplexityIds").attr("disabled",true); 
+	   $("#perplexityKey").attr("disabled",true); 
+	   $("#perplexitySource").attr("disabled",true); 
+	   $("#perplexityTarget").attr("disabled",true); 
+
 	   return false;
-   }  
+   }
+   
+   $("#perplexityIds").attr("disabled",false); 
 
    var targetLang = null;
    var options_string = "";
@@ -462,6 +513,52 @@ function updateWFMS(projObj)
 
 }
 
+function updatePerplexity(v){
+	var n = $(v).val();
+	var x = n == -1;
+	
+	$("#perplexityKey").attr("disabled",true); 
+	$("#perplexitySource").attr("disabled",x); 
+	$("#perplexityTarget").attr("disabled",x); 
+	
+	if (x) {
+		$("#perplexityKey").val(-1);
+	} else {
+		$("#loading").show();
+		
+		var data = {
+				id : n,
+				lpId : $("#localePairField").val()
+			};
+			
+			$.ajax({
+				type : "POST",
+				url : '<%=self.getPageURL()%>&action=getPerplexity',
+				cache : false,
+				dataType : 'text',
+				data : data,
+				success : function(data) {
+					var z = eval("(" + data + ")");
+					$("#perplexityKey").html('<option value="-1"><%=bundle.getString("lb_choose")%></option>');
+					for (var i in z){
+						 var zb = z[i];
+						$("#perplexityKey").append('<option value="' + zb + '">' + zb + '</option>');
+					}
+					$("#perplexityKey").attr("disabled",false); 
+					$("#loading").hide();
+				},
+				error : function(request, error, status) {
+					$("#loading").hide();
+					result = "error";
+					alert(error);
+				}
+			});		
+	}
+}
+
+$(function(){
+	$("#perplexityIds").attr("disabled",$("#localePairField").val() == -1); 
+});
 </SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
@@ -588,7 +685,7 @@ function updateWFMS(projObj)
 			<TD>
                 <INPUT TYPE="HIDDEN" NAME="ForLeverage" value="false">
                 <%=labelLocalePair%><SPAN CLASS="asterisk">*</SPAN>:<BR>
-                    <SELECT NAME="<%=localePairField%>" <%=disabled%> 
+                    <SELECT id="localePairField" NAME="<%=localePairField%>" <%=disabled%> 
                     CLASS="standardText" ONCHANGE="populateLeverageFromList(this)" >
 
                     <%
@@ -746,6 +843,60 @@ function updateWFMS(projObj)
 	        	</select>
             </TD>
             </TR>
+            
+            <%if (usePerplexity){ %>
+            <TR>
+			<TD>
+			     <fieldset>
+                   <legend><%=bundle.getString("lb_perplexity_scorer")%></legend>
+                      <table class="standardText">
+                          <tr>
+                              <td><%=bundle.getString("lb_wf_remote_service")%>:</td>
+                              <td>
+                                 <select id="perplexityIds" name="perplexityId" onchange="updatePerplexity(this)" >
+                                     <option value="-1"><%=bundle.getString("lb_choose")%></option>
+                                     <%for (PerplexityService p : perplexitys) {
+                                       if (wfti != null && wfti.getPerplexityService() != null && p.getId() == wfti.getPerplexityService().getId()){
+	                                     %>
+	                                     <option value="<%=p.getId()%>" selected="selected"><%=p.getName()%></option>
+	                                     <%} else {%>
+	                                     <option value="<%=p.getId()%>"><%=p.getName()%></option>
+	                                     <%}
+                                       }%>
+                                 </select>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td><%=bundle.getString("lb_key")%>:</td>
+                              <td>
+                                 <select id="perplexityKey" name="perplexityKey" disabled="disabled" style="float:left;">
+                                     <option value="-1"><%=bundle.getString("lb_choose")%></option>
+                                     <%if (wfti != null && wfti.getPerplexityKey() != null ) {%>
+                                     <option value="<%=wfti.getPerplexityKey()%>" selected="selected"><%=wfti.getPerplexityKey()%></option>
+                                     <%} %>
+                                 </select>
+                                 <img src="images/ajax-loader.gif" id="loading" style="float:left; width:17px; display: none;"></img>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td><%=bundle.getString("lb_perplexity_source_threshold")%>: </td>
+                              <td>
+                                 <input type="text" name="perplexitySourceThreshold" disabled="disabled" style="width:100px;" id="perplexitySource" 
+                                 <%if (wfti != null && wfti.getPerplexitySourceThreshold() > 0){ %> value="<%=wfti.getPerplexitySourceThreshold() %>" <%} %>>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td><%=bundle.getString("lb_perplexity_target_threshold")%>: </td>
+                              <td>
+                                 <input type="text" name="perplexityTargetThreshold" disabled="disabled" style="width:100px;" id="perplexityTarget"
+                                 <%if (wfti != null && wfti.getPerplexityTargetThreshold() > 0){ %> value="<%=wfti.getPerplexityTargetThreshold() %>" <%} %>>
+                              </td>
+                          </tr>
+                      </table>
+                  </fieldset>               
+            </TD>
+            </TR>
+            <%} %>
             <TR>
             </TR>
             </TABLE>

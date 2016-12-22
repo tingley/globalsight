@@ -723,6 +723,11 @@ public class JobDetailsReportHandler extends BasicReportHandler
         {
             subcolSize++;
         }
+        // For GBS-4495 perplexity score on MT
+        if (isUsePerplexity())
+        {
+            subcolSize++;
+        }
 
         if (isJobCostingOn())
         {
@@ -737,6 +742,11 @@ public class JobDetailsReportHandler extends BasicReportHandler
         if (super.isUseInContext())
         {
             subcols[i++] = WorkflowTableModel.IN_CONTEXT_WC;
+        }
+        // For GBS-4495 perplexity score on MT
+        if (isUsePerplexity())
+        {
+            subcols[i++] = WorkflowTableModel.PERPLEXITY;
         }
 
         subcols[i++] = WorkflowTableModel.FUZZY_HI_WC;

@@ -121,6 +121,9 @@ public class OfflineSegmentData implements Serializable
 
     // For XLF/OmegaT TK, if target "state" attribute is "translated"...
     private boolean isStateTranslated = false;
+    // For GBS-4495 perplexity score on MT
+    private boolean perplexityResult = false;
+    private boolean usePerplexity = false;
 
     //
     // Constructors
@@ -1189,5 +1192,25 @@ public class OfflineSegmentData implements Serializable
     public void setStateTranslated(boolean isStateTranslated)
     {
         this.isStateTranslated = isStateTranslated;
+    }
+
+    public boolean getPerplexityResult()
+    {
+        return perplexityResult;
+    }
+
+    public void setPerplexityResult(boolean perplexityResult)
+    {
+        this.perplexityResult =perplexityResult;
+    }
+
+    public boolean isUsePerplexity()
+    {
+        return usePerplexity;
+    }
+
+    public void setUsePerplexity(boolean usePerplexity)
+    {
+        this.usePerplexity = usePerplexity;
     }
 }

@@ -281,3 +281,10 @@ function setCookie(name, value, expiresDays) {
         cookieString += ";secure";
     document.cookie = cookieString;
 }
+
+function isPositiveNumber(value){
+	if (isNaN(value))
+		return false;
+	
+	 return value>0;
+}

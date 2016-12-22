@@ -362,6 +362,45 @@ public class DbUtil
         }
         return list;
     }
+    
+    @SuppressWarnings("rawtypes")
+    public static List<ArrayList> query(String sql, Object... args) throws Exception
+    {
+        Connection conn = getConnection();
+        List<ArrayList> list = new ArrayList<ArrayList>();
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        ResultSetMetaData rsmd = null;
+        try
+        {
+            st = conn.prepareStatement(sql);
+            
+            int j = 1;
+            for (Object arg : args)
+            {
+                st.setObject(j++, arg);
+            }
+            rs = st.executeQuery();
+            rsmd = rs.getMetaData();
+            int column = rsmd.getColumnCount();
+            while (rs.next())
+            {
+                ArrayList l = new ArrayList();
+                for (int i = 0; i < column; i++)
+                {
+                    l.add(rs.getObject(i + 1));
+                }
+                list.add(l);
+            }
+        }
+        finally
+        {
+            rs.close();
+            silentClose(st);
+            returnConnection(conn);
+        }
+        return list;
+    }
 
     /**
      * create in clause of locale ids. It produces somethig like this: (9238,

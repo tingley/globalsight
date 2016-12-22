@@ -47,6 +47,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.IXliffProcessor;
@@ -60,6 +61,7 @@ import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.tuv.XliffProcessor;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityScoreCounter;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
@@ -958,6 +960,20 @@ public abstract class AbstractTargetPagePersistence implements
         s_logger.info("End hit " + machineTranslator.getEngineName()
                 + "(SourcePageID:" + p_sourcePage.getIdAsLong()
                 + "; TargetLocale:" + p_targetLocale.getLocaleCode() + ").");
+        
+        // For GBS-4495 perplexity score on MT.
+        // Init perplexity score counter with WorkflowTemplateInfo.
+        PerplexityScoreCounter counter = null;
+        Request request = p_sourcePage.getRequest();
+        L10nProfile l10nProfile = request.getL10nProfile();
+        WorkflowTemplateInfo workflowTemplateInfo = l10nProfile
+                .getWorkflowTemplateInfo(p_targetLocale);
+        if (workflowTemplateInfo.getPerplexityService() != null)
+        {
+            counter = new PerplexityScoreCounter();
+            counter.init(workflowTemplateInfo);
+        }
+        
         // handle translate result one by one.
         Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
         for (int tuvIndex = 0; tuvIndex < targetTuvsInArray.length; tuvIndex++)
@@ -1007,6 +1023,12 @@ public abstract class AbstractTargetPagePersistence implements
                 // mark TUVs as localized so they get committed to the TM
                 TuvImpl t = (TuvImpl) currentNewTuv;
                 t.setState(com.globalsight.everest.tuv.TuvState.LOCALIZED);
+                
+                // For GBS-4495 perplexity score on MT. 
+                if (counter != null)
+                {
+                    counter.score(sourceTuv, t);
+                }
             }
 
             // save MT match into "leverage_match"
@@ -1022,7 +1044,16 @@ public abstract class AbstractTargetPagePersistence implements
                 lm.setTargetLocale(currentNewTuv.getGlobalSightLocale());
                 // This is the first MT matches,its order number is 301.
                 lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_MT);
-                lm.setScoreNum(MachineTranslator.MT_SCORE);
+                
+                // For GBS-4495 perplexity score on MT. 
+                float score = MachineTranslator.MT_SCORE;
+                TuvImpl t = (TuvImpl) currentNewTuv;
+                if (t.getPerplexityResult())
+                {
+                    score = MachineTranslator.MT_SCORE_PERPLEXITY;
+                }
+                    
+                lm.setScoreNum(score);
                 lm.setMatchType(MatchState.MACHINE_TRANSLATION.getName());
                 lm.setMatchedTuvId(-1);
                 lm.setProjectTmIndex(Leverager.MT_PRIORITY);

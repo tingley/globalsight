@@ -513,4 +513,17 @@ public class CompanyWrapper
         }
         return names;
     }
+    
+    /**
+     * Is current company use perplexity or not.
+     * 
+     * For GBS-4495 perplexity score on MT
+     * @return
+     */
+    public static boolean isUsePerplexity()
+    {
+        String currentId = CompanyThreadLocal.getInstance().getValue();
+        Company c = getCompanyById(Long.parseLong(currentId));
+        return c.isEnablePerplexity();
+    }
 }

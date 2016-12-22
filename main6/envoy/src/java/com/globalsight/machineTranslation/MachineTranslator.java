@@ -68,6 +68,8 @@ public interface MachineTranslator
 
     // MT translation applies fixed score "60".
     public static final float MT_SCORE = 60f;
+    // For GBS-4495. Set the mt score to 65 if pass the perplexity check.
+    public static final float MT_SCORE_PERPLEXITY = 65f;
 
     /**
      * In GlobalSight, segments from XLF file are "wrapped" with "ph" again.

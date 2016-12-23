@@ -726,10 +726,13 @@ public class ReviewerVendorPoXlsReportHelper
                     theSheet.setColumnWidth(col - 1, numwidth * 256);
                 }
                 
-                Cell cell_perplexity = getCell(theRow, col++);
-                cell_perplexity.setCellValue(data.tradosPerplexityWordCount);
-                cell_perplexity.setCellStyle(getContentStyle(p_workbook));
-                theSheet.setColumnWidth(col - 1, numwidth * 256);
+                if (usePerplexity)
+                {
+                    Cell cell_perplexity = getCell(theRow, col++);
+                    cell_perplexity.setCellValue(data.tradosPerplexityWordCount);
+                    cell_perplexity.setCellStyle(getContentStyle(p_workbook));
+                    theSheet.setColumnWidth(col - 1, numwidth * 256);
+                }
 
                 Cell cell_mt = getCell(theRow, col++);
                 cell_mt.setCellValue(data.tradosMTWordCount);

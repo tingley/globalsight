@@ -21,6 +21,14 @@ String selectFile = bundle.getString("msg_file_none");
 String helper_locale_pair_import = bundle.getString("helper_text_config_import");
 
 String startUploadURL = startUpload.getPageURL()+"&action=startUpload";
+boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
+List<Long> companyIdList = null;
+long currentId = -1;
+if(isSuperAdmin){
+	companyIdList = (List<Long>)request.getAttribute("companyIdList");
+	String currentIdStr = (String)request.getAttribute("currentId");
+	currentId = Long.parseLong(currentIdStr);
+}
 String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
 String disableUploadFileTypes = CompanyWrapper.getCompanyById(currentCompanyId).getDisableUploadFileTypes();
 %>
@@ -37,6 +45,7 @@ var helpFile = "<%=bundle.getString("help_configuration_screen")%>";
 var startUploadURL = "<%=startUploadURL%>";
 var companyId = -1;
 var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
+var isSuperAdmin = "<%=isSuperAdmin%>";
 function confirmJump()
 {
 	return true;
@@ -57,8 +66,31 @@ $(document).ready(function(){
 			alert("<%=bundle.getString("msg_alert_filter_import")%>");
 			return;
 		}
+		var fileTypeArr= new Array(); 
+    	fileTypeArr = disableUploadFileTypes.split(",");
+    	for(i=0;i<fileTypeArr.length ;i++ )
+    	{
+    		if(fileTypeArr[i] == ext)
+    		{
+    			alert("<%=bundle.getString("lb_message_check_upload_file_type")%>"+disableUploadFileTypes);
+        		return false;
+    		}
+    	}
+    	if(ext.toLowerCase() != ".xml"&& ext.toLowerCase() != ".properties"
+    			&& ext.toLowerCase() != ".zip" && ext.toLowerCase() != ".rar"&& ext.toLowerCase() != ".7z")
+		{
+			alert("<%=bundle.getString("msg_alert_filter_import")%>");
+			return;
+		}
 		
 		$("#progressbar").show();
+		if(isSuperAdmin == "true"){
+	     	var companyIdSelect = document.getElementById("companyId");
+	     	var index = companyIdSelect.selectedIndex;
+	        var companyId = companyIdSelect.options[index].value;
+	        
+	     	startUploadURL +=  "&companyId="+companyId;
+		}
      	document.configImportForm.action = startUploadURL;
      	document.configImportForm.submit();
 	 });
@@ -80,9 +112,25 @@ $(document).ready(function(){
 		<td colspan="2"><c:out value="<%= selectFile%>"/></td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="file" calss="standardText" size="60" id="fileInput" name="fileInput" onchange="checkAndUpload()"></td>
+		<td colspan="2"><input type="file" calss="standardText" size="60" id="fileInput" name="fileInput"></td>
 	</tr>
-
+<%if(isSuperAdmin){%>
+	<tr>
+		<td>Import To :</td>
+		<td>
+			<select id="companyId" name="companyId">
+			<option value="-1">Choose......</option>
+			<%if(companyIdList != null && companyIdList.size() > 0){
+				for(int n = 0;n < companyIdList.size();n++){%>
+					<option value = "<%= companyIdList.get(n)%>" <%=companyIdList.get(n) ==  currentId ? "selected":""%>>
+        			<%=CompanyWrapper.getCompanyNameById(String.valueOf(companyIdList.get(n)))%>
+        			</option>
+			<%}
+			}%>
+			</select>
+		</td>
+	</tr>
+<%}%>
     <tr>
 		<td colspan="2"><span id="progressbar" style="display:none"><img src="/globalsight/images/createjob/progressbar.gif" style="width:400px;height:20px"></img></span></td>
 	</tr>

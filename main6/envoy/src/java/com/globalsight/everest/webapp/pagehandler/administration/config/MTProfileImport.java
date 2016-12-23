@@ -43,36 +43,31 @@ import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.projecthandler.EngineEnum;
 import com.globalsight.everest.projecthandler.MachineTranslationExtentInfo;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Imports mt profile info to system.
  */
-public class MTProfileImport extends MultiCompanySupportedThread implements ConfigConstants
+public class MTProfileImport implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(MTProfileImport.class);
     private Map<Long, MachineTranslationProfile> mtpMap = new HashMap<Long, MachineTranslationProfile>();
     private Map<Long, Long> mtpExtentInfoMap = new HashMap<Long, Long>();
-    private File uploadedFile;
     private String currentCompanyId;
     private String sessionId;
+    private String importToCompId;
     private EngineEnum[] engines = null;
 
-    public MTProfileImport(String sessionId, File uploadedFile, String currentCompanyId)
+    public MTProfileImport(String sessionId, String currentCompanyId, String importToCompId)
     {
         this.sessionId = sessionId;
-        this.uploadedFile = uploadedFile;
         this.currentCompanyId = currentCompanyId;
-    }
-
-    public void run()
-    {
-        CompanyThreadLocal.getInstance().setIdValue(this.currentCompanyId);
+        this.importToCompId = importToCompId;
         engines = EngineEnum.values();
-        this.analysisAndImport(uploadedFile);
     }
 
-    private void analysisAndImport(File uploadedFile)
+    public void analysisAndImport(File uploadedFile)
     {
         Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
 
@@ -181,16 +176,14 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
             if (dataMap.containsKey("MachineTranslationProfile"))
             {
                 storeMTPData(dataMap);
-                Thread.sleep(100);
             }
 
             if (dataMap.containsKey("MachineTranslationExtentInfo"))
             {
                 storeMTPExtentInfoData(dataMap);
-                Thread.sleep(100);
             }
 
-            addMessage("<b>Imported successfully !</b>");
+            addMessage("<b> Done importing Machine Translation Profiles.</b>");
         }
         catch (Exception e)
         {
@@ -210,10 +203,22 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
             {
                 mtp = mtpList.get(i);
                 long oldId = mtp.getId();
-                if (!isMtProfileExisted(mtp.getMtProfileName(), mtp.getCompanyid()))
+                String oldName = mtp.getMtProfileName();
+                String newName = getMTPNewName(oldName, mtp.getCompanyid());
+                mtp.setMtProfileName(newName);
+                HibernateUtil.save(mtp);
+                long newId = selectNewId(newName, mtp.getCompanyid());
+                mtp = MTProfileHandlerHelper.getMTProfileById(String
+                        .valueOf(newId));
+                mtpMap.put(oldId, mtp);
+                if (oldName.equals(newName))
                 {
-                    HibernateUtil.save(mtp);
-                    mtpMap.put(oldId, mtp);
+                    addMessage("<b>" + mtp.getMtProfileName() + "</b> imported successfully.");
+                }
+                else
+                {
+                    addMessage(" MT Profile name <b>" + oldName + "</b> already exists. <b>"
+                            + mtp.getMtProfileName() + "</b> imported successfully.");
                 }
             }
         }
@@ -325,7 +330,14 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
             }
             else if (keyField.equalsIgnoreCase("COMPANY_ID"))
             {
-                mtp.setCompanyid(Long.parseLong(currentCompanyId));
+                if (importToCompId != null && !importToCompId.equals("-1"))
+                {
+                    mtp.setCompanyid(Long.parseLong(importToCompId));
+                }
+                else
+                {
+                    mtp.setCompanyid(Long.parseLong(currentCompanyId));
+                }
             }
             else if (keyField.equalsIgnoreCase("TIMESTAMP"))
             {
@@ -417,8 +429,7 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
         return extenInfo;
     }
 
-    @SuppressWarnings("unchecked")
-    private boolean isMtProfileExisted(String mtProfileName, Long companyId)
+    private String getMTPNewName(String filterName, Long companyId)
     {
         String hql = "select mtp.mtProfileName from MachineTranslationProfile "
                 + "  mtp where mtp.companyid=:companyid";
@@ -426,28 +437,58 @@ public class MTProfileImport extends MultiCompanySupportedThread implements Conf
         map.put("companyid", companyId);
         List itList = HibernateUtil.search(hql, map);
 
-        // map.put("companyid", companyId);
-        // map.put("mtProfileName", mtProfileName);
-        // MachineTranslationProfile result = (MachineTranslationProfile)
-        // HibernateUtil.getFirst(hql, map);
-        if (itList != null && itList.contains(mtProfileName))
+        if (itList.contains(filterName))
         {
-            return true;
+            for (int num = 1;; num++)
+            {
+                String returnStr = null;
+                if (filterName.contains("_import_"))
+                {
+                    returnStr = filterName.substring(0,
+                            filterName.lastIndexOf('_'))
+                            + "_" + num;
+                }
+                else
+                {
+                    returnStr = filterName + "_import_" + num;
+                }
+                if (!itList.contains(returnStr))
+                {
+                    return returnStr;
+                }
+            }
         }
-        return false;
+        else
+        {
+            return filterName;
+        }
     }
 
+    private Long selectNewId(String mtProfileName, Long companyId)
+    {
+        Map map = new HashMap();
+
+        String hql = "select mtp.id from MachineTranslationProfile "
+                + "  mtp where mtp.companyid=:companyid and  mtp.mtProfileName=:mtProfileName ";
+
+        map.put("companyid", companyId);
+        map.put("mtProfileName", mtProfileName);
+
+        Long id = (Long) HibernateUtil.getFirst(hql, map);
+
+        return id;
+    }
     private void addToError(String msg)
     {
         String former = config_error_map.get(sessionId) == null ? "" : config_error_map
                 .get(sessionId);
-        config_error_map.put(sessionId, former + "<p style='color:red'>" + msg);
+        config_error_map.put(sessionId, former + "<p>" + msg);
     }
 
     private void addMessage(String msg)
     {
         String former = config_error_map.get(sessionId) == null ? "" : config_error_map
                 .get(sessionId);
-        config_error_map.put(sessionId, former + "<p style='color:blue'>" + msg);
+        config_error_map.put(sessionId, former + "<p>" + msg);
     }
 }

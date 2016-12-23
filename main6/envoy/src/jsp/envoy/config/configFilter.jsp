@@ -89,18 +89,18 @@
                 <br/>        
                 <div id="toShowfmFilter" style="cursor:pointer;display:inline-block;" onclick="initConfigShow('toShowfmFilter','fmFilterPanel')">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
-                    <b><%=bundle.getString("lb_filter_fmfilter")%></b>
+                    <b><%=bundle.getString("lb_config_filter_fmfilter")%></b>
                 </div>
                 <div id="fmFilterPanel" style="display:none;">
                 
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
-      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_fmfilter")%>s
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_config_filter_fmfilter")%>s
       				</td>
       				<td>&nbsp;</td>
       				<td>
-      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_filter_fmfilter")%>s
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_config_filter_fmfilter")%>s
       				</td>
       			</tr>
         		<tr>
@@ -142,18 +142,18 @@
                 <br/>        
                 <div id="toShowHtmlFilter" style="cursor:pointer;display:inline-block;" onclick="initConfigShow('toShowHtmlFilter','htmlFilterPanel')">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
-                    <b><%=bundle.getString("lb_filter_htmlfilter")%></b>
+                    <b><%=bundle.getString("lb_config_filter_htmlfilter")%></b>
                 </div>
                 <div id="htmlFilterPanel" style="display:none;">
                 
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
-      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_htmlfilter")%>s
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_config_filter_htmlfilter")%>s
       				</td>
       				<td>&nbsp;</td>
       				<td>
-      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_filter_htmlfilter")%>s
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_config_filter_htmlfilter")%>s
       				</td>
       			</tr>
         		<tr>
@@ -301,18 +301,18 @@
                 <br/>        
                 <div id="toShowJavascriptFilter" style="cursor:pointer;display:inline-block;" onclick="initConfigShow('toShowJavascriptFilter','javascriptFilterPanel')">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
-                    <b><%=bundle.getString("lb_filter_javascriptfilter")%></b>
+                    <b><%=bundle.getString("lb_config_filter_javascriptfilter")%></b>
                 </div>
                 <div id="javascriptFilterPanel" style="display:none;">
                 
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
-      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_javascriptfilter")%>s
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_config_filter_javascriptfilter")%>s
       				</td>
       				<td>&nbsp;</td>
       				<td>
-      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_filter_javascriptfilter")%>s
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_config_filter_javascriptfilter")%>s
       				</td>
       			</tr>
         		<tr>
@@ -407,18 +407,18 @@
                 <br/>        
                 <div id="toShowjspFilter" style="cursor:pointer;display:inline-block;" onclick="initConfigShow('toShowjspFilter','jspFilterPanel')">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
-                    <b><%=bundle.getString("lb_filter_jspfilter")%></b>
+                    <b><%=bundle.getString("lb_config_filter_jspfilter")%></b>
                 </div>
                 <div id="jspFilterPanel" style="display:none;">
                 
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
-      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_jspfilter")%>s
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_config_filter_jspfilter")%>s
       				</td>
       				<td>&nbsp;</td>
       				<td>
-      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_filter_jspfilter")%>s
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_config_filter_jspfilter")%>s
       				</td>
       			</tr>
         		<tr>
@@ -884,18 +884,18 @@
                 <br/>        
                 <div id="toShowxmlFilter" style="cursor:pointer;display:inline-block;" onclick="initConfigShow('toShowxmlFilter','xmlFilterPanel')">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
-                    <b><%=bundle.getString("lb_filter_xmlfilter")%></b>
+                    <b><%=bundle.getString("lb_config_filter_xmlfilter")%></b>
                 </div>
                 <div id="xmlFilterPanel" style="display:none;">
                 
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
-      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_xmlfilter")%>s
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_config_filter_xmlfilter")%>s
       				</td>
       				<td>&nbsp;</td>
       				<td>
-      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_filter_xmlfilter")%>s
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_config_filter_xmlfilter")%>s
       				</td>
       			</tr>
         		<tr>

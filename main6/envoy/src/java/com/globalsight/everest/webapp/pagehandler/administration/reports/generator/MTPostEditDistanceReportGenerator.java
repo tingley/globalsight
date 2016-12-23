@@ -450,19 +450,19 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             Cell cell_I = getCell(detailHeaderRow, col);
             cell_I.setCellValue(m_bundle.getString("lb_source_perplexity"));
             cell_I.setCellStyle(getHeaderStyle(p_workBook));
-            p_sheet.setColumnWidth(col, 80 * 256);
+            p_sheet.setColumnWidth(col, 15 * 256);
             col++;
             
             Cell cell_J = getCell(detailHeaderRow, col);
             cell_J.setCellValue(m_bundle.getString("lb_target_perplexity"));
             cell_J.setCellStyle(getHeaderStyle(p_workBook));
-            p_sheet.setColumnWidth(col, 80 * 256);
+            p_sheet.setColumnWidth(col, 15 * 256);
             col++;
             
             Cell cell_K = getCell(detailHeaderRow, col);
             cell_K.setCellValue(m_bundle.getString("lb_pass_fail"));
             cell_K.setCellStyle(getHeaderStyle(p_workBook));
-            p_sheet.setColumnWidth(col, 80 * 256);
+            p_sheet.setColumnWidth(col, 15 * 256);
             col++;
         }
     }

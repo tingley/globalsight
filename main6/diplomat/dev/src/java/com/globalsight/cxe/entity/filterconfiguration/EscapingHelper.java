@@ -1909,7 +1909,7 @@ public class EscapingHelper
 			}
 		}
 
-		if (!contentMap.isEmpty())
+		if (!contentMap.isEmpty() || !tagMap.isEmpty())
 		{
 			Map<String, String> newContentMap = new HashMap<String, String>();
 			String content = "";
@@ -1976,7 +1976,7 @@ public class EscapingHelper
 			}
 		}
 
-		if (!contentMap.isEmpty() && !tagMap.isEmpty())
+		if (!contentMap.isEmpty() || !tagMap.isEmpty())
 		{
 			Map<String, String> newContentMap = new HashMap<String, String>();
 			Map<String, String> newTagMap = new HashMap<String, String>();
@@ -2040,6 +2040,7 @@ public class EscapingHelper
 				}
 			}
 		}
+
 		return sb.toString();
 	}
 

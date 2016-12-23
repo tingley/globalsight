@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
+import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.PTEscapeSequence;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
@@ -39,7 +41,12 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 
     private String REGEX_COLON = ":[\\s|\\t|\\r|\\n]*\"";
     private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[[\\s|\\t|\\r|\\n]*\"";
-
+    private static String[] invalidHtmlTagCharacters = new String[]
+    	    { "{", "}", "%", "^", "~", "!", "&", "*", "(", ")", "?" };
+	private static final String PLACEHOLDER_LEFT_TAG = "GS_PLACEHOLDER_LEFT_TAG";
+	private static final String PLACEHOLDER_RIGHT_TAG = "GS_PLACEHOLDER_RIGHT_TAG";
+	private static final String PLACEHOLDER_LEFT_NATIVE = "GS_PLACEHOLDER_LEFT_NATIVE";
+	private static final String PLACEHOLDER_RIGHT_NATIVE = "GS_PLACEHOLDER_RIGHT_NATIVE";
     private Output m_output = null;
     private Filter m_elementPostFilter = null;
     private String m_postFormat = null;
@@ -251,7 +258,8 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
     private void gotoPostFilter(String str, String sid)
     {
         XmlEntities entity = new XmlEntities();
-        str = str.replace("\\\"", "\"");
+        str = protectInvalidTags(str);
+        str = replaceAllTagSlash(str);
         Output output = switchExtractor(str, m_postFormat, m_elementPostFilter);
         Iterator it = output.documentElementIterator();
         while (it.hasNext())
@@ -296,6 +304,61 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
         }
     }
     
+    /**
+     * 	0001845: Translatable attribute in the html post filter does not work for json filter
+     * 	0002179: InActive start finished with does not work for JSON filter in some cases
+     * */
+    private String replaceAllTagSlash(String str){
+		StringBuffer buffer = new StringBuffer();
+    	Pattern startDecode = Pattern.compile("<[^>|^/]*>");
+    	Matcher mDecode = startDecode.matcher(str);
+		String str01 = "";
+		String str02 = "";
+		int i = 0;
+		while (mDecode.find())
+		{
+			str01 = str.substring(i, mDecode.start());
+			buffer.append(str01);
+			str02 = str.substring(mDecode.start(),mDecode.end()).replace("\\\"", "\"");
+			buffer.append(str02);
+			i = mDecode.end();
+		}
+		
+		if (i < str.length())
+		{
+			buffer.append(str.substring(i, str.length()));
+		}
+		if (buffer.toString() != null && buffer.length() > 0)
+		{
+			str = buffer.toString();
+			buffer = new StringBuffer();
+		}
+		
+		Pattern startEncode = Pattern.compile("&lt;[^>|^/]*&gt;");
+		Matcher mEecode = startEncode.matcher(str);
+		int j = 0;
+		while (mEecode.find())
+		{
+			str01 = str.substring(j, mEecode.start());
+			buffer.append(str01);
+			str02 = str.substring(mEecode.start(),mEecode.end()).replace("\\\"", "\"");
+			buffer.append(str02);
+			j = mEecode.end();
+		}
+		if (j < str.length())
+		{
+			buffer.append(str.substring(j, str.length()));
+		}
+		
+		if (buffer.toString() != null && buffer.length() > 0)
+		{
+			str = buffer.toString();
+			buffer = new StringBuffer();
+		}
+		
+		return str;
+    }
+    
     private void extractString(Reader p_input, boolean p_postFiltered, String sid)
     {
         Vector vTokenBuf = new Vector(200, 50);
@@ -327,6 +390,14 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
                 String content = Tok.m_strContent;
                 if (p_postFiltered)
                 {
+                	content = StringUtil.replace(content, PLACEHOLDER_LEFT_TAG,
+                            "<");
+                    content = StringUtil.replace(content,
+                            PLACEHOLDER_RIGHT_TAG, ">");
+                    content = StringUtil.replace(content,
+                            PLACEHOLDER_LEFT_NATIVE, "&lt;");
+                    content = StringUtil.replace(content,
+                            PLACEHOLDER_RIGHT_NATIVE, "&gt;");
                     m_output.addTranslatableTmx(content, sid, true, m_postFormat);
                 }
             }
@@ -351,6 +422,53 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 
     }
 
+    /**
+     * Protects invalid html tags, like <>, <{0}> before going into html
+     * post-filter.
+     * 
+     * @since GBS-3881
+     */
+    private String protectInvalidTags(String content)
+    {
+        Pattern p = Pattern.compile("<([^>]*?)>");
+        Matcher m = p.matcher(content);
+        while (m.find())
+        {
+            boolean isInvalidTag = false;
+            String tag = m.group(1);
+            if (StringUtil.isEmpty(tag))
+            {
+                isInvalidTag = true;
+            }
+            else
+            {
+                for (int i = 0; i < tag.length(); i++)
+                {
+                    char c = tag.charAt(i);
+                    if (StringUtil.isIncludedInArray(invalidHtmlTagCharacters,
+                            String.valueOf(c)))
+                    {
+                        isInvalidTag = true;
+                        break;
+                    }
+                }
+            }
+            if (isInvalidTag)
+            {
+                StringBuilder replaced = new StringBuilder();
+                replaced.append(content.substring(0, m.start()));
+                replaced.append(PLACEHOLDER_LEFT_NATIVE);
+                replaced.append(tag);
+                replaced.append(PLACEHOLDER_RIGHT_NATIVE);
+                replaced.append(content.substring(m.end()));
+
+                content = replaced.toString();
+                m = p.matcher(content);
+            }
+        }
+        return content;
+    }
+    
     @Override
     public void loadRules() throws ExtractorException
     {

@@ -398,7 +398,7 @@ function confirmForm(formSent) {
 	   return false;
 	}
 	
-	if (formSent.perplexityId.selectedIndex > 0)
+	if (formSent.perplexityId && formSent.perplexityId.selectedIndex > 0)
 	{
 	   if (formSent.perplexityKey.selectedIndex < 0)
 	   {

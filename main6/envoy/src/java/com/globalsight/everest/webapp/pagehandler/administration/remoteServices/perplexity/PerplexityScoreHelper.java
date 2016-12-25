@@ -582,7 +582,7 @@ public class PerplexityScoreHelper
         }
         catch (Exception e)
         {
-            logger.warn(e);
+            logger.error(e);
         }
 
         return null;

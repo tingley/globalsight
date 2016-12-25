@@ -83,15 +83,18 @@ public class PerplexityScoreCounter
 
         PerplexityScores result = helper.getPerplexityScore(accessToken, ps.getUrl(),
                 Long.parseLong(key), srcs, trgs);
-        List<Double> ss = result.getSources();
-        List<Double> ts = result.getTargets();
-        
-        TuvPerplexity perplexity = new TuvPerplexity();
-        perplexity.setPerplexitySource(ss.get(0));
-        perplexity.setPerplexityTarget(ts.get(0));
-        perplexity.setPerplexityResult(ss.get(0) <= sourceThreshold && ts.get(0) <= targetThreshold);
-        perplexity.setCompanyId(CompanyWrapper.getCurrentCompanyIdAsLong());
-        
-        trg.setPerplexity(perplexity);
+        if (result != null)
+        {
+            List<Double> ss = result.getSources();
+            List<Double> ts = result.getTargets();
+            
+            TuvPerplexity perplexity = new TuvPerplexity();
+            perplexity.setPerplexitySource(ss.get(0));
+            perplexity.setPerplexityTarget(ts.get(0));
+            perplexity.setPerplexityResult(ss.get(0) <= sourceThreshold && ts.get(0) <= targetThreshold);
+            perplexity.setCompanyId(CompanyWrapper.getCurrentCompanyIdAsLong());
+            
+            trg.setPerplexity(perplexity);
+        }
     }
 }

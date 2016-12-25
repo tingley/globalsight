@@ -1559,7 +1559,13 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 	// For GBS-4495 perplexity score on MT
     public boolean getPerplexityResult()
     {
-        return loadPerplexity().getPerplexityResult();
+        String modifiedUser = getLastModifiedUser();
+        if (modifiedUser != null && modifiedUser.endsWith("_MT"))
+        {
+            return loadPerplexity().getPerplexityResult();
+        }
+            
+        return false;
     }
 
     public TuvPerplexity getPerplexity()

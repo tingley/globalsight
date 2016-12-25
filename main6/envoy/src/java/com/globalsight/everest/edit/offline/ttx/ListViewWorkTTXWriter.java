@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
@@ -39,7 +40,6 @@ import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ServerUtil;
-import com.globalsight.util.StringUtil;
 
 public class ListViewWorkTTXWriter extends TTXWriterUnicode
 {
@@ -232,19 +232,7 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         m_outputStream.write(m_strEOL);
         
         int TMEditType = m_downloadParams.getTMEditType();
-        boolean writeTu = true;
-		if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH) 
-		{
-			if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100
-					&& isInContextMatch(p_osd))
-				writeTu = false;
-			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
-					&& isExactMatch(p_osd))
-				writeTu = false;
-			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
-					&& (isExactMatch(p_osd) || isInContextMatch(p_osd)))
-				writeTu = false;
-		}
+        boolean writeTu = !OfflineEditHelper.isLock(p_osd, TMEditType);
 
         if (writeTu)
         {

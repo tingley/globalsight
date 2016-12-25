@@ -942,6 +942,18 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
             case AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY:
                 displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_DENY;
                 break;
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_ICE_100:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE_100;
+                break;
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_ICE:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE;
+                break;
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_100:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_100;
+                break;
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY;
+                break;
             default:
                 TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_NONE;
                 displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_NONE;
@@ -1905,6 +1917,22 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
         else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_DENY.equals(displayTMEditType))
         {
             TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY;
+        }
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE_100.equals(displayTMEditType))
+        {
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_ICE_100;
+        }
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE.equals(displayTMEditType))
+        {
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_ICE;
+        }
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_100.equals(displayTMEditType))
+        {
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_100;
+        }
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY.equals(displayTMEditType))
+        {
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY;
         }
         else
         {

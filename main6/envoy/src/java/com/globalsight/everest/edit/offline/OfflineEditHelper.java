@@ -309,23 +309,90 @@ public class OfflineEditHelper
     /**
      * For GBS-4495 perplexity score on MT.
      */
+    public static boolean isLock(OfflineSegmentData osd, int TMEditType)
+    {
+        return YesNo.NO.equals(isTranslate(osd, TMEditType));
+    }
+    
+    public static boolean isTranslateAll(int TMEditType)
+    {
+        return TMEditType == 5;
+    }
+    
+    /**
+     * 1 = Both
+     * 2 = ICE
+     * 3 = 100
+     * 4 = DENY
+     * 5 = Allow Edit of perplexity, ICE and 100% matches 
+     * 6 = Allow Edit of perplexity and ICE matches 
+     * 7 = Allow Edit of perplexity and 100% matches
+     * 8 = Allow Edit of perplexity matches
+     * 
+     * @param TMEditType
+     * @return
+     */
+    public static boolean isTranslate100(int TMEditType)
+    {
+        return TMEditType == 1 || TMEditType == 3 || TMEditType == 5 || TMEditType == 7;
+    }
+    
+    /**
+     * 1 = Both
+     * 2 = ICE
+     * 3 = 100
+     * 4 = DENY
+     * 5 = Allow Edit of perplexity, ICE and 100% matches 
+     * 6 = Allow Edit of perplexity and ICE matches 
+     * 7 = Allow Edit of perplexity and 100% matches
+     * 8 = Allow Edit of perplexity matches
+     * 
+     * @param TMEditType
+     * @return
+     */
+    public static boolean isTranslateICE(int TMEditType)
+    {
+        return TMEditType == 1 || TMEditType == 2 || TMEditType == 5 || TMEditType == 6;
+    }
+    
+    /**
+     * 1 = Both
+     * 2 = ICE
+     * 3 = 100
+     * 4 = DENY
+     * 5 = Allow Edit of perplexity, ICE and 100% matches 
+     * 6 = Allow Edit of perplexity and ICE matches 
+     * 7 = Allow Edit of perplexity and 100% matches
+     * 8 = Allow Edit of perplexity matches
+     * 
+     * @param TMEditType
+     * @return
+     */
+    public static boolean isTranslatePerplexity(int TMEditType)
+    {
+        return TMEditType == 5 || TMEditType == 6 || TMEditType == 7 || TMEditType == 8;
+    }
+    
+    /**
+     * For GBS-4495 perplexity score on MT.
+     */
     public static YesNo isTranslate(OfflineSegmentData osd, int TMEditType)
     {
         boolean lockIncontext = true;
         boolean lockExact = true;
         boolean lockPerplexity = true;
         
-        if (TMEditType == 1 || TMEditType == 2 || TMEditType == 5 || TMEditType == 7)
+        if (isTranslateICE(TMEditType))
         {
             lockIncontext = false;
         }
         
-        if (TMEditType == 1 || TMEditType == 3 || TMEditType == 5 || TMEditType == 7)
+        if (isTranslate100(TMEditType))
         {
             lockExact = false;
         }
         
-        if (TMEditType == 5 || TMEditType == 6 || TMEditType == 7 || TMEditType == 8)
+        if (isTranslatePerplexity(TMEditType))
         {
             lockPerplexity = false;
         }

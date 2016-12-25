@@ -764,7 +764,7 @@ public class BigTableUtil implements TuvQueryConstants
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE translation_unit_variant_perplexity_").append(companyId).append(" ");
         sb.append("(");
-        sb.append(" ID BIGINT PRIMARY KEY,");
+        sb.append(" ID BIGINT AUTO_INCREMENT PRIMARY KEY,");
         sb.append(" tuv_id BIGINT,");
         sb.append(" source_score double DEFAULT \"-1\",");
         sb.append(" target_score double DEFAULT \"-1\",");

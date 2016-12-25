@@ -2735,6 +2735,15 @@ public class CompanyRemoval
         exec(conn, SQL_DELETE_REMOVED_TAG, tuIds);
         logEnd("REMOVED_TAG");
     }
+    
+    private void removePerplexity(long companyId, Connection conn, List<List<Object>> tuvIds)
+            throws SQLException
+    {
+        String table = "translation_unit_variant_perplexity_" + companyId;
+        logStart(table.toUpperCase());
+        exec(conn, "DELETE FROM " + table + " WHERE tuv_id IN ", tuvIds);
+        logEnd(table.toUpperCase());
+    }
 
     private void removeRequest(Connection conn, List<List<Object>> jobIds) throws Exception
     {
@@ -2922,6 +2931,7 @@ public class CompanyRemoval
             {
                 removeXliffAlt(conn, tuvIds);
                 removeIssues(conn, tuvIds);
+                removePerplexity(companyId, conn, tuvIds);
                 // to be safe, delete again via tuvIds
                 if (DbUtil.isTableExisted("TRANSLATION_TU_TUV_ATTR_" + companyId))
                 {
@@ -2964,6 +2974,7 @@ public class CompanyRemoval
                 {
                     removeXliffAlt(conn, tuvIds);
                     removeIssues(conn, tuvIds);
+                    removePerplexity(companyId, conn, tuvIds);
                     exec(conn, "delete from " + tuvTableName + " where ID in ",
                             tuvIds);
                 }
@@ -3562,6 +3573,7 @@ public class CompanyRemoval
             if (tuvIds.size() > 0)
             {
                 removeXliffAlt(conn, tuvIds);
+                removePerplexity(companyId, conn, tuvIds);
             }
 
             logStart(tableName);

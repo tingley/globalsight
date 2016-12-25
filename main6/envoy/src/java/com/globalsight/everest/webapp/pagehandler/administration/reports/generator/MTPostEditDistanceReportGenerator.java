@@ -59,6 +59,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -764,9 +765,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             // For GBS-4495 perplexity score on MT
             if (usePerplexity)
             {
-                TuvImpl tuv = new TuvImpl();
-                tuv.setId(data.getTuvId());
-                TuvPerplexity perplexity = tuv.loadPerplexity();
+                TuvImpl tuv1 = SegmentTuvUtil.getTuvById(data.getTuvId(), data.getJobId());
+                TuvPerplexity perplexity = tuv1.loadPerplexity();
                 
                 Cell cell_I = getCell(curRow, col);
                 String sourcePreplexity = Double.toString(perplexity.getPerplexitySource());

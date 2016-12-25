@@ -36,6 +36,7 @@ import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.DisplayMatchTypeKeys;
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
@@ -53,6 +54,7 @@ import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.PageSegments;
@@ -582,8 +584,16 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         Tuv trgTuv = p_pair.getTargetTuv();
         
         // only used for perplexity
-        TuvImpl tuv = new TuvImpl();
-        tuv.setId(trgTuv.getId());
+        TuvImpl tuv = null;
+        try
+        {
+            tuv = SegmentTuvUtil.getTuvById(trgTuv.getId(), jobId);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e);
+        }
+      
 
         ArrayList fmList = null;
         ArrayList fmRefTmsList = null;
@@ -626,8 +636,13 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             {
                 parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
             }
+            
+            if (OfflineEditHelper.isTranslateAll(TMEditType))
+            {
+                parentProtection = false;
+            }
 
-            if (parentProtection && TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100)
+            if (parentProtection && OfflineEditHelper.isTranslate100(TMEditType))
                 parentProtection = false;
 
             matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT, parentProtection,
@@ -725,10 +740,15 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     && isMtTranslated(trgTuv))
             {
                 
-                if (tuv.getPerplexityResult())
+                if (tuv != null && tuv.getPerplexityResult())
+                {
+                    parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
                     trgScore = 65;
+                }
                 else
+                {
                     trgScore = 60;
+                }
             }
 
             // This segment has been touched by a human but we want to
@@ -813,7 +833,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             }
             else if (populateMT && (isMtTranslated(trgTuv) || trgScore == 60))
             {
-                if (tuv.getPerplexityResult())
+                if (tuv != null && tuv.getPerplexityResult())
                     trgScore = 65;
             }
             else if (populate100 && trgScore == 100)
@@ -866,8 +886,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             result.setPageId(m_srcPage.getId());
         }
         // For GBS-4495 perplexity score on MT
-        result.setPerplexityResult(tuv.getPerplexityResult());
-        result.setUsePerplexity(tuv.getPerplexity().getPerplexitySource() > 0);
+        result.setPerplexityResult(tuv != null && tuv.getPerplexityResult());
+        result.setUsePerplexity(CompanyWrapper.isUsePerplexity());
 
         return result;
     }
@@ -1648,16 +1668,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      */
     private boolean determineTuvDownloadLockStatus(Tuv p_tuv, List isChangeable)
     {
-        if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
+        if (OfflineEditHelper.isTranslateAll(TMEditType))
         {
-            // User has been granted permision and has selected to
-            // unprotect all segments.
             return false;
         }
 
         // Else check the protection state of the tuv itself.
         long jobId = m_srcPage.getJobId();
-        boolean result = EditHelper.isTuvInProtectedState(p_tuv, jobId);
+        boolean result = EditHelper.isTuvInProtectedState(p_tuv, jobId, TMEditType);
         if (!result && p_tuv.getSubflowsAsGxmlElements() != null
                 && p_tuv.getSubflowsAsGxmlElements().size() > 0)
         {
@@ -1702,10 +1720,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      */
     private boolean determineSubDownloadLockStatus(Tuv p_srcTuv, String p_subId)
     {
-        if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
+        if (OfflineEditHelper.isTranslateAll(TMEditType))
         {
-            // User has been granted permision and has selected to
-            // unprotect all segments.
             return false;
         }
 

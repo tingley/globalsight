@@ -1040,6 +1040,9 @@ function canEdit(o)
 
 function isLocked(o)
 {
+	if (o.className && o.className.indexOf('editorSegmentLock') != -1)
+		return true;
+	
   return o.className && (o.className == 'segmentLocked' || o.className == 'segmentContext');
 }
 
@@ -1067,13 +1070,30 @@ function isMergeEnd(o)
   return o.getAttribute("isMerged") == MERGE_END;
 }
 
+function hasClass(obj, cls) {  
+    return obj.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));  
+}  
+
+function removeClass(obj, cls) {  
+    if (hasClass(obj, cls)) {  
+        var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');  
+        obj.className = obj.className.replace(reg, ' ');  
+    }  
+}  
+
+var isUnlock = false;
 function wasLocked(o)
 {
+	if (o.oldClassName && o.oldClassName.indexOf('editorSegmentLock') != -1)
+		return true;
+	
   return o.oldClassName && o.oldClassName == 'segmentLocked';
 }
 
 function unlock(o)
 {
+	removeClass(o, 'editorSegmentLock');
+	
   if (o.className == 'segmentLocked')
   {
     o.className = 'segmentExact';
@@ -3077,7 +3097,7 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
   	<span style="white-space:nowrap;">&nbsp;&nbsp;|&nbsp;&nbsp;Filter:&nbsp;&nbsp;
 	  	<select id="segmentFilter" onchange="doSegmentFilter(this[this.selectedIndex].value)" style="font-size: 8pt;">
 			<%
-			    List<String> fs = new ArrayList();
+			    List<String> fs = new ArrayList<>();
 				fs.addAll(OnlineEditorConstants.SEGMENT_FILTERS);
 				if (CompanyWrapper.isUsePerplexity())
 			    {

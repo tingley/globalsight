@@ -30,6 +30,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
@@ -388,6 +389,13 @@ public class WorkflowCancelHelper
         logStart(tuvTableName.toUpperCase());
         exec(conn, "DELETE FROM " + tuvTableName + " WHERE ID IN ", tuvIdList);
         logEnd(tuvTableName.toUpperCase());
+        
+        Job job = BigTableUtil.getJobById(p_jobId);
+        
+        String table = "translation_unit_variant_perplexity_" + job.getCompanyId();
+        logStart(table.toUpperCase());
+        exec(conn, "DELETE FROM " + table + " WHERE tuv_id IN ", tuvIdList);
+        logEnd(table.toUpperCase());
     }
 
     @SuppressWarnings("rawtypes")

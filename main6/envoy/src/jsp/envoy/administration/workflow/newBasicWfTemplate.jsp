@@ -400,7 +400,7 @@ function confirmForm(formSent) {
 	
 	if (formSent.perplexityId && formSent.perplexityId.selectedIndex > 0)
 	{
-	   if (formSent.perplexityKey.selectedIndex < 0)
+	   if (formSent.perplexityKey.selectedIndex < 1)
 	   {
 		   alert("<%= bundle.getString("jsmsg_wf_template_perplexity_key") %>");
 		   return false;

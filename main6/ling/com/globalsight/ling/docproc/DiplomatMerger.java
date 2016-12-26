@@ -1051,19 +1051,33 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     m_stateStack.push(new DiplomatParserState(de.type(), null, null));
 
                     String tmp = decode(((SkeletonElement) de).getSkeleton());
-                    if (tmp.indexOf("<![CDATA[") > -1 && tmp.indexOf("]]") == -1)
-                    {
-                        isInCDATA = true;
-                    }
-                    if (isInCDATA && tmp.indexOf("]]") > -1)
-                    {
-                        isInCDATA = false;
-                    }
-                    if (tmp.indexOf("<![CDATA[") > -1 && tmp.indexOf("]]") > -1)
-                    {
-                        isInCDATA = tmp.indexOf("<![CDATA[") > tmp.indexOf("]]");
-                    }
                     
+                    int startIndex = tmp.indexOf("<![CDATA[");
+					int endIndex = tmp.indexOf("]]");
+					if (startIndex > -1 && endIndex > -1)
+					{
+						while (startIndex > -1 && endIndex > -1)
+						{
+							String newTmp = tmp.substring(endIndex+2, tmp.length());
+							startIndex = newTmp.indexOf("<![CDATA[");
+							endIndex = newTmp.indexOf("]]");
+							if (startIndex > -1 && endIndex == -1)
+							{
+								isInCDATA = true;
+								break;
+							}
+						}
+					}
+					else if (startIndex > -1 && endIndex == -1)
+					{
+						isInCDATA = true;
+					}
+					
+					if (isInCDATA && startIndex == -1 && endIndex > -1)
+					{
+						isInCDATA = false;
+					}
+					
 					if ((isJavaOrPoAssociateHtmlFilter || isJsonOrTextAssociateHtmlFilter)
 							&& tmp.indexOf("<") > -1
 							&& tmp.indexOf(">") > -1

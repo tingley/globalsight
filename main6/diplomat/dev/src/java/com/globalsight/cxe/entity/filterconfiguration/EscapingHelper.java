@@ -610,19 +610,30 @@ public class EscapingHelper
 					String tmp = m_xmlEncoder
 							.decodeStringBasic(((SkeletonElement) de)
 									.getSkeleton());
-					if (tmp.indexOf("<![CDATA[") > -1
-							&& tmp.indexOf("]]") == -1)
+					int startIndex = tmp.indexOf("<![CDATA[");
+					int endIndex = tmp.indexOf("]]");
+					if (startIndex > -1 && endIndex > -1)
+					{
+						while (startIndex > -1 && endIndex > -1)
+						{
+							String newTmp = tmp.substring(endIndex+2, tmp.length());
+							startIndex = newTmp.indexOf("<![CDATA[");
+							endIndex = newTmp.indexOf("]]");
+							if (startIndex > -1 && endIndex == -1)
+							{
+								isInCDATA = true;
+								break;
+							}
+						}
+					}
+					else if (startIndex > -1 && endIndex == -1)
 					{
 						isInCDATA = true;
 					}
-					if (isInCDATA && tmp.indexOf("]]") > -1)
+					
+					if (isInCDATA && startIndex == -1 && endIndex > -1)
 					{
 						isInCDATA = false;
-					}
-					if (tmp.indexOf("<![CDATA[") > -1 && tmp.indexOf("]]") > -1)
-					{
-						isInCDATA = tmp.indexOf("<![CDATA[") > tmp
-								.indexOf("]]");
 					}
 
 					// attribute end
@@ -1461,22 +1472,42 @@ public class EscapingHelper
 		List<String> contentList = new ArrayList<String>();
 		int extractIndexStart = -1;
 		int extractIndexFinish = -1;
+		List<String> newInternalTexts = null;
 		// If Start and Finish Patterns are internal text
 		if (internalTexts != null && internalTexts.size() > 0)
 		{
 			ccc = InternalTextHelper.restoreInternalTexts(ccc, internalTexts);
+			newInternalTexts = new ArrayList<String>();
 		}
 
 		if (StringUtil.isNotEmptyAndNull(startStr))
 		{
+			int bptTagLength = -1;
 			if (startIsRegex)
 			{
 				Pattern p = Pattern.compile(startStr);
 				Matcher m = p.matcher(ccc);
-
 				while (m.find())
 				{
-					extractIndexStart = m.start();
+					if (internalTexts.size() > 0)
+					{
+						String checkStr = ccc.substring(m.start(), m.end());
+						if (checkInternalText(internalTexts, ccc, checkStr,
+								m.start())){
+							bptTagLength = getBptTagLenght(internalTexts,
+									checkStr);
+						}
+					}
+					
+					if (bptTagLength != -1)
+					{
+						extractIndexStart = m.start() - bptTagLength;
+					}
+					else
+					{
+						extractIndexStart = m.start();
+					}
+					
 					extractIndexStartList.add(extractIndexStart);
 				}
 			}
@@ -1485,25 +1516,29 @@ public class EscapingHelper
 				for (int k = 0; k < ccc.length();)
 				{
 					int i0 = -1;
-					if (k == 0)
-					{
-						i0 = ccc.indexOf(startStr);
-						if (i0 == -1)
-							break;
+					i0 = ccc.indexOf(startStr, k);
+					if (i0 == -1)
+						break;
 
-						extractIndexStart = i0 + startStr.length();
-						extractIndexStartList.add(i0);
-						k = extractIndexStart;
+					extractIndexStart = i0 + startStr.length();
+					k = extractIndexStart;
+					if (internalTexts.size() > 0)
+					{
+						String checkStr = ccc.substring(i0, extractIndexStart);
+						if (checkInternalText(internalTexts, ccc, checkStr, i0))
+						{
+							bptTagLength = getBptTagLenght(internalTexts,
+									checkStr);
+						}
+					}
+					
+					if (bptTagLength != -1)
+					{
+						extractIndexStartList.add(i0 - bptTagLength);
 					}
 					else
 					{
-						i0 = ccc.indexOf(startStr, extractIndexStart);
-						if (i0 == -1)
-							break;
-
-						extractIndexStart = i0 + startStr.length();
 						extractIndexStartList.add(i0);
-						k = extractIndexStart;
 					}
 				}
 			}
@@ -1512,6 +1547,7 @@ public class EscapingHelper
 		// find the index of finish string's
 		if (StringUtil.isNotEmptyAndNull(finishStr))
 		{
+			int eptTagLength = -1;
 			if (finishRegex)
 			{
 				Pattern p = Pattern.compile(finishStr);
@@ -1524,7 +1560,26 @@ public class EscapingHelper
 					{
 						if (m.find(extractIndexStartList.get(i)))
 						{
-							extractIndexFinish = m.end();
+							if (internalTexts.size() > 0)
+							{
+								String checkStr = ccc.substring(m.start(),
+										m.end());
+								if (checkInternalText(internalTexts, ccc,
+										checkStr, m.start()))
+								{
+									eptTagLength = getEptTagLenght(
+											internalTexts, checkStr);
+								}
+							}
+							if (eptTagLength != -1)
+							{
+								extractIndexFinish = m.end() + eptTagLength;
+							}
+							else
+							{
+								extractIndexFinish = m.end();
+							}
+							
 							if (i < length - 1
 									&& extractIndexFinish > extractIndexStartList
 											.get(i)
@@ -1561,6 +1616,23 @@ public class EscapingHelper
 							break;
 
 						extractIndexFinish = i0 + finishStr.length();
+						if (internalTexts.size() > 0)
+						{
+							String checkStr = ccc.substring(i0, extractIndexFinish);
+							if (checkInternalText(internalTexts, ccc, checkStr,
+									i0))
+							{
+								eptTagLength = getEptTagLenght(internalTexts,
+										checkStr);
+							}
+						}
+						
+						if (eptTagLength != -1)
+						{
+							extractIndexFinish = extractIndexFinish
+									+ eptTagLength;
+						}
+						
 						if (i < length - 1
 								&& extractIndexFinish > extractIndexStartList
 										.get(i)
@@ -1596,17 +1668,18 @@ public class EscapingHelper
 					String con01 = ccc.substring(0, keyList.get(i));
 					if (StringUtil.isNotEmptyAndNull(con01))
 					{
+						if (internalTexts.size() > 0)
+							con01 = InternalTextHelper.protectInternalTexts(
+									con01, newInternalTexts);
 						contentList.add("notmatch||" + con01);
 					}
 				}
 				String con02 = ccc.substring(keyList.get(i),
 						indexMap.get(keyList.get(i)));
 				// If Start and Finish Patterns are internal text
-				if (internalTexts != null && internalTexts.size() > 0)
-				{
+				if (internalTexts.size() > 0)
 					con02 = InternalTextHelper.protectInternalTexts(con02,
-							internalTexts);
-				}
+							newInternalTexts);
 				contentList.add("match||" + con02);
 				String con03 = "";
 				if (i < keyList.size() - 1)
@@ -1621,6 +1694,9 @@ public class EscapingHelper
 				}
 				if (StringUtil.isNotEmptyAndNull(con03))
 				{
+					if (internalTexts.size() > 0)
+						con03 = InternalTextHelper.protectInternalTexts(con03,
+								newInternalTexts);
 					contentList.add("notmatch||" + con03);
 				}
 			}
@@ -1633,11 +1709,9 @@ public class EscapingHelper
 				if (StringUtil.isNotEmptyAndNull(finishStr))
 				{
 					// If Start and Finish Patterns are internal text
-					if (internalTexts != null && internalTexts.size() > 0)
-					{
+					if (internalTexts.size() > 0)
 						ccc = InternalTextHelper.protectInternalTexts(ccc,
-								internalTexts);
-					}
+								newInternalTexts);
 					contentList.add("notmatch||" + ccc);
 				}
 				else
@@ -1648,16 +1722,17 @@ public class EscapingHelper
 							ccc.length());
 					if (StringUtil.isNotEmptyAndNull(con01))
 					{
+						if (internalTexts.size() > 0)
+							con01 = InternalTextHelper.protectInternalTexts(
+									con01, newInternalTexts);
 						contentList.add("notmatch||" + con01);
 					}
 					if (StringUtil.isNotEmptyAndNull(con02))
 					{
 						// If Start and Finish Patterns are internal text
-						if (internalTexts != null && internalTexts.size() > 0)
-						{
+						if (internalTexts.size() > 0)
 							con02 = InternalTextHelper.protectInternalTexts(
-									con02, internalTexts);
-						}
+									con02, newInternalTexts);
 						contentList.add("match||" + con02);
 					}
 				}
@@ -1665,18 +1740,22 @@ public class EscapingHelper
 			else
 			{
 				// If Start and Finish Patterns are internal text
-				if (internalTexts != null && internalTexts.size() > 0)
-				{
+				if (internalTexts.size() > 0)
 					ccc = InternalTextHelper.protectInternalTexts(ccc,
-							internalTexts);
-				}
+							newInternalTexts);
 				contentList.add("notmatch||" + ccc);
 			}
 		}
-
+		
+		if (internalTexts.size() > 0)
+		{
+			internalTexts = new ArrayList<String>();
+			internalTexts.addAll(newInternalTexts);
+		}
+		
 		return contentList;
 	}
-
+	
 	public static boolean checkJavaOrPoAssociatedHtmlFilter(Filter mFilter)
 	{
 		if (mFilter != null)
@@ -2126,5 +2205,72 @@ public class EscapingHelper
 			buffer.append(ccc);
 		}
 		return buffer.toString();
+	}
+	
+	private static boolean checkInternalText(List<String> internalTexts,
+			String content, String checkStr, int index)
+	{
+		for (String internalText : internalTexts)
+		{
+			String newStr = internalText.substring(
+					internalText.indexOf("</bpt>") + 6,
+					internalText.indexOf("<ept"));
+			if (newStr.indexOf(checkStr) > -1)
+			{
+				Pattern p = Pattern.compile(internalText);
+				Matcher m = p.matcher(content);
+				while (m.find())
+				{
+					if (index > m.start() && index < m.end())
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	private static int getBptTagLenght(List<String> internalTexts,
+			String checkStr)
+	{
+		int returnInt = -1;
+		for (String internalText : internalTexts)
+		{
+			String bpt = internalText.substring(0,
+					internalText.indexOf("</bpt>") + 6);
+			String newStr = internalText.substring(
+					internalText.indexOf("</bpt>") + 6,
+					internalText.indexOf("<ept"));
+			if (newStr.indexOf(checkStr) > -1)
+			{
+				String str = newStr.substring(0, newStr.indexOf(checkStr));
+				returnInt = str.length() + bpt.length();
+				break;
+			}
+		}
+		return returnInt;
+	}
+	
+	private static int getEptTagLenght(List<String> internalTexts,
+			String checkStr)
+	{
+		int returnInt = -1;
+		for (String internalText : internalTexts)
+		{
+			String newStr = internalText.substring(
+					internalText.indexOf("</bpt>") + 6,
+					internalText.indexOf("<ept"));
+			String eptStr = internalText.substring(
+					internalText.indexOf("<ept"), internalText.length());
+			if (newStr.indexOf(checkStr) > -1)
+			{
+				String str = newStr.substring(newStr.indexOf(checkStr),
+						newStr.length());
+				returnInt = str.length() + eptStr.length();
+				break;
+			}
+		}
+		return returnInt;
 	}
 }

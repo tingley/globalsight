@@ -43,7 +43,7 @@
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
 <script>
 var needWarning = true;
-var objectName = "";
+var objectName = "Configuration Export/Import";
 var guideNode="configExportImport";
 var helpFile = "<%=bundle.getString("help_configuration_main_screen")%>";
 	//Move option from f to t
@@ -70,7 +70,7 @@ var helpFile = "<%=bundle.getString("help_configuration_main_screen")%>";
 	}
 
 	function doImport(){
-		configForm.action = "<%=importsUrl%>";
+		configForm.action = "<%=importsUrl%>" + "&action=import";
 		configForm.submit();
 	}
 	
@@ -176,7 +176,7 @@ function initConfigShow(id, dif)
     		</td>
   		</tr>
   		
-  		<tr valign="top">
+<%--   		<tr valign="top">
     		<td colspan=3>
                 <br/>        
                 <div id="toShowUser" style="cursor:pointer;display:inline-block;"
@@ -228,7 +228,7 @@ function initConfigShow(id, dif)
 				</table>
                 </div>
     		</td>
-  		</tr>
+  		</tr> --%>
   		<tr valign="top">
     		<td colspan=3>
                  <br/>        
@@ -288,7 +288,7 @@ function initConfigShow(id, dif)
                 <div id="toShowFilter" style="cursor:pointer;display:inline-block;"
                 							onclick="initConfigShow('toShowFilter','filterPanel')">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
-                    <b><%=bundle.getString("lb_filter_configuration")%></b>
+                    <b><%=bundle.getString("lb_filter_configuration")%>s</b>
                 </div>
                 <div id="filterPanel" style="display:none;">
                 	<jsp:include page="configFilter.jsp"/>

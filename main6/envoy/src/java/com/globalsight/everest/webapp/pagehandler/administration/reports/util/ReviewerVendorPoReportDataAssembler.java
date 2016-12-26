@@ -328,6 +328,7 @@ public class ReviewerVendorPoReportDataAssembler
                     data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
                     //all mt wordcount
                     data.tradosMTWordCount += w.getMtTotalWordCount();
+                    data.tradosPerplexityWordCount += w.getPerplexityWordCount();
 
                     // add the lowest fuzzies and sublev match to nomatch
 //                    data.noMatchWordCount += w.getNoMatchWordCount() + data.lowFuzzyMatchWordCount;

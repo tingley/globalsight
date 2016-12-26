@@ -25,6 +25,7 @@ import java.util.Map;
 public interface ConfigConstants
 {
     Map<String, String> config_error_map = new HashMap<String, String>();
+    Map<String, Integer> config_percentage_map = new HashMap<String, Integer>();
 
     public static final String LOCALEPAIR_FILE_NAME = "LocalePairs_";
     public static final String USER_FILE_NAME = "User_";

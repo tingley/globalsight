@@ -30,8 +30,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -41,32 +39,26 @@ import com.globalsight.util.GlobalSightLocale;
  * 
  * Imports property file locale pair info.
  */
-public class LocalePairImport extends MultiCompanySupportedThread implements ConfigConstants
+public class LocalePairImport implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(LocalePairImport.class);
     private Map<String, String> localePairMap = new HashMap<String, String>();
     private Map<String, GlobalSightLocale> localeMap = new HashMap<String, GlobalSightLocale>();
-    private File uploadedFile;
     private String companyId;
     private String sessionId;
+    private String importToCompId;
 
-    public LocalePairImport(String sessionId, File uploadedFile, String companyId)
+    public LocalePairImport(String sessionId, String companyId, String importToCompId)
     {
-        this.sessionId = sessionId;
-        this.uploadedFile = uploadedFile;
         this.companyId = companyId;
-    }
-
-    public void run()
-    {
-        CompanyThreadLocal.getInstance().setIdValue(this.companyId);
-        this.analysisAndImport(uploadedFile);
+        this.sessionId = sessionId;
+        this.importToCompId = importToCompId;
     }
 
     /**
      *  Analysis and imports upload file.
      */
-    private void analysisAndImport(File uploadedFile)
+    public void analysisAndImport(File uploadedFile)
     {
         Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
 
@@ -166,17 +158,15 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
             {
                 // stores locale info
                 storeGlobalSightLocaleData(dataMap);
-                Thread.sleep(100);
             }
 
             if (dataMap.containsKey("LocalPairs"))
             {
                 // stores locale pair info
                 storeLocalePairData(dataMap);
-                Thread.sleep(100);
             }
 
-            addMessage("<b>Locale Pairs Imported successfully !</b>");
+            addMessage("<b>Done importing Locale Pairs.</b>");
         }
         catch (Exception e)
         {
@@ -252,6 +242,9 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
 
                 localeMgr.addSourceTargetLocalePair(localePair.getSource(), localePair.getTarget(),
                         localePair.getCompanyId());
+                addMessage("<b>" + localePair.getSource().getDisplayName() + "->"
+                        + localePair.getTarget().getDisplayName()
+                        + "</b>  is imported successfully.");
             }
         }
         catch (Exception e)
@@ -290,7 +283,14 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
             }
             else if (keyField.equalsIgnoreCase("COMPANY_ID"))
             {
-                localePair.setCompanyId(Long.parseLong(companyId));
+                if (importToCompId != null && !importToCompId.equals("-1"))
+                {
+                    localePair.setCompanyId(Long.parseLong(importToCompId));
+                }
+                else
+                {
+                    localePair.setCompanyId(Long.parseLong(companyId));
+                }
             }
             else if (keyField.equalsIgnoreCase("IS_ACTIVE"))
             {
@@ -349,6 +349,6 @@ public class LocalePairImport extends MultiCompanySupportedThread implements Con
     {
         String former = config_error_map.get(sessionId) == null ? "" : config_error_map
                 .get(sessionId);
-        config_error_map.put(sessionId, former + "<p style='color:blue'>" + msg);
+        config_error_map.put(sessionId, former + "<p>" + msg);
     }
 }

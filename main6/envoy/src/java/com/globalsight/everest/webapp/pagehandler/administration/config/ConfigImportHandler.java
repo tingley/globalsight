@@ -44,6 +44,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 import de.innosystec.unrar.rarfile.FileHeader;
@@ -72,11 +73,26 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
         String companyId = CompanyThreadLocal.getInstance().getValue();
         String action = p_request.getParameter("action");
         List<File> uploadedFiles = new ArrayList<File>();
-        if ("startUpload".equals(action))
+        boolean isSuperAdmin = ((Boolean) session
+                .getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
+        if ("import".equals(action))
+        {
+            if (isSuperAdmin)
+            {
+                importConfig(p_request);
+                p_request.setAttribute("currentId", companyId);
+            }
+        }
+        else if ("startUpload".equals(action))
         {
             try
             {
-                uploadedFiles = getUploadFiles(p_request);
+                uploadedFiles = this.getUploadFiles(p_request);
+                if (isSuperAdmin)
+                {
+                    String importToCompId = p_request.getParameter("companyId");
+                    session.setAttribute("importToCompId", importToCompId);
+                }
                 session.setAttribute("uploading_filter", uploadedFiles);
             }
             catch (Exception e)
@@ -103,8 +119,10 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
             }
             if (session.getAttribute("uploading_filter") != null)
             {
+                config_percentage_map.clear();
                 config_error_map.clear();
                 List<File> uploadFiles = (List<File>) session.getAttribute("uploading_filter");
+                String importToCompId = (String) session.getAttribute("importToCompId");
 
                 session.removeAttribute("importToCompId");
                 session.removeAttribute("uploading_filter");
@@ -115,35 +133,9 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
                     fileName = fileName.substring(0, fileName.indexOf("_") + 1);
                     fileInfo.put(fileName, file);
                 }
-                if (fileInfo.containsKey(LOCALEPAIR_FILE_NAME))
-                {
-                    // uploads locale pair property file
-                    File file = fileInfo.get(LOCALEPAIR_FILE_NAME);
-                    LocalePairImport imp = new LocalePairImport(sessionId, file, companyId);
-                    imp.start();
-                }
-                if (fileInfo.containsKey(USER_FILE_NAME))
-                {
-                    // uploads user property file
-                    File file = fileInfo.get(USER_FILE_NAME);
-                    UserImport imp = new UserImport(sessionId, file, user, companyId);
-                    imp.start();
-                }
-                if (fileInfo.containsKey(MT_FILE_NAME))
-                {
-                    // uploads mt profile property file
-                    File file = fileInfo.get(MT_FILE_NAME);
-                    MTProfileImport imp = new MTProfileImport(sessionId, file, companyId);
-                    imp.start();
-                }
-                if (fileInfo.containsKey(FILTER_FILE_NAME))
-                {
-                    // uploads filter property file
-                    File file = fileInfo.get(FILTER_FILE_NAME);
-                    FilterConfigImport imp = new FilterConfigImport(sessionId, file,
-                            user.getUserId(), companyId);
-                    imp.start();
-                }
+                ConfigImporter imp = new ConfigImporter(sessionId, fileInfo, user, companyId,
+                        importToCompId);
+                imp.start();
             }
             else
             {
@@ -159,6 +151,17 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
+    private void importConfig(HttpServletRequest p_request)
+    {
+        String hql = "select id from Company";
+        List<Long> companyIdList = (List<Long>) HibernateUtil.search(hql);
+        p_request.setAttribute("companyIdList", companyIdList);
+        
+    }
+
+    /**
+     * Imports the configuration info into system.
+     */
     private void refreshProgress(HttpServletRequest request, HttpServletResponse response,
             String sessionId)
     {
@@ -177,6 +180,22 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
         }
         try
         {
+            int percentage;
+            if (config_percentage_map.get(sessionId) == null)
+            {
+                percentage = 0;
+            }
+            else
+            {
+                if (count == 1)
+                {
+                    percentage = 0;
+                }
+                else
+                {
+                    percentage = config_percentage_map.get(sessionId);
+                }
+            }
             String msg;
             if (config_error_map.get(sessionId) == null)
             {
@@ -198,8 +217,12 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
 
             response.setContentType("text/html;charset=UTF-8");
             PrintWriter writer = response.getWriter();
-            writer.write(String.valueOf(msg));
+            writer.write(String.valueOf(percentage + "&" + msg));
             writer.close();
+            if (percentage == 100)
+            {
+                sessionMgr.removeElement("count");
+            }
         }
         catch (Exception e)
         {

@@ -59,6 +59,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -450,19 +451,19 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             Cell cell_I = getCell(detailHeaderRow, col);
             cell_I.setCellValue(m_bundle.getString("lb_source_perplexity"));
             cell_I.setCellStyle(getHeaderStyle(p_workBook));
-            p_sheet.setColumnWidth(col, 80 * 256);
+            p_sheet.setColumnWidth(col, 15 * 256);
             col++;
             
             Cell cell_J = getCell(detailHeaderRow, col);
             cell_J.setCellValue(m_bundle.getString("lb_target_perplexity"));
             cell_J.setCellStyle(getHeaderStyle(p_workBook));
-            p_sheet.setColumnWidth(col, 80 * 256);
+            p_sheet.setColumnWidth(col, 15 * 256);
             col++;
             
             Cell cell_K = getCell(detailHeaderRow, col);
             cell_K.setCellValue(m_bundle.getString("lb_pass_fail"));
             cell_K.setCellStyle(getHeaderStyle(p_workBook));
-            p_sheet.setColumnWidth(col, 80 * 256);
+            p_sheet.setColumnWidth(col, 15 * 256);
             col++;
         }
     }
@@ -764,9 +765,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             // For GBS-4495 perplexity score on MT
             if (usePerplexity)
             {
-                TuvImpl tuv = new TuvImpl();
-                tuv.setId(data.getTuvId());
-                TuvPerplexity perplexity = tuv.loadPerplexity();
+                TuvImpl tuv1 = SegmentTuvUtil.getTuvById(data.getTuvId(), data.getJobId());
+                TuvPerplexity perplexity = tuv1.loadPerplexity();
                 
                 Cell cell_I = getCell(curRow, col);
                 String sourcePreplexity = Double.toString(perplexity.getPerplexitySource());

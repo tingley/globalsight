@@ -45,28 +45,46 @@ $(document).ready(function(){
 	$("#backBtn").click(function(){
 		document.location.href="/globalsight/ControlServlet?linkName=importConfig&pageName=CONFIGEXPORTIMPORT&action=import";
 	});
+	$("#refreshBtn").click(function(){
+		$("#idProgressBar").stop(true);
+		refreshBar();
+	});
 });
 
 function doOnLoad() {
 	loadGuides();
 	startUpload();
+	refreshBar();
 }
 
 function startUpload() {
-	$.post("/globalsight/ControlServlet?pageName=CONFIGIMPORTD&linkName=startUpload&action=doImport",
-			function(){
-		refreshBar();
-	});
+	$.post("/globalsight/ControlServlet?pageName=CONFIGIMPORTD&linkName=startUpload&action=doImport");
 }
 
 function refreshBar() {
+	if ($.browser.msie) {
+		$("#idProgressBar").height(17);
+	}
 	$.get("/globalsight/ControlServlet?pageName=CONFIGIMPORTD&linkName=startUpload&action=refreshProgress", 
 		{"no":Math.random()},
 		function(data){
-			if(data==""){
-				setTimeout('refreshBar()',1000);
-			}else{
-			$("#msgBox").html(data);}
+			
+			var tmp = data.split("&");
+			var percentage = tmp[0];
+			var errorMsg = tmp[1];
+			$("#msgBox").html(errorMsg);
+			var wii = parseInt(percentage) / 100 * 400;
+			$("#idProgressBar").animate({width : wii}, function(){
+				$("#idProgress").html(percentage + "%");
+				
+				if (percentage == 100) {
+					$("#okBtn").show();
+					$("#refreshBtn").hide();
+					$("#idPleaseWait").hide();
+				} else {
+					setTimeout('refreshBar()',1000);
+				}
+			});
 			
 		});
 }
@@ -79,7 +97,12 @@ function refreshBar() {
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
 <SPAN CLASS="mainHeading" id="idHeading"><%= lb_processing_import_file%></SPAN><BR>
+<SPAN CLASS="standardTextItalic" id="idPleaseWait"><%= lb_please_wait%></SPAN>
 
+<DIV id="idProgressContainer">
+  <DIV id="idProgress">0%</DIV>
+</DIV>
+<DIV id="idProgressBar"></DIV>
 <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="standardText">
 <tr><td height="50px">&nbsp;</td></tr>
 </TABLE>
@@ -89,7 +112,8 @@ function refreshBar() {
 </tr>
 </TABLE>
 <br><br>
-<input type="button" id="okBtn" value="<%= lb_ok%>" >
+<input type="button" id="okBtn" value="<%= lb_ok%>" style="display:none">
+<input type="button" id="refreshBtn" value="<%= lb_refresh%>">
 <input type="button" id="backBtn" value="<%= lb_back%>" >
 </div>
 </body>

@@ -689,8 +689,7 @@ public class InternalTextHelper
     public static String protectInternalTexts(String p_text,
             List<String> internalTexts)
     {
-        int i = 0;
-
+        int i = internalTexts.size();
         List<String> its = getInternalTexts(p_text);
         String temp = p_text;
 

@@ -103,6 +103,11 @@ public interface AmbassadorDwUpConstants
     static public final String HEADER_TM_EDIT_TYPE_ICE = "Incontext Match";
     static public final String HEADER_TM_EDIT_TYPE_100 = "Exact Match";
     static public final String HEADER_TM_EDIT_TYPE_DENY = "Deny Edit";
+    
+    static public final String HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE_100 = "Perplexity, Incontext Match and Exact Match";
+    static public final String HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE = "Perplexity, Incontext Match";
+    static public final String HEADER_TM_EDIT_TYPE_PERPLEXITY_100 = "Perplexity, Exact Match";
+    static public final String HEADER_TM_EDIT_TYPE_PERPLEXITY = "Perplexity";
 
     static public final String LINK_NAME_MAIN_HELP = "For more information, see the Offline Help, Placeholder Map and GlobalSight Wiki.";
     static public final String LINK_NAME_UPLOAD_HELP = "Click here to learn how to save files for upload.";
@@ -239,6 +244,10 @@ public interface AmbassadorDwUpConstants
     static public final int TM_EDIT_TYPE_ICE = 2;
     static public final int TM_EDIT_TYPE_100 = 3;
     static public final int TM_EDIT_TYPE_DENY = 4;
+    static public final int TM_EDIT_TYPE_PERPLEXITY_ICE_100 = 5;
+    static public final int TM_EDIT_TYPE_PERPLEXITY_ICE = 6;
+    static public final int TM_EDIT_TYPE_PERPLEXITY_100 = 7;
+    static public final int TM_EDIT_TYPE_PERPLEXITY = 8;
 
     // RESOURCE LINKING (a user selectable download option)
     // add values between start and end

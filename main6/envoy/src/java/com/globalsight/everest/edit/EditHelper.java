@@ -19,6 +19,8 @@ package com.globalsight.everest.edit;
 
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.util.gxml.GxmlElement;
@@ -26,12 +28,16 @@ import com.globalsight.util.gxml.GxmlNames;
 
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 /**
  * A helper class for both online and offline.
  * 
  */
 public class EditHelper
 {
+    static private final Logger logger = Logger.getLogger(EditHelper.class);
+    
     public static boolean s_isParagraphEditorEnabled = false;
 
     public static boolean s_isGxmlEditorEnabled = false;
@@ -71,15 +77,35 @@ public class EditHelper
      */
     public static boolean isTuvInProtectedState(Tuv p_tuv, long p_jobId)
     {
-        // Revised: 10-17-01 bb
-        // We now protect all exact matches instead of just
-        // LeverageGroupExactMatches.
-
-        // return p_tuv.isLeverageGroupExactMatchLocalized();
-        if (p_tuv instanceof TuvImpl)
+        return isTuvInProtectedState(p_tuv, p_jobId, -1);
+    }
+    
+    /**
+     * Determines if a tuv's state is a protected state.
+     */
+    public static boolean isTuvInProtectedState(Tuv p_tuv, long p_jobId, int TMEditType)
+    {
+        if (TMEditType == -1)
         {
-            TuvImpl t = (TuvImpl) p_tuv;
-            if (t.getPerplexityResult())
+            TuvImpl t = null;
+            if (p_tuv instanceof TuvImpl)
+            {
+                t = (TuvImpl) p_tuv;
+                
+            }
+            else
+            {
+                try
+                {
+                    t = SegmentTuvUtil.getTuvById(p_tuv.getId(), p_jobId);
+                }
+                catch (Exception e)
+                {
+                    logger.error(e);
+                }
+            }
+            
+            if (t != null && t.getPerplexityResult() && !OfflineEditHelper.isTranslatePerplexity(TMEditType))
                 return true;
         }
         

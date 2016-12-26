@@ -529,6 +529,7 @@ function contextForX(e)
         if (targetClass)
         {
         	if (targetClass.indexOf('editorSegmentLocked') != -1 
+        			|| targetClass.indexOf('editorSegmentLock') != -1 
             		|| (targetClass.indexOf('segmentContextUnlock') == -1 
             				&& targetClass.indexOf('segmentContext') != -1))
         	{

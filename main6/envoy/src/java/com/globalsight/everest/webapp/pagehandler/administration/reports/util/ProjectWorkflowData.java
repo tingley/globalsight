@@ -79,6 +79,8 @@ public class ProjectWorkflowData
 
     public long tradosRepsWordCount = 0;
     
+    public long tradosPerplexityWordCount = 0;
+    
     public long tradosMTWordCount = 0;
 
     public long tradosTotalWordCount = 0;

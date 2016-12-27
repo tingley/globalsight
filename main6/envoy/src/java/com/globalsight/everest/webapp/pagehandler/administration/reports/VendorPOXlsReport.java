@@ -282,8 +282,6 @@ public class VendorPOXlsReport
         int n = 4;
         if (p_data.headers[0] != null)
             n++;
-        if (p_data.usePerplexity)
-            n++;
         
         theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + n));
         setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + n),
@@ -302,13 +300,6 @@ public class VendorPOXlsReport
             cell_InContext.setCellValue(
                     bundle.getString("jobinfo.tmmatches.wordcounts.incontextmatches"));
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
-        }
-        
-        if (p_data.usePerplexity)
-        {
-            Cell cell = getCell(fourRow, c++);
-            cell.setCellValue(bundle.getString("lb_perplexity"));
-            cell.setCellStyle(getHeaderStyle(p_workbook));
         }
         
         Cell cell_FuzzyMatches = getCell(fourRow, c++);
@@ -624,14 +615,6 @@ public class VendorPOXlsReport
                     theSheet.setColumnWidth(col - 1, numwidth * 256);
                 }
                 
-                if (p_data.usePerplexity)
-                {
-                    Cell cell = getCell(theRow, col++);
-                    cell.setCellValue(data.perplexityWordCount);
-                    cell.setCellStyle(temp_normalStyle);
-                    theSheet.setColumnWidth(col - 1, numwidth * 256);
-                }
-
                 Cell cell_FuzzyMatch = getCell(theRow, col++);
                 cell_FuzzyMatch.setCellValue(data.dellFuzzyMatchWordCount);
                 cell_FuzzyMatch.setCellStyle(temp_normalStyle);
@@ -731,11 +714,6 @@ public class VendorPOXlsReport
         if (p_data.headers[0] != null)
         {
             totle += 2;
-            moneyStyleI++;
-        }
-        if (p_data.usePerplexity)
-        {
-            totle++;
             moneyStyleI++;
         }
         

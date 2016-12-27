@@ -580,9 +580,6 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         if (m_data.useInContext)
             n++;
         
-        if (m_data.usePerplexity)
-            n++;
-        
         p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
         setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + n),
                 getHeaderStyle(p_workbook));
@@ -604,14 +601,6 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
         
-        if (m_data.usePerplexity)
-        {
-            col++;
-            Cell cell_InContext = getCell(fourRow, col);
-            cell_InContext.setCellValue(m_bundle.getString("lb_perplexity"));
-            cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
-        }
-
         col++;
         Cell cell_FuzzyMatches = getCell(fourRow, col);
         cell_FuzzyMatches
@@ -704,9 +693,6 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         {
             n = 6;
             if (m_data.useInContext)
-                n++;
-            
-            if (m_data.usePerplexity)
                 n++;
             
             p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + n));
@@ -1314,14 +1300,6 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 }
                 
-                if (m_data.usePerplexity)
-                {
-                    Cell cell_perplexity = getCell(theRow, col++);
-                    cell_perplexity.setCellValue(data.perplexityWordCount);
-                    cell_perplexity.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
-                }
-
                 Cell cell_FuzzyMatch = getCell(theRow, col++);
                 cell_FuzzyMatch.setCellValue(data.fuzzyMatchWordCount);
                 cell_FuzzyMatch.setCellStyle(temp_normalStyle);
@@ -1556,14 +1534,6 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     }
 
-                    if (m_data.usePerplexity)
-                    {
-                        Cell cell_perplexity = getCell(theRow, col++);
-                        cell_perplexity.setCellValue(data.perplexityWordCount);
-                        cell_perplexity.setCellStyle(temp_normalStyle);
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
-                    }
-                    
                     Cell cell_FuzzyMatch_Review = getCell(theRow, col++);
                     cell_FuzzyMatch_Review.setCellValue(data.fuzzyMatchWordCount);
                     cell_FuzzyMatch_Review.setCellStyle(temp_normalStyle);
@@ -2426,7 +2396,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             sumStartCol = getColumnName(c);
         }
         
-        if (m_data.usePerplexity)
+        if (m_data.isTradosStyle() && m_data.usePerplexity)
         {
             Cell cell_Perplexity = getCell(theRow, c++);
             cell_Perplexity.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");

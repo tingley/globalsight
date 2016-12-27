@@ -459,6 +459,8 @@ public class CommentUpload
                     //
                     int start = lineRead.indexOf("name=\"");
                     int end = lineRead.indexOf("\"", start + 7);
+                    if(end == -1)
+                    	break;
                     String fieldName = lineRead.substring(start + 6, end);
 
                     // Read and ignore the blank line

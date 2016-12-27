@@ -46,6 +46,7 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.download.HTMLResourcePages.DownloadWriterInterface;
 import com.globalsight.everest.edit.offline.download.HTMLResourcePages.IndexJobsWriter;
 import com.globalsight.everest.edit.offline.download.HTMLResourcePages.IndexPageWriter;
@@ -1276,8 +1277,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 				if (iceType > 0)
 				{
 	                segment = (OfflineSegmentData) vector.get(i);
-	                if (opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
-	                        || opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE)
+	                if (OfflineEditHelper.isTranslateICE(opd.getTMEditType()))
 	                    segment.setWriteAsProtectedSegment(false);
 	                else
 	                {
@@ -1327,9 +1327,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             && tuv.getId() == id
                             && "".equals(segment.getSubflowId()))
                     {
-                        if (opd.getTMEditType() != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
-                                && opd.getTMEditType() != AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
-                                && !segment.getTargetTuv().getState()
+                        if (OfflineEditHelper.isTranslateICE(opd.getTMEditType()) && !segment.getTargetTuv().getState()
                                         .equals(TuvState.LOCALIZED))
                         {
                             segment.setWriteAsProtectedSegment(true);                        	

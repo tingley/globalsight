@@ -1002,6 +1002,7 @@ function contextForX(e)
     {
         if (o.className == 'editorSegmentLocked'||o.className == 'segmentContext'
                 || o.className.indexOf('editorSegmentLocked') != -1 
+                || o.className.indexOf('editorSegmentLock') != -1 
                 || (o.className.indexOf('segmentContextUnlock') == -1 
                         && o.className.indexOf('segmentContext') != -1)
                     || o.tagName == 'TD')

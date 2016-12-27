@@ -162,6 +162,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     public static final String STYLE_REPETITION = "editorSegmentRepetition";
     public static final String STYLE_CONTEXT = "segmentContext";
     public static final String STYLE_CONTEXT_UNLOCK = "segmentContextUnlock";
+    
+    // For GBS-4495 perplexity score on MT. Please note "STYLE_LOCKED" has color style but STYLE_LOCK havn't.
+    public static final String STYLE_LOCK = "editorSegmentLock";
+    
     /**
      * CSS class names for new editor.
      */
@@ -4616,10 +4620,16 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         if (modifiedUser != null && modifiedUser.endsWith("_MT"))
         {
             // For GBS-4495 perplexity score on MT
-            if (p_trgTuv instanceof TuvImpl){
+            if (p_trgTuv instanceof TuvImpl)
+            {
                 TuvImpl t = (TuvImpl) p_trgTuv;
                 if (t.getPerplexityResult())
-                    return STYLE_MT_PERPLEXITY;
+                {
+                    if (p_unlock)
+                        return STYLE_MT_PERPLEXITY;
+                    
+                    return STYLE_MT_PERPLEXITY + " " + STYLE_LOCK;
+                }
             }
             
             return STYLE_MT;
@@ -4701,10 +4711,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String modifiedUser = p_trgTuv.getLastModifiedUser();
         if (modifiedUser != null && modifiedUser.endsWith("_MT"))
         {
-            if (p_trgTuv instanceof TuvImpl){
+            if (p_trgTuv instanceof TuvImpl)
+            {
                 TuvImpl t = (TuvImpl) p_trgTuv;
                 if (t.getPerplexityResult())
-                    return STYLE_MT_PERPLEXITY;
+                    return STYLE_MT_PERPLEXITY + " " + STYLE_LOCK;
             }
             
             return STYLE_MT;

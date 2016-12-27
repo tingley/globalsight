@@ -43,7 +43,7 @@
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
 <script>
 var needWarning = true;
-var objectName = "";
+var objectName = "Configuration Export/Import";
 var guideNode="configExportImport";
 var helpFile = "<%=bundle.getString("help_configuration_main_screen")%>";
 	//Move option from f to t

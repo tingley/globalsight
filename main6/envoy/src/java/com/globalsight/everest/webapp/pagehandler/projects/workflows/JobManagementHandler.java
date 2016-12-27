@@ -1814,33 +1814,21 @@ public abstract class JobManagementHandler extends PageHandler
     	if(StringUtil.isNotEmpty(fromRequest) && stateMarch)
     	{		
     		String jobIdFilter = ServletUtil.getValue(p_request, "idf");
-    		if(StringUtil.isNotEmpty(jobIdFilter))
-    		{      	
-    			sessionMgr.setMyjobsAttribute("jobIdFilter", jobIdFilter);
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("jobIdFilter", jobIdFilter);
+
 			String jobGroupIdFilter = ServletUtil.getValue(p_request, "idg");
-			if (StringUtil.isNotEmpty(jobGroupIdFilter))
-			{
-				sessionMgr.setMyjobsAttribute("jobGroupIdFilter",
+			sessionMgr.setMyjobsAttribute("jobGroupIdFilter",
 						jobGroupIdFilter);
-			}
-    		
+
     		String jobIdOption = ServletUtil.getValue(p_request, "io");
-    		if(StringUtil.isNotEmpty(jobIdOption))
-    		{      	
-    			sessionMgr.setMyjobsAttribute("jobIdOption", jobIdOption);
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("jobIdOption", jobIdOption);
+
             String jobNameFilter;
             try
             {
                 jobNameFilter = new String(ServletUtil.getValue(p_request, "nf")
                         .getBytes("ISO8859-1"), "UTF-8");
-                if(StringUtil.isNotEmpty(jobNameFilter))
-                {           
-                    sessionMgr.setMyjobsAttribute("jobNameFilter", jobNameFilter);
-                }
+                sessionMgr.setMyjobsAttribute("jobNameFilter", jobNameFilter);
             }
             catch (Exception e)
             {
@@ -1848,43 +1836,28 @@ public abstract class JobManagementHandler extends PageHandler
 
     		
     		String jobProjectFilter = ServletUtil.getValue(p_request, "po");
-    		if(StringUtil.isNotEmpty(jobProjectFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("jobProjectFilter", jobProjectFilter);
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("jobProjectFilter", jobProjectFilter);
+
     		String sourceLocaleFilter = ServletUtil.getValue(p_request, "sl");
-    		if(StringUtil.isNotEmpty(sourceLocaleFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", sourceLocaleFilter);
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", sourceLocaleFilter);
+
     		String npp = ServletUtil.getValue(p_request, "npp");
     		boolean isNewNpp = false;
-    		if(StringUtil.isNotEmpty(npp))
-    		{
-    			if(sessionMgr.getMyjobsAttribute("numPerPage") != null)
-    			{
-    				int oldNpp = (Integer) sessionMgr.getMyjobsAttribute("numPerPage");
-    				if(oldNpp != Integer.valueOf(npp))
-    					isNewNpp = true;
-    			}
-    			sessionMgr.setMyjobsAttribute("numPerPage", Integer.valueOf(npp));
-    		}
-    		
+            if(sessionMgr.getMyjobsAttribute("numPerPage") != null)
+            {
+                int oldNpp = (Integer) sessionMgr.getMyjobsAttribute("numPerPage");
+                if(oldNpp != Integer.valueOf(npp))
+                    isNewNpp = true;
+            }
+            sessionMgr.setMyjobsAttribute("numPerPage", Integer.valueOf(npp));
+
     		String jobListStart = ServletUtil.getValue(p_request, "jobListStart");
     		if(isNewNpp)
     			jobListStart = "0";
-    		if(StringUtil.isNotEmpty(jobListStart))
-    		{
-    			sessionMgr.setMyjobsAttribute("jobListStart", jobListStart);
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("jobListStart", jobListStart);
+
     		String priorityFilter = ServletUtil.getValue(p_request, "pro");
-    		if(StringUtil.isNotEmpty(priorityFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("priorityFilter", priorityFilter);
-    		}
+   			sessionMgr.setMyjobsAttribute("priorityFilter", priorityFilter);
     	}
     	else 
     	{
@@ -1917,46 +1890,28 @@ public abstract class JobManagementHandler extends PageHandler
     	if(StringUtil.isNotEmpty(fromRequest))
     	{
     		String creationStartFilter = ServletUtil.getValue(p_request, "csf");
-    		if(StringUtil.isNotEmpty(creationStartFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("creationStartFilter", creationStartFilter);
-    			sessionMgr.setMyjobsAttribute("creationStartOptionsFilter", ServletUtil.getValue(p_request, "cso"));
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("creationStartFilter", creationStartFilter);
+   			sessionMgr.setMyjobsAttribute("creationStartOptionsFilter", ServletUtil.getValue(p_request, "cso"));
+
     		String creationEndOptionsFilter = ServletUtil.getValue(p_request, "ceo");
-    		if(StringUtil.isNotEmpty(creationEndOptionsFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("creationEndFilter", ServletUtil.getValue(p_request, "cef"));
-    			sessionMgr.setMyjobsAttribute("creationEndOptionsFilter", creationEndOptionsFilter);
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("creationEndFilter", ServletUtil.getValue(p_request, "cef"));
+   			sessionMgr.setMyjobsAttribute("creationEndOptionsFilter", creationEndOptionsFilter);
+
     		String completionStartFilter = ServletUtil.getValue(p_request, "esf");
-    		if(StringUtil.isNotEmpty(completionStartFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("completionStartFilter", completionStartFilter);
-    			sessionMgr.setMyjobsAttribute("completionStartOptionsFilter", ServletUtil.getValue(p_request, "eso"));
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("completionStartFilter", completionStartFilter);
+   			sessionMgr.setMyjobsAttribute("completionStartOptionsFilter", ServletUtil.getValue(p_request, "eso"));
+
     		String completionEndOptionsFilter = ServletUtil.getValue(p_request, "eeo");
-    		if(StringUtil.isNotEmpty(completionEndOptionsFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("completionEndFilter", ServletUtil.getValue(p_request, "eef"));
-    			sessionMgr.setMyjobsAttribute("completionEndOptionsFilter", completionEndOptionsFilter);
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("completionEndFilter", ServletUtil.getValue(p_request, "eef"));
+   			sessionMgr.setMyjobsAttribute("completionEndOptionsFilter", completionEndOptionsFilter);
+
     		String exportDateStartFilter = ServletUtil.getValue(p_request, "edss");
-    		if(StringUtil.isNotEmpty(exportDateStartFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("exportDateStartFilter", exportDateStartFilter);
-    			sessionMgr.setMyjobsAttribute("exportDateStartOptionsFilter", ServletUtil.getValue(p_request, "edso"));
-    		}
-    		
+   			sessionMgr.setMyjobsAttribute("exportDateStartFilter", exportDateStartFilter);
+   			sessionMgr.setMyjobsAttribute("exportDateStartOptionsFilter", ServletUtil.getValue(p_request, "edso"));
+
     		String exportDateEndOptionsFilter = ServletUtil.getValue(p_request, "edes");
-    		if(StringUtil.isNotEmpty(exportDateEndOptionsFilter))
-    		{
-    			sessionMgr.setMyjobsAttribute("exportDateEndFilter", ServletUtil.getValue(p_request, "edee"));
-    			sessionMgr.setMyjobsAttribute("exportDateEndOptionsFilter", exportDateEndOptionsFilter);
-    		}
+   			sessionMgr.setMyjobsAttribute("exportDateEndFilter", ServletUtil.getValue(p_request, "edee"));
+   			sessionMgr.setMyjobsAttribute("exportDateEndOptionsFilter", exportDateEndOptionsFilter);
     	}
     	
     	String advancedSearch = ServletUtil.getValue(p_request, "advancedSearch");

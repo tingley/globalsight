@@ -45,8 +45,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sun.misc.BASE64Encoder;
-
 import com.globalsight.cxe.adapter.adobe.InddTuMapping;
 import com.globalsight.cxe.adapter.adobe.InddTuMappingHelper;
 import com.globalsight.everest.comment.CommentManager;
@@ -124,6 +122,8 @@ import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.zip.ZipIt;
+
+import sun.misc.BASE64Encoder;
 
 /**
  * OnlineEditorManagerLocal implements the OnlineEditorManager server interface
@@ -862,15 +862,19 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         File zf = new File(f);
                         String name = zf.getName();
                         n = name.lastIndexOf(".");
+                        if (n < 1)
+                            continue;
+                        
                         name = name.substring(0, n);
                         
-                        if (name.equals(oname)) 
+                        if (name.equals(oname) || name.startsWith(oname + "_")) 
                         {
                             File r = new File(previewZipFile.getParent(), f);
                             result = GxmlUtil.cleanUpDisplayHtml(FileUtil.readFile(r, "UTF-8"));
                             try
                             {
                                 result = replaceImg(r);
+                                result = replaceCss(result, r.getParentFile().getAbsolutePath());
                             }
                             catch (Exception e)
                             {
@@ -982,7 +986,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     {
         String root = f.getParentFile().getAbsolutePath();
         String content = FileUtil.readFile(f, "utf-8");
-        Pattern p = Pattern.compile("<img [^>]*? src=\"([^\"]*)\"[^>]*?/>");
+        Pattern p = Pattern.compile("<img [^>]*?src=\"([^\"]*)\"");
         Matcher m = p.matcher(content);
         Map<String, String> imgs = new HashMap<>();
         
@@ -1003,6 +1007,96 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                       
                     BASE64Encoder encoder = new BASE64Encoder();  
                     imgs.put(s, encoder.encode(data));
+                }
+            }
+           
+            start = m.end();
+        }
+        
+        for (String key : imgs.keySet()){
+            content = content.replace(key, "data:image/png;base64," + imgs.get(key));
+        }
+        
+        return content;
+    }
+    
+    /**
+     * Adds css file support for AEM 6.2.
+     * 
+     * @param content
+     * @param root
+     * @return
+     * @throws IOException
+     */
+    private String replaceCss(String content, String root) throws IOException
+    {
+        Pattern p = Pattern.compile("\"([^\"]*).css\"");
+        Matcher m = p.matcher(content);
+        
+        StringBuffer allCss = new StringBuffer();
+        
+        int start = 0;
+        while (m.find(start))
+        {
+            String s = m.group(1);
+            File f2 = new File(root, s + ".css");
+            if(f2.exists())
+            {
+                String cssContent = replaceCssImg(f2);
+                allCss.append(cssContent);
+            }
+           
+            start = m.end();
+        }
+        
+        int n = content.indexOf("</head>");
+        if (n > 0 && allCss.length() > 0)
+        {
+            content = content.substring(0, n) + "<style type=\"text/css\">\n" + allCss.toString()
+                    + "\n</style>" + content.substring(n);
+        }
+        
+        return content;
+    }
+    
+    /**
+     * Adds css file support for AEM 6.2.
+     * 
+     * @param f
+     * @return
+     * @throws IOException
+     */
+    private String replaceCssImg(File f) throws IOException
+    {
+        String root = f.getParentFile().getAbsolutePath();
+        String content = FileUtil.readFile(f, "utf-8");
+        Pattern p = Pattern.compile("url\\(([^\\)]*)\\)");
+        Matcher m = p.matcher(content);
+        Map<String, String> imgs = new HashMap<>();
+        
+        int start = 0;
+        while (m.find(start))
+        {
+            String s = m.group(1);
+            if (!imgs.containsKey(s))
+            {
+                String realName = s;
+                if (realName.startsWith("\"") && realName.endsWith("\"") && realName.length() > 2)
+                {
+                    realName = realName.substring(1, realName.length() - 1);
+                }
+                File f2 = new File(root, realName);
+                if(f2.exists())
+                {
+                    byte[] data = null;  
+                    InputStream in = new FileInputStream(f2);  
+                    data = new byte[in.available()];  
+                    in.read(data);  
+                    in.close();  
+                      
+                    BASE64Encoder encoder = new BASE64Encoder();  
+                    String ss = encoder.encode(data).replace("\r", "").replace("\n", "");
+                    imgs.put(s, ss);
                 }
             }
            

@@ -417,6 +417,10 @@ function confirmForm(formSent) {
 		   alert("<%= bundle.getString("jsmsg_wf_template_perplexity_target") %>");
 		   return false;
 	   }
+	   
+	   $("#perplexityKey").attr("disabled",false); 
+	   $("#perplexitySource").attr("disabled",false); 
+	   $("#perplexityTarget").attr("disabled",false); 
 	}
 
 	return true;
@@ -558,6 +562,11 @@ function updatePerplexity(v){
 
 $(function(){
 	$("#perplexityIds").attr("disabled",$("#localePairField").val() == -1); 
+	
+	if ($("#perplexityIds").val() != -1){
+		   $("#perplexitySource").attr("disabled",false); 
+		   $("#perplexityTarget").attr("disabled",false); 
+	}
 });
 </SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>

@@ -714,7 +714,7 @@ public class EscapingHelper
 					&& escaping.getPartConentValue().equalsIgnoreCase(
 							"startFinishes"))
 			{
-				sb.append(getSpecialContentForExport(tags, escaping, format,
+				sb.append(startsFinshesForExport(tags, escaping, format,
 						doDecode, escapingChars, contentType, isInCDATA,
 						internalTexts));
 			}
@@ -737,7 +737,8 @@ public class EscapingHelper
 						{
 							// In order to process XML attribute, if xml filter
 							// set up "Embeddable Tags"
-							if (escaping.isCheckActive()
+							if (IFormatNames.FORMAT_XML.equals(format)
+									&& escaping.isCheckActive()
 									&& escaping.getPartConentValue()
 											.equalsIgnoreCase("xmlAttribute"))
 							{
@@ -1074,7 +1075,7 @@ public class EscapingHelper
 					&& escaping.getPartConentValue().equalsIgnoreCase(
 							"startFinishes"))
 			{
-				sb.append(getSpecialContentForImport(tags, escaping, format,
+				sb.append(startsFinshesForImport(tags, escaping, format,
 						isPureText, processedChars, contentType, internalTexts));
 			}
 			else
@@ -1459,6 +1460,24 @@ public class EscapingHelper
 		return contentType;
 	}
 
+	/**
+	 * Compare translation content to "Start Pattern" and "Finish Pattern"
+	 * 
+	 * @param ccc
+	 *            translation content
+	 * @param startStr
+	 *            start pattern
+	 * @param finishStr
+	 *            finish pattern
+	 * @param startIsRegex
+	 *            start pattern is a regular expression
+	 * @param finishRegex
+	 *            Finish pattern is a regular expression
+	 * @param internalTexts
+	 *            internal text list
+	 * @return List<String> return match option and not match option content
+	 *         list
+	 * */
 	public static List<String> extractOneLine(String ccc, String startStr,
 			String finishStr, boolean startIsRegex, boolean finishRegex,
 			List<String> internalTexts)
@@ -1961,7 +1980,11 @@ public class EscapingHelper
 		return false;
 	}
 
-	private static String getSpecialContentForImport(List<TagIndex> tags,
+	/**
+	 * When "Active/Inactive Only If Content" choose the "Starts/Finishes With",
+	 * piece together all the content in the tag list and compare
+	 * */
+	private static String startsFinshesForImport(List<TagIndex> tags,
 			Escaping escaping, String format, boolean isPureText,
 			List<Character> processedChars, String contentType,
 			List<String> internalTexts)
@@ -2027,7 +2050,7 @@ public class EscapingHelper
 		return sb.toString();
 	}
 
-	private static String getSpecialContentForExport(List<TagIndex> tags,
+	private static String startsFinshesForExport(List<TagIndex> tags,
 			Escaping escaping, String format, boolean doDecode,
 			String escapingChars, String contentType, boolean isInCDATA,
 			List<String> internalTexts)
@@ -2123,6 +2146,9 @@ public class EscapingHelper
 		return sb.toString();
 	}
 
+	/**
+     * Protects invalid html tags, like <>, <{0}>
+     */
 	public static boolean protectInvalidTags(String content)
 	{
 		Pattern p = Pattern.compile("<([^>]*?)>");

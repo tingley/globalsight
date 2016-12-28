@@ -85,7 +85,7 @@ public class EditHelper
      */
     public static boolean isTuvInProtectedState(Tuv p_tuv, long p_jobId, int TMEditType)
     {
-        if (TMEditType == -1)
+        if (TMEditType != -1)
         {
             TuvImpl t = null;
             if (p_tuv instanceof TuvImpl)

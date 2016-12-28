@@ -427,6 +427,9 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     @SuppressWarnings("rawtypes")
     public static TuvPerplexity getTuvPerplexityByTuvId(long tuvId)
     {
+        if(!CompanyWrapper.isUsePerplexity())
+            return null;
+        
         String sql = GET_TUV_PERPLEXITYS_SQL.replace(COMPANY_ID_PLACEHOLDER,
                 CompanyWrapper.getCurrentCompanyId());
         

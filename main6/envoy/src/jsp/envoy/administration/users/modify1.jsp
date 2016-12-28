@@ -224,12 +224,16 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
         <SPAN CLASS="asterisk">*</SPAN>
     :</TD>
     <TD>
+      <% if ("1".equals(needStrongPassword)) { %>
 	  <div class="vali_pass">
 		  <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
 		  <div class="vali_pass_progress" style="display:inline-flex;">
 			<span class="vali_pass_inner_progress"></span><span class="standardText" id="pvText"></span>
 		  </div>
 	  </div>
+      <% } else { %>
+          <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
+      <% } %>
     </TD>
   </TR>
   <TR>

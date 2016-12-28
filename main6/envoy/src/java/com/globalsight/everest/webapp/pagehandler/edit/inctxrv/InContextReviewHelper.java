@@ -255,7 +255,7 @@ public class InContextReviewHelper implements WebAppConstants
         catch (GeneralException ge)
         {
             String[] msgArgs =
-            { "Failed to authenticate user!" };
+            { "Failed to authenticate user" };
 
             logger.warn("Invalid login attempt for user '"
                     + UserUtil.getUserNameById(p_userId)

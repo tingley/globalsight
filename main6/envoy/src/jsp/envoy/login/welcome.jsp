@@ -473,9 +473,9 @@ function openWizardWindow(url)
     $(document).ready(function () {
         var resetTimes = <%=userWelcome.getResetPasswordTimes()%>;
         if (resetTimes > 1) {
-            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYou can log in " + resetTimes + " times before reset the password.");
+            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYou can log in " + resetTimes + " times before resetting the password.");
         } else if (resetTimes == 1) {
-            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYOU NEED TO CHANGE YOUR PASSWORD IN THIS LAST TIME.\r\nOtherwise you will NOT be allowed to log in.");
+            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYou need to change your password in this last time.\r\nOtherwise you will NOT be allowed to log in.");
         }
     });
 </script>

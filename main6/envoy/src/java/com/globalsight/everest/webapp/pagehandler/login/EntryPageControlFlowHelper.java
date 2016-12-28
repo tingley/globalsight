@@ -463,7 +463,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         catch (GeneralException ge)
         {
             String[] msgArgs =
-            { "Failed to authenticate user" };
+            { "Failed to authenticate the user" };
 
             // TODO distinguish the different error cases
             CATEGORY.warn("Invalid login attempt for user '"

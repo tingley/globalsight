@@ -662,7 +662,7 @@ BaseFilter.prototype.saveEscaping = function()
 				 return false;
 			 }
 			 
-			 if(finishIsRegex == true && (finishPattern == null || finishPattern == ''))
+			 if(finishPattern == null || finishPattern == '')
 			 {
 				 alert(jsStartFinishPatternMessage);
 				 return false;

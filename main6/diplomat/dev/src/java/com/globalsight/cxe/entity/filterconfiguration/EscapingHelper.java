@@ -614,9 +614,10 @@ public class EscapingHelper
 					int endIndex = tmp.indexOf("]]");
 					if (startIndex > -1 && endIndex > -1)
 					{
+						String newTmp = tmp;
 						while (startIndex > -1 && endIndex > -1)
 						{
-							String newTmp = tmp.substring(endIndex+2, tmp.length());
+							newTmp = newTmp.substring(endIndex+2, newTmp.length());
 							startIndex = newTmp.indexOf("<![CDATA[");
 							endIndex = newTmp.indexOf("]]");
 							if (startIndex > -1 && endIndex == -1)

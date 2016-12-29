@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
@@ -1559,6 +1560,9 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 	// For GBS-4495 perplexity score on MT
     public boolean getPerplexityResult()
     {
+        if(!CompanyWrapper.isUsePerplexity())
+            return false;
+        
         String modifiedUser = getLastModifiedUser();
         if (modifiedUser != null && modifiedUser.endsWith("_MT"))
         {

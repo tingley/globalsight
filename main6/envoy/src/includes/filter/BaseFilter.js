@@ -658,13 +658,13 @@ BaseFilter.prototype.saveEscaping = function()
 			 
 			 if(startPattern == null || startPattern == '')
 			 {
-				 alert(jsStartPatternMessage);
+				 alert(jsStartFinishPatternMessage);
 				 return false;
 			 }
 			 
-			 if(finishIsRegex == true && (finishPattern == null || finishPattern == ''))
+			 if(finishPattern == null || finishPattern == '')
 			 {
-				 alert(jsFinishPatternMessage);
+				 alert(jsStartFinishPatternMessage);
 				 return false;
 			 }
 		 }

@@ -127,8 +127,7 @@ var jsEscapeImport = "<%= bundle.getString("lb_filter_basefilter_escape_import")
 var jsEscapeExport = "<%= bundle.getString("lb_filter_basefilter_escape_export") %>";
 var jsEscape = "<%= bundle.getString("lb_filter_basefilter_escape_escape") %>";
 var jsActiveOrInactive = "<%= bundle.getString("lb_filter_basefilter_escape_activeorinactive") %>";
-var jsStartPatternMessage = "<%=bundle.getString("lb_filter_basefilter_escape_startPattern_message")%>";
-var jsFinishPatternMessage = "<%=bundle.getString("lb_filter_basefilter_escape_finishPattern_message")%>";
+var jsStartFinishPatternMessage = "<%=bundle.getString("lb_filter_basefilter_escape_startFinishPattern_message")%>";
 
 var jsStartString = "<%= bundle.getString("lb_filter_plaintextfilter_StartStr") %>";
 var jsStartIs = "<%= bundle.getString("lb_filter_plaintextfilter_StartIs") %>";

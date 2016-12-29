@@ -341,11 +341,11 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         if (data.inludeMtColumn)
         {
             span += 1;
-        }
-        
-        if (data.usePerplexity)
-        {
-            span ++;
+            
+            if (data.usePerplexity)
+            {
+                span ++;
+            }
         }
 
         p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + span));
@@ -389,16 +389,16 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
         cell_InContext.setCellStyle(getHeaderStyle(p_workBook));
 
-        if (data.usePerplexity)
-        {
-            col++;
-            Cell cell_MT = getCell(segHeaderRow, col);
-            cell_MT.setCellValue(m_bundle.getString("lb_perplexity"));
-            cell_MT.setCellStyle(getHeaderStyle(p_workBook));
-        }
-        
         if (data.inludeMtColumn)
         {
+            if (data.usePerplexity)
+            {
+                col++;
+                Cell cell_MT = getCell(segHeaderRow, col);
+                cell_MT.setCellValue(m_bundle.getString("lb_perplexity"));
+                cell_MT.setCellStyle(getHeaderStyle(p_workBook));
+            }
+            
             col++;
             Cell cell_MT = getCell(segHeaderRow, col);
             cell_MT.setCellValue("MT");
@@ -669,18 +669,17 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         	cell_InContext.setCellValue(0);
         	cell_InContext.setCellStyle(cs);
         }
-
-        
-        if (data.usePerplexity)
-        {
-            cursor++;
-            Cell cell_MT = getCell(row, cursor);
-            cell_MT.setCellValue(perplexityWordCount);
-            cell_MT.setCellStyle(cs);
-        }
         
         if (data.inludeMtColumn)
         {
+            if (data.usePerplexity)
+            {
+                cursor++;
+                Cell cell_MT = getCell(row, cursor);
+                cell_MT.setCellValue(perplexityWordCount);
+                cell_MT.setCellStyle(cs);
+            }
+            
             cursor++;
             Cell cell_MT = getCell(row, cursor);
             cell_MT.setCellValue(mtTotalWordCount);
@@ -772,17 +771,17 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     	cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
         sumStartCellCol++;
         
-        if (data.usePerplexity)
-        {
-            Cell cell = getCell(segHeaderRow, c++);
-            cell.setCellFormula("SUM(" + sumStartCellCol + "5:"
-                    + sumStartCellCol + lastRow + ")");
-            cell.setCellStyle(getSubTotalStyle(p_workbook));
-            sumStartCellCol++;
-        }
-
         if (data.inludeMtColumn)
         {
+            if (data.usePerplexity)
+            {
+                Cell cell = getCell(segHeaderRow, c++);
+                cell.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                        + sumStartCellCol + lastRow + ")");
+                cell.setCellStyle(getSubTotalStyle(p_workbook));
+                sumStartCellCol++;
+            }
+            
         	Cell cell_MT = getCell(segHeaderRow, c++);
         	cell_MT.setCellFormula("SUM(" + sumStartCellCol + "5:"
                     + sumStartCellCol + lastRow + ")");
@@ -1193,12 +1192,14 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         csvWriter.write(bundle.getString("lb_no_match"));
         csvWriter.write(bundle.getString("lb_repetition_word_cnt"));
         csvWriter.write(bundle.getString("lb_in_context_tm"));
-        if (data.usePerplexity)
-        {
-            csvWriter.write(bundle.getString("lb_perplexity"));
-        }
+        
         if (data.inludeMtColumn)
         {
+            if (data.usePerplexity)
+            {
+                csvWriter.write(bundle.getString("lb_perplexity"));
+            }
+            
             csvWriter.write("MT");
         }
         csvWriter.write(bundle.getString("lb_total"));
@@ -1442,13 +1443,13 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             csvWriter.write(String.valueOf(0));
         }
         
-        if (data.usePerplexity)
-        {
-            csvWriter.write(String.valueOf(perplexityWordCount));
-        }
-
         if (data.inludeMtColumn)
         {
+            if (data.usePerplexity)
+            {
+                csvWriter.write(String.valueOf(perplexityWordCount));
+            }
+            
             csvWriter.write(String.valueOf(mtTotalWordCount));
         }
 

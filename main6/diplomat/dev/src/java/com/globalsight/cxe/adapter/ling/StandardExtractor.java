@@ -865,6 +865,7 @@ public class StandardExtractor
                         p_diplomat.resetForChainFilter();
                         if (p_fp != null)
                         {
+                        	p_diplomat.setIsSecondFilter(true);
                             p_diplomat.setFileProfile(p_fp);
                             p_diplomat.setFileProfileId(p_fpId);
                             p_diplomat.setFilterId(p_secondFilterId);

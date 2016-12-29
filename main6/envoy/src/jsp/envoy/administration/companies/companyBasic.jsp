@@ -254,16 +254,15 @@
             </td>
         </tr>
         <tr>
-            <td valign="top"><%=bundle.getString("lb_enablePerplexity")%>:</td>
-            <td colspan="2">
-                <input class="standardText" type="checkbox" id="enablePerplexity" name="<%=CompanyConstants.ENABLE_PERPLEXITY%>" <%=perplexity%>/>
-            </td>
-        </tr>
-        
-        <tr>
             <td valign="top"><%=bundle.getString("lb_enableTBAccessControl")%>:</td>
             <td colspan="2">
                 <input class="standardText" type="checkbox" id="enableTBAccessControl" name="<%=CompanyConstants.ENABLE_TB_ACCESS_CONTROL%>" <%=tbAccessControl%>/>
+            </td>
+        </tr>
+        <tr>
+            <td valign="top"><%=bundle.getString("lb_enablePerplexity")%>:</td>
+            <td colspan="2">
+                <input class="standardText" type="checkbox" id="enablePerplexity" name="<%=CompanyConstants.ENABLE_PERPLEXITY%>" <%=perplexity%>/>
             </td>
         </tr>
 

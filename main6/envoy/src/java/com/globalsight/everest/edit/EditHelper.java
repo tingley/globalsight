@@ -85,28 +85,31 @@ public class EditHelper
      */
     public static boolean isTuvInProtectedState(Tuv p_tuv, long p_jobId, int TMEditType)
     {
-        if (TMEditType != -1)
+        
+        TuvImpl t = null;
+        if (p_tuv instanceof TuvImpl)
         {
-            TuvImpl t = null;
-            if (p_tuv instanceof TuvImpl)
-            {
-                t = (TuvImpl) p_tuv;
-                
-            }
-            else
-            {
-                try
-                {
-                    t = SegmentTuvUtil.getTuvById(p_tuv.getId(), p_jobId);
-                }
-                catch (Exception e)
-                {
-                    logger.error(e);
-                }
-            }
+            t = (TuvImpl) p_tuv;
             
-            if (t != null && t.getPerplexityResult() && !OfflineEditHelper.isTranslatePerplexity(TMEditType))
+        }
+        else
+        {
+            try
+            {
+                t = SegmentTuvUtil.getTuvById(p_tuv.getId(), p_jobId);
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+        }
+        
+        if (t != null && t.getPerplexityResult())
+        {
+            if (TMEditType == -1 || OfflineEditHelper.isTranslatePerplexity(TMEditType))
+            {
                 return true;
+            }
         }
         
         return p_tuv.isExactMatchLocalized(p_jobId);

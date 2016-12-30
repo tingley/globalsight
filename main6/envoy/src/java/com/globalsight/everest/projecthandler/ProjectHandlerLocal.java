@@ -2977,6 +2977,11 @@ public class ProjectHandlerLocal implements ProjectHandler
         workflowTemplateInfo.setWorkflowType(p_origWorkflowTemplateInfo.getWorkflowType());
         workflowTemplateInfo
                 .setScorecardShowType(p_origWorkflowTemplateInfo.getScorecardShowType());
+        
+        workflowTemplateInfo.setPerplexityKey(p_origWorkflowTemplateInfo.getPerplexityKey());
+        workflowTemplateInfo.setPerplexityService(p_origWorkflowTemplateInfo.getPerplexityService());
+        workflowTemplateInfo.setPerplexitySourceThreshold(p_origWorkflowTemplateInfo.getPerplexitySourceThreshold());
+        workflowTemplateInfo.setPerplexityTargetThreshold(p_origWorkflowTemplateInfo.getPerplexityTargetThreshold());
         return workflowTemplateInfo;
     }
 

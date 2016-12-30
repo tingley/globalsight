@@ -106,7 +106,7 @@ public class EditHelper
         
         if (t != null && t.getPerplexityResult())
         {
-            if (TMEditType == -1 || OfflineEditHelper.isTranslatePerplexity(TMEditType))
+            if (TMEditType == -1 || !OfflineEditHelper.isTranslatePerplexity(TMEditType))
             {
                 return true;
             }

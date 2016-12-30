@@ -535,7 +535,10 @@ public class SummaryReportGenerator implements
         // Cost Columns Data
         for (row = ROWNUMBER + 1; row < (rowLen + ROWNUMBER); row++)
         {
-            String leveragingForm = getCostWithLeveraging(1, wordTotalCol - 2,
+            int leveratingEnd = wordTotalCol - 2;
+            if (usePerplexity)
+                leveratingEnd--;
+            String leveragingForm = getCostWithLeveraging(1, leveratingEnd,
                     wordTotalCol, (row + 1));
             String noLeveragingForm = getColumnName(wordTotalCol) + (row + 1)
                     + "*" + getColumnName(wordTotalCol + 5) + (row + 1);

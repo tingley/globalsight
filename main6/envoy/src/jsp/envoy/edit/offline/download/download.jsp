@@ -389,6 +389,11 @@
     
     String userOptionOfTMEditString = (String)optionsHash.get(DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTION_TM_EDIT_TYPE);
     int userOptionOfTMEdit = Integer.parseInt(userOptionOfTMEditString);
+    if (!CompanyWrapper.isUsePerplexity())
+    {
+    	if (userOptionOfTMEdit > 4 && userOptionOfTMEdit < 9)
+    		userOptionOfTMEdit = 4;
+    }
     
     String path = "";
 %>

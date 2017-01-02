@@ -304,13 +304,7 @@ public class SummaryReportGenerator implements
         cell_G.setCellValue(bundle.getString("lb_repetition_word_cnt"));
         cell_G.setCellStyle(getHeaderOrangeStyle(p_workbook));
 
-        if (usePerplexity)
-        {
-            p_sheet.setColumnWidth(column, 10 * 256);
-            Cell cell = getCell(thirRow, column++);
-            cell.setCellValue(bundle.getString("lb_perplexity"));
-            cell.setCellStyle(getHeaderOrangeStyle(p_workbook));
-        }
+        
         if (headers[0] != null)
         {
             p_sheet.setColumnWidth(column, 10 * 256);
@@ -324,6 +318,14 @@ public class SummaryReportGenerator implements
             Cell cell_Context = getCell(thirRow, column++);
             cell_Context.setCellValue(bundle.getString("lb_context_matches"));
             cell_Context.setCellStyle(getHeaderOrangeStyle(p_workbook));
+        }
+        
+        if (usePerplexity)
+        {
+            p_sheet.setColumnWidth(column, 10 * 256);
+            Cell cell = getCell(thirRow, column++);
+            cell.setCellValue(bundle.getString("lb_perplexity"));
+            cell.setCellStyle(getHeaderOrangeStyle(p_workbook));
         }
         
         Cell cell_MT = getCell(thirRow, column++);
@@ -398,12 +400,7 @@ public class SummaryReportGenerator implements
                 addNumberCell(p_sheet, column++, row,
                         sumWordCount.getTradosRepsWordCount(), 
                         getHeaderStyle(p_workbook));
-                if (usePerplexity)
-                {
-                    addNumberCell(p_sheet, column++, row,
-                            sumWordCount.getPerplexity(),
-                            getHeaderStyle(p_workbook));
-                }
+                
                 if (headers[0] != null)
                 {
                     addNumberCell(p_sheet, column++, row,
@@ -417,6 +414,12 @@ public class SummaryReportGenerator implements
                             getHeaderStyle(p_workbook));
                 }
                 
+                if (usePerplexity)
+                {
+                    addNumberCell(p_sheet, column++, row,
+                            sumWordCount.getPerplexity(),
+                            getHeaderStyle(p_workbook));
+                }
                 addNumberCell(p_sheet, column++, row, sumWordCount.getTradosMTWordCount(),
                         getHeaderStyle(p_workbook));
                 
@@ -532,7 +535,10 @@ public class SummaryReportGenerator implements
         // Cost Columns Data
         for (row = ROWNUMBER + 1; row < (rowLen + ROWNUMBER); row++)
         {
-            String leveragingForm = getCostWithLeveraging(1, wordTotalCol - 2,
+            int leveratingEnd = wordTotalCol - 2;
+            if (usePerplexity)
+                leveratingEnd--;
+            String leveragingForm = getCostWithLeveraging(1, leveratingEnd,
                     wordTotalCol, (row + 1));
             String noLeveragingForm = getColumnName(wordTotalCol) + (row + 1)
                     + "*" + getColumnName(wordTotalCol + 5) + (row + 1);

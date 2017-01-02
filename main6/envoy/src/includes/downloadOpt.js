@@ -240,13 +240,20 @@ function setClientDwnldOptions(formSent)
 	if(dwnldOpt.TMEditType)
 	{
 		if (tmEditTypeSelector) {
+			var tmEditTypeFound = false;
 			for(var i = 0; i < tmEditTypeSelector.length; i++)
 			{
 				if(tmEditTypeSelector.options[i].value == dwnldOpt.TMEditType)
 				{
 					tmEditTypeSelector.selectedIndex = i; 
+					tmEditTypeFound = true;
 					break;
 				}
+			}
+			
+			if (!tmEditTypeFound)
+			{
+				tmEditTypeSelector.selectedIndex = tmEditTypeSelector.length - 1; 
 			}
 		}
 	}

@@ -273,7 +273,7 @@ public class ReportWordCount implements Cloneable
         addTradosRepsWordCount(p_reportWordCount.getTradosRepsWordCount());
         addTradosMTWordCount(p_reportWordCount.getTradosMTWordCount());
         // For GBS-4495 perplexity score on MT
-        setPerplexity(p_reportWordCount.getPerplexity());
+        addPerplexity(p_reportWordCount.getPerplexity());
     }
 
     public ReportWordCount clone() 
@@ -298,5 +298,10 @@ public class ReportWordCount implements Cloneable
     public void setPerplexity(long perplexity)
     {
         this.perplexity = perplexity;
+    }
+    
+    public void addPerplexity(long perplexity)
+    {
+        this.perplexity += perplexity;
     }
 }

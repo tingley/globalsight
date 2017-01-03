@@ -1327,7 +1327,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             && tuv.getId() == id
                             && "".equals(segment.getSubflowId()))
                     {
-                        if (OfflineEditHelper.isTranslateICE(opd.getTMEditType()) && !segment.getTargetTuv().getState()
+                        if (!OfflineEditHelper.isTranslateICE(opd.getTMEditType()) && !segment.getTargetTuv().getState()
                                         .equals(TuvState.LOCALIZED))
                         {
                             segment.setWriteAsProtectedSegment(true);                        	

@@ -351,7 +351,7 @@ public class TaskDetailHandler extends PageHandler
             String dqfComment = wf.getDQFComment();
             String fluencyScore = wf.getFluencyScore();
             String adequacyScore = wf.getAdequacyScore();
-            boolean isDQFDone = StringUtil.isNotEmpty(dqfComment);
+            boolean isDQFDone = StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore);
 
             sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
             sessionMgr.setAttribute("scorecard", scorecardMap);

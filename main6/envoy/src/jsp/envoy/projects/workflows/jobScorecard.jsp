@@ -353,11 +353,6 @@ function editDQF(index) {
 }
 
 function saveDQF(index) {
-    if ($.trim($("#dqfComment").val()) == "") {
-        alert("Please fill in the comment for the DQF.");
-        return false;
-    }
-    
     notSave = false;
     $("#currentWfId").val(index);
     $("#dqfForm").submit();

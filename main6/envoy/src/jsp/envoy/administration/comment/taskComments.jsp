@@ -149,7 +149,7 @@
         }
 		if (scorecardShowType == 3 || scorecardShowType == 5) 
         {
-            needDQF = StringUtil.isEmpty(workflowImpl.getFluencyScore()) || StringUtil.isEmpty(workflowImpl.getAdequacyScore());
+            needDQF = StringUtil.isEmpty(workflowImpl.getDQFComment());
         }
     }
     

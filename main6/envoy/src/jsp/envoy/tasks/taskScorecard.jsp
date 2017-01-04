@@ -381,7 +381,7 @@ private static String toggleBgColor(int p_rowNumber)
         } 
 		if (scorecardShowType == 3 || scorecardShowType == 5) 
         {
-            needDQF = StringUtil.isEmpty(workflowImpl.getFluencyScore()) || StringUtil.isEmpty(workflowImpl.getAdequacyScore());
+            needDQF = StringUtil.isEmpty(dqfComment);
         }
     }
     switch (scorecardShowType) {
@@ -1417,6 +1417,11 @@ function saveDQF() {
         return false;
     }
 	
+    var comment = $("#dqfComment").val();
+    if ($.trim(comment) == "") {
+        alert("Please fill in your DQF comment first.");
+        return false;
+    }
     $("#dqfForm").submit();
 }
 </SCRIPT>

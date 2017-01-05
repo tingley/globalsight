@@ -839,7 +839,7 @@ public class SummaryReportGenerator implements
                 int mtExactMatchWordCount = w.getMtExactMatchWordCount();
                 int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
                 int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
-                reportWordCount.setPerplexity(w.getPerplexityWordCount());
+                reportWordCount.addPerplexity(w.getPerplexityWordCount());
                 
                 if (PageHandler.isInContextMatch(w.getJob()))
                 {

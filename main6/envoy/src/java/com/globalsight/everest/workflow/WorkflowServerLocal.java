@@ -400,13 +400,11 @@ public class WorkflowServerLocal implements WorkflowServer
         }
 
         Object[] args =
-        {
-                p_emailInfo.getJobName(),
-                p_emailInfo.getAssigneesName(),
-                capLoginUrl(),
+        { p_emailInfo.getJobName(), p_emailInfo.getAssigneesName(), capLoginUrl(),
                 p_emailInfo.getPriorityAsString(),
                 WorkflowHelper.localePair(p_emailInfo.getSourceLocale(),
-                        p_emailInfo.getTargetLocale(), "en_US"), state };
+                        p_emailInfo.getTargetLocale(), "en_US"),
+                state };
 
         sendTaskActionEmailToUser(p_emailInfo.getAssigneesName(), p_emailInfo, null,
                 WorkflowMailerConstants.COMPLETED_WFL, args);
@@ -1638,11 +1636,11 @@ public class WorkflowServerLocal implements WorkflowServer
                         p_emailInfo.getPageName(), p_emailInfo.getTime(), p_emailInfo.getJobName(),
                         p_emailInfo.getComments() };
                 sendTaskActionEmailToUsers(p_emailInfo.getProjectManagerId(),
-                        getNodeAssignees(
-                                WorkflowJbpmUtil.getNodeById(processInstance.getProcessDefinition(),
-                                        task.getTaskId()),
+                        getNodeAssignees(WorkflowJbpmUtil.getNodeById(
+                                processInstance.getProcessDefinition(), task.getTaskId()),
                                 processInstance),
-                        p_emailInfo.getProjectIdAsLong(), null, p_taskActionType, args);
+                        p_emailInfo.getProjectIdAsLong(), null, p_taskActionType, args,
+                        task.getTaskId());
             }
         }
         catch (Exception e)
@@ -2286,7 +2284,6 @@ public class WorkflowServerLocal implements WorkflowServer
                         getWarningThreshold(), p_emailInfo);
             }
 
-            String companyIdStr = p_emailInfo.getCompanyId();
             String pmIdStr = p_emailInfo.getProjectManagerId();
 
             Object[] deactiveArgs =
@@ -2304,10 +2301,10 @@ public class WorkflowServerLocal implements WorkflowServer
 
             // notify deactivated and activated task assignees
             sendTaskActionEmailToUsers(pmIdStr, previousAssignees, p_emailInfo.getProjectIdAsLong(),
-                    null, WorkflowMailerConstants.CANCEL_TASK, deactiveArgs);
+                    null, WorkflowMailerConstants.CANCEL_TASK, deactiveArgs, p_taskId);
 
             sendTaskActionEmailToUsers(pmIdStr, newAssignees, p_emailInfo.getProjectIdAsLong(),
-                    null, WorkflowMailerConstants.REASSIGN_TASK, activeArgs);
+                    null, WorkflowMailerConstants.REASSIGN_TASK, activeArgs, p_taskId);
         }
         catch (Exception e)
         {
@@ -3184,7 +3181,7 @@ public class WorkflowServerLocal implements WorkflowServer
 
                         if (skipping == null || (skipping != null && skipping.startsWith("LAST")))
                             sendTaskActionEmailToUsers(from, new String[]
-                            { to }, projectId, null, ActionType, messageArgs);
+                            { to }, projectId, null, ActionType, messageArgs, p_taskInfo.getId());
                     }
                 }
 
@@ -3512,7 +3509,7 @@ public class WorkflowServerLocal implements WorkflowServer
      * a workflow action
      */
     private void sendTaskActionEmailToUsers(String p_initiator, String[] userIds, Long p_projectId,
-            String p_cc, int p_taskActionType, Object[] p_messageArgs)
+            String p_cc, int p_taskActionType, Object[] p_messageArgs, long p_taskId)
     {
         if (!m_systemNotificationEnabled)
         {
@@ -3535,6 +3532,7 @@ public class WorkflowServerLocal implements WorkflowServer
                     {
                         taskDeatilUrlParam.put(WebAppConstants.LOGIN_NAME_FIELD,
                                 UserUtil.getUserNameById(to.getUserId()));
+                        taskDeatilUrlParam.put("taskId", String.valueOf(p_taskId));
                         p_messageArgs[1] = makeLoginToTaskUrl();
                         sendMail(p_initiator, to, getEmailSubject(p_taskActionType),
                                 getEmailMessage(p_taskActionType), p_messageArgs, companyIdStr);

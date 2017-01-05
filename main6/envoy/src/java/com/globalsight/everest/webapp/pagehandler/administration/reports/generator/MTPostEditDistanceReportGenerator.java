@@ -101,24 +101,22 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     private String m_userId;
     private String INCLUDE_SEGS_FROM_LATEST = "latest";
     private String INCLUDE_SEGS_FROM_ALL = "all";
-    private String includeSegsFrom = INCLUDE_SEGS_FROM_LATEST;//default
+    private String includeSegsFrom = INCLUDE_SEGS_FROM_LATEST;// default
 
     private NumberFormat twoDigitFormater = null;
     private NumberFormat threeDigitFormater = null;
     private boolean usePerplexity = false;
+    private boolean isIncludeInternalText = true;
 
-    private static final String GET_DETAILED_DATA_SQL1 =
-            "SELECT t1.Id as tuvId, t2.tuId, t2.source, t2.MT, t1.segment_string AS target, t2.mt_name, t1.state "
+    private static final String GET_DETAILED_DATA_SQL1 = "SELECT t1.Id as tuvId, t2.tuId, t2.source, t2.MT, t1.segment_string AS target, t2.mt_name, t1.state "
             + " FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS t1,"
             + " (SELECT lm.source_page_id, lm.original_source_tuv_id AS tuvId, tuv.tu_id AS tuId, tuv.segment_string AS source, lm.matched_text_string AS MT, lm.mt_name"
-            + "  FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS tuv, " + TuvQueryConstants.LM_TABLE_PLACEHOLDER + " AS lm"
+            + "  FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS tuv, "
+            + TuvQueryConstants.LM_TABLE_PLACEHOLDER + " AS lm"
             + "  WHERE tuv.id = lm.original_source_tuv_id"
-            + "  AND lm.source_page_id IN (_SOURCE_PAGE_IDS_)"
-            + "  AND lm.target_locale_id = ?"
-            + "  AND lm.order_num = 301"
-            + "  AND lm.sub_id = '0'"
-            + "  AND tuv.state != 'OUT_OF_DATE') AS t2"
-            + "  WHERE t1.tu_id = t2.tuId"
+            + "  AND lm.source_page_id IN (_SOURCE_PAGE_IDS_)" + "  AND lm.target_locale_id = ?"
+            + "  AND lm.order_num = 301" + "  AND lm.sub_id = '0'"
+            + "  AND tuv.state != 'OUT_OF_DATE') AS t2" + "  WHERE t1.tu_id = t2.tuId"
             + "  AND t1.locale_id = ?";
     private static final String GET_DETAILED_DATA_SQL2 = " AND t1.state != 'OUT_OF_DATE'";
     private static final String GET_DETAILED_DATA_SQL3 = " ORDER BY t1.tu_id ASC, t1.id ASC";
@@ -151,12 +149,12 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     // for junit test only
     public MTPostEditDistanceReportGenerator()
     {
-        
+
     }
 
     public MTPostEditDistanceReportGenerator(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws LocaleManagerException,
-            RemoteException, GeneralException
+            HttpServletResponse p_response)
+            throws LocaleManagerException, RemoteException, GeneralException
     {
         usePerplexity = CompanyWrapper.isUsePerplexity();
         HttpSession session = p_request.getSession();
@@ -167,14 +165,15 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         CompanyThreadLocal.getInstance().setValue(m_companyName);
 
         includeSegsFrom = m_request.getParameter("includeSegsFrom");
+        String includeInternalText = p_request.getParameter("includeInternalText");
+        isIncludeInternalText = "on".equals(includeInternalText) ? true : false;
 
         setProjectIdList(p_request);
         setTargetLocales(p_request);
         setStates(p_request);
     }
 
-    public void sendReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales,
+    public void sendReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales,
             HttpServletResponse p_response) throws Exception
     {
         if (p_jobIDS == null || p_jobIDS.size() == 0)
@@ -283,8 +282,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         }
 
         mtedTargetLocales.addAll(mtedTargetLocalesSet);
-        SortUtil.sort(mtedTargetLocales, new GlobalSightLocaleComparator(
-                GlobalSightLocaleComparator.ISO_CODE, Locale.US));
+        SortUtil.sort(mtedTargetLocales,
+                new GlobalSightLocaleComparator(GlobalSightLocaleComparator.ISO_CODE, Locale.US));
 
         mtedJobs.addAll(mtedJobsSet);
         SortUtil.sort(mtedJobs, new JobComparator(JobComparator.JOB_ID, Locale.US));
@@ -306,7 +305,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         Cell titleCell = getCell(firstRow, 0);
         titleCell.setCellValue(m_bundle.getString("mt_post_edit_distance_report"));
         titleCell.setCellStyle(titleStyle);
-        
+
         p_sheet.setColumnWidth(0, 15 * 256);
     }
 
@@ -320,7 +319,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         int col = 0;
         int row = SUMMARY_HEADER_ROW;
         Row summaryHeaderRow = getRow(p_sheet, row);
-        
+
         Cell cell_A = getCell(summaryHeaderRow, col);
         cell_A.setCellValue(m_bundle.getString("lb_company"));
         cell_A.setCellStyle(getHeaderStyle(p_workBook));
@@ -356,7 +355,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         cell_F.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
-        
+
         if (usePerplexity)
         {
             Cell cell = getCell(summaryHeaderRow, col);
@@ -444,7 +443,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         cell_H.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 80 * 256);
         col++;
-        
+
         // For GBS-4495 perplexity score on MT
         if (usePerplexity)
         {
@@ -453,13 +452,13 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             cell_I.setCellStyle(getHeaderStyle(p_workBook));
             p_sheet.setColumnWidth(col, 15 * 256);
             col++;
-            
+
             Cell cell_J = getCell(detailHeaderRow, col);
             cell_J.setCellValue(m_bundle.getString("lb_target_perplexity"));
             cell_J.setCellStyle(getHeaderStyle(p_workBook));
             p_sheet.setColumnWidth(col, 15 * 256);
             col++;
-            
+
             Cell cell_K = getCell(detailHeaderRow, col);
             cell_K.setCellValue(m_bundle.getString("lb_pass_fail"));
             cell_K.setCellStyle(getHeaderStyle(p_workBook));
@@ -488,7 +487,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 // sequence, latest segment should be the last one for a TU.
                 detailedDatas = sortDetailedData(detailedDatas);
                 // Remove duplicated translations
-//                detailedDatas = removeDuplicates(detailedDatas);
+                // detailedDatas = removeDuplicates(detailedDatas);
             }
 
             if (detailedDatas.size() > 0)
@@ -533,7 +532,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
         if (curActiveData != null)
         {
-            newList.add(curActiveData);            
+            newList.add(curActiveData);
         }
 
         return newList;
@@ -651,15 +650,36 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 data.setTuId(tuId);
 
                 String source = rs.getString("source");
-                source = MTHelper.getGxmlElement(source).getTextValue();
+                if (isIncludeInternalText)
+                {
+                    source = MTHelper.getGxmlElement(source).getTextValue();
+                }
+                else
+                {
+                    source = MTHelper.getGxmlElement(source).getTextValueWithoutInternalText();
+                }
                 data.setSource(source);
 
                 String mt = rs.getString("MT");
-                mt = MTHelper.getGxmlElement(mt).getTextValue();
+                if (isIncludeInternalText)
+                {
+                    mt = MTHelper.getGxmlElement(mt).getTextValue();
+                }
+                else
+                {
+                    mt = MTHelper.getGxmlElement(mt).getTextValueWithoutInternalText();
+                }
                 data.setMt(mt);
 
                 String target = rs.getString("target");
-                target = MTHelper.getGxmlElement(target).getTextValue();
+                if (isIncludeInternalText)
+                {
+                    target = MTHelper.getGxmlElement(target).getTextValue();
+                }
+                else
+                {
+                    target = MTHelper.getGxmlElement(target).getTextValueWithoutInternalText();
+                }
                 data.setTarget(target);
 
                 int levenshteinDistance = StringUtils.getLevenshteinDistance(mt, target);
@@ -667,7 +687,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
                 String mtName = rs.getString("mt_name");
                 data.setMtEngineName(mtName);
-                
+
                 String state = rs.getString("state");
                 data.setState(state);
 
@@ -720,8 +740,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             col++;
 
             Cell cell_D = getCell(curRow, col);
-            cell_D.setCellValue(Double.valueOf(this.get2DigitFormater().format(
-                    data.getPostEditDistance())));
+            cell_D.setCellValue(
+                    Double.valueOf(this.get2DigitFormater().format(data.getPostEditDistance())));
             cell_D.setCellStyle(getContentStyle(p_workBook));
             col++;
 
@@ -761,31 +781,34 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                     : getContentStyle(p_workBook);
             cell_H.setCellStyle(targetStyle);
             col++;
-            
+
             // For GBS-4495 perplexity score on MT
             if (usePerplexity)
             {
                 TuvImpl tuv1 = SegmentTuvUtil.getTuvById(data.getTuvId(), data.getJobId());
                 TuvPerplexity perplexity = tuv1.loadPerplexity();
-                
+
                 Cell cell_I = getCell(curRow, col);
                 String sourcePreplexity = Double.toString(perplexity.getPerplexitySource());
-                cell_I.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(sourcePreplexity) : sourcePreplexity);
+                cell_I.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(sourcePreplexity)
+                        : sourcePreplexity);
                 CellStyle sourcePreplexityStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                         : getContentStyle(p_workBook);
                 cell_I.setCellStyle(sourcePreplexityStyle);
                 col++;
-                
+
                 Cell cell_J = getCell(curRow, col);
                 String targetPreplexity = Double.toString(perplexity.getPerplexityTarget());
-                cell_J.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(targetPreplexity) : targetPreplexity);
+                cell_J.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(targetPreplexity)
+                        : targetPreplexity);
                 CellStyle targetPreplexityStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                         : getContentStyle(p_workBook);
                 cell_J.setCellStyle(targetPreplexityStyle);
                 col++;
-                
+
                 Cell cell_K = getCell(curRow, col);
-                String passFail = perplexity.getPerplexityResult() ? m_bundle.getString("lb_pass") : m_bundle.getString("lb_fail");
+                String passFail = perplexity.getPerplexityResult() ? m_bundle.getString("lb_pass")
+                        : m_bundle.getString("lb_fail");
                 cell_K.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(passFail) : passFail);
                 CellStyle passFailStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                         : getContentStyle(p_workBook);
@@ -843,10 +866,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 }
 
                 String state = wf.getState();
-                if (Workflow.DISPATCHED.equals(state)
-                        || Workflow.EXPORTED.equals(state)
-                        || Workflow.EXPORT_FAILED.equals(state)
-                        || Workflow.ARCHIVED.equals(state)
+                if (Workflow.DISPATCHED.equals(state) || Workflow.EXPORTED.equals(state)
+                        || Workflow.EXPORT_FAILED.equals(state) || Workflow.ARCHIVED.equals(state)
                         || Workflow.LOCALIZED.equals(state))
                 {
                     addWorkflowSummary(p_workbook, p_sheet, job, wf, detailedData, row);
@@ -861,8 +882,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
      * 
      * @exception Exception
      */
-    private void addWorkflowSummary(Workbook workBook, Sheet sheet, Job job,
-            Workflow workflow, List<DetailedData> detailedData, IntHolder row) throws Exception
+    private void addWorkflowSummary(Workbook workBook, Sheet sheet, Job job, Workflow workflow,
+            List<DetailedData> detailedData, IntHolder row) throws Exception
     {
         int col = 0;
         Row curRow = getRow(sheet, row.value);
@@ -905,7 +926,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         cell_F.setCellValue(workflow.getMtTotalWordCount());
         cell_F.setCellStyle(getContentStyle(workBook));
         col++;
-        
+
         // Perplexity passed word count
         if (usePerplexity)
         {
@@ -966,7 +987,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
         row.inc();
     }
-    
+
     @Override
     public String getReportType()
     {
@@ -998,13 +1019,12 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     }
 
     @SuppressWarnings("unchecked")
-	private void setTargetLocales(HttpServletRequest p_request)
+    private void setTargetLocales(HttpServletRequest p_request)
             throws LocaleManagerException, RemoteException, GeneralException
     {
         data.trgLocaleList.clear();
         data.wantsAllLocales = false;
-        String[] paramTrgLocales = p_request
-                .getParameterValues(ReportConstants.TARGETLOCALE_LIST);
+        String[] paramTrgLocales = p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST);
         if (paramTrgLocales != null)
         {
             for (int i = 0; i < paramTrgLocales.length; i++)
@@ -1013,8 +1033,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 {
                     data.wantsAllLocales = true;
                     data.trgLocaleList = new ArrayList<GlobalSightLocale>(
-                            ServerProxy.getLocaleManager()
-                                    .getAllTargetLocales());
+                            ServerProxy.getLocaleManager().getAllTargetLocales());
                     break;
                 }
                 else
@@ -1234,7 +1253,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
         return headerStyle;
     }
-    
+
     private CellStyle getContentStyle(Workbook p_workbook) throws Exception
     {
         if (contentStyle == null)
@@ -1279,7 +1298,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         for (int i = cellRangeAddress.getFirstRow(); i <= cellRangeAddress.getLastRow(); i++)
         {
             Row row = getRow(sheet, i);
-            for (int j = cellRangeAddress.getFirstColumn(); j <= cellRangeAddress.getLastColumn(); j++)
+            for (int j = cellRangeAddress.getFirstColumn(); j <= cellRangeAddress
+                    .getLastColumn(); j++)
             {
                 Cell cell = getCell(row, j);
                 cell.setCellStyle(cs);
@@ -1302,7 +1322,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             cell = p_row.createCell(index);
         return cell;
     }
-    
+
     @Override
     public void setPercent(int p_finishedJobNum)
     {
@@ -1370,7 +1390,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         {
             return jobName;
         }
-        
+
         public void setJobName(String jobName)
         {
             this.jobName = jobName;

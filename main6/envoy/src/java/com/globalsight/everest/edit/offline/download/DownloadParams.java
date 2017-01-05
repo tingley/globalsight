@@ -29,6 +29,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
@@ -1622,6 +1623,12 @@ public class DownloadParams implements Serializable
 
     public int getTMEditType()
     {
+        if (!CompanyWrapper.isUsePerplexity())
+        {
+            // For GBS-4495
+            if (TMEditType > 4 && TMEditType < 9)
+                return 4;
+        }
         return TMEditType;
     }
 

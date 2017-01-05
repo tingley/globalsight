@@ -300,7 +300,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         boolean isStored = false;
         
         if (isDQFEnabled) {
-            isStored = StringUtil.isNotEmpty(dqfComment);
+            isStored = StringUtil.isNotEmpty(fluencyScore);
             
             // DQF enabled
             row = DQF_START_ROW;

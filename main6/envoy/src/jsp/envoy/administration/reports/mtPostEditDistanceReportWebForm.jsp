@@ -348,6 +348,10 @@ function doOnload()
         <input name="includeSegsFrom" value="all" type="radio"/><%=bundle.getString("lb_include_segments_from_all")%><br>
     </td>
 </tr>
+<tr>
+    <td class="standardText"><%=bundle.getString("report_include_internal_text")%>:</td>
+    <td><input id="includeInternalText" name="includeInternalText" type="checkbox" checked="true"></td>
+</tr>
 
 <tr>
 	<TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" id="submitButton" name="submitButton" onClick="submitForm()"></TD>

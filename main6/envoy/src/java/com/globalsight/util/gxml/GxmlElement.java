@@ -48,8 +48,7 @@ public class GxmlElement implements Serializable
 {
     private static final long serialVersionUID = -7065428615407672282L;
 
-    private static final Logger CATEGORY = Logger.getLogger(GxmlElement.class
-            .getName());
+    private static final Logger CATEGORY = Logger.getLogger(GxmlElement.class.getName());
 
     // Element types
     public static final int NONE = -1;
@@ -207,6 +206,28 @@ public class GxmlElement implements Serializable
     }
 
     /**
+     * Gets the text value without internal text element.
+     * 
+     * @since GBS-4639
+     */
+    public String getTextValueWithoutInternalText()
+    {
+        List<GxmlElement> children = getTextNodeWithoutInternal();
+        if (children == null)
+        {
+            return "";
+        }
+
+        StringBuilder result = new StringBuilder(10 * children.size());
+        for (GxmlElement child : children)
+        {
+            result.append(((TextNode) child).getTextNodeValue());
+        }
+
+        return result.toString();
+    }
+
+    /**
      * Get the text value of a TextNode element. The TextNode value is defined
      * as the content of a TextNode. If the GxmlElement is not a TextNode, an
      * empty String is returned.
@@ -303,8 +324,7 @@ public class GxmlElement implements Serializable
      *                , a globalsight Exception, thrown when the attribute is
      *                not a boolean value e.g. true or false
      */
-    public Boolean getAttributeAsBoolean(String p_attributeName)
-            throws BooleanConvertingException
+    public Boolean getAttributeAsBoolean(String p_attributeName) throws BooleanConvertingException
     {
         if (m_attributes == null)
         {
@@ -316,8 +336,7 @@ public class GxmlElement implements Serializable
 
         if (attr != null)
         {
-            if ("true".equals(attr.toLowerCase())
-                    || "false".equals(attr.toLowerCase()))
+            if ("true".equals(attr.toLowerCase()) || "false".equals(attr.toLowerCase()))
             {
                 output = new Boolean(attr);
             }
@@ -340,8 +359,7 @@ public class GxmlElement implements Serializable
      *                , thrown when the attribute value is not a number e.g.
      *                true or false
      */
-    public Integer getAttributeAsInteger(String p_attributeName)
-            throws NumberFormatException
+    public Integer getAttributeAsInteger(String p_attributeName) throws NumberFormatException
     {
         if (m_attributes == null)
         {
@@ -408,8 +426,7 @@ public class GxmlElement implements Serializable
             return new ArrayList<GxmlElement>(0);
         }
 
-        List<GxmlElement> someChildElmts = new ArrayList<GxmlElement>(
-                m_childElements.size());
+        List<GxmlElement> someChildElmts = new ArrayList<GxmlElement>(m_childElements.size());
 
         boolean inInternal = false;
         String bptI = "-1";
@@ -495,8 +512,7 @@ public class GxmlElement implements Serializable
      */
     public GxmlElement getChildElement(int p_index)
     {
-        if (p_index == -1 || m_childElements == null
-                || p_index >= m_childElements.size())
+        if (p_index == -1 || m_childElements == null || p_index >= m_childElements.size())
         {
             return null;
         }
@@ -511,8 +527,7 @@ public class GxmlElement implements Serializable
      *            - an array of element types
      * @return a List of descendant elements having the specified element types
      */
-    public List<GxmlElement> getDescendantElements(int[] p_types,
-            boolean... fromPage)
+    public List<GxmlElement> getDescendantElements(int[] p_types, boolean... fromPage)
     {
         if (m_childElements == null)
         {
@@ -520,8 +535,7 @@ public class GxmlElement implements Serializable
         }
 
         // First get the immediate children of the specified types
-        List<GxmlElement> descendants = new ArrayList<GxmlElement>(
-                m_childElements.size());
+        List<GxmlElement> descendants = new ArrayList<GxmlElement>(m_childElements.size());
 
         for (int i = 0; i < m_childElements.size(); i++)
         {
@@ -624,8 +638,7 @@ public class GxmlElement implements Serializable
      */
     public String getStartTag(boolean isXliff)
     {
-        StringBuffer output = new StringBuffer(
-                GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
+        StringBuffer output = new StringBuffer(GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
 
         output.append("<");
         output.append(getName());
@@ -675,18 +688,15 @@ public class GxmlElement implements Serializable
             {
                 GxmlElement gxmlElement = (GxmlElement) it.next();
 
-                children += gxmlElement.toString()
-                        + GlobalSightCategory.getLineContinuation();
+                children += gxmlElement.toString() + GlobalSightCategory.getLineContinuation();
             }
         }
 
         return "m_name=" + (m_name != null ? m_name : "null") + " m_type="
                 + Integer.toString(m_type) + " m_parent="
-                + (m_parent != null ? m_parent.getName() : "null")
-                + " m_attributes="
-                + (m_attributes != null ? m_attributes.toString() : "null")
-                + " children={" + children + "} " + " m_name="
-                + (m_name != null ? m_name : "null");
+                + (m_parent != null ? m_parent.getName() : "null") + " m_attributes="
+                + (m_attributes != null ? m_attributes.toString() : "null") + " children={"
+                + children + "} " + " m_name=" + (m_name != null ? m_name : "null");
     }
 
     /**
@@ -717,8 +727,8 @@ public class GxmlElement implements Serializable
         }
     }
 
-    protected String toGxml(String p_startTagDelimiter,
-            boolean p_excludeTopTags, boolean p_handleNRT)
+    protected String toGxml(String p_startTagDelimiter, boolean p_excludeTopTags,
+            boolean p_handleNRT)
     {
         return toGxml(p_startTagDelimiter, p_excludeTopTags, p_handleNRT, false);
     }
@@ -731,24 +741,21 @@ public class GxmlElement implements Serializable
      *            placed before start-tag
      * @return the element as a Gxml String
      */
-    protected String toGxml(String p_startTagDelimiter,
-            boolean p_excludeTopTags, boolean p_handleNRT, boolean isXlf)
+    protected String toGxml(String p_startTagDelimiter, boolean p_excludeTopTags,
+            boolean p_handleNRT, boolean isXlf)
     {
         StringBuffer result = null;
 
         if (p_excludeTopTags)
         {
             result = new StringBuffer(
-                    (m_childElements != null ? m_childElements.size()
-                            * STRING_BUFFER_LENGTH : 0));
+                    (m_childElements != null ? m_childElements.size() * STRING_BUFFER_LENGTH : 0));
         }
         else
         {
-            result = new StringBuffer(
-                    GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH
-                            + (m_childElements != null ? m_childElements.size()
-                                    * STRING_BUFFER_LENGTH : 0)
-                            + GxmlSaxHelper.END_TAG_STRING_BUFFER_LENGTH);
+            result = new StringBuffer(GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH
+                    + (m_childElements != null ? m_childElements.size() * STRING_BUFFER_LENGTH : 0)
+                    + GxmlSaxHelper.END_TAG_STRING_BUFFER_LENGTH);
         }
 
         result.append(p_startTagDelimiter);
@@ -774,8 +781,7 @@ public class GxmlElement implements Serializable
                  * str.replaceAll("&#xa;", "&amp;#xa;"); //str =
                  * str.replaceAll("<", "&lt;"); //str = str.replaceAll(">",
                  * "&gt;"); result.append(str); } else {
-                 */result.append(child.toGxml(p_startTagDelimiter, false,
-                        p_handleNRT, isXlf));
+                 */result.append(child.toGxml(p_startTagDelimiter, false, p_handleNRT, isXlf));
                 // }
             }
         }
@@ -812,8 +818,7 @@ public class GxmlElement implements Serializable
                 return "";
             }
 
-            StringBuffer output = new StringBuffer(
-                    GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
+            StringBuffer output = new StringBuffer(GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
 
             Set keys = m_attributes.keySet();
 
@@ -865,8 +870,7 @@ public class GxmlElement implements Serializable
     public GxmlElement getDescendantByAttributeValue(String p_attributeName,
             String p_attributeValue, int p_type)
     {
-        return getNthDescendantByAttributeValue(p_attributeName,
-                p_attributeValue, p_type, 1);
+        return getNthDescendantByAttributeValue(p_attributeName, p_attributeValue, p_type, 1);
     }
 
     /**
@@ -890,30 +894,7 @@ public class GxmlElement implements Serializable
     public GxmlElement getNthDescendantByAttributeValue(String p_attributeName,
             String p_attributeValue, int p_type, int p_position)
     {
-        List possibleReturns = getAllDescendantByAttributeValue(
-                p_attributeName, p_attributeValue, p_type);
-
-        p_position = p_position - 1;
-        if (p_position < 0 || p_position >= possibleReturns.size())
-        {
-            return null;
-        }
-
-        // order the descendants by nearness to this element. return
-        // first one
-        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(
-                p_position);
-    }
-
-    /**
-     * Returns the N-th descendant that has non specified attribute. It could be
-     * this element. All elements must belong to the same tree structure of
-     * elements.
-     */
-    public GxmlElement getNthDescendantByAttributeNone(String p_attributeName,
-            int p_type, int p_position)
-    {
-        List possibleReturns = getAllDescendantByAttributeNone(p_attributeName,
+        List possibleReturns = getAllDescendantByAttributeValue(p_attributeName, p_attributeValue,
                 p_type);
 
         p_position = p_position - 1;
@@ -924,8 +905,28 @@ public class GxmlElement implements Serializable
 
         // order the descendants by nearness to this element. return
         // first one
-        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(
-                p_position);
+        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(p_position);
+    }
+
+    /**
+     * Returns the N-th descendant that has non specified attribute. It could be
+     * this element. All elements must belong to the same tree structure of
+     * elements.
+     */
+    public GxmlElement getNthDescendantByAttributeNone(String p_attributeName, int p_type,
+            int p_position)
+    {
+        List possibleReturns = getAllDescendantByAttributeNone(p_attributeName, p_type);
+
+        p_position = p_position - 1;
+        if (p_position < 0 || p_position >= possibleReturns.size())
+        {
+            return null;
+        }
+
+        // order the descendants by nearness to this element. return
+        // first one
+        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(p_position);
     }
 
     /**
@@ -943,8 +944,8 @@ public class GxmlElement implements Serializable
      *         value of the attribute. If none is found, an empty List is
      *         returned.
      */
-    public List getAllDescendantByAttributeValue(String p_attributeName,
-            String p_attributeValue, int p_type)
+    public List getAllDescendantByAttributeValue(String p_attributeName, String p_attributeValue,
+            int p_type)
     {
         List allElements = new ArrayList();
 
@@ -954,13 +955,11 @@ public class GxmlElement implements Serializable
         {
             String attributeValue = gxmlElement.getAttribute(p_attributeName);
 
-            if (attributeValue != null
-                    && attributeValue.equals(p_attributeValue))
+            if (attributeValue != null && attributeValue.equals(p_attributeValue))
             {
                 allElements.add(gxmlElement);
             }
-            else if ("none".equals(p_attributeValue)
-                    && "type".equals(p_attributeName))
+            else if ("none".equals(p_attributeValue) && "type".equals(p_attributeName))
             {
                 allElements.add(gxmlElement);
             }
@@ -981,9 +980,8 @@ public class GxmlElement implements Serializable
                     continue;
                 }
 
-                List elements = ((GxmlElement) child)
-                        .getAllDescendantByAttributeValue(p_attributeName,
-                                p_attributeValue, p_type);
+                List elements = ((GxmlElement) child).getAllDescendantByAttributeValue(
+                        p_attributeName, p_attributeValue, p_type);
 
                 allElements.addAll(elements);
             }
@@ -995,8 +993,7 @@ public class GxmlElement implements Serializable
     /**
      * Returns all elements that has non specified attribute.
      */
-    public List getAllDescendantByAttributeNone(String p_attributeName,
-            int p_type)
+    public List getAllDescendantByAttributeNone(String p_attributeName, int p_type)
     {
         List allElements = new ArrayList();
 
@@ -1028,8 +1025,7 @@ public class GxmlElement implements Serializable
                 }
 
                 List elements = ((GxmlElement) child)
-                        .getAllDescendantByAttributeNone(p_attributeName,
-                                p_type);
+                        .getAllDescendantByAttributeNone(p_attributeName, p_type);
 
                 allElements.addAll(elements);
             }
@@ -1177,8 +1173,7 @@ public class GxmlElement implements Serializable
      */
     public static GxmlElement getGxmlRootElement(GxmlElement p_element)
     {
-        while (p_element.getType() != GXML_ROOT
-                && p_element.getParent() != null)
+        while (p_element.getType() != GXML_ROOT && p_element.getParent() != null)
         {
             p_element = p_element.getParent();
         }
@@ -1253,8 +1248,7 @@ public class GxmlElement implements Serializable
     {
         GxmlElement target = p_targetElement;
 
-        if (!(p_elementType == GxmlElement.UNSPECIFIED)
-                && target.getType() != p_elementType)
+        if (!(p_elementType == GxmlElement.UNSPECIFIED) && target.getType() != p_elementType)
         {
             List descendants = p_targetElement.getDescendantElements(new int[]
             { p_elementType });
@@ -1295,8 +1289,7 @@ public class GxmlElement implements Serializable
      * @param p_replacementElement
      *            the element to replace the old one
      */
-    public static void replace(GxmlElement p_oldElement,
-            GxmlElement p_replacementElement)
+    public static void replace(GxmlElement p_oldElement, GxmlElement p_replacementElement)
     {
         GxmlElement parent = p_oldElement.getParent();
 
@@ -1331,8 +1324,7 @@ public class GxmlElement implements Serializable
             String type = elem.getAttribute(GxmlNames.BPT_TYPE);
             if (type != null)
             {
-                elem.setAttribute(GxmlNames.BPT_TYPE,
-                        TmxTypeMapper.normalizeType(type));
+                elem.setAttribute(GxmlNames.BPT_TYPE, TmxTypeMapper.normalizeType(type));
             }
         }
     }

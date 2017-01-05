@@ -17,20 +17,6 @@
 
 package com.globalsight.everest.tuv;
 
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Query;
-import org.hibernate.Session;
-
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
@@ -42,6 +28,19 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import org.apache.log4j.Logger;
+import org.hibernate.Query;
+import org.hibernate.Session;
+
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * The TuvManagerLocal class is an implementation of TuvManager interface.
@@ -660,6 +659,10 @@ public final class TuvManagerLocal implements TuvManager
                     + " returned " + taskTuvs.size() + " TaskTuvs="
                     + taskTuvs.toString());
         }
+
+        CATEGORY.info("getPreviousTaskTuvs" + " p_tuvId=" + p_tuvId
+                + " returned " + taskTuvs.size() + " TaskTuvs="
+                + taskTuvs.toString());
 
         return taskTuvs;
     }

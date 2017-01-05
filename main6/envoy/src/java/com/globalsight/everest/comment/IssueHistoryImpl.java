@@ -17,15 +17,14 @@
 package com.globalsight.everest.comment;
 
 // 
-import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.edit.EditUtil;
 
-//
 import java.util.Calendar;
 import java.util.Date;
+
+//
 
 /**
  * Implements the IssueHistory interface.
@@ -45,6 +44,7 @@ public class IssueHistoryImpl extends PersistentObject implements IssueHistory
     private Issue m_issue;
     
     private Long dbId;
+    private String type;
 
     /**
      * Default constructor.
@@ -106,6 +106,16 @@ public class IssueHistoryImpl extends PersistentObject implements IssueHistory
         return m_comment;
     }
 
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
     /**
      * 
      */
@@ -119,6 +129,7 @@ public class IssueHistoryImpl extends PersistentObject implements IssueHistory
         sb.append(m_reportedBy);
         sb.append(", m_comment=");
         sb.append(m_comment);
+        sb.append(", type=").append(type);
         sb.append("}");
 
         return sb.toString();

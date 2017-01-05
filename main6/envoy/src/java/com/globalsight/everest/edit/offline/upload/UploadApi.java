@@ -902,7 +902,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             String tmpDQFComment = workflow.getDQFComment();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-            if (StringUtil.isEmpty(tmpDQFComment) && DQF_START_ROW > 0)
+            if (StringUtil.isEmpty(workflow.getFluencyScore()) && DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
@@ -915,10 +915,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     if (StringUtil.isNotEmpty(dqfComment))
                         workflow.setDQFComment(dqfComment);
                     isWorkflowChanged = true;
-                }
-                else if (StringUtil.isEmpty(fluencyScore) && StringUtil.isEmpty(adequacyScore))
-                {
-                    // ignore to store DQF info because all 3 fields are empty
                 }
                 else
                 {
@@ -1329,7 +1325,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             String tmpDQFComment = workflow.getDQFComment();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-            if (StringUtil.isEmpty(tmpDQFComment) && DQF_START_ROW > 0)
+            if (StringUtil.isEmpty(workflow.getFluencyScore()) && DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
@@ -1339,13 +1335,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 {
                     workflow.setFluencyScore(fluencyScore);
                     workflow.setAdequacyScore(adequacyScore);
-                    if (StringUtil.isNotEmpty(dqfComment))
-                        workflow.setDQFComment(dqfComment);
+                    workflow.setDQFComment(dqfComment);
                     isWorkflowChanged = true;
-                }
-                else if (StringUtil.isEmpty(fluencyScore) && StringUtil.isEmpty(adequacyScore))
-                {
-                    // ignore to store DQF info because all 3 fields are empty
                 }
                 else
                 {

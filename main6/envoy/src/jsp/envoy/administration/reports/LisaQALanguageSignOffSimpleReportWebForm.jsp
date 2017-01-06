@@ -367,7 +367,7 @@ function doOnload()
     
     <tr>
         <td class="standardText"><%=bundle.getString("with_compact_tags")%>:</td>
-        <td><input id="withCompactTagsSimple" name="withCompactTagsSimple" type="checkbox"></td>
+        <td><input id="withCompactTagsSimple" name="withCompactTagsSimple" type="checkbox" checked="true"></td>
     </tr>
     
     <tr>

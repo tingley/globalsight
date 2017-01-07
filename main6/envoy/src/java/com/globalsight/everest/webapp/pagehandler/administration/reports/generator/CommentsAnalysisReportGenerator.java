@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
+import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.comment.IssueImpl;
@@ -109,9 +110,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     public int NEXT_DQF_COLUMN = 1;
 
     // "I" column, index 8
-    public int CATEGORY_FAILURE_COLUMN = 8;
-    public int SEVERITY_COLUMN = 5;
-    public int COMMENT_STATUS_COLUMN = 5;
+    public int CATEGORY_FAILURE_COLUMN = 10;
+    public int SEVERITY_COLUMN = 11;
+    public int COMMENT_STATUS_COLUMN = 11;
 
     private Locale uiLocale = new Locale("en", "US");
     String m_userId;
@@ -334,7 +335,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             {
                 targetLocale = workflow.getTargetLocale();
 
-                Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(workflow.getId());
                 int scoreShowType = workflow.getScorecardShowType();
                 if (scoreShowType > -1)
                 {
@@ -375,20 +375,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             if (!jobTL.contains(trgLocale))
                 continue;
 
-            fluencyScore = "";
-            adequacyScore = "";
-            dqfComment = "";
-            scores = null;
-            scoreComment = "";
-            isDQFEnabled = false;
-            isScorecardEnabled = false;
-            needProtect = false;
-
-            DQF_START_ROW = 0;
-            SCORECARD_START_ROW = 0;
-            SEGMENT_HEADER_ROW = 6;
-            SEGMENT_START_ROW = 7;
-
             String srcLang = p_job.getSourceLocale().getDisplayName(uiLocale);
             String trgLang = trgLocale.getDisplayName(uiLocale);
 
@@ -400,6 +386,20 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             }
             else
             {
+                fluencyScore = "";
+                adequacyScore = "";
+                dqfComment = "";
+                scores = null;
+                scoreComment = "";
+                isDQFEnabled = false;
+                isScorecardEnabled = false;
+                needProtect = false;
+
+                DQF_START_ROW = 0;
+                SCORECARD_START_ROW = 0;
+                SEGMENT_HEADER_ROW = 6;
+                SEGMENT_START_ROW = 7;
+
                 sheet = p_workbook.createSheet(trgLocale.toString());
                 sheet.protectSheet("");
 
@@ -422,6 +422,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             if (p_workbook.getName(CATEGORY_FAILURE_DROP_DOWN_LIST) == null)
             {
                 createCategoryFailureNameArea(p_workbook);
+
+                String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
+                List<String> categories = CompanyWrapper.getCompanyCategoryNames(bundle,
+                        currentCompanyId, CategoryType.Severity, true);
+                ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
+                        SEGMENT_START_ROW, 28);
             }
 
             // Insert Segment Data
@@ -468,7 +474,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             // Set basic info
             isDQFEnabled = true;
             isScorecardEnabled = true;
-            COMMENT_STATUS_COLUMN = 6;
+            COMMENT_STATUS_COLUMN = 12;
             DQF_START_ROW = 6;
             SCORECARD_START_ROW = isDQFEnabled ? 11 : 7;
 
@@ -661,17 +667,18 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
+        //TODO: AS a potential requirement of GBS-4638, comments are better to separate into translation and reviewer two parts
         cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(bundle.getString("lb_reviewer_comments"));
+        cell.setCellValue(bundle.getString("lb_comments"));
         cell.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(bundle.getString("lb_translator_comments"));
-        cell.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 40 * 256);
-        col++;
+//        cell = ExcelUtil.getCell(segHeaderRow, col);
+//        cell.setCellValue(bundle.getString("lb_translator_comments"));
+//        cell.setCellStyle(headerStyle);
+//        p_sheet.setColumnWidth(col, 40 * 256);
+//        col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_category_failure"));
@@ -906,8 +913,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     StringBuilder comments = new StringBuilder();
                     StringBuilder reviewerComments = new StringBuilder();
                     int size = issueHistories.size();
-                    if (size > 0) {
-                        int lastOne = size -1;
+                    if (size > 0)
+                    {
+                        int lastOne = size - 1;
                         IssueHistory issueHistory;
                         String date;
                         for (int k = 0; k < lastOne; k++)
@@ -919,11 +927,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                                 comments.append("[").append(date).append("     ")
                                         .append(UserUtil.getUserNameById(issueHistory.reportedBy()))
                                         .append("]:\r\n").append(issueHistory.getComment()).append("\r\n");
-                            } else {
+                            }
+                            else
+                            {
                                 reviewerComments.append("[").append(date).append("     ")
                                         .append(UserUtil.getUserNameById(issueHistory.reportedBy()))
                                         .append("]:\r\n").append(issueHistory.getComment()).append("\r\n");
-
                             }
                         }
                         issueHistory = (IssueHistory) issueHistories.get(lastOne);
@@ -933,11 +942,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                             comments.append("[").append(date).append("     ")
                                     .append(UserUtil.getUserNameById(issueHistory.reportedBy()))
                                     .append("]:\r\n").append(issueHistory.getComment());
-                        } else {
+                        }
+                        else
+                        {
                             reviewerComments.append("[").append(date).append("     ")
                                     .append(UserUtil.getUserNameById(issueHistory.reportedBy()))
                                     .append("]:\r\n").append(issueHistory.getComment());
-
                         }
                     }
 
@@ -1031,7 +1041,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     cell.setCellStyle(contentStyle);
                     col++;
 
-                    // Reviewer Comments
+                    // Comments
                     CellStyle commentStyle = rtlTargetLocale ? REPORT_STYLE.getUnlockedRightStyle()
                             : REPORT_STYLE.getUnlockedStyle();
                     String commentContent = rtlTargetLocale
@@ -1042,14 +1052,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     col++;
 
                     // Translator Comments
-                    commentStyle = rtlTargetLocale ? REPORT_STYLE.getUnlockedRightStyle()
-                            : REPORT_STYLE.getUnlockedStyle();
-                    commentContent = rtlTargetLocale
-                            ? EditUtil.toRtlString(comments.toString()) : comments.toString();
-                    cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(commentContent);
-                    cell.setCellStyle(commentStyle);
-                    col++;
+//                    commentStyle = rtlTargetLocale ? REPORT_STYLE.getUnlockedRightStyle()
+//                            : REPORT_STYLE.getUnlockedStyle();
+//                    commentContent = rtlTargetLocale
+//                            ? EditUtil.toRtlString(comments.toString()) : comments.toString();
+//                    cell = ExcelUtil.getCell(currentRow, col);
+//                    cell.setCellValue(commentContent);
+//                    cell.setCellStyle(commentStyle);
+//                    col++;
 
                     // Category failure
                     cell = ExcelUtil.getCell(currentRow, col);
@@ -1109,7 +1119,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 allTuvMap = null;
             }
             // Add category failure drop down list here.
-            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row, CATEGORY_FAILURE_COLUMN,
+            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row - 1, CATEGORY_FAILURE_COLUMN,
                     CATEGORY_FAILURE_COLUMN);
 
             termLeverageMatchResultMap = null;
@@ -1119,8 +1129,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
             ExcelUtil.addValidation(p_sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
                     CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
-            ExcelUtil.addValidation(p_sheet, "StatusCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
-                    COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
             if (isDQFEnabled)
             {
                 ExcelUtil.addValidation(p_sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, p_row - 1,

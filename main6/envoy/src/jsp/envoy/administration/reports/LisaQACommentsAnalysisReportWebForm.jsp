@@ -402,7 +402,10 @@ function sortNumber(a,b)
 <span class="mainHeading"><B><%=bundle.getString("comments_analysis_report_web_form")%></B></span>
 <BR><BR>
 <TABLE WIDTH="80%">
-    <TR><TD><SPAN CLASS="smallText"><%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN></TD></TR>
+    <TR><TD><SPAN CLASS="smallText">
+        <%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%><br>
+        <%=bundle.getString("car_dqf_hint")%>
+    </SPAN></TD></TR>
 </TABLE>
 <p/><p/>
 

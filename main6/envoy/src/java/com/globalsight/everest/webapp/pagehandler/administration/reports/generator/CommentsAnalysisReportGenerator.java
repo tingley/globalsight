@@ -1455,7 +1455,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             });
 
             int len = previousTaskTuvs.size() - 2;
-            logger.info("CAR == len == " + len);
             int lastReviewerCount = 0;
 
             while ((len >= 0) && (((TaskTuv) previousTaskTuvs.get(len)).getTask()
@@ -1467,7 +1466,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             }
 
             int beforeLastReviewerCount = previousTaskTuvs.size() - lastReviewerCount - 1;
-            logger.info("CAR == beforeLastReviewerCount == " + beforeLastReviewerCount);
 
             if (beforeLastReviewerCount == 1)
             {
@@ -1487,7 +1485,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 {
                     previousSegments = previousSegments + previousSeg;
                 }
-                logger.info("CAR == PreviousTUV [" + previousTuv.getTuId() + ", " + previousTuv.getId() + "], Segment [" + previousSeg + "]");
             }
             else
             {
@@ -1515,10 +1512,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     previous.remove(previous.size() - 1);
                 }
 
-                for (int pi = 0; pi < previous.size(); pi++)
+                // GBS-4638, TripAdvisor needs to only show previous segment in first translation activity
+                int count = previous.size() > 1 ? 1 : 0;
+                for (int pi = 0; pi < count; pi++)
                 {
                     previousSegment = (String) previous.get(pi);
-                    if (previous.size() > 1)
+                    if (count > 1)
                     {
                         previousSegments = previousSegments + "{" + previousSegment + "}\r\n";
                     }
@@ -1529,7 +1528,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 }
             }
         }
-        logger.info("CAR == Returned previous segment [" + previousSegments + "]");
         return previousSegments;
     }
 

@@ -660,9 +660,9 @@ public final class TuvManagerLocal implements TuvManager
                     + taskTuvs.toString());
         }
 
-        CATEGORY.info("getPreviousTaskTuvs" + " p_tuvId=" + p_tuvId
-                + " returned " + taskTuvs.size() + " TaskTuvs="
-                + taskTuvs.toString());
+//        CATEGORY.info("getPreviousTaskTuvs" + " p_tuvId=" + p_tuvId
+//                + " returned " + taskTuvs.size() + " TaskTuvs="
+//                + taskTuvs.toString());
 
         return taskTuvs;
     }

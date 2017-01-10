@@ -87,7 +87,7 @@ TR.standardText
        parent.windx++;
        var newurl=url+"&companyName="+oSheng.val();
        window.open(newurl,target,
-       'height=710,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
+       'height=880,width=800,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
     }
     
     $(function(){

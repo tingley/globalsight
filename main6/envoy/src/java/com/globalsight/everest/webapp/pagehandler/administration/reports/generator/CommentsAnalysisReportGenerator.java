@@ -380,8 +380,21 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
             // Create One Report Sheet/Tab
             Sheet sheet = null;
+            int columnIndexOfJobs = 0;
             if (isCombineAllJobs && p_workbook.getSheet(trgLocale.toString()) != null)
             {
+                //To judge if current target locale contains workflow which enables DQF/Scorecard
+                if (dqfInfo != null && dqfInfo.get(trgLocale) != null && dqfInfo.get(trgLocale).size() > 0)
+                {
+                    isDQFEnabled = true;
+                    isScorecardEnabled = true;
+                }
+                else
+                {
+                    isDQFEnabled = false;
+                    isScorecardEnabled = false;
+                }
+
                 sheet = p_workbook.getSheet(trgLocale.toString());
             }
             else
@@ -409,7 +422,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 // Add Locale Pair Header
                 addLanguageHeader(p_workbook, sheet);
 
-                addDQFHeader(p_workbook, sheet, p_job, trgLocale, dqfInfo);
+                columnIndexOfJobs = addDQFHeader(p_workbook, sheet, p_job, trgLocale, dqfInfo);
 
                 // Add Segment Header
                 addSegmentHeader(p_workbook, sheet);
@@ -421,13 +434,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             // Create Name Areas for drop down list.
             if (p_workbook.getName(CATEGORY_FAILURE_DROP_DOWN_LIST) == null)
             {
-                createCategoryFailureNameArea(p_workbook);
-
                 String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
                 List<String> categories = CompanyWrapper.getCompanyCategoryNames(bundle,
+                        currentCompanyId, CategoryType.SegmentComment, true);;
+                ExcelUtil.createValidatorList(p_workbook, CATEGORY_FAILURE_DROP_DOWN_LIST,
+                        categories, SEGMENT_START_ROW, columnIndexOfJobs + 1);
+
+                categories = CompanyWrapper.getCompanyCategoryNames(bundle,
                         currentCompanyId, CategoryType.Severity, true);
                 ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
-                        SEGMENT_START_ROW, 28);
+                        SEGMENT_START_ROW, columnIndexOfJobs + 3);
             }
 
             // Insert Segment Data
@@ -454,16 +470,17 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
     }
 
-    private void addDQFHeader(Workbook workbook, Sheet sheet, Job job, GlobalSightLocale targetLocale,
+    private int addDQFHeader(Workbook workbook, Sheet sheet, Job job, GlobalSightLocale targetLocale,
                               HashMap<GlobalSightLocale, ArrayList<DQFDataInCAR>> dqfInfo) throws Exception {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
+        int columnIndex = 0;
         Row rowLine = null;
         Cell cell = null;
         boolean isStored = false;
 
         if (job == null || targetLocale == null || dqfInfo == null)
-            return;
+            return 0;
 
         ArrayList<DQFDataInCAR> data = dqfInfo.get(targetLocale);
         HashMap<String, Integer> elements = new HashMap<String, Integer>();
@@ -479,7 +496,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             SCORECARD_START_ROW = isDQFEnabled ? 11 : 7;
 
             // write DQF/Scorecard header info
-            int columnIndex = 0;
             int rowIndex = DQF_START_ROW;
             rowLine = ExcelUtil.getRow(sheet, rowIndex);
             cell = ExcelUtil.getCell(rowLine, 0);
@@ -595,6 +611,10 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 columnIndex++;
             }
         }
+        if (columnIndex < 26)
+            columnIndex = 26;
+
+        return columnIndex;
     }
 
 
@@ -812,6 +832,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         Collection<TargetPage> targetPages = null;
 
         long jobId = p_job.getId();
+        boolean toShowSeverity = false;
 
         TranslationMemoryProfile tmp = p_job.getL10nProfile().getTranslationMemoryProfile();
         Vector<String> excludItems = null;
@@ -827,6 +848,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             }
             if (p_targetLocale.getId() == workflow.getTargetLocale().getId())
             {
+                if (workflow.enableDQF())
+                    toShowSeverity = true;
                 targetPages = workflow.getTargetPages();
                 tmp = workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
                 if (tmp != null)
@@ -1072,8 +1095,10 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     {
                         // Severity
                         cell = ExcelUtil.getCell(currentRow, col);
+                        if (!toShowSeverity)
+                            severity = "---";
                         cell.setCellValue(severity);
-                        cell.setCellStyle(unlockedStyle);
+                        cell.setCellStyle(REPORT_STYLE.getLockedStyle());
                         col++;
                     }
 

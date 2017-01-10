@@ -87,9 +87,18 @@ TR.standardText
        parent.windx++;
        var newurl=url+"&companyName="+oSheng.val();
        window.open(newurl,target,
-       'height=880,width=800,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
+       'height=710,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
     }
-    
+
+    function popupExternal2(url, target)
+    {
+        target = target + parent.windx + windownum++;
+        parent.windx++;
+        var newurl=url+"&companyName="+oSheng.val();
+        window.open(newurl,target,
+            'height=810,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
+    }
+
     $(function(){
    		oSheng = $("#companySel");
     	if(companyJson && companyJson!="null"){
@@ -407,7 +416,7 @@ TR.standardText
 	<amb:permission name="<%=Permission.REPORTS_COMMENTS_ANALYSIS%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD>
-          	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportCommentsAnalysis","CommentsAnalysis")'
+          	 <A CLASS=standardHREF HREF='javascript: popupExternal2("/globalsight/ControlServlet?activityName=xlsReportCommentsAnalysis","CommentsAnalysis")'
              onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportCommentsAnalysis'; return true"><%=bundle.getString("review_comments")%>
              </A>
             </TD>

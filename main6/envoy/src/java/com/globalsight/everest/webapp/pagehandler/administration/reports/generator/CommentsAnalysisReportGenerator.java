@@ -50,16 +50,14 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportH
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
+import com.globalsight.everest.workflow.DQFData;
 import com.globalsight.everest.workflow.ScorecardScore;
 import com.globalsight.everest.workflow.ScorecardScoreHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
-import com.globalsight.util.ExcelUtil;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ReportStyle;
-import com.globalsight.util.SortUtil;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
@@ -125,7 +123,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     private List<String> scorecardCategories = null;
     private String scoreComment = "";
     private boolean needProtect = false;
-    private boolean hasDQFInfo = false;
+    private HashMap<String, Boolean> targetLocaleHasDQF = new HashMap<>();
 
     private ArrayList<String> jobStateList = null;
 
@@ -257,7 +255,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             dateFormat = DEFAULT_DATE_FORMAT;
         }
 
-        HashMap<GlobalSightLocale, ArrayList<DQFDataInCAR>> data = null;
+        HashMap<Long, List<DQFDataInCAR>> data = null;
         int finishedJobNum = 0;
         data = getDQFInfo(p_jobIDS);
 
@@ -299,7 +297,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         if (isCombineAllJobs)
         {
             File file = getFile(reportType + TAG_COMBINED, null, combinedWorkBook);
-            addCriteriaSheet(combinedWorkBook, jobsList, stateSet, projectSet);
+            addCriteriaSheet(combinedWorkBook, jobsList, stateSet, projectSet, data);
             FileOutputStream out = new FileOutputStream(file);
             combinedWorkBook.write(out);
             out.close();
@@ -316,14 +314,13 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
      * @throws RemoteException
      * @throws NamingException
      */
-    private HashMap<GlobalSightLocale, ArrayList<DQFDataInCAR>> getDQFInfo(List<Long> p_jobIDS)
+    private HashMap<Long, List<DQFDataInCAR>> getDQFInfo(List<Long> p_jobIDS)
             throws RemoteException, NamingException
     {
         ArrayList<String> stateList = getJobStateList();
-        HashMap<GlobalSightLocale, ArrayList<DQFDataInCAR>> data = new HashMap<>();
-        GlobalSightLocale targetLocale;
+        HashMap<Long, List<DQFDataInCAR>> data = new HashMap<>();
         DQFDataInCAR dqfData;
-        ArrayList<DQFDataInCAR> tmpList;
+        List<DQFDataInCAR> dqfList;
 
         for (long jobId : p_jobIDS)
         {
@@ -333,8 +330,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
             for (Workflow workflow : job.getWorkflows())
             {
-                targetLocale = workflow.getTargetLocale();
-
                 int scoreShowType = workflow.getScorecardShowType();
                 if (scoreShowType > -1)
                 {
@@ -348,12 +343,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     dqfData.setDqfComment(workflow.getDQFComment());
                     dqfData.setScorecardComment(workflow.getScorecardComment());
                     dqfData.setScorecards(ScorecardScoreHelper.getScoreByWrkflowId(workflow.getId()));
+                    dqfData.setTargetLocale(workflow.getTargetLocale().toString());
 
-                    tmpList = data.get(targetLocale);
-                    if (tmpList == null)
-                        tmpList = new ArrayList<>();
-                    tmpList.add(dqfData);
-                    data.put(targetLocale, tmpList);
+                    dqfList = data.get(job.getJobId());
+                    if (dqfList == null)
+                        dqfList = new ArrayList<>();
+                    dqfList.add(dqfData);
+                    data.put(job.getJobId(), dqfList);
+
+                    if (workflow.enableDQF())
+                        targetLocaleHasDQF.put(workflow.getTargetLocale().toString(), true);
                 }
             }
         }
@@ -367,7 +366,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
      */
     private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat,
-            HashMap<GlobalSightLocale, ArrayList<DQFDataInCAR>> dqfInfo) throws Exception
+            HashMap<Long, List<DQFDataInCAR>> dqfInfo) throws Exception
     {
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
         for (GlobalSightLocale trgLocale : p_targetLocales)
@@ -380,21 +379,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
             // Create One Report Sheet/Tab
             Sheet sheet = null;
-            int columnIndexOfJobs = 0;
             if (isCombineAllJobs && p_workbook.getSheet(trgLocale.toString()) != null)
             {
-                //To judge if current target locale contains workflow which enables DQF/Scorecard
-                if (dqfInfo != null && dqfInfo.get(trgLocale) != null && dqfInfo.get(trgLocale).size() > 0)
-                {
-                    isDQFEnabled = true;
-                    isScorecardEnabled = true;
-                }
-                else
-                {
-                    isDQFEnabled = false;
-                    isScorecardEnabled = false;
-                }
-
                 sheet = p_workbook.getSheet(trgLocale.toString());
             }
             else
@@ -422,7 +408,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 // Add Locale Pair Header
                 addLanguageHeader(p_workbook, sheet);
 
-                columnIndexOfJobs = addDQFHeader(p_workbook, sheet, p_job, trgLocale, dqfInfo);
+                addDQFHeader(p_workbook, sheet, p_job, trgLocale);
 
                 // Add Segment Header
                 addSegmentHeader(p_workbook, sheet);
@@ -438,12 +424,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 List<String> categories = CompanyWrapper.getCompanyCategoryNames(bundle,
                         currentCompanyId, CategoryType.SegmentComment, true);;
                 ExcelUtil.createValidatorList(p_workbook, CATEGORY_FAILURE_DROP_DOWN_LIST,
-                        categories, SEGMENT_START_ROW, columnIndexOfJobs + 1);
+                        categories, SEGMENT_START_ROW, 26);
 
                 categories = CompanyWrapper.getCompanyCategoryNames(bundle,
                         currentCompanyId, CategoryType.Severity, true);
                 ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
-                        SEGMENT_START_ROW, columnIndexOfJobs + 3);
+                        SEGMENT_START_ROW, 28);
             }
 
             // Insert Segment Data
@@ -470,153 +456,131 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
     }
 
-    private int addDQFHeader(Workbook workbook, Sheet sheet, Job job, GlobalSightLocale targetLocale,
-                              HashMap<GlobalSightLocale, ArrayList<DQFDataInCAR>> dqfInfo) throws Exception {
+    private int addDQFHeader(Workbook workbook, Sheet sheet, Job job, GlobalSightLocale targetLocale) throws Exception {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
         int columnIndex = 0;
         Row rowLine = null;
         Cell cell = null;
         boolean isStored = false;
+        Hashtable<String, Integer> elements = new Hashtable<String, Integer>();
 
-        if (job == null || targetLocale == null || dqfInfo == null)
+        if (job == null || targetLocale == null)
             return 0;
 
-        ArrayList<DQFDataInCAR> data = dqfInfo.get(targetLocale);
-        HashMap<String, Integer> elements = new HashMap<String, Integer>();
-
-        if (data != null && data.size() > 0)
+        for (Workflow wf : job.getWorkflows())
         {
-            // Current target locale has job(s) which has DQF/Scorecard info
-            // Set basic info
-            isDQFEnabled = true;
-            isScorecardEnabled = true;
-            COMMENT_STATUS_COLUMN = 12;
-            DQF_START_ROW = 6;
-            SCORECARD_START_ROW = isDQFEnabled ? 11 : 7;
-
-            // write DQF/Scorecard header info
-            int rowIndex = DQF_START_ROW;
-            rowLine = ExcelUtil.getRow(sheet, rowIndex);
-            cell = ExcelUtil.getCell(rowLine, 0);
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            cell.setCellValue(bundle.getString("lb_job_name"));
-
-            rowIndex++;
-            rowLine = ExcelUtil.getRow(sheet, rowIndex);
-            cell = ExcelUtil.getCell(rowLine, 0);
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            cell.setCellValue(bundle.getString("lb_dqf_fluency_only"));
-
-            rowIndex++;
-            rowLine = ExcelUtil.getRow(sheet, rowIndex);
-            cell = ExcelUtil.getCell(rowLine, 0);
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            cell.setCellValue(bundle.getString("lb_dqf_adequacy_only"));
-
-            rowIndex++;
-            rowLine = ExcelUtil.getRow(sheet, rowIndex);
-            cell = ExcelUtil.getCell(rowLine, 0);
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            cell.setCellValue(bundle.getString("lb_comment"));
-
-            rowIndex = SCORECARD_START_ROW;
-            rowLine = ExcelUtil.getRow(sheet, rowIndex);
-            cell = ExcelUtil.getCell(rowLine, 0);
-            cell.setCellValue(bundle.getString("lb_scorecard"));
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-
-            rowIndex++;
-            long companyId = CompanyWrapper.getCurrentCompany().getId();
-            scorecardCategories = ScorecardScoreHelper.getScorecardCategories(companyId, bundle);
-            if (scorecardCategories != null && scorecardCategories.size() > 0)
+            if (targetLocale.getId() == wf.getTargetLocale().getId())
             {
-                for (String scorecard : scorecardCategories)
-                {
-                    rowLine = ExcelUtil.getRow(sheet, rowIndex);
-                    cell = ExcelUtil.getCell(rowLine, 0);
-                    cell.setCellValue(scorecard);
+                if (wf.enableDQF()) {
+                    isDQFEnabled = true;
+                    fluencyScore = wf.getFluencyScore();
+                    adequacyScore = wf.getAdequacyScore();
+                    dqfComment = wf.getDQFComment();
+                    DQF_START_ROW = 6;
+                    // Only DQF enabled
+                    SEGMENT_HEADER_ROW = DQF_START_ROW + 4;
 
-                    elements.put(scorecard, Integer.valueOf(rowIndex));
-                    rowIndex++;
+                    COMMENT_STATUS_COLUMN = 12;
                 }
-
-                rowLine = ExcelUtil.getRow(sheet, rowIndex);
-                cell = ExcelUtil.getCell(rowLine, 0);
-                cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-                cell.setCellValue(bundle.getString("lb_comment"));
-            }
-            SEGMENT_HEADER_ROW = SCORECARD_START_ROW + scorecardCategories.size() + 3;
-            SEGMENT_START_ROW = SEGMENT_HEADER_ROW + 1;
-
-            // Write DQF/Scorecard info
-            columnIndex = 1;
-            DQFDataInCAR dqfData;
-            for (int i=0;i<data.size();i++) {
-                dqfData = data.get(i);
-
-                if (!isCombineAllJobs && dqfData.getJobId() != job.getId())
-                        continue;
-
-                // Job name
-                rowIndex = DQF_START_ROW;
-                rowLine = ExcelUtil.getRow(sheet, rowIndex);
-                cell = ExcelUtil.getCell(rowLine, columnIndex);
-                cell.setCellStyle(REPORT_STYLE.getContentStyle());
-                cell.setCellValue(dqfData.getJobName());
-
-                // Fluency
-                rowIndex++;
-                rowLine = ExcelUtil.getRow(sheet, rowIndex);
-                cell = ExcelUtil.getCell(rowLine, columnIndex);
-                cell.setCellStyle(REPORT_STYLE.getContentStyle());
-                cell.setCellValue(dqfData.getFluencyScore());
-
-                // Adequacy
-                rowIndex++;
-                rowLine = ExcelUtil.getRow(sheet, rowIndex);
-                cell = ExcelUtil.getCell(rowLine, columnIndex);
-                cell.setCellStyle(REPORT_STYLE.getContentStyle());
-                cell.setCellValue(dqfData.getAdequacyScore());
-
-                // DQF Comment
-                rowIndex++;
-                rowLine = ExcelUtil.getRow(sheet, rowIndex);
-                cell = ExcelUtil.getCell(rowLine, columnIndex);
-                cell.setCellStyle(REPORT_STYLE.getContentStyle());
-                cell.setCellValue(dqfData.getDqfComment());
-
-                scores = dqfData.getScorecards();
-                rowIndex = SCORECARD_START_ROW;
-                String key = "";
-                Integer rowValue = 0;
-                for (ScorecardScore score : scores)
-                {
-                    key = score.getScorecardCategory();
-                    rowValue = elements.get(key);
-                    rowLine = ExcelUtil.getRow(sheet, rowValue);
-                    cell = ExcelUtil.getCell(rowLine, columnIndex);
-                    cell.setCellStyle(REPORT_STYLE.getContentStyle());
-                    cell.setCellValue(score.getScore());
-                    rowIndex++;
+                else
+                    COMMENT_STATUS_COLUMN = 11;
+                if (wf.enableScorecard()) {
+                    isScorecardEnabled = true;
+                    scorecardCategories = getScorecardCategories(wf.getCompanyId(), bundle);
+                    scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());
+                    scoreComment = wf.getScorecardComment();
+                    SCORECARD_START_ROW = isDQFEnabled ? 10 : 6;
+                    // Scorecard enabled or both DQF and scorecard are enabled
+                    SEGMENT_HEADER_ROW = SCORECARD_START_ROW + scorecardCategories.size() + 3;
                 }
-
-                // Scorecard Comment
-                rowIndex++;
-                rowLine = ExcelUtil.getRow(sheet, rowIndex);
-                cell = ExcelUtil.getCell(rowLine, columnIndex);
-                cell.setCellStyle(REPORT_STYLE.getContentStyle());
-                cell.setCellValue(dqfData.getScorecardComment());
-
-                columnIndex++;
             }
         }
-        if (columnIndex < 26)
-            columnIndex = 26;
+
+        if (!isCombineAllJobs)
+        {
+            if (isDQFEnabled)
+            {
+                DQFData dqfData = new DQFData();
+                dqfData.setFluency(fluencyScore);
+                dqfData.setAdequacy(adequacyScore);
+                dqfData.setComment(dqfComment);
+
+                DQFReportHelper.writeDQFInfo(needProtect, isDQFEnabled, dqfData, sheet, DQF_START_ROW, bundle);
+            }
+
+            if (isScorecardEnabled)
+            {
+                isStored = StringUtil.isNotEmpty(scoreComment);
+
+                // Scorecard enabled
+                row = SCORECARD_START_ROW;
+                rowLine = ExcelUtil.getRow(sheet, row);
+                cell = ExcelUtil.getCell(rowLine, col);
+                cell.setCellValue(bundle.getString("lb_scorecard"));
+                cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
+                row++;
+                if (scorecardCategories != null && scorecardCategories.size() > 0)
+                {
+                    for (String scorecard : scorecardCategories)
+                    {
+                        rowLine = ExcelUtil.getRow(sheet, row);
+                        cell = ExcelUtil.getCell(rowLine, col);
+                        cell.setCellValue(scorecard);
+
+                        cell = ExcelUtil.getCell(rowLine, 1);
+                        if (needProtect)
+                            cell.setCellStyle(REPORT_STYLE.getLockedStyle());
+                        else
+                            cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+
+                        elements.put(scorecard, Integer.valueOf(row));
+                        row++;
+                    }
+                    String key = "";
+                    Integer rowValue = 0;
+                    for (ScorecardScore score : scores)
+                    {
+                        key = score.getScorecardCategory();
+                        rowValue = elements.get(key);
+                        rowLine = ExcelUtil.getRow(sheet, rowValue);
+                        cell = ExcelUtil.getCell(rowLine, 1);
+                        if (isStored)
+                            cell.setCellStyle(REPORT_STYLE.getLockedStyle());
+                        else
+                            cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+                        cell.setCellValue(score.getScore());
+                    }
+                }
+
+                rowLine = ExcelUtil.getRow(sheet, row);
+                cell = ExcelUtil.getCell(rowLine, col);
+                cell.setCellValue(bundle.getString("lb_comment"));
+                cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
+                cell = ExcelUtil.getCell(rowLine, 1);
+                if (isStored || needProtect)
+                {
+                    cell.setCellStyle(REPORT_STYLE.getLockedStyle());
+                }
+                else
+                {
+                    cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+                }
+                cell.setCellValue(scoreComment);
+            }
+        } else
+            SEGMENT_HEADER_ROW = 6;
+
+        SEGMENT_START_ROW = SEGMENT_HEADER_ROW + 1;
 
         return columnIndex;
     }
 
+    private List<String> getScorecardCategories(long companyId, ResourceBundle bundle) {
+        if (scorecardCategories == null || scorecardCategories.size() == 0)
+            scorecardCategories = ScorecardScoreHelper.getScorecardCategories(companyId, bundle);
+        return scorecardCategories;
+    }
 
     /**
      * Add segment header to the sheet for Comments Analysis Report
@@ -859,6 +823,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             }
         }
 
+        Boolean ifDqf = targetLocaleHasDQF.get(p_targetLocale.toString());
+        boolean enableDQF = ifDqf != null && ifDqf.booleanValue();
+
         if (!targetPages.isEmpty())
         {
             LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
@@ -1091,7 +1058,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     col++;
 
                     // Severity
-                    if (isDQFEnabled)
+                    if (enableDQF)
                     {
                         // Severity
                         cell = ExcelUtil.getCell(currentRow, col);
@@ -1154,35 +1121,18 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
             ExcelUtil.addValidation(p_sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
                     CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
-            if (isDQFEnabled)
+            if (enableDQF)
             {
                 ExcelUtil.addValidation(p_sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
                         SEVERITY_COLUMN, SEVERITY_COLUMN);
-
-//                categories = CompanyWrapper.getCompanyCategoryNames(bundle, currentCompanyId,
-//                        CategoryType.Fluency, true);
-//                ExcelUtil.createValidatorList(p_sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
-//
-//                categories = CompanyWrapper.getCompanyCategoryNames(bundle, currentCompanyId,
-//                        CategoryType.Adequacy, true);
-//                ExcelUtil.createValidatorList(p_sheet, categories, DQF_START_ROW + 1,
-//                        DQF_START_ROW + 1, 1);
             }
-
-//            if (SCORECARD_START_ROW > 0)
-//            {
-//                String[] data = new String[]
-//                        { "5", "4", "3", "2", "1" };
-//                ExcelUtil.createValidatorList(p_sheet, data, SCORECARD_START_ROW + 1,
-//                        SCORECARD_START_ROW + scorecardCategories.size(), 1);
-//            }
         }
 
         return p_row;
     }
 
     private void addCriteriaSheet(Workbook p_workbook, List<Job> p_jobsList, Set<String> stateSet,
-            Set<String> projectSet) throws Exception
+            Set<String> projectSet, HashMap<Long, List<DQFDataInCAR>> dqfData) throws Exception
     {
         Sheet sheet = p_workbook.createSheet(bundle.getString("lb_criteria"));
         StringBuffer temp = new StringBuffer();
@@ -1190,34 +1140,83 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         int headerColumn = 1;
         int valueColumn = 2;
 
+        if (dqfData == null || dqfData.size() == 0)
+            isDQFEnabled = false;
+        else
+            isDQFEnabled = true;
+
         Row targetLocalesRow = ExcelUtil.getRow(sheet, row++);
         Row statusRow = ExcelUtil.getRow(sheet, row++);
         Row projectRow = ExcelUtil.getRow(sheet, row++);
         Row dateRangeRow = ExcelUtil.getRow(sheet, row++);
         Row jobsRow = ExcelUtil.getRow(sheet, row);
 
-        CellStyle contentStyle = REPORT_STYLE.getContentStyle();
+        CellStyle contentStyle = REPORT_STYLE.getHeaderStyle();
 
-        Cell cell_TargetLocales = ExcelUtil.getCell(targetLocalesRow, headerColumn);
-        cell_TargetLocales.setCellValue(bundle.getString("lb_report_target_locales"));
-        cell_TargetLocales.setCellStyle(contentStyle);
+        Cell cell = ExcelUtil.getCell(targetLocalesRow, headerColumn);
+        cell.setCellValue(bundle.getString("lb_report_target_locales"));
+        cell.setCellStyle(contentStyle);
         sheet.setColumnWidth(headerColumn, 20 * 256);
 
-        Cell cell_Status = ExcelUtil.getCell(statusRow, headerColumn);
-        cell_Status.setCellValue(bundle.getString("job_status"));
-        cell_Status.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(statusRow, headerColumn);
+        cell.setCellValue(bundle.getString("job_status"));
+        cell.setCellStyle(contentStyle);
 
-        Cell cell_Project = ExcelUtil.getCell(projectRow, headerColumn);
-        cell_Project.setCellValue(bundle.getString("lb_report_project"));
-        cell_Project.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(projectRow, headerColumn);
+        cell.setCellValue(bundle.getString("lb_report_project"));
+        cell.setCellStyle(contentStyle);
 
-        Cell cell_DateRange = ExcelUtil.getCell(dateRangeRow, headerColumn);
-        cell_DateRange.setCellValue(bundle.getString("lb_report_date_range"));
-        cell_DateRange.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(dateRangeRow, headerColumn);
+        cell.setCellValue(bundle.getString("lb_report_date_range"));
+        cell.setCellStyle(contentStyle);
 
-        Cell cell_Jobs = ExcelUtil.getCell(jobsRow, headerColumn);
-        cell_Jobs.setCellValue(bundle.getString("lb_jobs"));
-        cell_Jobs.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(jobsRow, headerColumn);
+        cell.setCellValue(bundle.getString("lb_jobs"));
+        cell.setCellStyle(contentStyle);
+
+        HashMap<String, Integer> scorecardColumns = new HashMap<>();
+        if (isDQFEnabled) {
+            int columnIndex = 3;
+            cell = ExcelUtil.getCell(jobsRow, columnIndex);
+            cell.setCellStyle(contentStyle);
+            cell.setCellValue(bundle.getString("lb_target_locale"));
+            columnIndex++;
+
+            // Show DQF info
+            cell = ExcelUtil.getCell(jobsRow, columnIndex);
+            cell.setCellStyle(contentStyle);
+            cell.setCellValue(bundle.getString("lb_dqf_fluency_only"));
+            columnIndex++;
+
+            cell = ExcelUtil.getCell(jobsRow, columnIndex);
+            cell.setCellStyle(contentStyle);
+            cell.setCellValue(bundle.getString("lb_dqf_adequacy_only"));
+            columnIndex++;
+
+            cell = ExcelUtil.getCell(jobsRow, columnIndex);
+            cell.setCellStyle(contentStyle);
+            cell.setCellValue(bundle.getString("lb_dqf_dqf_comments"));
+            sheet.setColumnWidth(columnIndex, 40 * 256);
+            columnIndex++;
+
+            cell = ExcelUtil.getCell(jobsRow, columnIndex);
+            cell.setCellStyle(contentStyle);
+            cell.setCellValue(bundle.getString("lb_dqf_scorecard_comments"));
+            sheet.setColumnWidth(columnIndex, 40 * 256);
+            columnIndex++;
+
+            // Show scorecard info
+            for (String category : scorecardCategories) {
+                cell = ExcelUtil.getCell(jobsRow, columnIndex);
+                cell.setCellStyle(contentStyle);
+                cell.setCellValue(category);
+                scorecardColumns.put(category, columnIndex);
+
+                columnIndex++;
+            }
+        }
+
+        contentStyle = REPORT_STYLE.getContentStyle();
 
         // locale
         Set<String> localeSet = rowsMap.keySet();
@@ -1225,9 +1224,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         {
             temp.append(locale + "\n");
         }
-        Cell cell_TargetLocalesValue = ExcelUtil.getCell(targetLocalesRow, valueColumn);
-        cell_TargetLocalesValue.setCellValue(temp.substring(0, temp.length() - 1));
-        cell_TargetLocalesValue.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(targetLocalesRow, valueColumn);
+        cell.setCellValue(temp.substring(0, temp.length() - 1));
+        cell.setCellStyle(contentStyle);
         sheet.setColumnWidth(valueColumn, 45 * 256);
 
         // status
@@ -1236,9 +1235,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         {
             temp.append(status + "\n");
         }
-        Cell cell_StatusValue = ExcelUtil.getCell(statusRow, valueColumn);
-        cell_StatusValue.setCellValue(temp.substring(0, temp.length() - 1));
-        cell_StatusValue.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(statusRow, valueColumn);
+        cell.setCellValue(temp.substring(0, temp.length() - 1));
+        cell.setCellStyle(contentStyle);
 
         // project
         temp.setLength(0);
@@ -1246,9 +1245,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         {
             temp.append(status + "\n");
         }
-        Cell cell_ProjectValue = ExcelUtil.getCell(projectRow, valueColumn);
-        cell_ProjectValue.setCellValue(temp.substring(0, temp.length() - 1));
-        cell_ProjectValue.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(projectRow, valueColumn);
+        cell.setCellValue(temp.substring(0, temp.length() - 1));
+        cell.setCellStyle(contentStyle);
 
         // date range
         temp.setLength(0);
@@ -1264,17 +1263,64 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         {
             temp.append("Ends:" + endCount);
         }
-        Cell cell_DateRangeValue = ExcelUtil.getCell(dateRangeRow, valueColumn);
-        cell_DateRangeValue.setCellValue(temp.toString());
-        cell_DateRangeValue.setCellStyle(contentStyle);
+        cell = ExcelUtil.getCell(dateRangeRow, valueColumn);
+        cell.setCellValue(temp.toString());
+        cell.setCellStyle(contentStyle);
 
         // jobs
-        int jobRowNum = 4;
+        int jobRowNum = 5;
+        List<DQFDataInCAR> dqfList;
+        List<ScorecardScore> scores;
+        String category;
+        int scorecardIndex;
         for (Job job : p_jobsList)
         {
-            Cell cell_JobValue = ExcelUtil.getCell(ExcelUtil.getRow(sheet, jobRowNum++), valueColumn);
-            cell_JobValue.setCellValue(job.getJobId() + "," + job.getJobName());
-            cell_JobValue.setCellStyle(contentStyle);
+            valueColumn = 2;
+            jobsRow = ExcelUtil.getRow(sheet, jobRowNum);
+            cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+            cell.setCellValue(job.getJobId() + "," + job.getJobName());
+            cell.setCellStyle(contentStyle);
+
+            if (isDQFEnabled) {
+                dqfList = dqfData.get(job.getJobId());
+                for (DQFDataInCAR dqfDataInCAR : dqfList) {
+                    valueColumn = 3;
+                    if (dqfDataInCAR != null) {
+                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                        cell.setCellStyle(contentStyle);
+                        cell.setCellValue(dqfDataInCAR.getTargetLocale());
+
+                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                        cell.setCellStyle(contentStyle);
+                        cell.setCellValue(dqfDataInCAR.getFluencyScore());
+
+                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                        cell.setCellStyle(contentStyle);
+                        cell.setCellValue(dqfDataInCAR.getAdequacyScore());
+
+                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                        cell.setCellStyle(contentStyle);
+                        cell.setCellValue(dqfDataInCAR.getDqfComment());
+
+                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                        cell.setCellStyle(contentStyle);
+                        cell.setCellValue(dqfDataInCAR.getScorecardComment());
+
+                        scores = dqfDataInCAR.getScorecards();
+                        for (ScorecardScore ss : scores) {
+                            category = ss.getScorecardCategory();
+                            scorecardIndex = scorecardColumns.get(category);
+
+                            cell = ExcelUtil.getCell(jobsRow, scorecardIndex);
+                            cell.setCellStyle(contentStyle);
+                            cell.setCellValue(ss.getScore());
+                        }
+                    }
+                    jobRowNum++;
+                    jobsRow = ExcelUtil.getRow(sheet, jobRowNum);
+                }
+            } else
+                jobRowNum++;
         }
     }
 

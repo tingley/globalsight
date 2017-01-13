@@ -17,6 +17,17 @@ public class DQFDataInCAR
     private String dqfComment;
     private String scorecardComment;
     private List<ScorecardScore> scorecards;
+    private String targetLocale;
+
+    public String getTargetLocale()
+    {
+        return targetLocale;
+    }
+
+    public void setTargetLocale(String targetLocale)
+    {
+        this.targetLocale = targetLocale;
+    }
 
     public long getJobId()
     {

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.Element;
 
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
@@ -36,6 +38,7 @@ import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
+import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -172,15 +175,26 @@ public class PtagPageGenerator
                     EditUtil.decodeXmlEntities(PTagData.getPTagSourceString()));
             }
 
+            if(params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
+               || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 )
+            {
+				fixAttributeIX(p_OSD);
+            }
+            
             if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
                     || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 
-                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) {
+                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) 
+            {
 				p_OSD.setDisplaySourceText(TmxUtil.convertXlfToTmxFormat(p_OSD.getDisplaySourceText()));
-			} else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) {
+			}
+            else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) 
+            {
 				//for ttx format,need extra handling
 				String pTagSourceString = EditUtil.encodeXmlEntities(PTagData.getPTagSourceString());
 				p_OSD.setDisplaySourceText(pTagSourceString);
-			} else {
+			} 
+            else 
+            {
 				// GBS-539, avoid decoding for the second time here
 				//p_OSD.setDisplaySourceText(EditUtil.decodeXmlEntities(p_OSD.getDisplaySourceText()));
 				p_OSD.setDisplaySourceText(PTagData.getPTagSourceString());
@@ -199,13 +213,18 @@ public class PtagPageGenerator
 
             if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
                     || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 
-                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) {
-				p_OSD.setDisplayTargetText(TmxUtil.convertXlfToTmxFormat(p_OSD.getDisplayTargetText()));				
-			} else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) {
+                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) 
+            {
+				p_OSD.setDisplayTargetText(TmxUtil.convertXlfToTmxFormat(p_OSD.getDisplayTargetText()));
+			} 
+            else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) 
+            {
 				//for ttx format,need extra handling (below codes seem wrong,but they are right!!!)
         		String pTagTargetString = EditUtil.encodeXmlEntities(PTagData.getPTagSourceString());
 				p_OSD.setDisplayTargetText(pTagTargetString);
-			} else {
+			} 
+            else 
+            {
 				// GBS-539, avoid decoding for the second time here
 				//p_OSD.setDisplayTargetText(EditUtil.decodeXmlEntities(p_OSD.getDisplayTargetText()));
 				p_OSD.setDisplayTargetText(PTagData.getPTagSourceString());
@@ -246,6 +265,90 @@ public class PtagPageGenerator
                     AmbassadorDwUpExceptionConstants.INVALID_GXML, ex
                             + "\n\nSEGMENT ID for above exception: "
                             + getMsg(p_OSD));
+        }
+    }
+    
+	private void fixAttributeIX(OfflineSegmentData p_OSD)
+	{
+		Element troot = getDom(
+				"<seg>" + p_OSD.getDisplayTargetText() + "</seg>")
+				.getRootElement();
+		Element sroot = getDom(
+				"<seg>" + p_OSD.getDisplaySourceText() + "</seg>")
+				.getRootElement();
+
+		fixAttributeIX(sroot, troot);
+
+		int firstIndex = 5;
+		int sEndIndex = sroot.asXML().length() - 6;
+		int tEndIndex = troot.asXML().length() - 6;
+		// Save the modified segments back into the tuvs.
+		p_OSD.setDisplaySourceText(sroot.asXML().substring(firstIndex,
+				sEndIndex));
+		p_OSD.setDisplayTargetText(troot.asXML().substring(firstIndex,
+				tEndIndex));
+	}
+	
+	private void fixAttributeIX(Element p_sroot, Element p_troot)
+    {
+        // First use the same "i" across source and target tuvs.
+        List bpts = p_sroot.selectNodes("//bpt");
+
+        for (int i = 0, max = bpts.size(); i < max; i++)
+        {
+            Element bpt = (Element) bpts.get(i);
+
+            String xAttr = bpt.attributeValue("x");
+            String iAttr = bpt.attributeValue("i");
+
+            // Be prepared for data errors where "x" is missing.
+            // Don't crash here because of it. Fix it elsewhere.
+            if (xAttr != null && iAttr != null)
+            {
+                fixAttributeI(xAttr, iAttr, p_troot);
+            }
+        }
+    }
+	
+    /**
+     * Fixes a single "i" attribute in all other TUVs based on the "x".
+     */
+    private void fixAttributeI(String p_x, String p_i, Element p_root)
+	{
+		Element bpt = (Element) p_root.selectSingleNode("//bpt[@x='" + p_x
+				+ "']");
+
+		if (bpt != null)
+		{
+			String curI = bpt.attributeValue("i");
+			Element ept = (Element) p_root.selectSingleNode("//ept[@i='" + curI
+					+ "']");
+
+			bpt.addAttribute("i", p_i);
+			if (ept != null)
+			{
+				ept.addAttribute("i", p_i);
+			}
+		}
+	}
+    
+	private static Document getDom(String p_xml)
+    {
+        XmlParser parser = null;
+
+        try
+        {
+            parser = XmlParser.hire();
+            return parser.parseXml(p_xml);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException("invalid GXML `" + p_xml + "': "
+                    + ex.getMessage());
+        }
+        finally
+        {
+            XmlParser.fire(parser);
         }
     }
 

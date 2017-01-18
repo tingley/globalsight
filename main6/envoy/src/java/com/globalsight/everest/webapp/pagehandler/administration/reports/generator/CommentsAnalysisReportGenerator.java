@@ -612,7 +612,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_segment_id"));
         cell.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 20 * 256);
+        p_sheet.setColumnWidth(col, 10 * 256);
         col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
@@ -624,7 +624,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_targetpage_id"));
         cell.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 20 * 256);
+        p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
@@ -642,13 +642,13 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_sid"));
         cell.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 40 * 256);
+        p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_character_count"));
         cell.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 30 * 256);
+        p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         //TODO: AS a potential requirement of GBS-4638, comments are better to separate into translation and reviewer two parts
@@ -1206,6 +1206,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             columnIndex++;
 
             // Show scorecard info
+            if (scorecardCategories == null || scorecardCategories.size() == 0)
+            {
+                long companyId = CompanyWrapper.getCurrentCompanyIdAsLong();
+                scorecardCategories = getScorecardCategories(companyId, bundle);
+
+                // In case that current company do not have any scorecard categories
+                if (scorecardCategories == null)
+                    scorecardCategories = new ArrayList<>();
+            }
+
             for (String category : scorecardCategories) {
                 cell = ExcelUtil.getCell(jobsRow, columnIndex);
                 cell.setCellStyle(contentStyle);
@@ -1283,42 +1293,46 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
             if (isDQFEnabled) {
                 dqfList = dqfData.get(job.getJobId());
-                for (DQFDataInCAR dqfDataInCAR : dqfList) {
-                    valueColumn = 3;
-                    if (dqfDataInCAR != null) {
-                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
-                        cell.setCellStyle(contentStyle);
-                        cell.setCellValue(dqfDataInCAR.getTargetLocale());
-
-                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
-                        cell.setCellStyle(contentStyle);
-                        cell.setCellValue(dqfDataInCAR.getFluencyScore());
-
-                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
-                        cell.setCellStyle(contentStyle);
-                        cell.setCellValue(dqfDataInCAR.getAdequacyScore());
-
-                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
-                        cell.setCellStyle(contentStyle);
-                        cell.setCellValue(dqfDataInCAR.getDqfComment());
-
-                        cell = ExcelUtil.getCell(jobsRow, valueColumn++);
-                        cell.setCellStyle(contentStyle);
-                        cell.setCellValue(dqfDataInCAR.getScorecardComment());
-
-                        scores = dqfDataInCAR.getScorecards();
-                        for (ScorecardScore ss : scores) {
-                            category = ss.getScorecardCategory();
-                            scorecardIndex = scorecardColumns.get(category);
-
-                            cell = ExcelUtil.getCell(jobsRow, scorecardIndex);
+                if (dqfList != null && dqfList.size() > 0)
+                {
+                    for (DQFDataInCAR dqfDataInCAR : dqfList) {
+                        valueColumn = 3;
+                        if (dqfDataInCAR != null) {
+                            cell = ExcelUtil.getCell(jobsRow, valueColumn++);
                             cell.setCellStyle(contentStyle);
-                            cell.setCellValue(ss.getScore());
+                            cell.setCellValue(dqfDataInCAR.getTargetLocale());
+
+                            cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                            cell.setCellStyle(contentStyle);
+                            cell.setCellValue(dqfDataInCAR.getFluencyScore());
+
+                            cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                            cell.setCellStyle(contentStyle);
+                            cell.setCellValue(dqfDataInCAR.getAdequacyScore());
+
+                            cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                            cell.setCellStyle(contentStyle);
+                            cell.setCellValue(dqfDataInCAR.getDqfComment());
+
+                            cell = ExcelUtil.getCell(jobsRow, valueColumn++);
+                            cell.setCellStyle(contentStyle);
+                            cell.setCellValue(dqfDataInCAR.getScorecardComment());
+
+                            scores = dqfDataInCAR.getScorecards();
+                            for (ScorecardScore ss : scores) {
+                                category = ss.getScorecardCategory();
+                                scorecardIndex = scorecardColumns.get(category);
+
+                                cell = ExcelUtil.getCell(jobsRow, scorecardIndex);
+                                cell.setCellStyle(contentStyle);
+                                cell.setCellValue(ss.getScore());
+                            }
                         }
+                        jobRowNum++;
+                        jobsRow = ExcelUtil.getRow(sheet, jobRowNum);
                     }
+                } else
                     jobRowNum++;
-                    jobsRow = ExcelUtil.getRow(sheet, jobRowNum);
-                }
             } else
                 jobRowNum++;
         }
@@ -1559,7 +1573,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 }
 
                 // GBS-4638, TripAdvisor needs to only show previous segment in first translation activity
-                int count = previous.size() > 1 ? 1 : 0;
+                int count = previous.size() >= 1 ? 1 : 0;
                 for (int pi = 0; pi < count; pi++)
                 {
                     previousSegment = (String) previous.get(pi);

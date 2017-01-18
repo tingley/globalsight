@@ -174,12 +174,6 @@ public class PtagPageGenerator
                     p_OSD.getDisplaySourceText() + "\nDisplayText=" +
                     EditUtil.decodeXmlEntities(PTagData.getPTagSourceString()));
             }
-
-            if(params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
-               || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 )
-            {
-				fixAttributeIX(p_OSD);
-            }
             
             if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
                     || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 
@@ -203,6 +197,12 @@ public class PtagPageGenerator
             // convert the current target text
             // NOTE: The use of getPTagSourceString() below is correct!!
             convertor.tmx2Pseudo(p_OSD.getDisplayTargetText(), PTagData); 
+            
+            if(params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
+               || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 )
+            {
+				fixAttributeIX(p_OSD);
+            }
 
             if (CATEGORY.isDebugEnabled())
             {

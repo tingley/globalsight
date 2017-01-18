@@ -45,7 +45,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
@@ -84,6 +85,8 @@ import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ReportStyle;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -136,6 +139,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
     private ResourceBundle m_bundle;
     private String m_dateFormat;
     private boolean cancel = false;
+    private ReportStyle m_style = null;
 
     public ReviewersCommentsSimpleReportGenerator(String p_cureentCompanyName)
     {
@@ -295,13 +299,13 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
 
             setAllCellStyleNull();
 
-            Workbook workBook = new SXSSFWorkbook();
+            Workbook workBook = new XSSFWorkbook();
+            m_style = new ReportStyle(workBook);
             createReport(workBook, job, p_targetLocales, m_dateFormat);
             File file = getFile(getReportType(), job, workBook);
             FileOutputStream out = new FileOutputStream(file);
             workBook.write(out);
             out.close();
-            ((SXSSFWorkbook) workBook).dispose();
 
             workBooks.add(file);
         }
@@ -704,7 +708,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
                         srcStyle = contentStyle;
                     }
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(getSegment(pData, sourceTuv, m_rtlSourceLocale, jobId));
+                    setCellForInternalText(cell_A, getSegment(pData, sourceTuv, jobId),
+                            m_rtlSourceLocale);
                     cell_A.setCellStyle(srcStyle);
                     col++;
 
@@ -724,7 +729,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
                         trgStyle = contentStyle;
                     }
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(getSegment(pData, targetTuv, m_rtlTargetLocale, jobId));
+                    setCellForInternalText(cell_B, getSegment(pData, targetTuv, jobId),
+                            m_rtlTargetLocale);
                     cell_B.setCellStyle(trgStyle);
                     col++;
 
@@ -825,6 +831,44 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
         p_sheet.setColumnHidden(10, true);
 
         return p_row;
+    }
+
+    /**
+     * Sets the cell value for internal text.
+     * 
+     * @since GBS-4663
+     */
+    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
+    {
+        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+        {
+            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
+                    "");
+            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
+                    "");
+            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
+                    : contentWithoutMark;
+            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
+            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+            {
+                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
+                content = content.substring(0, internalBpt)
+                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
+                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
+                content = content.substring(0, internalEpt)
+                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
+
+                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
+                        rtlLocale ? internalEpt + 1 : internalEpt, m_style.getInternalFont());
+                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
+                        m_style.getContentFont());
+            }
+            p_cell.setCellValue(ts);
+        }
+        else
+        {
+            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
+        }
     }
 
     /**
@@ -1416,9 +1460,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
         cancel = true;
     }
 
-    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)
+    private String getSegment(PseudoData pData, Tuv tuv, long p_jobId)
     {
-        String result = null;
         StringBuffer content = new StringBuffer();
         List subFlows = tuv.getSubflowsAsGxmlElements();
         long tuId = tuv.getTuId();
@@ -1429,6 +1472,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
             {
                 dataType = tuv.getDataType(p_jobId);
                 pData.setAddables(dataType);
+                pData.setIsFromReportGeneration(true);
                 TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
                 content.append(pData.getPTagSourceString());
 
@@ -1450,7 +1494,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
         }
         else
         {
-            String mainSeg = tuv.getGxmlElement().getTextValue();
+            String mainSeg = tuv.getGxmlElement().getTextValueWithInternalTextMark();
             content.append(mainSeg);
 
             if (subFlows != null && subFlows.size() > 0)
@@ -1460,18 +1504,12 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator, 
                     GxmlElement sub = (GxmlElement) subFlows.get(i);
                     String subId = sub.getAttribute(GxmlNames.SUB_ID);
                     content.append("\r\n#").append(tuId).append(":").append(subId).append("\n")
-                            .append(sub.getTextValue());
+                            .append(sub.getTextValueWithInternalTextMark());
                 }
             }
         }
 
-        result = content.toString();
-        if (m_rtlLocale)
-        {
-            result = EditUtil.toRtlString(result);
-        }
-
-        return result;
+        return content.toString();
     }
 
     private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)

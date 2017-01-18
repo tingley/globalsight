@@ -16,6 +16,43 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.naming.NamingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -57,22 +94,13 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
-import com.globalsight.util.*;
+import com.globalsight.util.ExcelUtil;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ReportStyle;
+import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
-import javax.naming.NamingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.globalsight.util.gxml.GxmlElement;
 
 /**
  * Comments Analysis Report Generator Include Comments Analysis Report in popup
@@ -101,7 +129,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
-    public  int SEGMENT_HEADER_ROW = 6;
+    public int SEGMENT_HEADER_ROW = 6;
     public int SEGMENT_START_ROW = 7;
     public int SCORECARD_START_ROW = 0;
     public int DQF_START_ROW = 0;
@@ -206,6 +234,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
     /**
      * Get job state list expect PENDING state
+     * 
      * @return List of job states
      */
     private ArrayList<String> getJobStateList()
@@ -279,14 +308,13 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             else
             {
                 setAllCellStyleNull();
-                Workbook workBook = new SXSSFWorkbook();
+                Workbook workBook = new XSSFWorkbook();
                 REPORT_STYLE = new ReportStyle(workBook);
                 createReport(workBook, job, p_targetLocales, dateFormat, data);
                 File file = getFile(reportType, job, workBook);
                 FileOutputStream out = new FileOutputStream(file);
                 workBook.write(out);
                 out.close();
-                ((SXSSFWorkbook) workBook).dispose();
                 workBooks.add(file);
             }
 
@@ -310,6 +338,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
     /**
      * Get Scorecard/DQF info from all selected jobs
+     * 
      * @param p_jobIDS
      * @throws RemoteException
      * @throws NamingException
@@ -333,7 +362,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 int scoreShowType = workflow.getScorecardShowType();
                 if (scoreShowType > -1)
                 {
-                    //Has Scorecard or DQF info
+                    // Has Scorecard or DQF info
                     dqfData = new DQFDataInCAR();
                     dqfData.setJobId(job.getJobId());
                     dqfData.setJobName(job.getJobName());
@@ -342,7 +371,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     dqfData.setAdequacyScore(workflow.getAdequacyScore());
                     dqfData.setDqfComment(workflow.getDQFComment());
                     dqfData.setScorecardComment(workflow.getScorecardComment());
-                    dqfData.setScorecards(ScorecardScoreHelper.getScoreByWrkflowId(workflow.getId()));
+                    dqfData.setScorecards(
+                            ScorecardScoreHelper.getScoreByWrkflowId(workflow.getId()));
                     dqfData.setTargetLocale(workflow.getTargetLocale().toString());
 
                     dqfList = data.get(job.getJobId());
@@ -426,8 +456,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 ExcelUtil.createValidatorList(p_workbook, CATEGORY_FAILURE_DROP_DOWN_LIST,
                         categories, SEGMENT_START_ROW, 26);
 
-                categories = CompanyWrapper.getCompanyCategoryNames(bundle,
-                        currentCompanyId, CategoryType.Severity, true);
+                categories = CompanyWrapper.getCompanyCategoryNames(bundle, currentCompanyId,
+                        CategoryType.Severity, true);
                 ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
                         SEGMENT_START_ROW, 28);
             }
@@ -456,7 +486,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
     }
 
-    private int addDQFHeader(Workbook workbook, Sheet sheet, Job job, GlobalSightLocale targetLocale) throws Exception {
+    private int addDQFHeader(Workbook workbook, Sheet sheet, Job job,
+            GlobalSightLocale targetLocale) throws Exception
+    {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
         int columnIndex = 0;
@@ -472,7 +504,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         {
             if (targetLocale.getId() == wf.getTargetLocale().getId())
             {
-                if (wf.enableDQF()) {
+                if (wf.enableDQF())
+                {
                     isDQFEnabled = true;
                     fluencyScore = wf.getFluencyScore();
                     adequacyScore = wf.getAdequacyScore();
@@ -485,7 +518,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 }
                 else
                     COMMENT_STATUS_COLUMN = 11;
-                if (wf.enableScorecard()) {
+                if (wf.enableScorecard())
+                {
                     isScorecardEnabled = true;
                     scorecardCategories = getScorecardCategories(wf.getCompanyId(), bundle);
                     scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());
@@ -506,7 +540,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 dqfData.setAdequacy(adequacyScore);
                 dqfData.setComment(dqfComment);
 
-                DQFReportHelper.writeDQFInfo(needProtect, isDQFEnabled, dqfData, sheet, DQF_START_ROW, bundle);
+                DQFReportHelper.writeDQFInfo(needProtect, isDQFEnabled, dqfData, sheet,
+                        DQF_START_ROW, bundle);
             }
 
             if (isScorecardEnabled)
@@ -568,7 +603,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 }
                 cell.setCellValue(scoreComment);
             }
-        } else
+        }
+        else
             SEGMENT_HEADER_ROW = 6;
 
         SEGMENT_START_ROW = SEGMENT_HEADER_ROW + 1;
@@ -576,7 +612,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         return columnIndex;
     }
 
-    private List<String> getScorecardCategories(long companyId, ResourceBundle bundle) {
+    private List<String> getScorecardCategories(long companyId, ResourceBundle bundle)
+    {
         if (scorecardCategories == null || scorecardCategories.size() == 0)
             scorecardCategories = ScorecardScoreHelper.getScorecardCategories(companyId, bundle);
         return scorecardCategories;
@@ -651,18 +688,19 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
-        //TODO: AS a potential requirement of GBS-4638, comments are better to separate into translation and reviewer two parts
+        // TODO: AS a potential requirement of GBS-4638, comments are better to
+        // separate into translation and reviewer two parts
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_comments"));
         cell.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-//        cell = ExcelUtil.getCell(segHeaderRow, col);
-//        cell.setCellValue(bundle.getString("lb_translator_comments"));
-//        cell.setCellStyle(headerStyle);
-//        p_sheet.setColumnWidth(col, 40 * 256);
-//        col++;
+        // cell = ExcelUtil.getCell(segHeaderRow, col);
+        // cell.setCellValue(bundle.getString("lb_translator_comments"));
+        // cell.setCellStyle(headerStyle);
+        // p_sheet.setColumnWidth(col, 40 * 256);
+        // col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_category_failure"));
@@ -684,7 +722,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         cell.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
-
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(bundle.getString("lb_tm_match_original"));
@@ -869,8 +906,10 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-                    sourceSegmentString = sourceTuv.getGxmlElement().getTextValue();
-                    targetSegmentString = targetTuv.getGxmlElement().getTextValue();
+                    sourceSegmentString = sourceTuv.getGxmlElement()
+                            .getTextValueWithInternalTextMark();
+                    targetSegmentString = targetTuv.getGxmlElement()
+                            .getTextValueWithInternalTextMark();
                     sid = sourceTuv.getSid();
 
                     category = sourceTuv.getTu(jobId).getTuType();
@@ -916,13 +955,15 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                             {
                                 comments.append("[").append(date).append("     ")
                                         .append(UserUtil.getUserNameById(issueHistory.reportedBy()))
-                                        .append("]:\r\n").append(issueHistory.getComment()).append("\r\n");
+                                        .append("]:\r\n").append(issueHistory.getComment())
+                                        .append("\r\n");
                             }
                             else
                             {
                                 reviewerComments.append("[").append(date).append("     ")
                                         .append(UserUtil.getUserNameById(issueHistory.reportedBy()))
-                                        .append("]:\r\n").append(issueHistory.getComment()).append("\r\n");
+                                        .append("]:\r\n").append(issueHistory.getComment())
+                                        .append("\r\n");
                             }
                         }
                         issueHistory = (IssueHistory) issueHistories.get(lastOne);
@@ -1002,20 +1043,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     // Source segment
                     CellStyle srcStyle = rtlSourceLocale ? REPORT_STYLE.getRtlContentStyle()
                             : contentStyle;
-                    String srcContent = rtlSourceLocale ? EditUtil.toRtlString(sourceSegmentString)
-                            : sourceSegmentString;
                     cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(srcContent);
+                    setCellForInternalText(cell, sourceSegmentString, rtlSourceLocale);
                     cell.setCellStyle(srcStyle);
                     col++;
 
                     // Target segment
                     CellStyle trgStyle = rtlTargetLocale ? REPORT_STYLE.getRtlContentStyle()
                             : contentStyle;
-                    String content = rtlTargetLocale ? EditUtil.toRtlString(targetSegmentString)
-                            : targetSegmentString;
                     cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(content);
+                    setCellForInternalText(cell, targetSegmentString, rtlTargetLocale);
                     cell.setCellStyle(trgStyle);
                     col++;
 
@@ -1035,21 +1072,24 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     CellStyle commentStyle = rtlTargetLocale ? REPORT_STYLE.getUnlockedRightStyle()
                             : REPORT_STYLE.getUnlockedStyle();
                     String commentContent = rtlTargetLocale
-                            ? EditUtil.toRtlString(reviewerComments.toString()) : reviewerComments.toString();
+                            ? EditUtil.toRtlString(reviewerComments.toString())
+                            : reviewerComments.toString();
                     cell = ExcelUtil.getCell(currentRow, col);
                     cell.setCellValue(commentContent);
                     cell.setCellStyle(commentStyle);
                     col++;
 
                     // Translator Comments
-//                    commentStyle = rtlTargetLocale ? REPORT_STYLE.getUnlockedRightStyle()
-//                            : REPORT_STYLE.getUnlockedStyle();
-//                    commentContent = rtlTargetLocale
-//                            ? EditUtil.toRtlString(comments.toString()) : comments.toString();
-//                    cell = ExcelUtil.getCell(currentRow, col);
-//                    cell.setCellValue(commentContent);
-//                    cell.setCellStyle(commentStyle);
-//                    col++;
+                    // commentStyle = rtlTargetLocale ?
+                    // REPORT_STYLE.getUnlockedRightStyle()
+                    // : REPORT_STYLE.getUnlockedStyle();
+                    // commentContent = rtlTargetLocale
+                    // ? EditUtil.toRtlString(comments.toString()) :
+                    // comments.toString();
+                    // cell = ExcelUtil.getCell(currentRow, col);
+                    // cell.setCellValue(commentContent);
+                    // cell.setCellStyle(commentStyle);
+                    // col++;
 
                     // Category failure
                     cell = ExcelUtil.getCell(currentRow, col);
@@ -1097,7 +1137,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     String previousSegments = getPreviousSegments(allTuvMap, targetTuv.getId(),
                             targetSegmentString, jobId);
                     cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(previousSegments);
+                    setCellForInternalText(cell, previousSegments, rtlTargetLocale);
                     cell.setCellStyle(contentStyle);
 
                     p_row++;
@@ -1111,24 +1151,62 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 allTuvMap = null;
             }
             // Add category failure drop down list here.
-            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row - 1, CATEGORY_FAILURE_COLUMN,
-                    CATEGORY_FAILURE_COLUMN);
+            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row - 1,
+                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
 
             termLeverageMatchResultMap = null;
 
             List<String> categories = null;
             String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
 
-            ExcelUtil.addValidation(p_sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
-                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
+            ExcelUtil.addValidation(p_sheet, "FailureCategoriesValidator", SEGMENT_START_ROW,
+                    p_row - 1, CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
             if (enableDQF)
             {
-                ExcelUtil.addValidation(p_sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
-                        SEVERITY_COLUMN, SEVERITY_COLUMN);
+                ExcelUtil.addValidation(p_sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW,
+                        p_row - 1, SEVERITY_COLUMN, SEVERITY_COLUMN);
             }
         }
 
         return p_row;
+    }
+
+    /**
+     * Sets the cell value for internal text.
+     * 
+     * @since GBS-4663
+     */
+    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
+    {
+        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+        {
+            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
+                    "");
+            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
+                    "");
+            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
+                    : contentWithoutMark;
+            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
+            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+            {
+                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
+                content = content.substring(0, internalBpt)
+                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
+                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
+                content = content.substring(0, internalEpt)
+                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
+
+                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
+                        rtlLocale ? internalEpt + 1 : internalEpt, REPORT_STYLE.getInternalFont());
+                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
+                        REPORT_STYLE.getContentFont());
+            }
+            p_cell.setCellValue(ts);
+        }
+        else
+        {
+            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
+        }
     }
 
     private void addCriteriaSheet(Workbook p_workbook, List<Job> p_jobsList, Set<String> stateSet,
@@ -1175,7 +1253,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         cell.setCellStyle(contentStyle);
 
         HashMap<String, Integer> scorecardColumns = new HashMap<>();
-        if (isDQFEnabled) {
+        if (isDQFEnabled)
+        {
             int columnIndex = 3;
             cell = ExcelUtil.getCell(jobsRow, columnIndex);
             cell.setCellStyle(contentStyle);
@@ -1211,12 +1290,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 long companyId = CompanyWrapper.getCurrentCompanyIdAsLong();
                 scorecardCategories = getScorecardCategories(companyId, bundle);
 
-                // In case that current company do not have any scorecard categories
+                // In case that current company do not have any scorecard
+                // categories
                 if (scorecardCategories == null)
                     scorecardCategories = new ArrayList<>();
             }
 
-            for (String category : scorecardCategories) {
+            for (String category : scorecardCategories)
+            {
                 cell = ExcelUtil.getCell(jobsRow, columnIndex);
                 cell.setCellStyle(contentStyle);
                 cell.setCellValue(category);
@@ -1291,13 +1372,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             cell.setCellValue(job.getJobId() + "," + job.getJobName());
             cell.setCellStyle(contentStyle);
 
-            if (isDQFEnabled) {
+            if (isDQFEnabled)
+            {
                 dqfList = dqfData.get(job.getJobId());
                 if (dqfList != null && dqfList.size() > 0)
                 {
-                    for (DQFDataInCAR dqfDataInCAR : dqfList) {
+                    for (DQFDataInCAR dqfDataInCAR : dqfList)
+                    {
                         valueColumn = 3;
-                        if (dqfDataInCAR != null) {
+                        if (dqfDataInCAR != null)
+                        {
                             cell = ExcelUtil.getCell(jobsRow, valueColumn++);
                             cell.setCellStyle(contentStyle);
                             cell.setCellValue(dqfDataInCAR.getTargetLocale());
@@ -1319,7 +1403,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                             cell.setCellValue(dqfDataInCAR.getScorecardComment());
 
                             scores = dqfDataInCAR.getScorecards();
-                            for (ScorecardScore ss : scores) {
+                            for (ScorecardScore ss : scores)
+                            {
                                 category = ss.getScorecardCategory();
                                 scorecardIndex = scorecardColumns.get(category);
 
@@ -1331,9 +1416,11 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                         jobRowNum++;
                         jobsRow = ExcelUtil.getRow(sheet, jobRowNum);
                     }
-                } else
+                }
+                else
                     jobRowNum++;
-            } else
+            }
+            else
                 jobRowNum++;
         }
     }
@@ -1572,7 +1659,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     previous.remove(previous.size() - 1);
                 }
 
-                // GBS-4638, TripAdvisor needs to only show previous segment in first translation activity
+                // GBS-4638, TripAdvisor needs to only show previous segment in
+                // first translation activity
                 int count = previous.size() >= 1 ? 1 : 0;
                 for (int pi = 0; pi < count; pi++)
                 {

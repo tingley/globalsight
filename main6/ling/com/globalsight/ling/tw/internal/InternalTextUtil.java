@@ -24,26 +24,35 @@ import java.util.regex.Pattern;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.XmlEntities;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.gxml.GxmlElement;
 
 public class InternalTextUtil
 {
-    private final static Pattern INTERNAL_START_REGEX_1 = Pattern.compile("<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>");
-    private final static Pattern INTERNAL_START_REGEX_2 = Pattern.compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</bpt>");
-    private final static Pattern INTERNAL_START_REGEX_3 = Pattern.compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>");
-    private final static Pattern INTERNAL_START_REGEX_5 = Pattern.compile("<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?[^>]*?/>");
-    
+    private final static Pattern INTERNAL_START_REGEX_1 = Pattern
+            .compile("<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>");
+    private final static Pattern INTERNAL_START_REGEX_2 = Pattern
+            .compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</bpt>");
+    private final static Pattern INTERNAL_START_REGEX_3 = Pattern
+            .compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>");
+    private final static Pattern INTERNAL_START_REGEX_5 = Pattern
+            .compile("<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?[^>]*?/>");
+
     private final static String INTERNAL_ALL_REGEX_1 = "<bpt[^>]*?i=\"%n%\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>(.*?)<ept i=\"%n%\"[^>]*?>[^<]*?</ept>";
     private final static String INTERNAL_ALL_REGEX_2 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"%n%\"[^>]*?>[^<]*?</bpt>(.*?)<ept i=\"%n%\"[^>]*?>[^<]*?</ept>";
     private final static String INTERNAL_ALL_REGEX_3 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"%n%\"[^>]*?/>(.*?)<ept[^>]*?i=\"%n%\"[^>]*?/>";
     private final static String INTERNAL_ALL_REGEX_5 = "<bpt[^>]*?i=\"%n%\"[^>]*?internal=\"yes\"[^>]*?/>(.*?)<ept[^>]*?i=\"%n%\"[^>]*?/>";
-    
+
     private final static String MRK_TAG = "<mrk ";
-    private final static Pattern INTERNAL_START_REGEX_4 = Pattern.compile("<mrk[^>]*?comment=\"internal text, i=(\\d*?)\"[^>]*?/>");
+    private final static Pattern INTERNAL_START_REGEX_4 = Pattern
+            .compile("<mrk[^>]*?comment=\"internal text, i=(\\d*?)\"[^>]*?/>");
     private final static String INTERNAL_ALL_REGEX_4 = "<mrk[^>]*?comment=\"internal text, i=%n%\"[^>]*?/>";
-    
-    private final static Pattern REGEX_INTERNAL_1 = Pattern.compile("<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</ept>");
-    private final static Pattern REGEX_INTERNAL_2 = Pattern.compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</bpt>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</ept>");
-    private final static Pattern REGEX_INTERNAL_3 = Pattern.compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?/>");
+
+    private final static Pattern REGEX_INTERNAL_1 = Pattern.compile(
+            "<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</ept>");
+    private final static Pattern REGEX_INTERNAL_2 = Pattern.compile(
+            "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</bpt>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</ept>");
+    private final static Pattern REGEX_INTERNAL_3 = Pattern.compile(
+            "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?/>");
 
     private static final String TAG_REGEX = "<.pt.*?>[^<]*?</.pt>";
     private static final String TAG_REGEX_PH = "<ph[\\s].*?>[^<]*?</ph>";
@@ -70,7 +79,7 @@ public class InternalTextUtil
             s2 = s1;
             s1 = StringUtil.replaceWithRE(s2, TAG_REGEX, "");
         }
-        
+
         // replace ph tags - GBS-3287
         s1 = StringUtil.replaceWithRE(s1, TAG_REGEX_PH, "");
 
@@ -110,8 +119,8 @@ public class InternalTextUtil
         return "[" + strInside + "]";
     }
 
-    private String preProcessInternalText(String segment, Pattern bptRegex,
-            String allRegex) throws DiplomatBasicParserException
+    private String preProcessInternalText(String segment, Pattern bptRegex, String allRegex,
+            boolean isFromReportGeneration) throws DiplomatBasicParserException
     {
         Matcher m = bptRegex.matcher(segment);
         StringBuilder output = new StringBuilder();
@@ -136,73 +145,67 @@ public class InternalTextUtil
                 {
                     internalSegment = m2.group(1);
                 }
-                
+
                 internalSegment = removeTags(internalSegment);
                 internalSegment = removeWhiteSpace(internalSegment);
-                String replaceTag = internalTag.getInternalTag(internalSegment,
-                        matchedSegment, texts);
+                // GBS-4663, add mark around internal text for later use
+                if (isFromReportGeneration)
+                {
+                    internalSegment = GxmlElement.GS_INTERNAL_BPT + internalSegment
+                            + GxmlElement.GS_INTERNAL_EPT;
+                }
+                String replaceTag = internalTag.getInternalTag(internalSegment, matchedSegment,
+                        texts);
                 // for GBS-2580
                 String wrappedTag = convertBrackets(replaceTag);
                 // for merge
                 /*
-                if (start != 0 && start == m2.start() && lastReplaceTag != null)
-                {
-                    String ltag = lastReplaceTag.substring(0,
-                            lastReplaceTag.length() - 1);
-                    String rtag = replaceTag.substring(1);
+                 * if (start != 0 && start == m2.start() && lastReplaceTag !=
+                 * null) { String ltag = lastReplaceTag.substring(0,
+                 * lastReplaceTag.length() - 1); String rtag =
+                 * replaceTag.substring(1);
+                 * 
+                 * String newReplaceTag = ltag + rtag; String newMatchedSegment
+                 * = lastMatchedSegment + matchedSegment; String newWrappedTag =
+                 * lastWrappedSegment.substring(0, lastWrappedSegment.length() -
+                 * 1) + wrappedTag.substring(1);
+                 * 
+                 * replaceTag = newReplaceTag; matchedSegment =
+                 * newMatchedSegment; wrappedTag = newWrappedTag;
+                 * 
+                 * int len = output.length(); output.delete(len -
+                 * lastReplaceTag.length(), len);
+                 * 
+                 * if (texts.getInternalTexts().containsKey(lastReplaceTag)) {
+                 * texts.getInternalTexts().remove(lastReplaceTag); }
+                 * 
+                 * String wkey = xmlDecoder.decodeString(lastReplaceTag); if
+                 * (texts.getWrappedInternalTexts().containsKey(wkey)) {
+                 * texts.getWrappedInternalTexts().remove(wkey); } }
+                 * lastReplaceTag = replaceTag; lastMatchedSegment =
+                 * matchedSegment; lastWrappedSegment = wrappedTag;
+                 */
 
-                    String newReplaceTag = ltag + rtag;
-                    String newMatchedSegment = lastMatchedSegment
-                            + matchedSegment;
-                    String newWrappedTag = lastWrappedSegment.substring(0,
-                            lastWrappedSegment.length() - 1)
-                            + wrappedTag.substring(1);
-
-                    replaceTag = newReplaceTag;
-                    matchedSegment = newMatchedSegment;
-                    wrappedTag = newWrappedTag;
-                    
-                    int len = output.length();
-                    output.delete(len - lastReplaceTag.length(), len);
-                    
-                    if (texts.getInternalTexts().containsKey(lastReplaceTag))
-                    {
-                        texts.getInternalTexts().remove(lastReplaceTag);
-                    }
-                    
-                    String wkey = xmlDecoder.decodeString(lastReplaceTag);
-                    if (texts.getWrappedInternalTexts().containsKey(wkey))
-                    {
-                        texts.getWrappedInternalTexts().remove(wkey);
-                    }
-                }
-                lastReplaceTag = replaceTag;
-                lastMatchedSegment = matchedSegment;
-                lastWrappedSegment = wrappedTag;
-                 */ 
-                
                 texts.addInternalTags(replaceTag, matchedSegment);
-                
+
                 if (!wrappedTag.equals(replaceTag))
                 {
-                    texts.addWrappedInternalTags(
-                            xmlDecoder.decodeString(replaceTag),
+                    texts.addWrappedInternalTags(xmlDecoder.decodeString(replaceTag),
                             xmlDecoder.decodeString(wrappedTag));
                 }
-                
-                
-                output.append(segment.substring(start, m2.start())); 
+
+                output.append(segment.substring(start, m2.start()));
                 output.append(replaceTag);
                 start = m2.end();
             }
             else
             {
-                throw new DiplomatBasicParserException("Can not find <ept i=\""
-                        + i + "\"> from segment:" + segment);
+                throw new DiplomatBasicParserException(
+                        "Can not find <ept i=\"" + i + "\"> from segment:" + segment);
             }
         }
-        
-        output.append(segment.substring(start)); 
+
+        output.append(segment.substring(start));
         return output.toString();
     }
 
@@ -246,21 +249,26 @@ public class InternalTextUtil
         return indexs;
     }
 
-    public InternalTexts preProcessInternalText(String segment)
+    public InternalTexts preProcessInternalText(String segment) throws DiplomatBasicParserException
+    {
+        return preProcessInternalText(segment, false);
+    }
+
+    public InternalTexts preProcessInternalText(String segment, boolean isFromReportGeneration)
             throws DiplomatBasicParserException
     {
-        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_1,
-                INTERNAL_ALL_REGEX_1);
-        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_2,
-                INTERNAL_ALL_REGEX_2);
-        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_3,
-                INTERNAL_ALL_REGEX_3);
-        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_5,
-                INTERNAL_ALL_REGEX_5);
+        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_1, INTERNAL_ALL_REGEX_1,
+                isFromReportGeneration);
+        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_2, INTERNAL_ALL_REGEX_2,
+                isFromReportGeneration);
+        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_3, INTERNAL_ALL_REGEX_3,
+                isFromReportGeneration);
+        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_5, INTERNAL_ALL_REGEX_5,
+                isFromReportGeneration);
         if (segment.contains(MRK_TAG))
         {
-            segment = preProcessInternalText(segment, INTERNAL_START_REGEX_4,
-                    INTERNAL_ALL_REGEX_4);
+            segment = preProcessInternalText(segment, INTERNAL_START_REGEX_4, INTERNAL_ALL_REGEX_4,
+                    isFromReportGeneration);
         }
 
         texts.setSegment(segment);

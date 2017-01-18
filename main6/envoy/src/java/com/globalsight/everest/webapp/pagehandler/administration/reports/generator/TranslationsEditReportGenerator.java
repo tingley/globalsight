@@ -16,6 +16,38 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -55,25 +87,17 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.util.*;
+import com.globalsight.util.ExcelUtil;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ReportStyle;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.*;
 
 /**
  * This Generator is used for creating Translations Edit Report (Include
@@ -89,7 +113,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     public int SEGMENT_START_ROW = 7;
     public int SCORECARD_START_ROW = 0;
     public int DQF_START_ROW = 0;
-    
+
     public int CATEGORY_FAILURE_COLUMN = 5;
     public int SEVERITY_COLUMN = 6;
     public int COMMENT_STATUS_COLUMN = 6;
@@ -103,7 +127,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     String m_userId;
 
     private boolean cancel = false;
-    
+
     private boolean isDQFEnabled = false;
     private boolean isScorecradEnabled = false;
     private String fluencyScore = "";
@@ -193,7 +217,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             if (job == null)
                 continue;
 
-            Workbook workBook = new SXSSFWorkbook();
+            Workbook workBook = new XSSFWorkbook();
             REPORT_STYLE = new ReportStyle(workBook);
 
             createReport(workBook, job, p_targetLocales, m_dateFormat);
@@ -201,7 +225,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             FileOutputStream out = new FileOutputStream(file);
             workBook.write(out);
             out.close();
-            ((SXSSFWorkbook) workBook).dispose();
 
             workBooks.add(file);
         }
@@ -259,22 +282,25 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
 
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator", getFailureCategoriesList(), SEGMENT_START_ROW, 26);
+        ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator",
+                getFailureCategoriesList(), SEGMENT_START_ROW, 26);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
-                currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories, SEGMENT_START_ROW, 27);
+        List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
+                CategoryType.Severity, true);
+        ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
+                SEGMENT_START_ROW, 27);
 
-        int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
+        int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
+                SEGMENT_START_ROW);
 
         ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
                 CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
 
         if (DQF_START_ROW > 0)
         {
-            ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
-                    SEVERITY_COLUMN, SEVERITY_COLUMN);
+            ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW,
+                    lastRow - 1, SEVERITY_COLUMN, SEVERITY_COLUMN);
 
             categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
                     CategoryType.Fluency, true);
@@ -282,33 +308,37 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
             categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
                     CategoryType.Adequacy, true);
-            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1, 1);
+            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1,
+                    1);
         }
         if (SCORECARD_START_ROW > 0)
         {
-            String[] data = new String[] { "5", "4", "3", "2", "1" };
+            String[] data = new String[]
+            { "5", "4", "3", "2", "1" };
             ExcelUtil.createValidatorList(sheet, data, SCORECARD_START_ROW + 1,
                     SCORECARD_START_ROW + scorecardCategories.size(), 1);
         }
     }
-    
-    private void addDQFHeader(Workbook workbook, Sheet sheet) throws Exception {
+
+    private void addDQFHeader(Workbook workbook, Sheet sheet) throws Exception
+    {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
         Row rowLine = null;
         Cell cell = null;
         boolean isStored = false;
-        
-        if (isDQFEnabled) {
-            isStored = StringUtil.isNotEmpty(fluencyScore);
-            
+
+        if (isDQFEnabled)
+        {
+            isStored = StringUtil.isNotEmpty(dqfComment);
+
             // DQF enabled
             row = DQF_START_ROW;
             rowLine = ExcelUtil.getRow(sheet, row);
             cell = ExcelUtil.getCell(rowLine, col);
             cell.setCellValue(m_bundle.getString("lb_dqf_fluency_only"));
             cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            
+
             cell = ExcelUtil.getCell(rowLine, 1);
             if (isStored || needProtect)
             {
@@ -319,7 +349,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                 cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
             }
             cell.setCellValue(fluencyScore);
-           
+
             row++;
 
             rowLine = ExcelUtil.getRow(sheet, row);
@@ -337,7 +367,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             }
             cell.setCellValue(adequacyScore);
             row++;
-            
+
             rowLine = ExcelUtil.getRow(sheet, row);
             cell = ExcelUtil.getCell(rowLine, col);
             cell.setCellValue(m_bundle.getString("lb_comment"));
@@ -353,9 +383,10 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             }
             cell.setCellValue(dqfComment);
         }
-        if (isScorecradEnabled) {
+        if (isScorecradEnabled)
+        {
             isStored = StringUtil.isNotEmpty(scoreComment);
-            
+
             // Scorecard enabled
             row = SCORECARD_START_ROW;
             rowLine = ExcelUtil.getRow(sheet, row);
@@ -364,22 +395,24 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
             row++;
             Hashtable<String, Integer> elements = new Hashtable<String, Integer>();
-            if (scorecardCategories != null && scorecardCategories.size()>0) {
-                for (String scorecard : scorecardCategories) {
+            if (scorecardCategories != null && scorecardCategories.size() > 0)
+            {
+                for (String scorecard : scorecardCategories)
+                {
                     rowLine = ExcelUtil.getRow(sheet, row);
                     cell = ExcelUtil.getCell(rowLine, col);
                     cell.setCellValue(scorecard);
-                    
+
                     cell = ExcelUtil.getCell(rowLine, col + 1);
                     if (needProtect)
                         cell.setCellStyle(REPORT_STYLE.getLockedStyle());
                     else
                         cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
-                    
+
                     elements.put(scorecard, Integer.valueOf(row));
                     row++;
                 }
-                
+
                 String key = "";
                 Integer rowValue = 0;
                 for (ScorecardScore score : scores)
@@ -455,7 +488,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                         Task task = (Task) it.next();
                         reportInfo = ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION + "_"
                                 + task.getId();
-                        needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
+                        needProtect = !(task.isType(Task.TYPE_REVIEW)
+                                || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
                 int scoreShowType = wf.getScorecardShowType();
@@ -475,8 +509,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                 if (scoreShowType > -1 && scoreShowType < 4)
                 {
                     isScorecradEnabled = true;
-                    scorecardCategories = ScorecardScoreHelper.getScorecardCategories(
-                            wf.getCompanyId(), m_bundle);
+                    scorecardCategories = ScorecardScoreHelper
+                            .getScorecardCategories(wf.getCompanyId(), m_bundle);
                     scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());
                     scoreComment = wf.getScorecardComment();
                     SCORECARD_START_ROW = isDQFEnabled ? 10 : 7;
@@ -494,10 +528,10 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             SEGMENT_HEADER_ROW = SCORECARD_START_ROW + scorecardCategories.size() + 3;
         }
         SEGMENT_START_ROW = SEGMENT_HEADER_ROW + 1;
-        
-        //add additional info for DQF and scorecard used to read data via uploading report
-        reportInfo += "_" + DQF_START_ROW + "_" + SCORECARD_START_ROW + "_"
-                + SEGMENT_START_ROW;
+
+        // add additional info for DQF and scorecard used to read data via
+        // uploading report
+        reportInfo += "_" + DQF_START_ROW + "_" + SCORECARD_START_ROW + "_" + SEGMENT_START_ROW;
 
         Row titleRow = ExcelUtil.getRow(p_sheet, 0);
         Cell taskIdCell = ExcelUtil.getCell(titleRow, 26);
@@ -595,7 +629,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
-        
+
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(m_bundle.getString("lb_tm_match_original"));
         cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
@@ -811,8 +845,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     sid = sourceTuv.getSid();
 
                     StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatchMap,
-                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle,
-                            sourceTuv, targetTuv, p_job.getId());
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle, sourceTuv,
+                            targetTuv, p_job.getId());
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
@@ -833,16 +867,18 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
                     // Source segment with compact tags
                     cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(getSegment(pData, sourceTuv, m_rtlSourceLocale, p_job.getId()));
-                    cell.setCellStyle(m_rtlSourceLocale ? REPORT_STYLE.getRtlContentStyle()
-                            : contentStyle);
+                    setCellForInternalText(cell, getSegment(pData, sourceTuv, p_job.getId()),
+                            m_rtlSourceLocale);
+                    cell.setCellStyle(
+                            m_rtlSourceLocale ? REPORT_STYLE.getRtlContentStyle() : contentStyle);
                     col++;
 
                     // Target segment with compact tags
                     cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(getSegment(pData, targetTuv, m_rtlTargetLocale, p_job.getId()));
-                    cell.setCellStyle(m_rtlTargetLocale ? REPORT_STYLE.getRtlContentStyle()
-                            : contentStyle);
+                    setCellForInternalText(cell, getSegment(pData, targetTuv, p_job.getId()),
+                            m_rtlTargetLocale);
+                    cell.setCellStyle(
+                            m_rtlTargetLocale ? REPORT_STYLE.getRtlContentStyle() : contentStyle);
                     col++;
 
                     // Modify the translation
@@ -955,7 +991,45 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
         return p_row;
     }
-    
+
+    /**
+     * Sets the cell value for internal text.
+     * 
+     * @since GBS-4663
+     */
+    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
+    {
+        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+        {
+            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
+                    "");
+            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
+                    "");
+            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
+                    : contentWithoutMark;
+            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
+            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+            {
+                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
+                content = content.substring(0, internalBpt)
+                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
+                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
+                content = content.substring(0, internalEpt)
+                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
+
+                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
+                        rtlLocale ? internalEpt + 1 : internalEpt, REPORT_STYLE.getInternalFont());
+                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
+                        REPORT_STYLE.getContentFont());
+            }
+            p_cell.setCellValue(ts);
+        }
+        else
+        {
+            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
+        }
+    }
+
     private void addCommentStatus(Sheet p_sheet, Set<Integer> rowsWithCommentSet, int last_row)
     {
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
@@ -1219,7 +1293,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         p_sheet.addValidationData(validationOne);
     }
 
-    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)
+    private String getSegment(PseudoData pData, Tuv tuv, long p_jobId)
     {
         StringBuffer content = new StringBuffer();
         String dataType = null;
@@ -1227,6 +1301,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         {
             dataType = tuv.getDataType(p_jobId);
             pData.setAddables(dataType);
+            pData.setIsFromReportGeneration(true);
             TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
             content.append(pData.getPTagSourceString());
 
@@ -1249,12 +1324,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             logger.error(tuv.getId(), e);
         }
 
-        String result = content.toString();
-        if (m_rtlLocale)
-        {
-            result = EditUtil.toRtlString(result);
-        }
-        return result;
+        return content.toString();
     }
 
     private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)

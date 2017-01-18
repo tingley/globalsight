@@ -916,7 +916,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         workflow.setDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
-                else
+                else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
                 {
                     // User does not fill in all DQF fields, report error
                     m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
@@ -940,14 +940,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     try
                     {
                         value = Integer.parseInt(valueString);
+                        if (value < 0 || value > 5 || !scorecardCategories.contains(category))
+                            continue;
                     }
                     catch (Exception e)
                     {
                         continue;
                     }
-
-                    if (value < 0 || value > 5 || !scorecardCategories.contains(category))
-                        continue;
 
                     scores.put(category, value);
                 }
@@ -1338,7 +1337,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     workflow.setDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
-                else
+                else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
                 {
                     // User does not fill in all DQF fields, report error
                     m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
@@ -1362,14 +1361,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     try
                     {
                         value = Integer.parseInt(valueString);
+                        if (value < 0 || value > 5 || !scorecardCategories.contains(category))
+                            continue;
                     }
                     catch (Exception e)
                     {
                         continue;
                     }
-
-                    if (value < 0 || value > 5 || !scorecardCategories.contains(category))
-                        continue;
 
                     scores.put(category, value);
                 }

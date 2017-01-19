@@ -53,7 +53,7 @@ public class PseudoData
     private int m_nBaseUniqueIndex = 1; // must start at 1
     // A array of objects that represent all tagss in te source
     private Vector m_SrcCompleteTagList = new Vector();
-    
+
     private Vector unmapTags = null;
     // Locale (for now its just for error messages)
     private Locale m_locale = null;
@@ -80,6 +80,8 @@ public class PseudoData
     private Map<String, String> m_mtIdentifierLeading = new HashMap<String, String>();
     private Map<String, String> m_mtIdentifierTrailing = new HashMap<String, String>();
     private boolean m_isFromSourceTargetPanel = true;
+    // GBS-4663
+    private boolean m_isFromReportGeneration = false;
 
     static
     {
@@ -132,6 +134,16 @@ public class PseudoData
     public void setIsFromSourceTargetPanel(boolean p_isFromSourceTargetPanel)
     {
         m_isFromSourceTargetPanel = p_isFromSourceTargetPanel;
+    }
+
+    public boolean isFromReportGeneration()
+    {
+        return m_isFromReportGeneration;
+    }
+
+    public void setIsFromReportGeneration(boolean p_isFromReportGeneration)
+    {
+        m_isFromReportGeneration = p_isFromReportGeneration;
     }
 
     /**
@@ -1092,7 +1104,7 @@ public class PseudoData
 
         return null;
     }
-    
+
     private Vector getUnmapTags()
     {
         if (unmapTags == null)
@@ -1101,10 +1113,10 @@ public class PseudoData
             if (m_SrcCompleteTagList != null)
                 unmapTags.addAll(m_SrcCompleteTagList);
         }
-        
+
         return unmapTags;
     }
-    
+
     public TagNode findUnmapSrcItemByTrgName(String p_TrgPTag)
     {
         Vector tags = getUnmapTags();

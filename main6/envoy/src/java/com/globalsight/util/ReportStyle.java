@@ -40,6 +40,8 @@ public class ReportStyle
     private CellStyle titleStyle = null;
     private CellStyle colorStyle = null;
     private short colorIndex;
+    private Font contentFont = null;
+    private Font internalFont = null;
 
     public ReportStyle()
     {
@@ -102,6 +104,45 @@ public class ReportStyle
     public void setHeaderStyle(CellStyle headerStyle)
     {
         this.headerStyle = headerStyle;
+    }
+
+    /**
+     * Gets the content font.
+     * 
+     * @since GBS-4663
+     */
+    public Font getContentFont()
+    {
+        if (contentFont == null)
+        {
+            Font font = workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+
+            contentFont = font;
+        }
+
+        return contentFont;
+    }
+
+    /**
+     * Gets the internal text font.
+     * 
+     * @since GBS-4663
+     */
+    public Font getInternalFont()
+    {
+        if (internalFont == null)
+        {
+            Font font = workbook.createFont();
+            font.setColor(IndexedColors.BROWN.getIndex());
+            font.setFontName("Internal Text");
+            font.setFontHeightInPoints((short) 10);
+
+            internalFont = font;
+        }
+
+        return internalFont;
     }
 
     public CellStyle getContentStyle()
@@ -220,14 +261,15 @@ public class ReportStyle
 
     public CellStyle getColorStyle(short color)
     {
-        if (colorStyle == null || color != colorIndex) {
+        if (colorStyle == null || color != colorIndex)
+        {
             colorStyle = workbook.createCellStyle();
             colorStyle.cloneStyleFrom(getContentStyle());
-            
-            colorStyle.setFillPattern(CellStyle.SOLID_FOREGROUND );
+
+            colorStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
             colorStyle.setFillForegroundColor(color);
         }
-        
+
         return colorStyle;
     }
 

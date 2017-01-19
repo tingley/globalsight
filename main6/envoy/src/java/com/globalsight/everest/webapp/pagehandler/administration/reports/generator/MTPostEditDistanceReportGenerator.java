@@ -51,7 +51,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -80,8 +81,11 @@ import com.globalsight.reports.ter.TERtest;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.ReportStyle;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.gxml.GxmlElement;
 
 public class MTPostEditDistanceReportGenerator implements ReportGenerator
 {
@@ -107,6 +111,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     private NumberFormat threeDigitFormater = null;
     private boolean usePerplexity = false;
     private boolean isIncludeInternalText = true;
+    private ReportStyle m_style = null;
 
     private static final String GET_DETAILED_DATA_SQL1 = "SELECT t1.Id as tuvId, t2.tuId, t2.source, t2.MT, t1.segment_string AS target, t2.mt_name, t1.state "
             + " FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS t1,"
@@ -215,7 +220,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         List<GlobalSightLocale> mtedTargetLocales = new ArrayList<GlobalSightLocale>();
         findMTedJobs(jobs, p_selectedTargetLocales, mtedJobs, mtedTargetLocales);
 
-        Workbook workBook = new SXSSFWorkbook(1000);
+        Workbook workBook = new XSSFWorkbook();
+        m_style = new ReportStyle(workBook);
         Sheet summarySheet = workBook.createSheet(m_bundle.getString("lb_summary"));
         Map<GlobalSightLocale, Sheet> detailedSheets = new HashMap<GlobalSightLocale, Sheet>();
         for (GlobalSightLocale locale : mtedTargetLocales)
@@ -249,7 +255,6 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             FileOutputStream out = new FileOutputStream(file);
             workBook.write(out);
             out.close();
-            ((SXSSFWorkbook) workBook).dispose();
         }
 
         List<File> workBooks = new ArrayList<File>();
@@ -652,7 +657,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 String source = rs.getString("source");
                 if (isIncludeInternalText)
                 {
-                    source = MTHelper.getGxmlElement(source).getTextValue();
+                    source = MTHelper.getGxmlElement(source).getTextValueWithInternalTextMark();
                 }
                 else
                 {
@@ -663,7 +668,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 String mt = rs.getString("MT");
                 if (isIncludeInternalText)
                 {
-                    mt = MTHelper.getGxmlElement(mt).getTextValue();
+                    mt = MTHelper.getGxmlElement(mt).getTextValueWithInternalTextMark();
                 }
                 else
                 {
@@ -674,7 +679,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 String target = rs.getString("target");
                 if (isIncludeInternalText)
                 {
-                    target = MTHelper.getGxmlElement(target).getTextValue();
+                    target = MTHelper.getGxmlElement(target).getTextValueWithInternalTextMark();
                 }
                 else
                 {
@@ -717,8 +722,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         ArrayList<String> hyps = new ArrayList<String>();
         ArrayList<String> refs = new ArrayList<String>();
 
-        boolean m_rtlSourceLocale = EditUtil.isRTLLocale(sourceLocale.toString());
-        boolean m_rtlTargetLocale = EditUtil.isRTLLocale(targetLocale.toString());
+        boolean rtlSourceLocale = EditUtil.isRTLLocale(sourceLocale.toString());
+        boolean rtlTargetLocale = EditUtil.isRTLLocale(targetLocale.toString());
         for (DetailedData data : detailedDatas)
         {
             int col = 0;
@@ -760,24 +765,24 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
             Cell cell_F = getCell(curRow, col);
             String source = data.getSource();
-            cell_F.setCellValue(m_rtlSourceLocale ? EditUtil.toRtlString(source) : source);
-            CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
+            setCellForInternalText(cell_F, source, rtlSourceLocale);
+            CellStyle srcStyle = rtlSourceLocale ? getRtlContentStyle(p_workBook)
                     : getContentStyle(p_workBook);
             cell_F.setCellStyle(srcStyle);
             col++;
 
             Cell cell_G = getCell(curRow, col);
             String mt = data.getMt();
-            cell_G.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(mt) : mt);
-            CellStyle mtStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+            setCellForInternalText(cell_G, mt, rtlSourceLocale);
+            CellStyle mtStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
                     : getContentStyle(p_workBook);
             cell_G.setCellStyle(mtStyle);
             col++;
 
             Cell cell_H = getCell(curRow, col);
             String target = data.getTarget();
-            cell_H.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(target) : target);
-            CellStyle targetStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+            setCellForInternalText(cell_H, target, rtlSourceLocale);
+            CellStyle targetStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
                     : getContentStyle(p_workBook);
             cell_H.setCellStyle(targetStyle);
             col++;
@@ -790,18 +795,18 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
                 Cell cell_I = getCell(curRow, col);
                 String sourcePreplexity = Double.toString(perplexity.getPerplexitySource());
-                cell_I.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(sourcePreplexity)
+                cell_I.setCellValue(rtlTargetLocale ? EditUtil.toRtlString(sourcePreplexity)
                         : sourcePreplexity);
-                CellStyle sourcePreplexityStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                CellStyle sourcePreplexityStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
                         : getContentStyle(p_workBook);
                 cell_I.setCellStyle(sourcePreplexityStyle);
                 col++;
 
                 Cell cell_J = getCell(curRow, col);
                 String targetPreplexity = Double.toString(perplexity.getPerplexityTarget());
-                cell_J.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(targetPreplexity)
+                cell_J.setCellValue(rtlTargetLocale ? EditUtil.toRtlString(targetPreplexity)
                         : targetPreplexity);
-                CellStyle targetPreplexityStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                CellStyle targetPreplexityStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
                         : getContentStyle(p_workBook);
                 cell_J.setCellStyle(targetPreplexityStyle);
                 col++;
@@ -809,14 +814,52 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 Cell cell_K = getCell(curRow, col);
                 String passFail = perplexity.getPerplexityResult() ? m_bundle.getString("lb_pass")
                         : m_bundle.getString("lb_fail");
-                cell_K.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(passFail) : passFail);
-                CellStyle passFailStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                cell_K.setCellValue(rtlTargetLocale ? EditUtil.toRtlString(passFail) : passFail);
+                CellStyle passFailStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
                         : getContentStyle(p_workBook);
                 cell_K.setCellStyle(passFailStyle);
                 col++;
             }
 
             row.inc();
+        }
+    }
+
+    /**
+     * Sets the cell value for internal text.
+     * 
+     * @since GBS-4663
+     */
+    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
+    {
+        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+        {
+            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
+                    "");
+            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
+                    "");
+            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
+                    : contentWithoutMark;
+            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
+            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+            {
+                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
+                content = content.substring(0, internalBpt)
+                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
+                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
+                content = content.substring(0, internalEpt)
+                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
+
+                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
+                        rtlLocale ? internalEpt + 1 : internalEpt, m_style.getInternalFont());
+                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
+                        m_style.getContentFont());
+            }
+            p_cell.setCellValue(ts);
+        }
+        else
+        {
+            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
         }
     }
 

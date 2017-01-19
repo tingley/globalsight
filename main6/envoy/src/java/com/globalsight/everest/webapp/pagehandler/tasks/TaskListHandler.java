@@ -1432,7 +1432,8 @@ public class TaskListHandler extends PageHandler
                                 continue;
                             }
                             if ((showType == 3 || showType == 5)
-                                    && StringUtil.isEmpty(workflowImpl.getDQFComment()))
+                                    && (StringUtil.isEmpty(workflowImpl.getFluencyScore())
+                                    || StringUtil.isEmpty(workflowImpl.getAdequacyScore())))
                             {
                                 isNeedDQFTaskId.append("[JobID:").append(task.getJobId())
                                         .append(",JobName:").append(task.getJobName()).append("],");

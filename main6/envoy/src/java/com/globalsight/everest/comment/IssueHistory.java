@@ -48,4 +48,6 @@ public interface IssueHistory
      * Return the comment text that was added to the issue.
      */
     public String getComment();
+
+    public String getType();
 }

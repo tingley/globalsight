@@ -902,26 +902,21 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             String tmpDQFComment = workflow.getDQFComment();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-            if (StringUtil.isEmpty(tmpDQFComment) && DQF_START_ROW > 0)
+            if (StringUtil.isEmpty(workflow.getFluencyScore()) && DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
                 adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
                 dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
-                if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore)
-                        && StringUtil.isNotEmpty(dqfComment))
+                if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore))
                 {
                     workflow.setFluencyScore(fluencyScore);
                     workflow.setAdequacyScore(adequacyScore);
-                    workflow.setDQFComment(dqfComment);
+                    if (StringUtil.isNotEmpty(dqfComment))
+                        workflow.setDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
-                else if (StringUtil.isEmpty(fluencyScore) && StringUtil.isEmpty(adequacyScore)
-                        && StringUtil.isEmpty(dqfComment))
-                {
-                    // ignore to store DQF info because all 3 fields are empty
-                }
-                else
+                else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
                 {
                     // User does not fill in all DQF fields, report error
                     m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
@@ -945,14 +940,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     try
                     {
                         value = Integer.parseInt(valueString);
+                        if (value < 0 || value > 5 || !scorecardCategories.contains(category))
+                            continue;
                     }
                     catch (Exception e)
                     {
                         continue;
                     }
-
-                    if (value < 0 || value > 5 || !scorecardCategories.contains(category))
-                        continue;
 
                     scores.put(category, value);
                 }
@@ -1330,26 +1324,20 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             String tmpDQFComment = workflow.getDQFComment();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-            if (StringUtil.isEmpty(tmpDQFComment) && DQF_START_ROW > 0)
+            if (StringUtil.isEmpty(workflow.getFluencyScore()) && DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
                 adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
                 dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
-                if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore)
-                        && StringUtil.isNotEmpty(dqfComment))
+                if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore))
                 {
                     workflow.setFluencyScore(fluencyScore);
                     workflow.setAdequacyScore(adequacyScore);
                     workflow.setDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
-                else if (StringUtil.isEmpty(fluencyScore) && StringUtil.isEmpty(adequacyScore)
-                        && StringUtil.isEmpty(dqfComment))
-                {
-                    // ignore to store DQF info because all 3 fields are empty
-                }
-                else
+                else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
                 {
                     // User does not fill in all DQF fields, report error
                     m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
@@ -1373,14 +1361,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     try
                     {
                         value = Integer.parseInt(valueString);
+                        if (value < 0 || value > 5 || !scorecardCategories.contains(category))
+                            continue;
                     }
                     catch (Exception e)
                     {
                         continue;
                     }
-
-                    if (value < 0 || value > 5 || !scorecardCategories.contains(category))
-                        continue;
 
                     scores.put(category, value);
                 }

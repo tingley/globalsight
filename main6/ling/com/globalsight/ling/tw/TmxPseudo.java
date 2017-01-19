@@ -39,20 +39,17 @@ public class TmxPseudo
      * @param pseudoData
      *            - data mappings for the conversion.
      */
-    public static String pseudo2Tmx(PseudoData pseudoData)
-            throws PseudoParserException
+    public static String pseudo2Tmx(PseudoData pseudoData) throws PseudoParserException
     {
         PseudoCodec codec = new PseudoCodec();
         XmlEntities xmlEncoder = new XmlEntities();
-        String segment = xmlEncoder.encodeString(pseudoData
-                .getWrappedPTagTargetString());
+        String segment = xmlEncoder.encodeString(pseudoData.getWrappedPTagTargetString());
 
         Pseudo2TmxHandler pseudo2TmxHandler = new Pseudo2TmxHandler(pseudoData);
         PseudoParser pseudoParser = new PseudoParser(pseudo2TmxHandler);
         pseudoParser.tokenize(segment);
 
-        m_lastPseudo2TmxNativeResult = codec.decode(pseudo2TmxHandler
-                .getNativeResult());
+        m_lastPseudo2TmxNativeResult = codec.decode(pseudo2TmxHandler.getNativeResult());
 
         return codec.decode(pseudo2TmxHandler.getResult());
     }
@@ -66,8 +63,8 @@ public class TmxPseudo
      * @param p_hTagMapping
      *            HashTable
      */
-    public static PseudoData tmx2Pseudo(String p_strTmxString,
-            PseudoData p_PseudoData) throws DiplomatBasicParserException
+    public static PseudoData tmx2Pseudo(String p_strTmxString, PseudoData p_PseudoData)
+            throws DiplomatBasicParserException
     {
         return tmx2Pseudo(p_strTmxString, p_PseudoData, NOMAL);
     }
@@ -92,8 +89,7 @@ public class TmxPseudo
      * @param p_hTagMapping
      *            HashTable
      */
-    public static PseudoData tmx2Pseudo(String p_strTmxString,
-            PseudoData p_PseudoData, int state)
+    public static PseudoData tmx2Pseudo(String p_strTmxString, PseudoData p_PseudoData, int state)
             throws DiplomatBasicParserException
     {
         InternalTag internalTag = getInternalTagByState(state);
@@ -106,8 +102,8 @@ public class TmxPseudo
         {
             eventHandler.setMTIdentifiers(p_strTmxString);
         }
-        String segment = eventHandler.preProcessInternalText(
-                codec.encode(p_strTmxString), internalTag);
+        String segment = eventHandler.preProcessInternalText(codec.encode(p_strTmxString),
+                internalTag, p_PseudoData.isFromReportGeneration());
         DiplomatBasicParser parser = new DiplomatBasicParser(eventHandler);
 
         parser.parse(segment);

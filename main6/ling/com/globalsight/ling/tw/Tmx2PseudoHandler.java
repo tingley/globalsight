@@ -27,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20;
-import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20Handler;
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.internal.InternalTag;
@@ -66,7 +65,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
     private HashMap<String, String> ept2bpt = new HashMap();
     // this is for tag that not has id. just like [b]
     private HashMap<String, String> ept2bpt2 = new HashMap();
-    
+
     private int m_nextUniqIndex = 0;
     private Hashtable m_hTagMap = new Hashtable();
     private Hashtable m_missedhTagMap = new Hashtable();
@@ -82,15 +81,13 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
     public static final String R_MT_IDENTIFIER_TRAILING_EPT = "<ept i=\"\\d+\">&lt;/mttid&gt;</ept>";
     public static final String R_TEXT = "([\\d\\D]*?)";
 
-    public static final String R_MT_IDENTIFIER_LEADING = R_MT_IDENTIFIER_LEADING_BPT
-            + R_TEXT + R_MT_IDENTIFIER_LEADING_EPT;
-    public static final String R_MT_IDENTIFIER_TRAILING = R_MT_IDENTIFIER_TRAILING_BPT
-            + R_TEXT + R_MT_IDENTIFIER_TRAILING_EPT;
+    public static final String R_MT_IDENTIFIER_LEADING = R_MT_IDENTIFIER_LEADING_BPT + R_TEXT
+            + R_MT_IDENTIFIER_LEADING_EPT;
+    public static final String R_MT_IDENTIFIER_TRAILING = R_MT_IDENTIFIER_TRAILING_BPT + R_TEXT
+            + R_MT_IDENTIFIER_TRAILING_EPT;
 
-    public static Pattern P_MT_IDENTIFIER_LEADING = Pattern
-            .compile(R_MT_IDENTIFIER_LEADING);
-    public static Pattern P_MT_IDENTIFIER_TRAILING = Pattern
-            .compile(R_MT_IDENTIFIER_TRAILING);
+    public static Pattern P_MT_IDENTIFIER_LEADING = Pattern.compile(R_MT_IDENTIFIER_LEADING);
+    public static Pattern P_MT_IDENTIFIER_TRAILING = Pattern.compile(R_MT_IDENTIFIER_TRAILING);
 
     static
     {
@@ -174,18 +171,15 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             return;
         }
 
-        Tmx2PseudoHandlerElement selfElement = (Tmx2PseudoHandlerElement) m_elementStack
-                .pop();
+        Tmx2PseudoHandlerElement selfElement = (Tmx2PseudoHandlerElement) m_elementStack.pop();
 
-        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack
-                .peek();
+        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack.peek();
 
         if (selfElement.type == SUB)
         {
-            m_vSubflows.addElement(selfElement.getText()
-                    + PseudoConstants.PSEUDO_OPEN_TAG
-                    + PseudoConstants.PSEUDO_END_TAG_MARKER
-                    + selfElement.tagName + PseudoConstants.PSEUDO_CLOSE_TAG);
+            m_vSubflows.addElement(selfElement.getText() + PseudoConstants.PSEUDO_OPEN_TAG
+                    + PseudoConstants.PSEUDO_END_TAG_MARKER + selfElement.tagName
+                    + PseudoConstants.PSEUDO_CLOSE_TAG);
         }
         else
         {
@@ -193,18 +187,14 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             // put original code inside "if" to keep from adding
             // unnumbered tags to hash unnumbereds one are addable and
             // will be built on the fly.
-            if (Character.isDigit(selfElement.tagName
-                    .charAt(selfElement.tagName.length() - 1))
-                    || selfElement.getText().contains(
-                            " isFromOfficeContent=\"yes\"")
+            if (Character.isDigit(selfElement.tagName.charAt(selfElement.tagName.length() - 1))
+                    || selfElement.getText().contains(" isFromOfficeContent=\"yes\"")
                     || isSepicalTag(selfElement))
             {
-                m_hTagMap.put(selfElement.tagName, selfElement.getText()
-                        + p_strOriginalTag);
+                m_hTagMap.put(selfElement.tagName, selfElement.getText() + p_strOriginalTag);
 
                 // Assuming <sub> cannot be included in <sub>
-                for (Enumeration e = selfElement.subTags.elements(); e
-                        .hasMoreElements();)
+                for (Enumeration e = selfElement.subTags.elements(); e.hasMoreElements();)
                 {
                     currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
                     currentElement.append((String) e.nextElement());
@@ -216,8 +206,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                 int len = m_PseudoData.getSrcCompleteTagList().size();
                 if (len > 0)
                 {
-                    TagNode lastTag = (TagNode) m_PseudoData
-                            .getSrcCompleteTagList().get(len - 1);
+                    TagNode lastTag = (TagNode) m_PseudoData.getSrcCompleteTagList().get(len - 1);
                     m_missedhTagMap.put("" + lastTag.getSourceListIndex(),
                             selfElement.getText() + p_strOriginalTag);
                 }
@@ -240,7 +229,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
 
         return false;
     }
-    
+
     /**
      * For xliff 2.0 issues. Add all attribtes from bpt to ept.
      * 
@@ -259,19 +248,22 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                     Properties atts = (Properties) n.getAttributes();
                     if (atts != null)
                     {
-                        if (p_hAttributes.getProperty("x") != null && p_hAttributes.getProperty("x").equals(atts.getProperty("x")))
+                        if (p_hAttributes.getProperty("x") != null
+                                && p_hAttributes.getProperty("x").equals(atts.getProperty("x")))
                         {
                             p_hAttributes.putAll(atts);
                             break;
                         }
-                        
-                        if (p_hAttributes.getProperty("i") != null && p_hAttributes.getProperty("i").equals(atts.getProperty("i")))
+
+                        if (p_hAttributes.getProperty("i") != null
+                                && p_hAttributes.getProperty("i").equals(atts.getProperty("i")))
                         {
                             p_hAttributes.putAll(atts);
                             break;
                         }
-                        
-                        if (p_hAttributes.getProperty("id") != null && p_hAttributes.getProperty("id").equals(atts.getProperty("id")))
+
+                        if (p_hAttributes.getProperty("id") != null
+                                && p_hAttributes.getProperty("id").equals(atts.getProperty("id")))
                         {
                             p_hAttributes.putAll(atts);
                             break;
@@ -292,12 +284,10 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
      * @param p_strOriginalString
      *            - The complete raw token from the parser.
      */
-    public void handleStartTag(String p_strTmxTagName,
-            Properties p_hAttributes, String p_strOriginalString)
-            throws DiplomatBasicParserException
+    public void handleStartTag(String p_strTmxTagName, Properties p_hAttributes,
+            String p_strOriginalString) throws DiplomatBasicParserException
     {
-        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack
-                .peek();
+        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack.peek();
         String isExtracted = (String) p_hAttributes.get("isTranslate");
         Tmx2PseudoHandlerElement selfElement = new Tmx2PseudoHandlerElement();
 
@@ -331,17 +321,17 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             // Original code - intentionally empty
             // Some tags will not have an "i" attribute
         }
-        
+
         if (m_PseudoData.isXliff20File())
         {
-            String PTag = Tmx2Xliff20.getTag(p_strTmxTagName, p_hAttributes, p_strOriginalString, ept2bpt, ept2bpt2);
-            
+            String PTag = Tmx2Xliff20.getTag(p_strTmxTagName, p_hAttributes, p_strOriginalString,
+                    ept2bpt, ept2bpt2);
+
             try
             {
                 updateAttributeForEpt(p_strTmxTagName, p_hAttributes);
                 // capture source data
-                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
-                        PTag, p_hAttributes));
+                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName, PTag, p_hAttributes));
             }
             catch (TagNodeException e)
             {
@@ -355,7 +345,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
             currentElement.append(PTag);
             currentElement.append(PseudoConstants.PSEUDO_CLOSE_TAG);
-            
+
             return;
         }
 
@@ -364,19 +354,16 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             String PTag = null;
 
             // create tag name
-            PTag = m_PseudoData.makePseudoTagName(p_strTmxTagName,
-                    p_hAttributes, "g");
+            PTag = m_PseudoData.makePseudoTagName(p_strTmxTagName, p_hAttributes, "g");
 
             try
             {
                 // capture source data
                 int i_SourceListIdx = m_PseudoData
-                        .addSourceTagItem(new TagNode(p_strTmxTagName, PTag,
-                                p_hAttributes));
+                        .addSourceTagItem(new TagNode(p_strTmxTagName, PTag, p_hAttributes));
 
                 // capture ept to bpt mapping for later use to copy attributes
-                m_hEpt2BptSrcIndexMap.put(p_hAttributes.get("i"),
-                        String.valueOf(i_SourceListIdx));
+                m_hEpt2BptSrcIndexMap.put(p_hAttributes.get("i"), String.valueOf(i_SourceListIdx));
             }
             catch (TagNodeException e)
             {
@@ -412,8 +399,8 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
         }
         else if (p_strTmxTagName.equals("ept"))
         {
-            isExtracted = (m_extractedStack.size() > 0) ? (String) m_extractedStack
-                    .peek() : "false";
+            isExtracted = (m_extractedStack.size() > 0) ? (String) m_extractedStack.peek()
+                    : "false";
 
             // lookup index to the source bpt
             int i_SrcIdx = -1;
@@ -427,9 +414,8 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                 {
                     if (m_PseudoData.isXliffXlfFile())
                     {
-                        PTag = PseudoConstants.PSEUDO_END_TAG_MARKER
-                                + m_PseudoData.makePseudoTagName(
-                                        p_strTmxTagName, p_hAttributes, "g");
+                        PTag = PseudoConstants.PSEUDO_END_TAG_MARKER + m_PseudoData
+                                .makePseudoTagName(p_strTmxTagName, p_hAttributes, "g");
                     }
                     else
                     {
@@ -450,8 +436,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             }
             catch (NumberFormatException e)
             {
-                throw new DiplomatBasicParserException(" : ept i=\""
-                        + p_hAttributes.get("i")
+                throw new DiplomatBasicParserException(" : ept i=\"" + p_hAttributes.get("i")
                         + "\"  has no parent bpt in this segment.");
             }
 
@@ -459,16 +444,14 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             // build tag using bpt data
             if (BPTItem != null)
             {
-                PTag = PseudoConstants.PSEUDO_END_TAG_MARKER
-                        + BPTItem.getPTagName();
+                PTag = PseudoConstants.PSEUDO_END_TAG_MARKER + BPTItem.getPTagName();
                 atts = BPTItem.getAttributes();
             }
 
             try
             {
                 // capture source data for ept (re-using bpt attributes)
-                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
-                        PTag, atts));
+                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName, PTag, atts));
             }
             catch (TagNodeException e)
             {
@@ -529,16 +512,14 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             // regardless of type ( spec. for system3 ).
 
             // create pseudo tag name
-            PTag = m_PseudoData.makePseudoTagName(p_strTmxTagName,
-                    p_hAttributes, "x", true);
+            PTag = m_PseudoData.makePseudoTagName(p_strTmxTagName, p_hAttributes, "x", true);
             // PTag = m_PseudoData.makePseudoTagName(
             // p_strTmxTagName, p_hAttributes, "x");
 
             try
             {
                 // capture source data
-                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
-                        PTag, p_hAttributes));
+                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName, PTag, p_hAttributes));
             }
             catch (TagNodeException e)
             {
@@ -568,8 +549,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
      */
     public void handleText(String p_strText)
     {
-        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack
-                .peek();
+        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack.peek();
 
         currentElement.append(p_strText);
     }
@@ -592,14 +572,13 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
         m_elementStack.push(m_rootElement);
     }
 
-    public String preProcessInternalText(String segment)
-            throws DiplomatBasicParserException
+    public String preProcessInternalText(String segment) throws DiplomatBasicParserException
     {
-        return preProcessInternalText(segment, null);
+        return preProcessInternalText(segment, null, false);
     }
 
-    public String preProcessInternalText(String segment, InternalTag internalTag)
-            throws DiplomatBasicParserException
+    public String preProcessInternalText(String segment, InternalTag internalTag,
+            boolean isFromReportGeneration) throws DiplomatBasicParserException
     {
         if (internalTag == null)
         {
@@ -607,7 +586,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
         }
 
         InternalTextUtil util = new InternalTextUtil(internalTag);
-        InternalTexts texts = util.preProcessInternalText(segment);
+        InternalTexts texts = util.preProcessInternalText(segment, isFromReportGeneration);
         try
         {
             m_PseudoData.addInternalTags(texts);
@@ -626,8 +605,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
      * 
      * @since GBS-3722
      */
-    public void setMTIdentifiers(String segment)
-            throws DiplomatBasicParserException
+    public void setMTIdentifiers(String segment) throws DiplomatBasicParserException
     {
         if (m_PseudoData.getMTIdentifierList().size() > 0)
         {
@@ -639,15 +617,13 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             Matcher m = P_MT_IDENTIFIER_LEADING.matcher(segment);
             if (m.find())
             {
-                m_PseudoData.addMTIdentifierLeading("[" + m.group(1) + "]",
-                        m.group());
+                m_PseudoData.addMTIdentifierLeading("[" + m.group(1) + "]", m.group());
             }
 
             m = P_MT_IDENTIFIER_TRAILING.matcher(segment);
             if (m.find())
             {
-                m_PseudoData.addMTIdentifierTrailing("[" + m.group(1) + "]",
-                        m.group());
+                m_PseudoData.addMTIdentifierTrailing("[" + m.group(1) + "]", m.group());
             }
         }
         catch (TagNodeException e)

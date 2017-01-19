@@ -22,7 +22,7 @@ public class DQFReportHelper
         if (!isDQFEnabled || dqfData == null || sheet == null || sheet.getWorkbook() == null || startRow < 1 || bundle == null)
             return;
 
-        boolean isStored = StringUtil.isNotEmpty(dqfData.getComment());
+        boolean isStored = StringUtil.isNotEmpty(dqfData.getFluency());
         ReportStyle reportStyle = new ReportStyle(sheet.getWorkbook());
 
         // DQF enabled

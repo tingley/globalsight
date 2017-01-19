@@ -364,7 +364,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
         } 
 		if (scorecardShowType == 3 || scorecardShowType == 5) 
         {
-            needDQF = StringUtil.isEmpty(workflowImpl.getDQFComment());
+            needDQF = StringUtil.isEmpty(workflowImpl.getFluencyScore()) || StringUtil.isEmpty(workflowImpl.getAdequacyScore());
         }
     }
     if(theTask.isType(Task.TYPE_REVIEW))

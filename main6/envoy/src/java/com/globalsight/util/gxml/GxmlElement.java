@@ -87,6 +87,9 @@ public class GxmlElement implements Serializable
     public static final int[] USPECIFIED_TYPE = new int[]
     { GxmlElement.UNSPECIFIED };
 
+    public static String GS_INTERNAL_BPT = "#GSMARK_INTERNAL_BPT#";
+    public static String GS_INTERNAL_EPT = "#GSMARK_INTERNAL_EPT#";
+
     /** element type */
     protected int m_type = NONE;
 
@@ -200,6 +203,54 @@ public class GxmlElement implements Serializable
         for (int i = 0; i < children.size(); i++)
         {
             result.append(((TextNode) children.get(i)).getTextNodeValue());
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * Gets text string with internal text mark added.
+     * 
+     * @since GBS-4663
+     */
+    public String getTextValueWithInternalTextMark()
+    {
+        if (m_childElements == null)
+        {
+            return "";
+        }
+
+        StringBuffer result = new StringBuffer(10 * m_childElements.size());
+        boolean inInternal = false;
+        String bptI = "-1";
+        for (int i = 0; i < m_childElements.size(); i++)
+        {
+            GxmlElement child = (GxmlElement) m_childElements.get(i);
+            if (!inInternal && BPT == child.getType())
+            {
+                inInternal = "yes".equals(child.getAttribute("internal"));
+
+                if (inInternal)
+                {
+                    bptI = child.getAttribute("i");
+                    result.append(GS_INTERNAL_BPT);
+                }
+            }
+
+            if (TEXT_NODE == child.getType())
+            {
+                result.append(((TextNode) child).getTextNodeValue());
+            }
+
+            if (inInternal && EPT == child.getType())
+            {
+                String eptI = child.getAttribute("i");
+                if (bptI != null && bptI.equals(eptI))
+                {
+                    result.append(GS_INTERNAL_EPT);
+                    inInternal = false;
+                }
+            }
         }
 
         return result.toString();

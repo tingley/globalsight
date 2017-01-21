@@ -54,14 +54,13 @@ import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
-import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Import filter configuration.
  */
-public class FilterConfigImport extends MultiCompanySupportedThread implements ConfigConstants
+public class FilterConfigImport implements ConfigConstants
 {
     private String companyId;
     private String sessionId;

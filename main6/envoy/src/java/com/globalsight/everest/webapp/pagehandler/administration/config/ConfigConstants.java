@@ -31,4 +31,16 @@ public interface ConfigConstants
     public static final String USER_FILE_NAME = "User_";
     public static final String MT_FILE_NAME = "MachineTranslationProfiles_";
     public static final String FILTER_FILE_NAME = "FilterConfiguration_";
+    public static final String ACTIVITY_FILE_NAME = "ActivityTypes_";
+    public static final String PERMISSION_GROUP_NAME ="PermissionGroups_";
+    public static final String TM_FILE_NAME = "TranslationMemories_";
+    public static final String SEGMENT_RULE_FILE_NAME = "SegmentRlues_";
+    public static final String TM_PROFILE_FILE_NAME = "TranslationMemoryProfiles_";
+    public static final String PROJECT_FILE_NAME = "Projects_";
+    public static final String WORKFLOW_TEMPLATE_FILE_NAME = "Workflows_";
+    public static final String LOC_PROFILE_FILE_NAME = " LocalizationProfiles_";
+    public static final String XML_RULE_FILE_NAME = "XMLRules_";
+    public static final String FILE_PROFILE_FILE_NAME = "FileProfiles_";
+    
+    
 }

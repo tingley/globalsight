@@ -20,10 +20,8 @@ import java.io.File;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,13 +38,11 @@ import org.dom4j.io.SAXReader;
 
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
-import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterImpl;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
@@ -64,9 +60,9 @@ import com.globalsight.everest.webapp.pagehandler.administration.projects.Projec
 import com.globalsight.everest.webapp.pagehandler.administration.users.SetDefaultRoleUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserDefaultActivity;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserDefaultRole;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -74,43 +70,46 @@ import com.globalsight.util.GlobalSightLocale;
 /**
  * Imports user info into system.
  */
-public class UserImport extends MultiCompanySupportedThread implements ConfigConstants
+public class UserImport implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(UserImport.class);
-    private String sessionId;
-    private File uploadedFile;
     private User operator;
-    private int ignoreOrOverwrite = 0;// ignore existed user default
-    private String companyId;
+    private String sessionId;
+    private Company company;
     private static final String SQL_INSERT_PERMISSIONGROUP_USER = 
             "INSERT INTO permissiongroup_user (permissiongroup_id, user_id) VALUES (?, ?)";
-    private Map<String, Company> companyMap = null;
 
-    public UserImport(String sessionId, File uploadedFile, User operator, String companyId)
-    {
-        this.sessionId = sessionId;
-        this.uploadedFile = uploadedFile;
-        this.operator = operator;
-        this.companyId = companyId;
-    }
-
-    public void run()
-    {
-        CompanyThreadLocal.getInstance().setIdValue(this.companyId);
-        this.analysisAndImport(uploadedFile);
-    }
-
-    private void analysisAndImport(File uploadedFile)
+    public UserImport(String sessionId, User operator, String companyId, String importToCompId)
     {
         try
         {
-            String[] allUserNames = ServerProxy.getUserManager().getUserNamesFromAllCompanies();
-            Set<String> allUserNameSet = new HashSet<String>();
-            if (allUserNames != null)
+            this.operator = operator;
+            this.sessionId = sessionId;
+            Company companyUserBelongTo;
+            if (importToCompId != null && !importToCompId.equals("-1"))
             {
-                allUserNameSet.addAll(Arrays.asList(allUserNames));
+                companyUserBelongTo = ServerProxy.getJobHandler().getCompanyById(
+                        Long.parseLong(importToCompId));
             }
+            else
+            {
+                companyUserBelongTo = ServerProxy.getJobHandler().getCompanyById(
+                        Long.parseLong(companyId));
+            }
+            CompanyThreadLocal.getInstance().setIdValue(companyUserBelongTo.getId());
+            this.company = companyUserBelongTo;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+       
+    }
 
+    public void analysisAndImport(File uploadedFile)
+    {
+        try
+        {
             SAXReader saxReader = new SAXReader();
             Document document = saxReader.read(uploadedFile);
 
@@ -120,23 +119,12 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
             for (int i = 0; i < size; i++)
             {
                 Element userNode = (Element) userNodes.get(i);
-                if (validateData(userNode, allUserNameSet))
+                if (validateData(userNode))
                 {
-                    // overwrites
-                    if (isUserAlreadyExisted(userNode, allUserNameSet))
-                    {
-                        _updateExistedUser(userNode, allUserNameSet);
-                    }
-                    else
-                    // adds new
-                    {
-                        _addNewUser(userNode);
-                    }
+                    addNewUser(userNode);
                 }
-
-                Thread.sleep(100);
             }
-            addMessage("<b>Users Imported successfully !</b>");
+            addMessage("<b>Done importing Users.</b>");
         }
         catch (Exception e)
         {
@@ -148,20 +136,17 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     /**
      * Adds a new user into system.
      */
-    private void _addNewUser(Element userNode) throws Exception
+    private void addNewUser(Element userNode) throws Exception
     {
         User user = new UserImpl();
         Element basicInfoNode = userNode.element("BasicInfo");
 
-        String companyName = basicInfoNode.element("CompanyName").getText();
-        Company companyUserBelongTo = ServerProxy.getJobHandler().getCompany(companyName);
-        CompanyThreadLocal.getInstance().setIdValue(companyUserBelongTo.getId());
-
         // basic info node
         String userName = basicInfoNode.element("UserName").getText();
-        String userID = UserUtil.newUserId(userName);
+        String userNewName = getNewName(userName);
+        String userID = UserUtil.newUserId(userNewName);
         user.setUserId(userID);
-        user.setUserName(userName);
+        user.setUserName(userNewName);
         initUserInfo(userNode, user);
         // default role node
         ArrayList<UserDefaultRole> defaultRolesList = initDefaultUserRoles(userNode, userID);
@@ -176,65 +161,57 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         // user parameters
         List<UserParameterImpl> userParameterList = initUserParameter(userNode, user.getUserId());
         // saves user
-        saveUserInfo(user, companyUserBelongTo, projectIds, fs, rolesList, permissionGroupIds,
+        saveUserInfo(user, projectIds, fs, rolesList, permissionGroupIds,
                 userParameterList);
         SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(), defaultRolesList);
+        if (userName.equals(userNewName))
+        {
+            addMessage("<b>" + userNewName + "</b> imported successfully.");
+        }
+        else
+        {
+            addMessage(" User name <b>" + userName + "</b> already exists. <b>" + userNewName
+                    + "</b> imported successfully.");
+        }
     }
 
-    private void _updateExistedUser(Element userNode, Set<String> allUserNameSet)
-            throws Exception
+    private String getNewName(String userName)
     {
-        Element basicInfoNode = userNode.element("BasicInfo");
-
-        String companyName = basicInfoNode.element("CompanyName").getText();
-        Company companyUserBelongTo = ServerProxy.getJobHandler().getCompany(companyName);
-        CompanyThreadLocal.getInstance().setIdValue(companyUserBelongTo.getId());
-
-        String userName = basicInfoNode.element("UserName").getText();
-        // String userID = basicInfoNode.element("UserID").getText();
-        User user = UserUtil.getUserById(UserUtil.getUserIdByName(userName));
-        String userID = user.getUserId();
-        user.setUserName(userName);
-        // basic info node
-        initUserInfo(userNode, user);
-        // this.cachePercentage(i + 0.3, size);
-
-        // default role node
-        ArrayList<UserDefaultRole> defaultRolesList = initDefaultUserRoles(userNode, userID);
-        ArrayList<UserDefaultRole> oldRoles = SetDefaultRoleUtil.getDefaultRolesByUser(userID);
-        mergeDefaultRole(defaultRolesList, oldRoles);
-
-        // role node
-        List<UserRoleImpl> rolesList = initUserRoles(userNode, user);
-        addRolesUserAlreadyHave(rolesList, user);
-
-        // project node
-        List<Long> projectIds = initProjectIds(userNode, user);
-        addProjectsUserAlreadyIn(projectIds, userID);
-
-        // security node
-        UserFieldSecurity fs = initSecurity(userNode);
-
-        // save user
-        ServerProxy.getUserManager().modifyUser(operator, user, projectIds, fs, rolesList);
-
-        HibernateUtil.delete(oldRoles);
-        SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(), defaultRolesList);
-
-        // permission node
-        List<Long> allPermGroupIds = initPermissionGroups(userNode);
-        List<Long> newlyAddedPermGroupIds = getNewlyAddedPermissionGroups(allPermGroupIds, userID);
-        saveNewPermissionGroupUser(newlyAddedPermGroupIds, userID);
-
-        // user parameters
-        List<UserParameterImpl> userParameterList = initUserParameter(userNode, userID);
-        updateUserParameters(userParameterList, userID);
+        String[] allUserNames = UserHandlerHelper.getAllUserNames();
+        Set<String> allUserNameSet = new HashSet<String>();
+        if (allUserNames != null)
+        {
+            allUserNameSet.addAll(Arrays.asList(allUserNames));
+        }
+        if (allUserNameSet != null && allUserNameSet.contains(userName))
+        {
+            for (int num = 1;; num++)
+            {
+                String returnStr = null;
+                if (userName.contains("_import_"))
+                {
+                    returnStr = userName.substring(0, userName.lastIndexOf('_')) + "_" + num;
+                }
+                else
+                {
+                    returnStr = userName + "_import_" + num;
+                }
+                if (!allUserNameSet.contains(returnStr))
+                {
+                    return returnStr;
+                }
+            }
+        }
+        else
+        {
+            return userName;
+        }
     }
 
     /**
      * Saves data to database.
      */
-    private void saveUserInfo(User user, Company company, List<Long> projectIds,
+    private void saveUserInfo(User user, List<Long> projectIds,
             UserFieldSecurity fs, List<UserRoleImpl> rolesList, List<Long> permissionGroupIds,
             List<UserParameterImpl> userParameterList) throws Exception
     {
@@ -281,13 +258,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         for (int j = 0; j < permissionGroups.size(); j++)
         {
             Element permissionGroup = (Element) permissionGroups.get(j);
-            String companyName = permissionGroup.element("CompanyName").getText();
             String permissionGroupName = permissionGroup.element("PermissionGroupName").getText();
-            Company company = getCompanyByName(companyName);
-            if (company == null)
-            {
-                continue;
-            }
 
             final String hsql = "from PermissionGroupImpl as a where a.name =:pgName and a.companyId =:cId";
             Map<String, Object> params = new HashMap<String, Object>();
@@ -302,7 +273,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
             else
             {
                 String msg = "Cannot find proper permission group. Name: <b>" + permissionGroupName
-                        + "</b> in Company <b>" + companyName + "</b>.";
+                        + "</b> in Company <b>" + company.getName() + "</b>.";
                 addToError(msg);
                 continue;
             }
@@ -369,8 +340,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
             List<Project> projects = null;
             if (!isSuperPM)
             {
-                String companyName = user.getCompanyName();
-                Company company = this.getCompanyByName(companyName);
                 projects = ServerProxy.getProjectHandler().getProjectsByCompanyId(company.getId());
                 String companyId = String.valueOf(company.getId());
                 if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
@@ -408,18 +377,12 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                 Element projectNode = (Element) projects.get(j);
 
                 String projectName = projectNode.element("ProjectName").getText();
-                String projectCompanyName = projectNode.element("ProjectCompanyName").getText();
-                Company company = this.getCompanyByName(projectCompanyName);
-                if (company == null)
-                {
-                    continue;
-                }
                 Project project = ServerProxy.getProjectHandler().getProjectByNameAndCompanyId(
                         projectName, company.getId());
                 if (project == null || project.getCompanyId() != company.getId())
                 {
                     this.addToError("Cannot find project: <b>" + projectName
-                            + "</b> in Company: <b>" + projectCompanyName + "</b>.");
+                            + "</b> in Company: <b>" + company + "</b>.");
                     continue;
                 }
 
@@ -508,12 +471,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                 String sourceLocale = activityNode.element("SourceLocale").getText();
                 String targetLocale = activityNode.element("TargetLocale").getText();
                 String activityName = activityNode.element("ActivityName").getText();
-                String companyName = activityNode.element("CompanyName").getText();
-                Company company = this.getCompanyByName(companyName);
-                if (company == null)
-                {
-                    continue;
-                }
                 LocalePair lp = ServerProxy.getLocaleManager()
                         .getLocalePairBySourceTargetAndCompanyStrings(sourceLocale, targetLocale,
                                 company.getId());
@@ -521,7 +478,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                 {
                     String lpName = sourceLocale + " TO " + targetLocale;
                     this.addToError("Cannot find locale pair: <b>" + lpName
-                            + "</b> in Company: <b>" + companyName + "</b>.");
+                            + "</b> in Company: <b>" + company.getName() + "</b>.");
                     continue;
                 }
 
@@ -531,7 +488,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                 if (activity == null)
                 {
                     this.addToError("Cannot find activity: <b>" + activityName
-                            + "</b> in Company: <b>" + companyName + "</b>.");
+                            + "</b> in Company: <b>" + company.getName() + "</b>.");
                     continue;
                 }
 
@@ -556,7 +513,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
         user.setLastName(basicInfoNode.element("LastName").getText());
         user.setPassword(basicInfoNode.element("Password").getText());
         user.setTitle(basicInfoNode.element("Title").getText());
-        user.setCompanyName(basicInfoNode.element("CompanyName").getText());
+        user.setCompanyName(company.getName());
 
         // contact info node
         Element contactInfoNode = userNode.element("ContactInfo");
@@ -605,75 +562,9 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     }
 
     /**
-     * When save data from file into "project_user", to avoid user's mapped
-     * project is overwritten, add them in the list to ensure the map will not
-     * be lost.
-     */
-    private void addProjectsUserAlreadyIn(List<Long> projectIds, String userID) throws Exception
-    {
-        Set<Long> pids = new HashSet<Long>();
-        pids.addAll(projectIds);
-
-        List<Project> projectsUserAlreadyIn = ServerProxy.getProjectHandler().getProjectsByUser(
-                userID);
-        for (Project project : projectsUserAlreadyIn)
-        {
-            pids.add(project.getId());
-        }
-
-        projectIds.clear();
-        projectIds.addAll(pids);
-    }
-
-    /**
-     * When save user role data from file into "user_role", need merge file data
-     * and DB data before save to avoid user's current data is overwritten.
-     */
-    @SuppressWarnings("rawtypes")
-    private void addRolesUserAlreadyHave(List<UserRoleImpl> rolesList, User user) throws Exception
-    {
-        Map<String, UserRoleImpl> map = new HashMap<String, UserRoleImpl>();
-        for (UserRoleImpl newRole : rolesList)
-        {
-            map.put(getRoleCompareKey(newRole), newRole);
-        }
-
-        Collection oldRoles = ServerProxy.getUserManager().getUserRoles(user);
-        if (oldRoles != null)
-        {
-            for (Iterator it = oldRoles.iterator(); it.hasNext();)
-            {
-                UserRoleImpl oldRole = (UserRoleImpl) it.next();
-                String oldRoleKey = getRoleCompareKey(oldRole);
-                UserRoleImpl newRole = map.get(oldRoleKey);
-                if (newRole != null)
-                {
-                    rolesList.remove(newRole);
-                    rolesList.add(oldRole);
-                }
-                else
-                {
-                    rolesList.add(oldRole);
-                }
-            }
-        }
-    }
-
-    private String getRoleCompareKey(UserRoleImpl role)
-    {
-        StringBuffer keyBuf = new StringBuffer();
-        keyBuf.append(role.getSourceLocale());
-        keyBuf.append("-").append(role.getTargetLocale());
-        keyBuf.append("-").append(role.getActivity().getId());
-        keyBuf.append("-").append(role.getUser());
-
-        return keyBuf.toString();
-    }
-
-    /**
      * Checks data before import.
      */
-    private boolean validateData(Element userNode, Set<String> allUserNameSet) throws Exception
+    private boolean validateData(Element userNode) throws Exception
     {
         // check user existence
         String userName = userNode.element("BasicInfo").element("UserName").getText();
@@ -769,53 +660,7 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
                 }
             }
         }
-
-        if (isUserAlreadyExisted(userNode, allUserNameSet))
-        {
-            String comNameUserBelongTo = ServerProxy.getUserManager().getUserByName(userName)
-                    .getCompanyName();
-            if (ignoreOrOverwrite == 0)
-            {
-                String msg = "Skipped importing user <b>" + userName + "</b>. It already exists.";
-                logger.warn(msg);
-                addToError(msg);
-                return false;
-            }
-            else
-            {
-                if (!comNameUserBelongTo.equalsIgnoreCase(companyNameFromUserNode))
-                {
-                    String msg = "Skipped importing user <b>" + userName
-                            + "</b>. It already exists in another company.";
-                    logger.warn(msg);
-                    addToError(msg);
-                    return false;
-                }
-            }
-        }
-
-        String operatorCompanyName = operator.getCompanyName();
-        if (!CompanyWrapper.isSuperCompanyName(operatorCompanyName)
-                && !operatorCompanyName.equalsIgnoreCase(companyNameFromUserNode))
-        {
-            String msg = "Skipped importing user <b>" + userName
-                    + "</b>. You cannot import user from other companies.";
-            logger.warn(msg);
-            addToError(msg);
-            return false;
-        }
         return true;
-    }
-
-    private boolean isUserAlreadyExisted(Element userNode, Set<String> allUserNameSet)
-    {
-        String userName = userNode.element("BasicInfo").element("UserName").getText();
-        if (allUserNameSet != null && allUserNameSet.contains(userName))
-        {
-            return true;
-        }
-
-        return false;
     }
 
     private void addToError(String msg)
@@ -829,137 +674,6 @@ public class UserImport extends MultiCompanySupportedThread implements ConfigCon
     {
         String former = config_error_map.get(sessionId) == null ? "" : config_error_map
                 .get(sessionId);
-        config_error_map.put(sessionId, former + "<p style='color:blue'>" + msg);
-    }
-
-    private Company getCompanyByName(String companyName)
-    {
-        if (companyMap == null)
-        {
-            companyMap = new HashMap<String, Company>();
-        }
-        if (companyMap.get(companyName) != null)
-        {
-            return (Company) companyMap.get(companyName);
-        }
-        else
-        {
-            try
-            {
-                Company company = ServerProxy.getJobHandler().getCompany(companyName);
-                if (company != null)
-                {
-                    companyMap.put(companyName, company);
-                    return company;
-                }
-                else
-                {
-                    addToError("Cannot find a company named <b>" + companyName + "</b> in system.");
-                    return null;
-                }
-            }
-            catch (Exception e)
-            {
-                logger.warn("Failed to find proper company.", e);
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Gets the permission group IDs that are newly added.
-     */
-    private List<Long> getNewlyAddedPermissionGroups(List<Long> allPermissionGroupIds, String userId)
-    {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            String sql = "SELECT permissiongroup_id FROM permissiongroup_user WHERE user_id = ?";
-            conn = DbUtil.getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, userId);
-            rs = ps.executeQuery();
-            while (rs.next())
-            {
-                Long existedPGId = rs.getLong(1);
-                allPermissionGroupIds.remove(existedPGId);
-            }
-        }
-        catch (Exception e)
-        {
-
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(conn);
-        }
-
-        List<Long> result = new ArrayList<Long>();
-        result.addAll(allPermissionGroupIds);
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void updateUserParameters(List<UserParameterImpl> userParameterList, String userID)
-            throws Exception
-    {
-        if (userParameterList == null || userParameterList.size() == 0)
-            return;
-
-        HashMap<String, UserParameter> map = ServerProxy.getUserParameterManager()
-                .getUserParameterMap(userID);
-        List<UserParameter> list = new ArrayList<UserParameter>();
-        for (UserParameterImpl up : userParameterList)
-        {
-            UserParameter upInDb = map.get(up.getName());
-            if (upInDb != null)
-            {
-                upInDb.setValue(up.getValue());
-                list.add(upInDb);
-            }
-            else
-            {
-                list.add(up);
-            }
-        }
-        HibernateUtil.saveOrUpdate(list);
-    }
-
-    private void mergeDefaultRole(ArrayList<UserDefaultRole> defaultRolesList,
-            ArrayList<UserDefaultRole> oldRoles)
-    {
-        if (oldRoles.size() == 0)
-            return;
-
-        String key = null;
-        Map<String, UserDefaultRole> map = new HashMap<String, UserDefaultRole>();
-        for (UserDefaultRole defaultRole : defaultRolesList)
-        {
-            key = defaultRole.getSourceLocaleId() + "-" + defaultRole.getTargetLocaleId();
-            map.put(key, defaultRole);
-        }
-
-        for (UserDefaultRole oldRole : oldRoles)
-        {
-            UserDefaultRole cloneRole = oldRole.clone();
-            key = cloneRole.getSourceLocaleId() + "-" + cloneRole.getTargetLocaleId();
-            UserDefaultRole curRole = map.get(key);
-            if (curRole == null)
-            {
-                defaultRolesList.add(cloneRole);
-            }
-            else
-            {
-                for (UserDefaultActivity act : cloneRole.getActivities())
-                {
-                    act.setDefaultRole(curRole);
-                }
-                curRole.getActivities().addAll(cloneRole.getActivities());
-            }
-        }
+        config_error_map.put(sessionId, former + "<p>" + msg);
     }
 }

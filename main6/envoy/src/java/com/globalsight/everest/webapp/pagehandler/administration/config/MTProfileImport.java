@@ -38,8 +38,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.projecthandler.EngineEnum;
 import com.globalsight.everest.projecthandler.MachineTranslationExtentInfo;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;

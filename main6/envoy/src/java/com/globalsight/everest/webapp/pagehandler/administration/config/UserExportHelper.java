@@ -303,7 +303,7 @@ public class UserExportHelper implements ConfigConstants
         file.mkdirs();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = USER_FILE_NAME + sdf.format(new Date()) + ".xml";
+        String fileName = USER_FILE_NAME + "information_" + sdf.format(new Date()) + ".xml";
         File propertiesFile = new File(file, fileName);
 
         return propertiesFile;

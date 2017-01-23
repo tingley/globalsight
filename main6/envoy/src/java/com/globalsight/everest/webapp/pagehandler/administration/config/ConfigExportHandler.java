@@ -183,18 +183,23 @@ public class ConfigExportHandler extends PageHandler
         try
         {
             String[] idsArr = null;
-            File localePropertyFile = LocalePairExportHelper.createPropertyFile(user.getUserName(),
-                    companyId);
-
+            String userName = user.getUserName();
+            File localePropertyFile = LocalePairExportHelper.createPropertyFile(userName, companyId);
             File userPropertyFile = UserExportHelper.createPropertyfile(companyId);
-
-            File mtPropertyFile = MTExportHelper.createPropertyfile(user.getUserName(), companyId);
-
-            File filterPropertyFile = FilterExportHelper.createPropertyfile(user.getUserName(),
-                    companyId);
+            File mtPropertyFile = MTExportHelper.createPropertyfile(userName, companyId);
+            File filterPropertyFile = FilterExportHelper.createPropertyfile(userName, companyId);
+            File activityFile = ActivityExportHelper.createPropertyfile(userName, companyId);
+            File permissionFile = PermissionExportHelper.createPropertyfile(userName, companyId);
+            File srxPropertyFile = SegmentationRuleExportHelper.createPropertyfile(userName, companyId);
+            File xrPropertyFile = XmlRuleExportHelper.createPropertyfile(userName, companyId);
 
             Element root = new Element("UserInfo");
             Document Doc = new Document(root);
+            Element segRoot = new Element("SegmentationRuleInfo");
+            Document segDoc = new Document(segRoot);
+            Element xmlRoot = new Element("XMLRuleInfo");
+            Document xmlDoc = new Document(xmlRoot);
+            
             if (ids != null && !ids.equals(""))
             {
                 idsArr = ids.split(",");
@@ -234,6 +239,30 @@ public class ConfigExportHandler extends PageHandler
                             filterPropertyFile = FilterExportHelper.exportFilters(
                                     filterPropertyFile, specialFilterToExport, companyId);
                         }
+                        else if ("activity".equals(idArr[0]))
+                        {
+                            // gets activity type property file
+                            activityFile = ActivityExportHelper.exportActivities(activityFile,
+                                    idArr[1]);
+                        }
+                        else if ("perm".equals(idArr[0]))
+                        {
+                            // gets permission group property file
+                            permissionFile = PermissionExportHelper.exportPermissions(
+                                    permissionFile, idArr[1]);
+                        }
+                        else if ("srx".equals(idArr[0]))
+                        {
+                            // gets segmentation rule property file
+                            srxPropertyFile = SegmentationRuleExportHelper.propertiesInputSR(
+                                    srxPropertyFile, segRoot, segDoc, idArr[1]);
+                        }
+                        else if ("xr".equals(idArr[0]))
+                        {
+                            // gets XML rule property file
+                            xrPropertyFile = XmlRuleExportHelper.propertiesInputXR(xrPropertyFile,
+                                    xmlRoot, xmlDoc, idArr[1]);
+                        }
                     }
                 }
             }
@@ -252,6 +281,22 @@ public class ConfigExportHandler extends PageHandler
             if (filterPropertyFile.length() > 0)
             {
                 entryFiles.add(filterPropertyFile);
+            }
+            if (activityFile.length() > 0)
+            {
+                entryFiles.add(activityFile);
+            }
+            if (permissionFile.length() > 0)
+            {
+                entryFiles.add(permissionFile);
+            }
+            if (srxPropertyFile.length() > 0)
+            {
+                entryFiles.add(srxPropertyFile);
+            }
+            if (xrPropertyFile.length() > 0)
+            {
+                entryFiles.add(xrPropertyFile);
             }
             downLoadFile = new File(ZIP_FILE_NAME);
             String configPath = getQAReportWorkflowPath(companyId);

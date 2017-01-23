@@ -2,20 +2,8 @@
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/activityError.jsp"
          import="com.globalsight.everest.servlet.util.SessionManager,
-                 com.globalsight.util.edit.EditUtil,
                  com.globalsight.everest.webapp.WebAppConstants,
-                 com.globalsight.everest.webapp.javabean.NavigationBean,
                  com.globalsight.everest.webapp.pagehandler.PageHandler,
-                 com.globalsight.everest.webapp.pagehandler.administration.company.CompanyConstants,
-                 com.globalsight.everest.company.Company,
-                 com.globalsight.everest.webapp.webnavigation.LinkHelper,
-                 com.globalsight.everest.servlet.util.ServerProxy,
-                 com.globalsight.everest.servlet.EnvoyServletException,
-                 com.globalsight.everest.util.system.SystemConfigParamNames,
-                 com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper,
-                 com.globalsight.util.GeneralException,
-                 java.text.MessageFormat,
-                 com.globalsight.util.StringUtil,
                  java.util.*"
           session="true"
 %>
@@ -176,7 +164,7 @@ function initConfigShow(id, dif)
     		</td>
   		</tr>
   		
-<%--   		<tr valign="top">
+		<tr valign="top">
     		<td colspan=3>
                 <br/>        
                 <div id="toShowUser" style="cursor:pointer;display:inline-block;"
@@ -228,7 +216,7 @@ function initConfigShow(id, dif)
 				</table>
                 </div>
     		</td>
-  		</tr> --%>
+  		</tr>
   		<tr valign="top">
     		<td colspan=3>
                  <br/>        
@@ -295,8 +283,224 @@ function initConfigShow(id, dif)
                 </div>
     		</td>
   		</tr>
-        
-        <tr><td colspan="3">&nbsp;</td></tr>
+  		
+  		 <tr valign="top">
+    		<td colspan=3>
+                <br/>        
+                <div id="toShowActivity" style="cursor:pointer;display:inline-block;"
+                							onclick="initConfigShow('toShowActivity','activityPanel')">
+                    <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b><%=bundle.getString("lb_activity_types")%></b>
+                </div>
+                <div id="activityPanel" style="display:none;">
+               <table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_activity_types")%>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_activity_types")%>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="activityFrom" name="activityFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${activities}">
+	      					<option title="${op.displayName}" value="activity-${op.name}">${op.displayName}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('activityFrom','activityTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('activityTo','activityFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="activityTo" name="activityTo" multiple class="standardText" size="10" style="width:250">
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+                </div>
+    		</td>
+  		</tr>
+  		
+  		 <tr valign="top">
+    		<td colspan=3>
+                <br/>        
+                <div id="toShowPermission" style="cursor:pointer;display:inline-block;"
+                							onclick="initConfigShow('toShowPermission','permissionPanel')">
+                    <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b><%=bundle.getString("lb_permission_groups")%></b>
+                </div>
+                <div id="permissionPanel" style="display:none;">
+               <table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_permission_groups")%>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_permission_groups")%>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="permissionFrom" name="permissionFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${permissionGroups}">
+	      					<option title="${op.name}" value="perm-${op.id}">${op.name}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('permissionFrom','permissionTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('permissionTo','permissionFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="permissionTo" name="permissionTo" multiple class="standardText" size="10" style="width:250">
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+                </div>
+    		</td>
+  		</tr>
+  		
+  		 <tr valign="top">
+    		<td colspan=3>
+                <br/>        
+                <div id="toShowSRX" style="cursor:pointer;display:inline-block;"
+                							onclick="initConfigShow('toShowSRX','SRXPanel')">
+                    <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b><%=bundle.getString("lb_segmentation_rules")%></b>
+                </div>
+                <div id="SRXPanel" style="display:none;">
+               <table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_segmentation_rules")%>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_segmentation_rules")%>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="srxFrom" name="srxFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${segRules}">
+	      					<option title="${op.name}" value="srx-${op.id}">${op.name}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('srxFrom','srxTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('srxTo','srxFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="srxTo" name="srxTo" multiple class="standardText" size="10" style="width:250">
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+                </div>
+    		</td>
+  		</tr>
+  		
+  		 <tr valign="top">
+    		<td colspan=3>
+                <br/>        
+                <div id="toShowXR" style="cursor:pointer;display:inline-block;"
+                							onclick="initConfigShow('toShowXR','XRPanel')">
+                    <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b><%=bundle.getString("lb_xml_rules")%></b>
+                </div>
+                <div id="XRPanel" style="display:none;">
+               <table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_xml_rules")%>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_xml_rules")%>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="xrFrom" name="xrFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${xmlruleFiles}">
+	      					<option title="${op.name}" value="xr-${op.id}">${op.name}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('xrFrom','xrTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('xrTo','xrFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="xrTo" name="xrTo" multiple class="standardText" size="10" style="width:250">
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+                </div>
+    		</td>
+  		</tr>
+  		
+  		<tr><td colspan="3">&nbsp;</td></tr>
         <tr>
             <td colspan="3">
                 <input type="button" name="<%=lbexport%>" value="<%=lbexport%>" onclick="doExport();">

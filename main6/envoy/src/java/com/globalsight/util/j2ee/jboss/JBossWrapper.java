@@ -17,12 +17,14 @@
 package com.globalsight.util.j2ee.jboss;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.util.server.ServerRegistry;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.j2ee.AppServerWrapper;
@@ -34,10 +36,49 @@ public class JBossWrapper extends AppServerWrapper
 
     public static final String USER_TRANSACTION = "UserTransaction";
 
+    private static final String STR_JBOSS_MANAGEMENT_HTTP_PORT = "${jboss.management.http.port:";
+    private static String PORT_MANAGEMENT = readManagementPort();
+
     public JBossWrapper()
     {
         super();
         s_logger.info("Using JBoss as the J2EE Application Server");
+    }
+
+    private static String readManagementPort()
+    {
+        String port = "9990";
+        SystemConfiguration config = SystemConfiguration.getInstance();
+        String gsHome = config
+                .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+        StringBuilder standaloneXml = new StringBuilder();
+        standaloneXml.append(gsHome.replace('/', File.separatorChar));
+        standaloneXml.append(File.separator);
+        standaloneXml.append("jboss");
+        standaloneXml.append(File.separator);
+        standaloneXml.append("server");
+        standaloneXml.append(File.separator);
+        standaloneXml.append("standalone");
+        standaloneXml.append(File.separator);
+        standaloneXml.append("configuration");
+        standaloneXml.append(File.separator);
+        standaloneXml.append("standalone.xml");
+        File file = new File(standaloneXml.toString());
+        try
+        {
+            if (file.exists())
+            {
+                String content = FileUtil.readFile(file, "utf-8");
+                int index = content.indexOf(STR_JBOSS_MANAGEMENT_HTTP_PORT);
+                int endIndex = content.indexOf("}", index);
+                port = content.substring(index + STR_JBOSS_MANAGEMENT_HTTP_PORT.length(), endIndex);
+            }
+        }
+        catch (IOException e)
+        {
+            // ignore
+        }
+        return port;
     }
 
     public String getJ2EEServerName()
@@ -65,7 +106,9 @@ public class JBossWrapper extends AppServerWrapper
             {
                 c.append("jboss-cli.sh");
             }
-            c.append(" --connect --command=:shutdown(restart=true)");
+            c.append(" --connect --controller=localhost:");
+            c.append(PORT_MANAGEMENT);
+            c.append(" --command=:shutdown(restart=true)");
 
             SystemConfiguration config = SystemConfiguration.getInstance();
             String gsHome = config
@@ -109,7 +152,9 @@ public class JBossWrapper extends AppServerWrapper
             {
                 c.append("jboss-cli.sh");
             }
-            c.append(" --connect --command=:shutdown");
+            c.append(" --connect --controller=localhost:");
+            c.append(PORT_MANAGEMENT);
+            c.append(" --command=:shutdown");
 
             SystemConfiguration config = SystemConfiguration.getInstance();
             String gsHome = config

@@ -49,7 +49,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -91,6 +92,7 @@ import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ReportStyle;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -135,6 +137,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
     String m_userId;
 
     private boolean cancel = false;
+    private ReportStyle m_style = null;
 
     public TranslationVerificationReportGenerator(String p_currentCompanyName)
     {
@@ -213,13 +216,13 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
             if (job == null)
                 continue;
 
-            Workbook workBook = new SXSSFWorkbook();
+            Workbook workBook = new XSSFWorkbook();
+            m_style = new ReportStyle(workBook);
             createReport(workBook, job, p_targetLocales, m_dateFormat);
             File file = getFile(getReportType(), job, workBook);
             FileOutputStream out = new FileOutputStream(file);
             workBook.write(out);
             out.close();
-            ((SXSSFWorkbook) workBook).dispose();
 
             workBooks.add(file);
         }
@@ -647,8 +650,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
                             : getContentStyle(p_workBook);
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(
-                            getSegment(pData, sourceTuv, m_rtlSourceLocale, p_job.getId()));
+                    setCellForInternalText(cell_A, getSegment(pData, sourceTuv, p_job.getId()),
+                            m_rtlSourceLocale);
                     cell_A.setCellStyle(srcStyle);
                     col++;
 
@@ -656,10 +659,9 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     CellStyle trgStyle = null;
                     String previousSegments = getPreviousSegments(allTuvMap, targetTuv.getId(),
                             targetTuv, p_job.getId(), pData);
-                    String currentSegments = getSegment(pData, targetTuv, m_rtlTargetLocale,
-                            p_job.getId());
+                    String currentSegments = getSegment(pData, targetTuv, p_job.getId());
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(previousSegments);
+                    setCellForInternalText(cell_B, previousSegments, m_rtlTargetLocale);
                     if (StringUtil.isNotEmpty(previousSegments)
                             && !previousSegments.endsWith(currentSegments))
                     {
@@ -679,7 +681,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     // getRtlContentStyle(p_workBook)
                     // : getContentStyle(p_workBook);
                     Cell cell_C = getCell(currentRow, col);
-                    cell_C.setCellValue(currentSegments);
+                    setCellForInternalText(cell_C, currentSegments, m_rtlTargetLocale);
                     cell_C.setCellStyle(trgStyle);
                     col++;
 
@@ -788,6 +790,44 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         }
 
         return p_row;
+    }
+
+    /**
+     * Sets the cell value for internal text.
+     * 
+     * @since GBS-4663
+     */
+    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
+    {
+        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+        {
+            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
+                    "");
+            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
+                    "");
+            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
+                    : contentWithoutMark;
+            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
+            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+            {
+                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
+                content = content.substring(0, internalBpt)
+                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
+                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
+                content = content.substring(0, internalEpt)
+                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
+
+                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
+                        rtlLocale ? internalEpt + 1 : internalEpt, m_style.getInternalFont());
+                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
+                        m_style.getContentFont());
+            }
+            p_cell.setCellValue(ts);
+        }
+        else
+        {
+            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
+        }
     }
 
     private void addCommentStatus(Sheet p_sheet, Set<Integer> rowsWithCommentSet, int last_row)
@@ -1289,7 +1329,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         p_sheet.addValidationData(validation);
     }
 
-    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)
+    private String getSegment(PseudoData pData, Tuv tuv, long p_jobId)
     {
         StringBuffer content = new StringBuffer();
         String dataType = null;
@@ -1297,6 +1337,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         {
             dataType = tuv.getDataType(p_jobId);
             pData.setAddables(dataType);
+            pData.setIsFromReportGeneration(true);
             TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
             content.append(pData.getPTagSourceString());
 
@@ -1319,12 +1360,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
             logger.error(tuv.getId(), e);
         }
 
-        String result = content.toString();
-        if (m_rtlLocale)
-        {
-            result = EditUtil.toRtlString(result);
-        }
-        return result;
+        return content.toString();
     }
 
     private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)
@@ -1411,6 +1447,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         List previous = new ArrayList();
         dataType = tuv.getDataType(p_jobId);
         pData.setAddables(dataType);
+        pData.setIsFromReportGeneration(true);
         TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
         targetSegmentString = (pData.getPTagSourceString());
         if (previousTaskTuvs.size() > 0)

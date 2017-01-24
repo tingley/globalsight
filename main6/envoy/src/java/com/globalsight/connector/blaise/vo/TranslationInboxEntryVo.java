@@ -123,6 +123,21 @@ public class TranslationInboxEntryVo
 		}
 	}
 
+    public boolean isUsageOfHDU()
+    {
+        return isUsageOfHDU;
+    }
+
+    public boolean isUsageOfEDM()
+    {
+        return isUsageOfEDM;
+    }
+
+    public boolean isOtherUsages()
+    {
+        return isOtherUsages;
+    }
+
 	public int getWordCount()
 	{
 		return wordCount;

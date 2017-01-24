@@ -240,8 +240,8 @@ function validName()
         <tr>
             <td class="standardText"><%= bundle.getString("lb_blaise_automatic")%>:</td>
             <td class="standardText">
-                <input type="radio" name="isAutomatic" value="0" <%=isAutomatic ? "" : "checked"%> />No&nbsp;&nbsp;
-                <input type="radio" name="isAutomatic" value="1" <%=isAutomatic ? "checked" : ""%> />Yes
+                <input type="radio" name="isAutomatic" value="N" <%=isAutomatic ? "" : "checked"%> />No&nbsp;&nbsp;
+                <input type="radio" name="isAutomatic" value="Y" <%=isAutomatic ? "checked" : ""%> />Yes
             </td>
         </tr>
         <tr>
@@ -249,12 +249,12 @@ function validName()
             <td class="standardText">
                 <ul style="display: inline-flex;list-style-type: none;margin-left: 0px;padding-left: 0px;">
                     <li><input type="checkbox" name="monday" value="1" <%=pullDays.contains("1") ? "checked" : ""%>>Monday</li>
-                    <li><input type="checkbox" name="Thursday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Thursday</li>
-                    <li><input type="checkbox" name="Wednesday" value="3" <%=pullDays.contains("3") ? "checked" : ""%>>Wednesday</li>
-                    <li><input type="checkbox" name="Tuesday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Tuesday</li>
-                    <li><input type="checkbox" name="Friday" value="5" <%=pullDays.contains("5") ? "checked" : ""%>>Friday</li>
-                    <li><input type="checkbox" name="Saturday" value="6" <%=pullDays.contains("6") ? "checked" : ""%>>Saturday</li>
-                    <li><input type="checkbox" name="Sunday" value="7" <%=pullDays.contains("7") ? "checked" : ""%>>Sunday</li>
+                    <li><input type="checkbox" name="thursday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Thursday</li>
+                    <li><input type="checkbox" name="wednesday" value="3" <%=pullDays.contains("3") ? "checked" : ""%>>Wednesday</li>
+                    <li><input type="checkbox" name="tuesday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Tuesday</li>
+                    <li><input type="checkbox" name="friday" value="5" <%=pullDays.contains("5") ? "checked" : ""%>>Friday</li>
+                    <li><input type="checkbox" name="saturday" value="6" <%=pullDays.contains("6") ? "checked" : ""%>>Saturday</li>
+                    <li><input type="checkbox" name="sunday" value="7" <%=pullDays.contains("7") ? "checked" : ""%>>Sunday</li>
                 </ul>
             </td>
         </tr>
@@ -277,13 +277,13 @@ function validName()
         <tr>
             <td class="standardText"><%= bundle.getString("lb_blaise_min_procedure_words")%>:</td>
             <td class="standardText">
-                <input type="text" id="minThreshold" name="minThreshold" value="<%=wordCount%>" class="standardText" />
+                <input type="text" id="minProcedureWords" name="minProcedureWords" value="<%=wordCount%>" class="standardText" />
             </td>
         </tr>
         <tr>
             <td class="standardText"><%= bundle.getString("lb_default_file_profile")%>:</td>
             <td class="standardText">
-                <select id="fplist" class="standardText">
+                <select id="defaultFileProfileId" name="defaultFileProfileId" class="standardText">
                     <%
                         if (fps != null && fps.size() > 0) {
                             for (FileProfileImpl fp : fps) {
@@ -300,7 +300,7 @@ function validName()
         <tr>
             <td class="standardText"><%= bundle.getString("lb_attribute_groups")%>:</td>
             <td class="standardText">
-                <select id="jobAttributeGroups" class="standardText">
+                <select id="jobAttributeGroupId" name="jobAttributeGroupId" class="standardText">
                     <%
                         if (allAttributeSets != null && allAttributeSets.size() > 0) {
                             for (AttributeSet as : allAttributeSets) {

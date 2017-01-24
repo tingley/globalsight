@@ -135,11 +135,12 @@ public class WordExtractor extends AbstractExtractor
 
     public static Set<String> SPECIAL_NODES = new HashSet<String>();
     {
-        SPECIAL_NODES.add("b");
-        SPECIAL_NODES.add("i");
-        SPECIAL_NODES.add("u");
-        SPECIAL_NODES.add("sub");
-        SPECIAL_NODES.add("sup");
+        // merge the b i u sub sup to other tags.
+//        SPECIAL_NODES.add("b");
+//        SPECIAL_NODES.add("i");
+//        SPECIAL_NODES.add("u");
+//        SPECIAL_NODES.add("sub");
+//        SPECIAL_NODES.add("sup");
 
         SPECIAL_NODES.add("commentContent");
         SPECIAL_NODES.add("comment");
@@ -716,6 +717,7 @@ public class WordExtractor extends AbstractExtractor
             }
             
             addFldStart(node, sb);
+            addrprChild(node, sb);
         }
 
         if (!isCommonStleTag)
@@ -754,6 +756,15 @@ public class WordExtractor extends AbstractExtractor
 
         Node f = node.getFirstChild();
         handleFldCharStart(f, sb);
+    }
+    
+    private void addrprChild(Node node, StringBuilder sb)
+    {
+        Node f = node.getFirstChild();
+        if ("rprChild".equals(f.getNodeName()))
+        {
+            util.getXmlString(f, sb);
+        }
     }
 
     private void addFldEnd(Node node, StringBuilder sb)
@@ -932,6 +943,10 @@ public class WordExtractor extends AbstractExtractor
             sb.append("</ph>");
             outputTranslatableTmx(sb.toString());
 
+            return;
+        }
+        else if ("rprChild".equals(node.getNodeName()))
+        {
             return;
         }
 

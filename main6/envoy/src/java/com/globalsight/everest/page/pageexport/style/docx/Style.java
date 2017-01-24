@@ -112,45 +112,54 @@ public abstract class Style extends XmlUtil
     
     public void removeStyles(Document document)
     {
-    	List<Node> ns = getNodes(document, getAddNodeName());
+        List<Node> ns = getNodes(document, getAddNodeName());
+        for (Node n : ns)
+        {
+            if (getAddNodeValue() != null && !getAddNodeValue().equals(n.getNodeValue()))
+            {
+                continue;
+            }
+            
+            Node rPr = n.getParentNode();
+            if (rPr == null || !"w:rPr".equals(rPr.getNodeName()))
+                continue;
+            
+            Node wr = rPr.getParentNode();
+            if (wr == null || !"w:r".equals(wr.getNodeName()))
+                continue;
+            
+            Node wt = getNode(wr, "w:t");
+            if (wt != null)
+            {
+                Element e = wt.getOwnerDocument().createElement(getNodeName());
+                if (hasAttribute())
+                {
+                    NamedNodeMap atts = n.getAttributes();
+                    for (int j = 0; j < atts.getLength(); j++)
+                    {
+                        Node att = atts.item(j);
+                        e.setAttribute(att.getNodeName(), att.getNodeValue());
+                    }
+                }
+                
+                List<Node> cs = getChildNodes(wt);
+                for (Node c : cs)
+                {
+                    e.appendChild(c);
+                }
+                wt.appendChild(e);
+            }
+            
+            removeNode(n);
+        }
+    }
+    
+    public void clearStyles(Document document)
+    {
+    	List<Node> ns = getNodes(document, getNodeName());
 		for (Node n : ns)
 		{
-			if (getAddNodeValue() != null && !getAddNodeValue().equals(n.getNodeValue()))
-			{
-				continue;
-			}
-			
-			Node rPr = n.getParentNode();
-			if (rPr == null || !"w:rPr".equals(rPr.getNodeName()))
-				continue;
-			
-			Node wr = rPr.getParentNode();
-			if (wr == null || !"w:r".equals(wr.getNodeName()))
-				continue;
-			
-			Node wt = getNode(wr, "w:t");
-			if (wt != null)
-			{
-				Element e = wt.getOwnerDocument().createElement(getNodeName());
-				if (hasAttribute())
-				{
-					NamedNodeMap atts = n.getAttributes();
-					for (int j = 0; j < atts.getLength(); j++)
-					{
-						Node att = atts.item(j);
-						e.setAttribute(att.getNodeName(), att.getNodeValue());
-					}
-				}
-				
-				List<Node> cs = getChildNodes(wt);
-				for (Node c : cs)
-				{
-					e.appendChild(c);
-				}
-				wt.appendChild(e);
-			}
-			
-			removeNode(n);
+		    removeNode(n);
 		}
     }
 

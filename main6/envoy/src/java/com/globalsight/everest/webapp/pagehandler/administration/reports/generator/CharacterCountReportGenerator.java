@@ -37,11 +37,11 @@ import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -70,6 +70,8 @@ import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ReportStyle;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -92,15 +94,13 @@ public class CharacterCountReportGenerator implements ReportGenerator
     private HashMap totalSegmentCount = new HashMap();
     private ResourceBundle m_bundle;
 
-    private CellStyle contentStyle = null;
-    private CellStyle headerStyle = null;
-
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
     public static final int SEGMENT_HEADER_ROW = 6;
     public static final int SEGMENT_START_ROW = 7;
 
     private boolean isIncludeCompactTags = false;
+    private ReportStyle REPORT_STYLE = null;
 
     public CharacterCountReportGenerator(String p_currentCompanyName)
     {
@@ -230,16 +230,15 @@ public class CharacterCountReportGenerator implements ReportGenerator
             Job job = ServerProxy.getJobHandler().getJobById(jobID);
             if (job == null)
                 continue;
-            setAllCellStyleNull();
 
             File file = ReportHelper.getXLSReportFile(getReportType(), job);
-            Workbook workBook = new SXSSFWorkbook();
+            Workbook workBook = new XSSFWorkbook();
+            REPORT_STYLE = new ReportStyle(workBook);
             createReport(workBook, job, p_targetLocales);
 
             FileOutputStream out = new FileOutputStream(file);
             workBook.write(out);
             out.close();
-            ((SXSSFWorkbook) workBook).dispose();
 
             // Write total Segment Count
             FileInputStream fis = new FileInputStream(file);
@@ -356,22 +355,22 @@ public class CharacterCountReportGenerator implements ReportGenerator
         Row langRow = getRow(p_sheet, row);
         Cell srcLangCell = getCell(langRow, col);
         srcLangCell.setCellValue(bundle.getString("lb_source_language"));
-        srcLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        srcLangCell.setCellStyle(REPORT_STYLE.getHeaderStyle());
         col++;
 
         Cell trgLangCell = getCell(langRow, col);
         trgLangCell.setCellValue(bundle.getString("lb_target_language"));
-        trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        trgLangCell.setCellStyle(REPORT_STYLE.getHeaderStyle());
         col++;
 
         Cell jobIdCell = getCell(langRow, col);
         jobIdCell.setCellValue(bundle.getString("jobinfo.jobid"));
-        jobIdCell.setCellStyle(getHeaderStyle(p_workBook));
+        jobIdCell.setCellStyle(REPORT_STYLE.getHeaderStyle());
         col++;
 
         Cell TotalSegmentsCell = getCell(langRow, col);
         TotalSegmentsCell.setCellValue(bundle.getString("lb_segmentCount_in_job"));
-        TotalSegmentsCell.setCellStyle(getHeaderStyle(p_workBook));
+        TotalSegmentsCell.setCellStyle(REPORT_STYLE.getHeaderStyle());
     }
 
     /**
@@ -391,43 +390,43 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
         Cell cell_A = getCell(segHeaderRow, col);
         cell_A.setCellValue(bundle.getString("lb_segment_id"));
-        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        cell_A.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_PathAndName = getCell(segHeaderRow, col);
         cell_PathAndName.setCellValue(bundle.getString("lb_file_path_and_name"));
-        cell_PathAndName.setCellStyle(getHeaderStyle(p_workBook));
+        cell_PathAndName.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_B = getCell(segHeaderRow, col);
         cell_B.setCellValue(bundle.getString("lb_source_segment"));
-        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        cell_B.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_C = getCell(segHeaderRow, col);
         cell_C.setCellValue(bundle.getString("lb_source_character_count"));
-        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        cell_C.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell cell_D = getCell(segHeaderRow, col);
         cell_D.setCellValue(bundle.getString("lb_target_segment"));
-        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        cell_D.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_E = getCell(segHeaderRow, col);
         cell_E.setCellValue(bundle.getString("lb_target_character_count"));
-        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        cell_E.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell cell_F = getCell(segHeaderRow, col);
         cell_F.setCellValue(bundle.getString("lb_tm_match_original"));
-        cell_F.setCellStyle(getHeaderStyle(p_workBook));
+        cell_F.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 30 * 256);
     }
 
@@ -456,21 +455,21 @@ public class CharacterCountReportGenerator implements ReportGenerator
         // Source Language
         Cell srcLangCell = getCell(langInfoRow, col++);
         srcLangCell.setCellValue(p_sourceLang);
-        srcLangCell.setCellStyle(getContentStyle(p_workbook));
+        srcLangCell.setCellStyle(REPORT_STYLE.getContentStyle());
 
         // Target Language
         Cell trgLangCell = getCell(langInfoRow, col++);
         trgLangCell.setCellValue(p_targetLang);
-        trgLangCell.setCellStyle(getContentStyle(p_workbook));
+        trgLangCell.setCellStyle(REPORT_STYLE.getContentStyle());
 
         // Job ID
         Cell jobIdCell = getCell(langInfoRow, col++);
         jobIdCell.setCellValue(p_job.getId());
-        jobIdCell.setCellStyle(getContentStyle(p_workbook));
+        jobIdCell.setCellStyle(REPORT_STYLE.getContentStyle());
 
         // total SegmentCount
         Cell totalSegmentsCell = getCell(langInfoRow, col++);
-        totalSegmentsCell.setCellStyle(getContentStyle(p_workbook));
+        totalSegmentsCell.setCellStyle(REPORT_STYLE.getContentStyle());
     }
 
     /**
@@ -570,7 +569,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle, sourceTuv,
                             targetTuv, p_job.getId());
 
-                    CellStyle contentStyle = getContentStyle(p_workBook);
+                    CellStyle contentStyle = REPORT_STYLE.getContentStyle();
                     Row currentRow = getRow(p_sheet, p_row);
 
                     // Segment id
@@ -597,7 +596,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Source segment
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(getSegment(pData, sourceTuv, m_rtlSourceLocale, jobId));
+                    setCellForInternalText(cell_B, getSegment(pData, sourceTuv, jobId),
+                            m_rtlSourceLocale);
                     cell_B.setCellStyle(contentStyle);
                     col++;;
 
@@ -609,7 +609,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Target segment
                     Cell cell_D = getCell(currentRow, col);
-                    cell_D.setCellValue(getSegment(pData, targetTuv, m_rtlTargetLocale, jobId));
+                    setCellForInternalText(cell_D, getSegment(pData, targetTuv, jobId),
+                            m_rtlTargetLocale);
                     cell_D.setCellStyle(contentStyle);
                     col++;
 
@@ -631,37 +632,42 @@ public class CharacterCountReportGenerator implements ReportGenerator
         totalSegmentCount.put(p_targetLang, p_row - 7);
     }
 
-    private void setAllCellStyleNull()
+    /**
+     * Sets the cell value for internal text.
+     * 
+     * @since GBS-4663
+     */
+    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
     {
-        this.headerStyle = null;
-        this.contentStyle = null;
-    }
-
-    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
-    {
-        if (headerStyle == null)
+        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
         {
-            Font font = p_workbook.createFont();
-            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-            font.setColor(IndexedColors.BLACK.getIndex());
-            font.setUnderline(Font.U_NONE);
-            font.setFontName("Times");
-            font.setFontHeightInPoints((short) 11);
+            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
+                    "");
+            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
+                    "");
+            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
+                    : contentWithoutMark;
+            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
+            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+            {
+                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
+                content = content.substring(0, internalBpt)
+                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
+                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
+                content = content.substring(0, internalEpt)
+                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
 
-            CellStyle cs = p_workbook.createCellStyle();
-            cs.setFont(font);
-            cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
-            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-            cs.setBorderTop(CellStyle.BORDER_THIN);
-            cs.setBorderRight(CellStyle.BORDER_THIN);
-            cs.setBorderBottom(CellStyle.BORDER_THIN);
-            cs.setBorderLeft(CellStyle.BORDER_THIN);
-
-            headerStyle = cs;
+                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
+                        rtlLocale ? internalEpt + 1 : internalEpt, REPORT_STYLE.getInternalFont());
+                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
+                        REPORT_STYLE.getContentFont());
+            }
+            p_cell.setCellValue(ts);
         }
-
-        return headerStyle;
+        else
+        {
+            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
+        }
     }
 
     private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)
@@ -683,25 +689,6 @@ public class CharacterCountReportGenerator implements ReportGenerator
         return compactPtags;
     }
 
-    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (contentStyle == null)
-        {
-            CellStyle style = p_workbook.createCellStyle();
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-            style.setFont(font);
-
-            contentStyle = style;
-        }
-
-        return contentStyle;
-    }
-
     private Row getRow(Sheet p_sheet, int p_col)
     {
         Row row = p_sheet.getRow(p_col);
@@ -710,9 +697,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
         return row;
     }
 
-    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)
+    private String getSegment(PseudoData pData, Tuv tuv, long p_jobId)
     {
-        String result = null;
         StringBuffer content = new StringBuffer();
         List subFlows = tuv.getSubflowsAsGxmlElements();
         long tuId = tuv.getTuId();
@@ -723,6 +709,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
             {
                 dataType = tuv.getDataType(p_jobId);
                 pData.setAddables(dataType);
+                pData.setIsFromReportGeneration(true);
                 TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
                 content.append(pData.getPTagSourceString());
 
@@ -744,7 +731,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
         }
         else
         {
-            String mainSeg = tuv.getGxmlElement().getTextValue();
+            String mainSeg = tuv.getGxmlElement().getTextValueWithInternalTextMark();
             content.append(mainSeg);
 
             if (subFlows != null && subFlows.size() > 0)
@@ -759,13 +746,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
             }
         }
 
-        result = content.toString();
-        if (m_rtlLocale)
-        {
-            result = EditUtil.toRtlString(result);
-        }
-
-        return result;
+        return content.toString();
     }
 
     private Cell getCell(Row p_row, int index)

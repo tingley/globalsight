@@ -33,6 +33,8 @@ public class ReportStyle
     private Workbook workbook = null;
     private CellStyle headerStyle = null;
     private CellStyle contentStyle = null;
+    private CellStyle contentStyle1 = null;
+    private CellStyle rtlContentStyle1 = null;
     private CellStyle rtlContentStyle = null;
     private CellStyle lockedStyle = null;
     private CellStyle unlockedStyle = null;
@@ -143,6 +145,45 @@ public class ReportStyle
         }
 
         return internalFont;
+    }
+
+    public CellStyle getContentStyle1()
+    {
+        if (contentStyle1 == null)
+        {
+            contentStyle1 = workbook.createCellStyle();
+            contentStyle1.setWrapText(true);
+            contentStyle1.setAlignment(CellStyle.ALIGN_LEFT);
+            contentStyle1.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+            Font font = workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            contentStyle1.setFont(font);
+            contentStyle1.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            contentStyle1.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        }
+
+        return contentStyle1;
+    }
+
+    public CellStyle getRtlContentStyle1()
+    {
+        if (rtlContentStyle1 == null)
+        {
+            Font font = workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+
+            rtlContentStyle1 = workbook.createCellStyle();
+            rtlContentStyle1.setFont(font);
+            rtlContentStyle1.setWrapText(true);
+            rtlContentStyle1.setAlignment(CellStyle.ALIGN_RIGHT);
+            rtlContentStyle1.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+            rtlContentStyle1.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            rtlContentStyle1.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        }
+
+        return rtlContentStyle1;
     }
 
     public CellStyle getContentStyle()

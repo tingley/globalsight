@@ -42,7 +42,6 @@ import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -112,12 +111,6 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
             .getLogger(TranslationVerificationReportGenerator.class);
 
     private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
-
-    private CellStyle headerStyle = null;
-    private CellStyle contentStyle = null;
-    private CellStyle rtlContentStyle = null;
-    private CellStyle unlockedStyle = null;
-    private CellStyle unlockedRightStyle = null;
 
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
@@ -326,7 +319,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         Row titleRow = getRow(p_sheet, 0);
         Cell taskIdCell = getCell(titleRow, 26);
         taskIdCell.setCellValue(reportInfo);
-        taskIdCell.setCellStyle(contentStyle);
+        taskIdCell.setCellStyle(m_style.getContentStyle());
 
         p_sheet.setColumnHidden(26, true);
     }
@@ -347,12 +340,12 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         Row langRow = getRow(p_sheet, row);
         Cell srcLangCell = getCell(langRow, col);
         srcLangCell.setCellValue(m_bundle.getString("lb_source_language"));
-        srcLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        srcLangCell.setCellStyle(m_style.getHeaderStyle());
         col++;
 
         Cell trgLangCell = getCell(langRow, col);
         trgLangCell.setCellValue(m_bundle.getString("lb_target_language"));
-        trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        trgLangCell.setCellStyle(m_style.getHeaderStyle());
     }
 
     /**
@@ -371,91 +364,91 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
 
         Cell cell_A = getCell(segHeaderRow, col);
         cell_A.setCellValue(m_bundle.getString("lb_source_segment"));
-        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        cell_A.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_B = getCell(segHeaderRow, col);
         cell_B.setCellValue(m_bundle.getString("lb_initial_translation"));
-        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        cell_B.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_C = getCell(segHeaderRow, col);
         cell_C.setCellValue(m_bundle.getString("lb_current_translation"));
-        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        cell_C.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 50 * 256);
         col++;
 
         Cell cell_D = getCell(segHeaderRow, col);
         cell_D.setCellValue(m_bundle.getString("lb_modify_the_translation"));
-        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        cell_D.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 50 * 256);
         col++;
 
         Cell cell_E = getCell(segHeaderRow, col);
         cell_E.setCellValue(m_bundle.getString("latest_comments"));
-        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        cell_E.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_F = getCell(segHeaderRow, col);
         cell_F.setCellValue(m_bundle.getString("translation_comments"));
-        cell_F.setCellStyle(getHeaderStyle(p_workBook));
+        cell_F.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_G = getCell(segHeaderRow, col);
         cell_G.setCellValue(m_bundle.getString("lb_category_failure"));
-        cell_G.setCellStyle(getHeaderStyle(p_workBook));
+        cell_G.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_H = getCell(segHeaderRow, col);
         cell_H.setCellValue(m_bundle.getString("lb_comment_status"));
-        cell_H.setCellStyle(getHeaderStyle(p_workBook));
+        cell_H.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_I = getCell(segHeaderRow, col);
         cell_I.setCellValue(m_bundle.getString("lb_tm_match_original"));
-        cell_I.setCellStyle(getHeaderStyle(p_workBook));
+        cell_I.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_J = getCell(segHeaderRow, col);
         cell_J.setCellValue(m_bundle.getString("lb_glossary_source"));
-        cell_J.setCellStyle(getHeaderStyle(p_workBook));
+        cell_J.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
         Cell cell_K = getCell(segHeaderRow, col);
         cell_K.setCellValue(m_bundle.getString("lb_glossary_target"));
-        cell_K.setCellStyle(getHeaderStyle(p_workBook));
+        cell_K.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
         Cell cell_L = getCell(segHeaderRow, col);
         cell_L.setCellValue(m_bundle.getString("lb_job_id_report"));
-        cell_L.setCellStyle(getHeaderStyle(p_workBook));
+        cell_L.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_M = getCell(segHeaderRow, col);
         cell_M.setCellValue(m_bundle.getString("lb_segment_id"));
-        cell_M.setCellStyle(getHeaderStyle(p_workBook));
+        cell_M.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_N = getCell(segHeaderRow, col);
         cell_N.setCellValue(m_bundle.getString("lb_page_name"));
-        cell_N.setCellStyle(getHeaderStyle(p_workBook));
+        cell_N.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
         Cell cell_O = getCell(segHeaderRow, col);
         cell_O.setCellValue(m_bundle.getString("lb_sid"));
-        cell_O.setCellStyle(getHeaderStyle(p_workBook));
+        cell_O.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
     }
@@ -465,7 +458,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
-        CellStyle contentStyle = getContentStyle(p_workbook);
+        CellStyle contentStyle = m_style.getContentStyle();
         Row langInfoRow = getRow(p_sheet, row);
 
         // Source Language
@@ -528,7 +521,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
             }
         }
 
-        if (targetPages.isEmpty())
+        if (targetPages == null || targetPages.isEmpty())
         {
             // If no corresponding target page exists, set the cell blank
             writeBlank(p_sheet, p_row, 11);
@@ -647,8 +640,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     Row currentRow = getRow(p_sheet, p_row);
 
                     // Source segment with compact tags
-                    CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
-                            : getContentStyle(p_workBook);
+                    CellStyle srcStyle = m_rtlSourceLocale ? m_style.getRtlContentStyle()
+                            : m_style.getContentStyle();
                     Cell cell_A = getCell(currentRow, col);
                     setCellForInternalText(cell_A, getSegment(pData, sourceTuv, p_job.getId()),
                             m_rtlSourceLocale);
@@ -665,13 +658,13 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     if (StringUtil.isNotEmpty(previousSegments)
                             && !previousSegments.endsWith(currentSegments))
                     {
-                        trgStyle = m_rtlTargetLocale ? getRtlContentStyle1(p_workBook)
-                                : getContentStyle1(p_workBook);
+                        trgStyle = m_rtlTargetLocale ? m_style.getRtlContentStyle1()
+                                : m_style.getContentStyle1();
                     }
                     else
                     {
-                        trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                                : getContentStyle(p_workBook);
+                        trgStyle = m_rtlTargetLocale ? m_style.getRtlContentStyle()
+                                : m_style.getContentStyle();
                     }
                     cell_B.setCellStyle(trgStyle);
                     col++;
@@ -687,7 +680,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
 
                     // Modify the translation
                     CellStyle modifyTranslationStyle = m_rtlTargetLocale
-                            ? getUnlockedRightStyle(p_workBook) : getUnlockedStyle(p_workBook);
+                            ? m_style.getUnlockedRightStyle() : m_style.getUnlockedStyle();
                     Cell cell_D = getCell(currentRow, col);
                     cell_D.setCellValue("");
                     cell_D.setCellStyle(modifyTranslationStyle);
@@ -696,26 +689,26 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     // Reviewers Comments
                     Cell cell_E = getCell(currentRow, col);
                     cell_E.setCellValue(lastComment);
-                    cell_E.setCellStyle(getContentStyle(p_workBook));
+                    cell_E.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Translators Comments
                     Cell cell_F = getCell(currentRow, col);
                     cell_F.setCellValue("");
-                    cell_F.setCellStyle(getUnlockedStyle(p_workBook));
+                    cell_F.setCellStyle(m_style.getUnlockedStyle());
                     col++;
 
                     // Category failure
                     Cell cell_G = getCell(currentRow, col);
                     cell_G.setCellValue(failure);
-                    cell_G.setCellStyle(getContentStyle(p_workBook));
+                    cell_G.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Comment Status
                     Cell cell_H = getCell(currentRow, col);
                     cell_H.setCellValue(commentStatus);
                     CellStyle commentCS = p_workBook.createCellStyle();
-                    commentCS.cloneStyleFrom(getContentStyle(p_workBook));
+                    commentCS.cloneStyleFrom(m_style.getContentStyle());
                     commentCS.setLocked(false);
                     cell_H.setCellStyle(commentCS);
                     // add comment status drop down list for current row.
@@ -729,31 +722,31 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     // TM match
                     Cell cell_I = getCell(currentRow, col);
                     cell_I.setCellValue(matches.toString());
-                    cell_I.setCellStyle(getContentStyle(p_workBook));
+                    cell_I.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Glossary source
                     Cell cell_J = getCell(currentRow, col);
                     cell_J.setCellValue(sourceTerms);
-                    cell_J.setCellStyle(getContentStyle(p_workBook));
+                    cell_J.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Glossary target
                     Cell cell_K = getCell(currentRow, col);
                     cell_K.setCellValue(targetTerms);
-                    cell_K.setCellStyle(getContentStyle(p_workBook));
+                    cell_K.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Job Id
                     Cell cell_L = getCell(currentRow, col);
                     cell_L.setCellValue(p_job.getId());
-                    cell_L.setCellStyle(getContentStyle(p_workBook));
+                    cell_L.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Segment id
                     Cell cell_M = getCell(currentRow, col);
                     cell_M.setCellValue(sourceTuv.getTu(p_job.getId()).getId());
-                    cell_M.setCellStyle(getContentStyle(p_workBook));
+                    cell_M.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Fix for GBS-1484
@@ -770,13 +763,13 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     // Page Name
                     Cell cell_N = getCell(currentRow, col);
                     cell_N.setCellValue(name);
-                    cell_N.setCellStyle(getContentStyle(p_workBook));
+                    cell_N.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // SID
                     Cell cell_O = getCell(currentRow, col);
                     cell_O.setCellValue(sid);
-                    cell_O.setCellStyle(getContentStyle(p_workBook));
+                    cell_O.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     p_row++;
@@ -982,147 +975,6 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         }
 
         return options;
-    }
-
-    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
-    {
-        if (headerStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-            font.setColor(IndexedColors.BLACK.getIndex());
-            font.setUnderline(Font.U_NONE);
-            font.setFontName("Times");
-            font.setFontHeightInPoints((short) 11);
-
-            CellStyle cs = p_workbook.createCellStyle();
-            cs.setFont(font);
-            cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
-            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-            cs.setBorderTop(CellStyle.BORDER_THIN);
-            cs.setBorderRight(CellStyle.BORDER_THIN);
-            cs.setBorderBottom(CellStyle.BORDER_THIN);
-            cs.setBorderLeft(CellStyle.BORDER_THIN);
-
-            headerStyle = cs;
-        }
-
-        return headerStyle;
-    }
-
-    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (contentStyle == null)
-        {
-            CellStyle style = p_workbook.createCellStyle();
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-            style.setFont(font);
-
-            contentStyle = style;
-        }
-
-        return contentStyle;
-    }
-
-    private CellStyle getRtlContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (rtlContentStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_RIGHT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            rtlContentStyle = style;
-        }
-
-        return rtlContentStyle;
-    }
-
-    private CellStyle getContentStyle1(Workbook p_workbook)
-    {
-        CellStyle style = p_workbook.createCellStyle();
-        style.setWrapText(true);
-        style.setAlignment(CellStyle.ALIGN_LEFT);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-        Font font = p_workbook.createFont();
-        font.setFontName("Arial");
-        font.setFontHeightInPoints((short) 10);
-        style.setFont(font);
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-        style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-
-        return style;
-    }
-
-    private CellStyle getRtlContentStyle1(Workbook p_workbook)
-    {
-        Font font = p_workbook.createFont();
-        font.setFontName("Arial");
-        font.setFontHeightInPoints((short) 10);
-
-        CellStyle style = p_workbook.createCellStyle();
-        style.setFont(font);
-        style.setWrapText(true);
-        style.setAlignment(CellStyle.ALIGN_RIGHT);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-        style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-
-        return style;
-    }
-
-    private CellStyle getUnlockedStyle(Workbook p_workbook) throws Exception
-    {
-        if (unlockedStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setLocked(false);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            unlockedStyle = style;
-        }
-
-        return unlockedStyle;
-    }
-
-    private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
-    {
-        if (unlockedRightStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setLocked(false);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_RIGHT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            unlockedRightStyle = style;
-        }
-
-        return unlockedRightStyle;
     }
 
     private List<String> getFailureCategoriesList()

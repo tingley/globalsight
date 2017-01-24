@@ -307,7 +307,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             }
             else
             {
-                setAllCellStyleNull();
                 Workbook workBook = new XSSFWorkbook();
                 REPORT_STYLE = new ReportStyle(workBook);
                 createReport(workBook, job, p_targetLocales, dateFormat, data);
@@ -1464,10 +1463,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             result.add(aCategory.getValue());
         }
         return result;
-    }
-
-    private void setAllCellStyleNull()
-    {
     }
 
     /**

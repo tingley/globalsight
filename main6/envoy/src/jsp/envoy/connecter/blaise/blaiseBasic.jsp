@@ -8,6 +8,8 @@
      com.globalsight.cxe.entity.blaise.BlaiseConnector,
 	 java.util.*"
 	session="true"%>
+<%@ page import="com.globalsight.cxe.entity.fileprofile.FileProfileImpl" %>
+<%@ page import="com.globalsight.cxe.entity.customAttribute.AttributeSet" %>
 
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 
@@ -35,10 +37,19 @@
 	String url = "";
 	String username = "";
 	String password = "";
+	boolean isAutomatic = false;
+	String pullDays = "";
+	int pullHour = 7;
+	long fileProfileId = -1L;
+	long attributeGroupId = -1L;
+	boolean isCombined = true;
+	int wordCount = 600;
 	String clientCoreVersion = "2.0";// default "2.0".
 	long companyId = -1;
     boolean edit = false;
 	BlaiseConnector connector = (BlaiseConnector) request.getAttribute("blaise");
+	ArrayList<FileProfileImpl> fps = (ArrayList<FileProfileImpl>) request.getAttribute("fileProfiles");
+    List<AttributeSet> allAttributeSets = (List<AttributeSet>) request.getAttribute("allAttributeSets");
 	if (connector != null)
 	{
 		edit = true;
@@ -52,6 +63,13 @@
         desc = connector.getDescription();
         desc = desc == null ? "" : desc;
         clientCoreVersion = connector.getClientCoreVersion();
+        isAutomatic = connector.isAutomatic();
+        pullDays = connector.getPullDays();
+        pullHour = connector.getPullHour();
+        isCombined = connector.isCombined();
+        fileProfileId = connector.getDefaultFileProfileId();
+        attributeGroupId = connector.getJobAttributeGroupId();
+        wordCount = connector.getMinProcedureWords();
 	}
 	else
 	{
@@ -219,7 +237,119 @@ function validName()
             <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200" autocomplete="off"></td>
         </tr>
 
-    	<tr>
+        <tr>
+            <td class="standardText"><%= bundle.getString("lb_blaise_automatic")%>:</td>
+            <td class="standardText">
+                <input type="radio" name="isAutomatic" value="0" <%=isAutomatic ? "" : "checked"%> />No&nbsp;&nbsp;
+                <input type="radio" name="isAutomatic" value="1" <%=isAutomatic ? "checked" : ""%> />Yes
+            </td>
+        </tr>
+        <tr>
+            <td class="standardText"><%= bundle.getString("lb_blaise_pull_time")%>:</td>
+            <td class="standardText">
+                <ul style="display: inline-flex;list-style-type: none;margin-left: 0px;padding-left: 0px;">
+                    <li><input type="checkbox" name="monday" value="1" <%=pullDays.contains("1") ? "checked" : ""%>>Monday</li>
+                    <li><input type="checkbox" name="Thursday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Thursday</li>
+                    <li><input type="checkbox" name="Wednesday" value="3" <%=pullDays.contains("3") ? "checked" : ""%>>Wednesday</li>
+                    <li><input type="checkbox" name="Tuesday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Tuesday</li>
+                    <li><input type="checkbox" name="Friday" value="5" <%=pullDays.contains("5") ? "checked" : ""%>>Friday</li>
+                    <li><input type="checkbox" name="Saturday" value="6" <%=pullDays.contains("6") ? "checked" : ""%>>Saturday</li>
+                    <li><input type="checkbox" name="Sunday" value="7" <%=pullDays.contains("7") ? "checked" : ""%>>Sunday</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td class="standardText">
+                <select id="pullHour" class="standardText">
+                    <%
+                        for (int i=7;i<16;i++) {
+                    %>
+                    <option value="<%=i%>" <%=pullHour == i ? "selected" : ""%>><%=i%>:00</option>
+                    <% } %>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="standardText">Combined by language:</td>
+            <td class="standardText"><input type="checkbox" id="isCombined" value="Y" <%=isCombined ? "checked" : ""%>/></td>
+        </tr>
+        <tr>
+            <td class="standardText"><%= bundle.getString("lb_blaise_min_procedure_words")%>:</td>
+            <td class="standardText">
+                <input type="text" id="minThreshold" name="minThreshold" value="<%=wordCount%>" class="standardText" />
+            </td>
+        </tr>
+        <tr>
+            <td class="standardText"><%= bundle.getString("lb_default_file_profile")%>:</td>
+            <td class="standardText">
+                <select id="fplist" class="standardText">
+                    <%
+                        if (fps != null && fps.size() > 0) {
+                            for (FileProfileImpl fp : fps) {
+                                if (fp.getId() == fileProfileId)
+                                    out.println("<option value=" + fp.getId() + " selected>" + fp.getName() + "</option>");
+                                else
+                                    out.println("<option value=" + fp.getId() + ">" + fp.getName() + "</option>");
+                            }
+                        }
+                    %>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="standardText"><%= bundle.getString("lb_attribute_groups")%>:</td>
+            <td class="standardText">
+                <select id="jobAttributeGroups" class="standardText">
+                    <%
+                        if (allAttributeSets != null && allAttributeSets.size() > 0) {
+                            for (AttributeSet as : allAttributeSets) {
+                                if (as.getId() == attributeGroupId)
+                                    out.println("<option value=" + as.getId() + " selected>" + as.getName() + "</option>");
+                                else
+                                    out.println("<option value=" + as.getId() + ">" + as.getName() + "</option>");
+                            }
+                        }
+                    %>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table id="ja" name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="jobAttributes">
+                    <tr>
+                        <td>Falcon Product</td>
+                        <td>Choise List</td>
+                        <td>Yes</td>
+                        <td>HDU CBT</td>
+                    </tr>
+                    <tr>
+                        <td>Falcon Target Choise</td>
+                        <td>Choise List</td>
+                        <td>No</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Falcon Target Value</td>
+                        <td>Text</td>
+                        <td>No</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
     		<td colspan="2" align="left">
                 <input type="button" name="return" value="<%=bundle.getString("lb_cancel")%>" onclick="cancel();"/>
     		    <input type="button" name="saveBtn" value="<%=bundle.getString("lb_save")%>" onclick="save();"/>

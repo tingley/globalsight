@@ -17,6 +17,9 @@
 package com.globalsight.connector.blaise;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.servlet.ServletException;
@@ -24,6 +27,11 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.globalsight.cxe.entity.customAttribute.AttributeSet;
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
@@ -81,6 +89,25 @@ public class BlaiseBasicHandler extends PageActionHandler
 					.getBlaiseConnectorById(Long.parseLong(id));
 			request.setAttribute("blaise", connector);
 		}
+
+		long companyId = CompanyWrapper.getCurrentCompanyIdAsLong();
+        List<String> extensions = new ArrayList<>(1);
+        extensions.add("xlf");
+		try
+        {
+            Collection collection = ServerProxy.getFileProfilePersistenceManager().getFileProfilesByExtension(extensions, companyId);
+            if (collection != null && collection.size() > 0)
+            {
+                ArrayList<FileProfileImpl> fps = new ArrayList<>(collection);
+                request.setAttribute("fileProfiles", fps);
+            }
+            List<AttributeSet> allAttributeSets = (List<AttributeSet>) AttributeManager
+                    .getAllAttributeSets();
+            request.setAttribute("allAttributeSets", allAttributeSets);
+        } catch (Exception e)
+        {
+            logger.error("Error found when get basic information of company " + companyId);
+        }
 
         String names = "";
 		for (Object o : BlaiseManager.getAllConnectors())

@@ -16,10 +16,10 @@
  */
 package com.globalsight.connector.blaise.vo;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
+import com.globalsight.connector.blaise.BlaiseConstants;
+import jodd.util.StringBand;
 import org.apache.log4j.Logger;
 
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
@@ -31,6 +31,12 @@ public class TranslationInboxEntryVo
     static private final Logger logger = Logger.getLogger(TranslationInboxEntryVo.class);
 
     private TranslationInboxEntry entry = null;
+    private List<String> usages = null;
+    private int wordCount = 0;
+    private boolean isUsageOfHDU = false;
+    private boolean isUsageOfEDM = false;
+    private boolean isOtherUsages = false;
+    private boolean isNoNeedToTranslate = false;
 
 	// GlobalSight Job ID if job created
 	private List<Long> jobIds = null;
@@ -75,10 +81,59 @@ public class TranslationInboxEntryVo
         logger.info("entry.getDescription(): " + entry.getDescription());
         logger.info("entry.getSourceLocale(): " + entry.getSourceLocale());
         logger.info("entry.getTargetLocale(): " + entry.getTargetLocale());
+		logger.info("usages of entry: " + usages);
+		logger.info("word count of entry: " + wordCount);
         logger.info("------------------------------------------------------------");
     }
 
-    public TranslationInboxEntry getEntry()
+	public List<String> getUsages()
+	{
+		return usages;
+	}
+
+	public String getUsages2UI()
+	{
+		StringBand usagesString = new StringBand();
+		if (usages != null && usages.size() > 0)
+		{
+			for (String usage : usages)
+			{
+				usagesString.append(usage).append("<br>");
+			}
+		}
+		String info = usagesString.toString();
+		if (info.length() > 0)
+			info.substring(0, info.length() - 4);
+		return info;
+	}
+
+	public void setUsages(List<String> usages)
+	{
+		this.usages = usages;
+		if (usages != null) {
+			for (String usage : usages)
+			{
+				if (BlaiseConstants.USAGE_TYPE_HDU.equals(usage))
+					isUsageOfHDU = true;
+				else if (BlaiseConstants.USAGE_TYPE_EDM.equals(usage))
+					isUsageOfEDM = true;
+				else
+				    isOtherUsages = true;
+			}
+		}
+	}
+
+	public int getWordCount()
+	{
+		return wordCount;
+	}
+
+	public void setWordCount(int wordCount)
+	{
+		this.wordCount = wordCount;
+	}
+
+	public TranslationInboxEntry getEntry()
 	{
 		return entry;
 	}
@@ -218,4 +273,5 @@ public class TranslationInboxEntryVo
     {
         return BlaiseHelper.getTypeByRelatedObjectClassName(getRelatedObjectClassName());
     }
+
 }

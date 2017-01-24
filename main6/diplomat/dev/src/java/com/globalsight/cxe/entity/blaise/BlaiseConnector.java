@@ -32,8 +32,95 @@ public class BlaiseConnector extends PersistentObject
     private int clientCoreRevision = 0;
     private String workflowId = "TRANSLATION";
     private long companyId;
+    private String isAutomatic = "N";
+    private String pullDays = "";
+    private int pullHour = 7;
+    private int minProcedureWords = 600;
+    private long defaultFileProfileId = -1L;
+    private long jobAttributeGroupId = -1L;
+    private String isCombined = "Y";
 
-    public String getName() 
+    public String getPullDays()
+    {
+        return pullDays;
+    }
+
+    public void setPullDays(String pullDays)
+    {
+        this.pullDays = pullDays;
+    }
+
+    public int getMinProcedureWords()
+    {
+        return minProcedureWords;
+    }
+
+    public void setMinProcedureWords(int minProcedureWords)
+    {
+        this.minProcedureWords = minProcedureWords;
+    }
+
+    public long getDefaultFileProfileId()
+    {
+        return defaultFileProfileId;
+    }
+
+    public void setDefaultFileProfileId(long defaultFileProfileId)
+    {
+        this.defaultFileProfileId = defaultFileProfileId;
+    }
+
+    public long getJobAttributeGroupId()
+    {
+        return jobAttributeGroupId;
+    }
+
+    public void setJobAttributeGroupId(long jobAttributeGroupId)
+    {
+        this.jobAttributeGroupId = jobAttributeGroupId;
+    }
+
+    public boolean isCombined()
+    {
+        return "Y".equals(isCombined);
+    }
+
+    public String getIsCombined()
+    {
+        return isCombined;
+    }
+
+    public void setIsCombined(String isCombined)
+    {
+        this.isCombined = isCombined;
+    }
+
+    public boolean isAutomatic()
+    {
+        return "N".equals(isAutomatic);
+    }
+
+    public String getIsAutomatic()
+    {
+        return isAutomatic;
+    }
+
+    public void setIsAutomatic(String isAutomatic)
+    {
+        this.isAutomatic = isAutomatic;
+    }
+
+    public int getPullHour()
+    {
+        return pullHour;
+    }
+
+    public void setPullHour(int pullHour)
+    {
+        this.pullHour = pullHour;
+    }
+
+    public String getName()
     {
         return name;
     }

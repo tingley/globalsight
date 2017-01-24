@@ -26,16 +26,13 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
+import com.cognitran.translation.client.PublicationTypeUsageDetails;
+import com.cognitran.translation.client.TranslationStatisticsDetails;
+import com.globalsight.connector.blaise.BlaiseConstants;
+import com.globalsight.util.Entry;
 import org.apache.log4j.Logger;
 
 import com.cognitran.blaise.translation.api.ClientFactory;
@@ -63,11 +60,7 @@ public class BlaiseHelper
     private BlaiseConnector blc = null;
     private TranslationAgencyClient client = null;
 
-    private static final String DASH = " - ";
     private static List<String> specialChars = new ArrayList<String>();
-
-    private static final String HARLEY = "Harley";
-    private static final String FALCON_TARGET_VALUE = "Falcon Target Value";
 
     public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util.Locale>();
     public static final HashMap<String, com.cognitran.core.model.i18n.Locale> blaiseSupportedLocalesMap = new HashMap<String, com.cognitran.core.model.i18n.Locale>();
@@ -87,27 +80,21 @@ public class BlaiseHelper
             blaiseSupportedLocalesMap.put(key.toLowerCase(), blaiseLocale);
         }
 
-        relatedObjectClassName2Type.put("com.cognitran.publication.model.media.Graphic", "Graphic");
-        relatedObjectClassName2Type.put(
-                "com.cognitran.publication.model.standalone.StandalonePublication", "Standalone");
-        relatedObjectClassName2Type.put("com.cognitran.publication.model.composite.Procedure",
-                "Procedure");
-        relatedObjectClassName2Type.put(
-                "com.cognitran.publication.model.controlled.ControlledContent",
-                "Controlled content");
-        relatedObjectClassName2Type.put(
-                "com.cognitran.translation.model.TranslatableObjectsDocument",
-                "Translatable object");
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_GRAPHIC, BlaiseConstants.GS_TYPE_GRAPHIC);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_STANDALONE, BlaiseConstants.GS_TYPE_STANDALONE);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_PROCEDURE, BlaiseConstants.GS_TYPE_PROCEDURE);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_CONTROLLED_CONTENT,
+                BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_TRANSLATABLE_OBJECT,
+                BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT);
 
-        type2RelatedObjectClassName.put("Graphic", "com.cognitran.publication.model.media.Graphic");
-        type2RelatedObjectClassName.put("Standalone",
-                "com.cognitran.publication.model.standalone.StandalonePublication");
-        type2RelatedObjectClassName.put("Procedure",
-                "com.cognitran.publication.model.composite.Procedure");
-        type2RelatedObjectClassName.put("Controlled content",
-                "com.cognitran.publication.model.controlled.ControlledContent");
-        type2RelatedObjectClassName.put("Translatable object",
-                "com.cognitran.translation.model.TranslatableObjectsDocument");
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_GRAPHIC, BlaiseConstants.BLAISE_TYPE_GRAPHIC);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_STANDALONE, BlaiseConstants.BLAISE_TYPE_STANDALONE);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_PROCEDURE, BlaiseConstants.BLAISE_TYPE_PROCEDURE);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT,
+                BlaiseConstants.BLAISE_TYPE_CONTROLLED_CONTENT);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT,
+                BlaiseConstants.BLAISE_TYPE_TRANSLATABLE_OBJECT);
     }
 
     public BlaiseHelper(BlaiseConnector blc)
@@ -190,8 +177,7 @@ public class BlaiseHelper
             {
                 try
                 {
-                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                            (TranslationInboxEntry) entry);
+                    TranslationInboxEntryVo vo = convert((TranslationInboxEntry)entry, client);
                     results.add(vo);
                 }
                 catch (Exception ignore)
@@ -206,6 +192,49 @@ public class BlaiseHelper
         }
 
         return results;
+    }
+
+    /**
+     * Convert Blaise translation inbox entry to GlobalSight TranslationInboxEntryVo object
+     *
+     * @param entry Translation inbox entry object got from Blaise
+     * @param client Blaise client connection
+     * @return TranslationInboxEntryVo GlobalSight translation inbox entry object
+     * @throws Exception
+     */
+    private TranslationInboxEntryVo convert(TranslationInboxEntry entry, TranslationAgencyClient client) throws Exception
+    {
+        TranslationInboxEntryVo vo = new TranslationInboxEntryVo(entry);
+        Set<Long> idSet = new HashSet<>(1);
+        idSet.add(entry.getId());
+        List<String> entryUsages = new ArrayList<>();
+        // Fetch usages of entry
+        Map<InboxEntry, PublicationTypeUsageDetails> usages = client.mapPublicationTypeUsages(idSet);
+        if (usages != null)
+        {
+            for (Map.Entry<InboxEntry, PublicationTypeUsageDetails> item : usages.entrySet())
+            {
+                if (entry.getId() == item.getKey().getId() && item.getValue() != null)
+                {
+                    entryUsages = item.getValue().getTypes();
+                }
+            }
+        }
+        vo.setUsages(entryUsages);
+
+        Map<InboxEntry, TranslationStatisticsDetails> counts = client.mapTranslationStatistics(idSet);
+        int wordCount = 0;
+        if (counts != null)
+        {
+            for (Map.Entry<InboxEntry, TranslationStatisticsDetails> detailsEntry : counts.entrySet())
+            {
+                if (entry.getId() == detailsEntry.getKey().getId() && detailsEntry.getValue() != null)
+                    wordCount = detailsEntry.getValue().getNewSentencesWords();
+            }
+        }
+        vo.setWordCount(wordCount);
+
+        return vo;
     }
 
     public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids, TranslationPageCommand command)
@@ -227,8 +256,7 @@ public class BlaiseHelper
             {
                 try
                 {
-                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                            (TranslationInboxEntry) entry);
+                    TranslationInboxEntryVo vo = convert((TranslationInboxEntry) entry, client);
                     results.add(vo);
                 }
                 catch (Exception ignore)
@@ -285,8 +313,7 @@ public class BlaiseHelper
             {
                 try
                 {
-                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                            (TranslationInboxEntry) entry);
+                    TranslationInboxEntryVo vo = convert((TranslationInboxEntry) entry, client);
                     results.add(vo);
                 }
                 catch (Exception ignore)
@@ -337,6 +364,42 @@ public class BlaiseHelper
 				logger.error("Error when claim entry: " + id, e);
 			}
 		}
+    }
+
+    /**
+     * Claim Blaise inbox entries. If it has been claimed, Blaise API will throw
+     * exception/warning.
+     *
+     * As ONLY the first identifier is returned, we claim entry one by one.
+     *
+     * @param ids
+     */
+    public void claim(Set<Long> ids)
+    {
+        try
+        {
+            TranslationAgencyClient client = getTranslationClient();
+            if (client == null)
+            {
+                logger.error("TranslationAgencyClient is null, entry cannot be claimed: " + ids);
+                return;
+            }
+            if (ids == null || ids.size() == 0)
+                return;
+
+            client.claim(new HashSet<Long>(ids));
+        }
+        catch (Exception e)
+        {
+            if (e.getMessage().toLowerCase().contains("task already claimed"))
+            {
+                logger.warn("Warning when claim entry(" + ids + "): " + e.getMessage());
+            }
+            else
+            {
+                logger.error("Error when claim entry: " + ids, e);
+            }
+        }
     }
 
     /**
@@ -395,11 +458,11 @@ public class BlaiseHelper
             }
 
             // A simple replace to "cheat" Blaise API
-            String content = FileUtil.readFile(file, "UTF-8");
+            String content = FileUtil.readFile(file, BlaiseConstants.ENCODING);
             content = StringUtil.replace(content, "<target state=\"new\"", "<target state=\"translated\"");
             content = StringUtil.replace(content, "<target state=\"needs-review-translation\"", "<target state=\"translated\"");
             content = StringUtil.replace(content, "<target state=\"needs-i10n\"", "<target state=\"translated\"");
-            FileUtil.writeFile(file, content, "UTF-8");
+            FileUtil.writeFile(file, content, BlaiseConstants.ENCODING);
 
             InputStream is = new FileInputStream(file);
 			client.uploadXliff(entryId, is);
@@ -714,11 +777,11 @@ public class BlaiseHelper
 		}
 
         String localeInfo = fixLocale(entry.getEntry().getTargetLocale().getLocaleCode());
-		fileName.append("Blaise ID ").append(entry.getRelatedObjectId())
-		        .append(DASH).append(entry.getSourceRevision())
-				.append(DASH).append(des)
-				.append(DASH).append(localeInfo)
-				.append(".xlf").toString();
+		fileName.append(BlaiseConstants.FILENAME_PREFIX).append(entry.getRelatedObjectId())
+		        .append(BlaiseConstants.DASH).append(entry.getSourceRevision())
+				.append(BlaiseConstants.DASH).append(des)
+				.append(BlaiseConstants.DASH).append(localeInfo)
+				.append(BlaiseConstants.FILENAME_EXTENSION).toString();
 		String fileNameStr = fileName.toString();
 
 		return handleSpecialChars(fileNameStr);
@@ -743,7 +806,7 @@ public class BlaiseHelper
         {
             falconTargetValue = falconTargetValue.substring(0, 55);
         }
-        String jobName = HARLEY + "_" + falconTargetValue + "_" + targetLocale;
+        String jobName = BlaiseConstants.HARLEY + "_" + falconTargetValue + "_" + targetLocale;
 
         return handleSpecialChars(jobName);
 	}
@@ -779,9 +842,9 @@ public class BlaiseHelper
         StringBuilder jobName = new StringBuilder();
         jobName.append("Blaise IDs (");
         jobName.append(ids.toString().trim()).append(")");
-        jobName.append(DASH);
+        jobName.append(BlaiseConstants.DASH);
         jobName.append(fixLocale(entries.get(0).getEntry().getSourceLocale().getLocaleCode()));
-        jobName.append(DASH);
+        jobName.append(BlaiseConstants.DASH);
         jobName.append(fixLocale(entries.get(0).getEntry().getTargetLocale().getLocaleCode()));
 
         return handleSpecialChars(jobName.toString());
@@ -896,8 +959,8 @@ public class BlaiseHelper
             {
                 displayName = attr.getAttribute().getDisplayName();
                 internalName = attr.getAttribute().getName();
-                if (FALCON_TARGET_VALUE.equalsIgnoreCase(displayName)
-                        || FALCON_TARGET_VALUE.equalsIgnoreCase(internalName))
+                if (BlaiseConstants.FALCON_TARGET_VALUE.equalsIgnoreCase(displayName)
+                        || BlaiseConstants.FALCON_TARGET_VALUE.equalsIgnoreCase(internalName))
                 {
                     type = attr.getAttribute().getType();
                     // If "Falcon Target Value" attribute is "text" type...

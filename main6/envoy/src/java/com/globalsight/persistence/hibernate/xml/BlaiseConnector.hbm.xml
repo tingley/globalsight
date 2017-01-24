@@ -26,5 +26,19 @@
             not-null="true" unique="false" />
         <property name="companyId" column="COMPANY_ID" length="20"
             type="long" not-null="true" />
+        <property name="isAutomatic" column="IS_AUTOMATIC" type="yes_no"
+                  not-null="true" unique="false" />
+        <property name="pullDays" length="20" column="PULL_DAYS" type="string"
+                  not-null="false" unique="false" />
+        <property name="pullHour" column="PULL_HOUR" length="20"
+                  type="int" not-null="true" />
+        <property name="defaultFileProfileId" column="DEFAULT_FILE_PROFILE_ID" length="20"
+                  type="long" not-null="true" />
+        <property name="minProcedureWords" column="MIN_PROCEDURE_WORDS" length="20"
+                  type="int" not-null="true" />
+        <property name="jobAttributeGroupId" column="JOB_ATTRIBUTE_GROUP_ID" length="20"
+                  type="long" not-null="true" />
+        <property name="isCombined" column="IS_COMBINED" type="yes_no"
+                  not-null="true" unique="false" />
     </class>
 </hibernate-mapping>

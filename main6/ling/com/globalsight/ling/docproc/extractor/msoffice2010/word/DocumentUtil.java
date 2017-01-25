@@ -82,6 +82,7 @@ public class DocumentUtil
         removeSpellError(document);
         removeSmartTags(document);
         mergeSameNode(getWr(document));
+        mergeSameNotLinkNode(getWr(document));
         handleStyle(document);
         mergeNodes(getWr(document));
         handleHyperlink(document);
@@ -891,6 +892,89 @@ public class DocumentUtil
             if (canMergeAsSame(n1, n2))
             {
                 mergeTo(n1, n2);
+            }
+        }
+    }
+    
+    
+    /**
+     * 
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    *<w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>Na</w:t>
+    *</w:r>
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    *<w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:vertAlign w:val="subscript"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>2</w:t>
+    *</w:r>
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    <*w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>HPO</w:t>
+    *</w:r>
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    *<w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:vertAlign w:val="subscript"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>4</w:t>
+    *</w:r>
+      @param ns
+     */
+    private void mergeSameNotLinkNode(List<Node> ns)
+    {
+        if (ns.size() < 3)
+            return;
+        
+        for (int i = 0; i < ns.size() - 1; i++)
+        {
+            Node n1 = ns.get(i);
+            int fj = -1;
+            
+            Node fn = n1;
+            for (int j = i + 1; j < ns.size() - 1; j++)
+            {
+                Node n2 = ns.get(j);
+                if (!n2.equals(fn.getNextSibling()))
+                    break;
+                
+                if (isSameNode(n1, n2) == 0)
+                {
+                    fj = j;
+                }
+                fn = n2;
+            }
+            
+            if (fj > 0)
+            {
+                if (i > 0 || fj < ns.size() - 1)
+                {
+                    mergeSameNotLinkNode(ns.subList(i, fj));
+                }
+                mergeNodes(ns.subList(i, fj));
+                i = fj;
             }
         }
     }

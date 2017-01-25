@@ -713,10 +713,14 @@ public class LeverageUtil
                 nextHash = sourceTuv.getNextHash();
             }
 
-            if (preHash != -1 && nextHash != -1 && preHash != BaseTmTuv.FIRST_HASH
-                    && nextHash != BaseTmTuv.LAST_HASH && preHash == lm.getPreviousHash()
-                    && nextHash == lm.getNextHash())
-            {
+			if ((preHash != -1 && nextHash != -1
+					&& preHash != BaseTmTuv.FIRST_HASH
+					&& nextHash != BaseTmTuv.LAST_HASH
+					&& preHash == lm.getPreviousHash() && nextHash == lm
+					.getNextHash())
+					|| ((index == 0 && preHash == BaseTmTuv.FIRST_HASH && nextHash != -1) || (index == p_sourceTuvs
+							.size() - 1 && preHash != -1 && nextHash == BaseTmTuv.LAST_HASH)))
+			{
                 return true;
             }
         }

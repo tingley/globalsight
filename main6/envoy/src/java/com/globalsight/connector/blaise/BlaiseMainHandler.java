@@ -147,7 +147,6 @@ public class BlaiseMainHandler extends PageActionHandler
                         null, null, null);
                 Thread t = new MultiCompanySupportedThread(runnable);
                 pool.execute(t);
-
             }
         }
     }

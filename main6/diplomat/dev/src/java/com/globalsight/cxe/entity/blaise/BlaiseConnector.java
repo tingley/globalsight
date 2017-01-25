@@ -32,13 +32,13 @@ public class BlaiseConnector extends PersistentObject
     private int clientCoreRevision = 0;
     private String workflowId = "TRANSLATION";
     private long companyId;
-    private String isAutomatic = "N";
+    private boolean automatic = false;
     private String pullDays = "";
     private int pullHour = 7;
     private int minProcedureWords = 600;
     private long defaultFileProfileId = -1L;
     private long jobAttributeGroupId = -1L;
-    private String isCombined = "Y";
+    private boolean combined = true;
 
     public String getPullDays()
     {
@@ -82,32 +82,22 @@ public class BlaiseConnector extends PersistentObject
 
     public boolean isCombined()
     {
-        return "Y".equals(isCombined);
+        return combined;
     }
 
-    public String getIsCombined()
+    public void setCombined(boolean isCombined)
     {
-        return isCombined;
-    }
-
-    public void setIsCombined(String isCombined)
-    {
-        this.isCombined = isCombined;
+        this.combined = isCombined;
     }
 
     public boolean isAutomatic()
     {
-        return "N".equals(isAutomatic);
+        return automatic;
     }
 
-    public String getIsAutomatic()
+    public void setAutomatic(boolean isAutomatic)
     {
-        return isAutomatic;
-    }
-
-    public void setIsAutomatic(String isAutomatic)
-    {
-        this.isAutomatic = isAutomatic;
+        this.automatic = isAutomatic;
     }
 
     public int getPullHour()

@@ -16,35 +16,20 @@
  */
 package com.globalsight.connector.blaise;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import com.cognitran.translation.client.TranslationPageCommand;
+import com.globalsight.connector.blaise.form.BlaiseConnectorFilter;
 import com.globalsight.connector.blaise.form.CreateBlaiseJobForm;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
+import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
+import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.servlet.util.SessionManager;
-import jodd.util.StringBand;
-import org.apache.log4j.Logger;
-
-import com.globalsight.connector.blaise.form.BlaiseConnectorFilter;
-import com.globalsight.connector.blaise.util.BlaiseManager;
-import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.BlaiseConnectorComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
@@ -52,6 +37,19 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
+import jodd.util.StringBand;
+import org.apache.log4j.Logger;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BlaiseMainHandler extends PageActionHandler
 {
@@ -83,6 +81,10 @@ public class BlaiseMainHandler extends PageActionHandler
         if (tmp != null && tmp.length() > 0)
             tmp = tmp.substring(0, tmp.length() - 1);
         connector.setPullDays(tmp);
+        tmp = request.getParameter("automatic");
+        connector.setAutomatic("true".equals(tmp));
+        tmp = request.getParameter("combined");
+        connector.setCombined("true".equals(tmp));
         HibernateUtil.saveOrUpdate(connector);
     }
 
@@ -112,10 +114,11 @@ public class BlaiseMainHandler extends PageActionHandler
             BlaiseHelper helper = new BlaiseHelper(blc);
 
             //demo to fetch procedure entries to create a job
-            TranslationPageCommand command = helper.initTranslationPageCommand(0, 20,
-                    null, null, null,
+            TranslationPageCommand command = helper.initTranslationPageCommand(0, 10,
+                    null, "en_US", "de_DE",
                     BlaiseConstants.GS_TYPE_PROCEDURE, null, 0, false);
             List<TranslationInboxEntryVo> entries = helper.listInbox(command);
+            logger.info("Fetch entries == " + (entries != null ? entries.size() : "0"));
             ArrayList<TranslationInboxEntryVo> hduEntries = new ArrayList<>();
             ArrayList<TranslationInboxEntryVo> edmEntries = new ArrayList<>();
             ArrayList<TranslationInboxEntryVo> otherEntries = new ArrayList<>();
@@ -127,6 +130,7 @@ public class BlaiseMainHandler extends PageActionHandler
                         edmEntries.add(entry);
                     else
                         otherEntries.add(entry);
+                    helper.claim(entry.getId());
                 }
                 ExecutorService pool = Executors.newFixedThreadPool(10);
                 HttpSession session = request.getSession(false);
@@ -135,12 +139,15 @@ public class BlaiseMainHandler extends PageActionHandler
                 User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
                 String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
                 List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
-                fileProfiles.add(HibernateUtil.get(FileProfileImpl.class, blc.getDefaultFileProfileId()));
+                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, blc.getDefaultFileProfileId());
+                for (int i=0;i<entries.size();i++)
+                    fileProfiles.add(fp);
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setBlaiseConnectorId(String.valueOf(cId));
                 blaiseForm.setCombineByLangs("on");
                 blaiseForm.setJobName(BlaiseHelper.getEntriesJobName(entries));
                 blaiseForm.setUserName(user.getUserName());
+                blaiseForm.setPriority("3");
 
                 CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
                         blc, blaiseForm, entries, fileProfiles, null,

@@ -240,8 +240,8 @@ function validName()
         <tr>
             <td class="standardText"><%= bundle.getString("lb_blaise_automatic")%>:</td>
             <td class="standardText">
-                <input type="radio" name="isAutomatic" value="N" <%=isAutomatic ? "" : "checked"%> />No&nbsp;&nbsp;
-                <input type="radio" name="isAutomatic" value="Y" <%=isAutomatic ? "checked" : ""%> />Yes
+                <input type="radio" name="automatic" value="false" <%=isAutomatic ? "" : "checked"%> />No&nbsp;&nbsp;
+                <input type="radio" name="automatic" value="true" <%=isAutomatic ? "checked" : ""%> />Yes
             </td>
         </tr>
         <tr>
@@ -272,7 +272,7 @@ function validName()
         </tr>
         <tr>
             <td class="standardText">Combined by language:</td>
-            <td class="standardText"><input type="checkbox" id="isCombined" value="Y" <%=isCombined ? "checked" : ""%>/></td>
+            <td class="standardText"><input type="checkbox" id="combined" name="combined" value="true" <%=isCombined ? "checked" : ""%>/></td>
         </tr>
         <tr>
             <td class="standardText"><%= bundle.getString("lb_blaise_min_procedure_words")%>:</td>
@@ -301,6 +301,7 @@ function validName()
             <td class="standardText"><%= bundle.getString("lb_attribute_groups")%>:</td>
             <td class="standardText">
                 <select id="jobAttributeGroupId" name="jobAttributeGroupId" class="standardText">
+                    <option value="-1">Choose...</option>
                     <%
                         if (allAttributeSets != null && allAttributeSets.size() > 0) {
                             for (AttributeSet as : allAttributeSets) {
@@ -359,5 +360,43 @@ function validName()
     </FORM>
 </div>
 </div>
+<script>
+    function changeAttributeGroup()
+    {
+        if ($("#jobAttributeGroupId").val() == "-1")
+            return;
+        $.ajax({
+            url:'blaiseAjax.jsp',
+            type:'POST', //GET
+            async:true,    //或false,是否异步
+            data:{
+                type:'jag'
+            },
+            timeout:5000,    //超时时间
+            dataType:'text',    //返回的数据格式：json/xml/html/script/jsonp/text
+            success:function(data,textStatus,jqXHR){
+                if (data != "") {
+                    var tableContent = "";
+                    var attributes = data.split(";");
+                    for (var i=0;i<attributes.length;i++) {
+                        var attrData = attributes[i].split(",");
+                        tableContent += "<tr><td class='standardText'>" + attrData[1] + "</td><td>" + attrData[2] + "</td>";
+                        tableContent += "<td>";
+                        if (attrData[3] == "Y")
+                            tableContent += "Yes";
+                        else
+                            tableContent += "No";
+                    }
+                }
+            },
+            error:function(xhr,textStatus){
+            },
+            complete:function(){
+                console.log('结束')
+            }
+        })
+
+    }
+</script>
 </body>
 </html>

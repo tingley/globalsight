@@ -26,7 +26,7 @@
             not-null="true" unique="false" />
         <property name="companyId" column="COMPANY_ID" length="20"
             type="long" not-null="true" />
-        <property name="isAutomatic" column="IS_AUTOMATIC" type="yes_no"
+        <property name="automatic" column="IS_AUTOMATIC" type="yes_no"
                   not-null="true" unique="false" />
         <property name="pullDays" length="20" column="PULL_DAYS" type="string"
                   not-null="false" unique="false" />
@@ -38,7 +38,7 @@
                   type="int" not-null="true" />
         <property name="jobAttributeGroupId" column="JOB_ATTRIBUTE_GROUP_ID" length="20"
                   type="long" not-null="true" />
-        <property name="isCombined" column="IS_COMBINED" type="yes_no"
+        <property name="combined" column="IS_COMBINED" type="yes_no"
                   not-null="true" unique="false" />
     </class>
 </hibernate-mapping>

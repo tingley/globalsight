@@ -42,7 +42,6 @@ import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -115,12 +114,6 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
     private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
     private static final String QUALITY_ASSESSMENT_LIST = "qualityAssessmentList";
     private static final String MARKET_SUITABILITY_LIST = "marketSuitabilityList";
-
-    private CellStyle headerStyle = null;
-    private CellStyle contentStyle = null;
-    private CellStyle rtlContentStyle = null;
-    private CellStyle unlockedStyle = null;
-    private CellStyle unlockedRightStyle = null;
 
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
@@ -207,15 +200,6 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         CompanyThreadLocal.getInstance().setValue(m_companyName);
     }
 
-    private void setAllCellStyleNull()
-    {
-        this.headerStyle = null;
-        this.contentStyle = null;
-        this.rtlContentStyle = null;
-        this.unlockedStyle = null;
-        this.unlockedRightStyle = null;
-    }
-
     @Override
     public File[] generateReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales)
             throws Exception
@@ -231,7 +215,6 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             if (job == null)
                 continue;
 
-            setAllCellStyleNull();
             Workbook workBook = new XSSFWorkbook();
             m_style = new ReportStyle(workBook);
             createReport(workBook, job, p_targetLocales, m_dateFormat);
@@ -405,7 +388,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         Row titleRow = getRow(p_sheet, 0);
         Cell taskIdCell = getCell(titleRow, 26);
         taskIdCell.setCellValue(reportInfo);
-        taskIdCell.setCellStyle(contentStyle);
+        taskIdCell.setCellStyle(m_style.getContentStyle());
 
         p_sheet.setColumnHidden(26, true);
     }
@@ -426,12 +409,12 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         Row langRow = getRow(p_sheet, row);
         Cell srcLangCell = getCell(langRow, col);
         srcLangCell.setCellValue(m_bundle.getString("lb_source_language"));
-        srcLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        srcLangCell.setCellStyle(m_style.getHeaderStyle());
         col++;
 
         Cell trgLangCell = getCell(langRow, col);
         trgLangCell.setCellValue(m_bundle.getString("lb_target_language"));
-        trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        trgLangCell.setCellStyle(m_style.getHeaderStyle());
     }
 
     private void addQuaAssessment(Workbook p_workBook, Sheet p_sheet) throws Exception
@@ -442,7 +425,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         Row langRow = getRow(p_sheet, row);
         Cell quaAssessmentCell = getCell(langRow, col);
         quaAssessmentCell.setCellValue(m_bundle.getString("lb_quality_assessment"));
-        quaAssessmentCell.setCellStyle(getHeaderStyle(p_workBook));
+        quaAssessmentCell.setCellStyle(m_style.getHeaderStyle());
     }
 
     private void addSuitMarket(Workbook p_workBook, Sheet p_sheet) throws Exception
@@ -453,7 +436,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         Row langRow = getRow(p_sheet, row);
         Cell marSuitCell = getCell(langRow, col);
         marSuitCell.setCellValue(m_bundle.getString("lb_market_suitability"));
-        marSuitCell.setCellStyle(getHeaderStyle(p_workBook));
+        marSuitCell.setCellStyle(m_style.getHeaderStyle());
     }
 
     private void addReviwerCommet(Workbook p_workBook, Sheet p_sheet) throws Exception
@@ -464,7 +447,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         Row langRow = getRow(p_sheet, row);
         Cell commentCell = getCell(langRow, col);
         commentCell.setCellValue(m_bundle.getString("lb_reviewer_comment"));
-        commentCell.setCellStyle(getHeaderStyle(p_workBook));
+        commentCell.setCellStyle(m_style.getHeaderStyle());
     }
 
     /**
@@ -483,85 +466,85 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
 
         Cell cell_A = getCell(segHeaderRow, col);
         cell_A.setCellValue(m_bundle.getString("lb_source_segment"));
-        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        cell_A.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_B = getCell(segHeaderRow, col);
         cell_B.setCellValue(m_bundle.getString("lb_edit_history"));
-        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        cell_B.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_C = getCell(segHeaderRow, col);
         cell_C.setCellValue(m_bundle.getString("lb_updated_target_segment"));
-        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        cell_C.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_D = getCell(segHeaderRow, col);
         cell_D.setCellValue(m_bundle.getString("lb_comments_history"));
-        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        cell_D.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_E = getCell(segHeaderRow, col);
         cell_E.setCellValue(m_bundle.getString("lb_category_failure"));
-        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        cell_E.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell cell_F = getCell(segHeaderRow, col);
         cell_F.setCellValue(m_bundle.getString("lb_comment_status"));
-        cell_F.setCellStyle(getHeaderStyle(p_workBook));
+        cell_F.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_G = getCell(segHeaderRow, col);
         cell_G.setCellValue(m_bundle.getString("lb_priority"));
-        cell_G.setCellStyle(getHeaderStyle(p_workBook));
+        cell_G.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_H = getCell(segHeaderRow, col);
         cell_H.setCellValue(m_bundle.getString("lb_tm_match_original"));
-        cell_H.setCellStyle(getHeaderStyle(p_workBook));
+        cell_H.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_I = getCell(segHeaderRow, col);
         cell_I.setCellValue(m_bundle.getString("lb_glossary_source"));
-        cell_I.setCellStyle(getHeaderStyle(p_workBook));
+        cell_I.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
         Cell cell_J = getCell(segHeaderRow, col);
         cell_J.setCellValue(m_bundle.getString("lb_glossary_target"));
-        cell_J.setCellStyle(getHeaderStyle(p_workBook));
+        cell_J.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
         Cell cell_K = getCell(segHeaderRow, col);
         cell_K.setCellValue(m_bundle.getString("lb_job_id_report"));
-        cell_K.setCellStyle(getHeaderStyle(p_workBook));
+        cell_K.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_L = getCell(segHeaderRow, col);
         cell_L.setCellValue(m_bundle.getString("lb_segment_id"));
-        cell_L.setCellStyle(getHeaderStyle(p_workBook));
+        cell_L.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_M = getCell(segHeaderRow, col);
         cell_M.setCellValue(m_bundle.getString("lb_page_name"));
-        cell_M.setCellStyle(getHeaderStyle(p_workBook));
+        cell_M.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
         Cell cell_N = getCell(segHeaderRow, col);
         cell_N.setCellValue(m_bundle.getString("lb_sid"));
-        cell_N.setCellStyle(getHeaderStyle(p_workBook));
+        cell_N.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
     }
@@ -571,7 +554,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
-        CellStyle contentStyle = getContentStyle(p_workbook);
+        CellStyle contentStyle = m_style.getContentStyle();
         Row langInfoRow = getRow(p_sheet, row);
 
         // Source Language
@@ -592,7 +575,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         int col = 1;
         int row = 6;
         CellStyle contentStyle = p_workbook.createCellStyle();
-        contentStyle.cloneStyleFrom(getContentStyle(p_workbook));
+        contentStyle.cloneStyleFrom(m_style.getContentStyle());
         contentStyle.setBorderTop(CellStyle.BORDER_THIN);
         contentStyle.setBorderRight(CellStyle.BORDER_THIN);
         contentStyle.setBorderBottom(CellStyle.BORDER_THIN);
@@ -635,7 +618,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         int col = 1;
         int row = 7;
         CellStyle contentStyle = p_workbook.createCellStyle();
-        contentStyle.cloneStyleFrom(getContentStyle(p_workbook));
+        contentStyle.cloneStyleFrom(m_style.getContentStyle());
         contentStyle.setBorderTop(CellStyle.BORDER_THIN);
         contentStyle.setBorderRight(CellStyle.BORDER_THIN);
         contentStyle.setBorderBottom(CellStyle.BORDER_THIN);
@@ -675,7 +658,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         int col = 1;
         int row = 8;
         CellStyle contentStyle = p_workbook.createCellStyle();
-        contentStyle.cloneStyleFrom(getContentStyle(p_workbook));
+        contentStyle.cloneStyleFrom(m_style.getContentStyle());
         contentStyle.setBorderTop(CellStyle.BORDER_THIN);
         contentStyle.setBorderRight(CellStyle.BORDER_THIN);
         contentStyle.setBorderBottom(CellStyle.BORDER_THIN);
@@ -875,8 +858,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     Row currentRow = getRow(p_sheet, p_row);
 
                     // Source segment with compact tags
-                    CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
-                            : getContentStyle(p_workBook);
+                    CellStyle srcStyle = m_rtlSourceLocale ? m_style.getRtlContentStyle()
+                            : m_style.getContentStyle();
                     Cell cell_A = getCell(currentRow, col);
                     setCellForInternalText(cell_A, getSegment(pData, sourceTuv, p_job.getId()),
                             m_rtlSourceLocale);
@@ -884,8 +867,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     col++;
 
                     // Target segment with compact tags
-                    CellStyle trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                            : getContentStyle(p_workBook);
+                    CellStyle trgStyle = m_rtlTargetLocale ? m_style.getRtlContentStyle()
+                            : m_style.getContentStyle();
                     String previousSegments = getPreviousSegments(allTuvMap, tuvMatchTypes,
                             targetTuv.getId(), sourceTuv, targetTuv, p_job.getId(), pData);
                     Cell cell_B = getCell(currentRow, col);
@@ -895,7 +878,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
 
                     // Modify the translation
                     CellStyle modifyTranslationStyle = m_rtlTargetLocale
-                            ? getUnlockedRightStyle(p_workBook) : getUnlockedStyle(p_workBook);
+                            ? m_style.getUnlockedRightStyle() : m_style.getUnlockedStyle();
                     modifyTranslationStyle.setLocked(false);
                     Cell cell_C = getCell(currentRow, col);
                     setCellForInternalText(cell_C, getSegment(pData, targetTuv, p_job.getId()),
@@ -910,20 +893,20 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     // Reviewers Comments
                     Cell cell_D = getCell(currentRow, col);
                     cell_D.setCellValue(commentHistory);
-                    cell_D.setCellStyle(getContentStyle(p_workBook));
+                    cell_D.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Category failure
                     Cell cell_E = getCell(currentRow, col);
                     cell_E.setCellValue(failure);
-                    cell_E.setCellStyle(getContentStyle(p_workBook));
+                    cell_E.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Comment Status
                     Cell cell_F = getCell(currentRow, col);
                     cell_F.setCellValue(commentStatus);
                     CellStyle commentCS = p_workBook.createCellStyle();
-                    commentCS.cloneStyleFrom(getContentStyle(p_workBook));
+                    commentCS.cloneStyleFrom(m_style.getContentStyle());
                     // commentCS.setLocked(false);
                     cell_F.setCellStyle(commentCS);
                     // add comment status drop down list for current row.
@@ -937,37 +920,37 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     // Priority
                     Cell cell_G = getCell(currentRow, col);
                     cell_G.setCellValue(priority);
-                    cell_G.setCellStyle(getContentStyle(p_workBook));
+                    cell_G.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // TM match
                     Cell cell_H = getCell(currentRow, col);
                     cell_H.setCellValue(matches.toString());
-                    cell_H.setCellStyle(getContentStyle(p_workBook));
+                    cell_H.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Glossary source
                     Cell cell_I = getCell(currentRow, col);
                     cell_I.setCellValue(sourceTerms);
-                    cell_I.setCellStyle(getContentStyle(p_workBook));
+                    cell_I.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Glossary target
                     Cell cell_J = getCell(currentRow, col);
                     cell_J.setCellValue(targetTerms);
-                    cell_J.setCellStyle(getContentStyle(p_workBook));
+                    cell_J.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Job Id
                     Cell cell_K = getCell(currentRow, col);
                     cell_K.setCellValue(p_job.getId());
-                    cell_K.setCellStyle(getContentStyle(p_workBook));
+                    cell_K.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Segment id
                     Cell cell_L = getCell(currentRow, col);
                     cell_L.setCellValue(sourceTuv.getTu(p_job.getId()).getId());
-                    cell_L.setCellStyle(getContentStyle(p_workBook));
+                    cell_L.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // Fix for GBS-1484
@@ -984,13 +967,13 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     // Page Name
                     Cell cell_M = getCell(currentRow, col);
                     cell_M.setCellValue(name);
-                    cell_M.setCellStyle(getContentStyle(p_workBook));
+                    cell_M.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     // SID
                     Cell cell_N = getCell(currentRow, col);
                     cell_N.setCellValue(sid);
-                    cell_N.setCellStyle(getContentStyle(p_workBook));
+                    cell_N.setCellStyle(m_style.getContentStyle());
                     col++;
 
                     p_row++;
@@ -1321,114 +1304,6 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         }
 
         return options;
-    }
-
-    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
-    {
-        if (headerStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-            font.setColor(IndexedColors.BLACK.getIndex());
-            font.setUnderline(Font.U_NONE);
-            font.setFontName("Times");
-            font.setFontHeightInPoints((short) 11);
-
-            CellStyle cs = p_workbook.createCellStyle();
-            cs.setFont(font);
-            cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
-            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-            cs.setBorderTop(CellStyle.BORDER_THIN);
-            cs.setBorderRight(CellStyle.BORDER_THIN);
-            cs.setBorderBottom(CellStyle.BORDER_THIN);
-            cs.setBorderLeft(CellStyle.BORDER_THIN);
-
-            headerStyle = cs;
-        }
-
-        return headerStyle;
-    }
-
-    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (contentStyle == null)
-        {
-            CellStyle style = p_workbook.createCellStyle();
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-            style.setFont(font);
-
-            contentStyle = style;
-        }
-
-        return contentStyle;
-    }
-
-    private CellStyle getRtlContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (rtlContentStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_RIGHT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            rtlContentStyle = style;
-        }
-
-        return rtlContentStyle;
-    }
-
-    private CellStyle getUnlockedStyle(Workbook p_workbook) throws Exception
-    {
-        if (unlockedStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setLocked(false);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            unlockedStyle = style;
-        }
-
-        return unlockedStyle;
-    }
-
-    private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
-    {
-        if (unlockedRightStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setLocked(false);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_RIGHT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            unlockedRightStyle = style;
-        }
-
-        return unlockedRightStyle;
     }
 
     private List<String> getFailureCategoriesList()

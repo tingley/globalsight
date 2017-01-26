@@ -94,10 +94,6 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     private static int SUMMARY_HEADER_ROW = 2;
     private static int DETAIL_HEADER_ROW = 2;
 
-    private CellStyle contentStyle = null;
-    private CellStyle rtlContentStyle = null;
-    private CellStyle headerStyle = null;
-
     protected ResourceBundle m_bundle = null;
     protected HttpServletRequest m_request = null;
     protected String m_companyName = "";
@@ -113,9 +109,9 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     private boolean isIncludeInternalText = true;
     private ReportStyle m_style = null;
 
-    private static final String GET_DETAILED_DATA_SQL1 = "SELECT t1.Id as tuvId, t2.tuId, t2.source, t2.MT, t1.segment_string AS target, t2.mt_name, t1.state "
+    private static final String GET_DETAILED_DATA_SQL1 = "SELECT t1.Id as tuvId, t2.tuId, t2.source, t2.MT_string, t2.MT_clob, t1.segment_string AS target, t2.mt_name, t1.state "
             + " FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS t1,"
-            + " (SELECT lm.source_page_id, lm.original_source_tuv_id AS tuvId, tuv.tu_id AS tuId, tuv.segment_string AS source, lm.matched_text_string AS MT, lm.mt_name"
+            + " (SELECT lm.source_page_id, lm.original_source_tuv_id AS tuvId, tuv.tu_id AS tuId, tuv.segment_string AS source, lm.matched_text_string AS MT_string, lm.matched_text_clob AS MT_clob, lm.mt_name"
             + "  FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS tuv, "
             + TuvQueryConstants.LM_TABLE_PLACEHOLDER + " AS lm"
             + "  WHERE tuv.id = lm.original_source_tuv_id"
@@ -199,8 +195,6 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     public File[] generateReports(List<Long> p_jobIDS,
             List<GlobalSightLocale> p_selectedTargetLocales) throws Exception
     {
-        setAllCellStyleNull();
-
         if (p_jobIDS == null || p_jobIDS.size() == 0)
         {
             p_jobIDS = data.jobIds;
@@ -327,37 +321,37 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
         Cell cell_A = getCell(summaryHeaderRow, col);
         cell_A.setCellValue(m_bundle.getString("lb_company"));
-        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        cell_A.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_B = getCell(summaryHeaderRow, col);
         cell_B.setCellValue(m_bundle.getString("lb_job_id"));
-        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        cell_B.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_C = getCell(summaryHeaderRow, col);
         cell_C.setCellValue(m_bundle.getString("lb_job_name"));
-        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        cell_C.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell cell_D = getCell(summaryHeaderRow, col);
         cell_D.setCellValue(m_bundle.getString("lb_language"));
-        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        cell_D.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_E = getCell(summaryHeaderRow, col);
         cell_E.setCellValue(m_bundle.getString("lb_workflow_state"));
-        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        cell_E.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_F = getCell(summaryHeaderRow, col);
         cell_F.setCellValue(m_bundle.getString("lb_mt_word_count"));
-        cell_F.setCellStyle(getHeaderStyle(p_workBook));
+        cell_F.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
@@ -365,32 +359,32 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         {
             Cell cell = getCell(summaryHeaderRow, col);
             cell.setCellValue(m_bundle.getString("lb_perplexity_wordcount"));
-            cell.setCellStyle(getHeaderStyle(p_workBook));
+            cell.setCellStyle(m_style.getHeaderStyle());
             p_sheet.setColumnWidth(col, 20 * 256);
             col++;
         }
 
         Cell cell_G = getCell(summaryHeaderRow, col);
         cell_G.setCellValue(m_bundle.getString("lb_total_word_count"));
-        cell_G.setCellStyle(getHeaderStyle(p_workBook));
+        cell_G.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_H = getCell(summaryHeaderRow, col);
         cell_H.setCellValue(m_bundle.getString("lb_average_edit_distance"));
-        cell_H.setCellStyle(getHeaderStyle(p_workBook));
+        cell_H.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell cell_I = getCell(summaryHeaderRow, col);
         cell_I.setCellValue(m_bundle.getString("lb_translation_error_rate"));
-        cell_I.setCellStyle(getHeaderStyle(p_workBook));
+        cell_I.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_J = getCell(summaryHeaderRow, col);
         cell_J.setCellValue(m_bundle.getString("lb_engine_name"));
-        cell_J.setCellStyle(getHeaderStyle(p_workBook));
+        cell_J.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
     }
@@ -403,49 +397,49 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
         Cell cell_A = getCell(detailHeaderRow, col);
         cell_A.setCellValue(m_bundle.getString("lb_job_id"));
-        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        cell_A.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 10 * 256);
         col++;
 
         Cell cell_B = getCell(detailHeaderRow, col);
         cell_B.setCellValue(m_bundle.getString("lb_job_name"));
-        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        cell_B.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell cell_C = getCell(detailHeaderRow, col);
         cell_C.setCellValue(m_bundle.getString("lb_tu_id"));
-        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        cell_C.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 10 * 256);
         col++;
 
         Cell cell_D = getCell(detailHeaderRow, col);
         cell_D.setCellValue(m_bundle.getString("lb_post_edit"));
-        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        cell_D.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_E = getCell(detailHeaderRow, col);
         cell_E.setCellValue(m_bundle.getString("lb_translation_error_rate"));
-        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        cell_E.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_F = getCell(detailHeaderRow, col);
         cell_F.setCellValue(m_bundle.getString("lb_source"));
-        cell_F.setCellStyle(getHeaderStyle(p_workBook));
+        cell_F.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 80 * 256);
         col++;
 
         Cell cell_G = getCell(detailHeaderRow, col);
         cell_G.setCellValue(m_bundle.getString("lb_tm_mt"));
-        cell_G.setCellStyle(getHeaderStyle(p_workBook));
+        cell_G.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 80 * 256);
         col++;
 
         Cell cell_H = getCell(detailHeaderRow, col);
         cell_H.setCellValue(m_bundle.getString("lb_translated_text"));
-        cell_H.setCellStyle(getHeaderStyle(p_workBook));
+        cell_H.setCellStyle(m_style.getHeaderStyle());
         p_sheet.setColumnWidth(col, 80 * 256);
         col++;
 
@@ -454,19 +448,19 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         {
             Cell cell_I = getCell(detailHeaderRow, col);
             cell_I.setCellValue(m_bundle.getString("lb_source_perplexity"));
-            cell_I.setCellStyle(getHeaderStyle(p_workBook));
+            cell_I.setCellStyle(m_style.getHeaderStyle());
             p_sheet.setColumnWidth(col, 15 * 256);
             col++;
 
             Cell cell_J = getCell(detailHeaderRow, col);
             cell_J.setCellValue(m_bundle.getString("lb_target_perplexity"));
-            cell_J.setCellStyle(getHeaderStyle(p_workBook));
+            cell_J.setCellStyle(m_style.getHeaderStyle());
             p_sheet.setColumnWidth(col, 15 * 256);
             col++;
 
             Cell cell_K = getCell(detailHeaderRow, col);
             cell_K.setCellValue(m_bundle.getString("lb_pass_fail"));
-            cell_K.setCellStyle(getHeaderStyle(p_workBook));
+            cell_K.setCellStyle(m_style.getHeaderStyle());
             p_sheet.setColumnWidth(col, 15 * 256);
             col++;
         }
@@ -665,7 +659,11 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 }
                 data.setSource(source);
 
-                String mt = rs.getString("MT");
+                String mt = rs.getString("MT_string");
+                if (mt == null)
+                {
+                    mt = rs.getString("MT_clob");
+                }
                 if (isIncludeInternalText)
                 {
                     mt = MTHelper.getGxmlElement(mt).getTextValueWithInternalTextMark();
@@ -731,23 +729,23 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
             Cell cell_A = getCell(curRow, col);
             cell_A.setCellValue(data.getJobId());
-            cell_A.setCellStyle(getContentStyle(p_workBook));
+            cell_A.setCellStyle(m_style.getContentStyle());
             col++;
 
             Cell cell_B = getCell(curRow, col);
             cell_B.setCellValue(data.getJobName());
-            cell_B.setCellStyle(getContentStyle(p_workBook));
+            cell_B.setCellStyle(m_style.getContentStyle());
             col++;
 
             Cell cell_C = getCell(curRow, col);
             cell_C.setCellValue(data.getTuId());
-            cell_C.setCellStyle(getContentStyle(p_workBook));
+            cell_C.setCellStyle(m_style.getContentStyle());
             col++;
 
             Cell cell_D = getCell(curRow, col);
             cell_D.setCellValue(
                     Double.valueOf(this.get2DigitFormater().format(data.getPostEditDistance())));
-            cell_D.setCellStyle(getContentStyle(p_workBook));
+            cell_D.setCellStyle(m_style.getContentStyle());
             col++;
 
             hyps.clear();
@@ -760,30 +758,30 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             refs.add(data.getTarget());
             refsegs.put(String.valueOf(data.getTuId()), refs);
             cell_E.setCellValue(calculateTER(hypsegs, refsegs));
-            cell_E.setCellStyle(getContentStyle(p_workBook));
+            cell_E.setCellStyle(m_style.getContentStyle());
             col++;
 
             Cell cell_F = getCell(curRow, col);
             String source = data.getSource();
             setCellForInternalText(cell_F, source, rtlSourceLocale);
-            CellStyle srcStyle = rtlSourceLocale ? getRtlContentStyle(p_workBook)
-                    : getContentStyle(p_workBook);
+            CellStyle srcStyle = rtlSourceLocale ? m_style.getRtlContentStyle()
+                    : m_style.getContentStyle();
             cell_F.setCellStyle(srcStyle);
             col++;
 
             Cell cell_G = getCell(curRow, col);
             String mt = data.getMt();
             setCellForInternalText(cell_G, mt, rtlSourceLocale);
-            CellStyle mtStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                    : getContentStyle(p_workBook);
+            CellStyle mtStyle = rtlTargetLocale ? m_style.getRtlContentStyle()
+                    : m_style.getContentStyle();
             cell_G.setCellStyle(mtStyle);
             col++;
 
             Cell cell_H = getCell(curRow, col);
             String target = data.getTarget();
             setCellForInternalText(cell_H, target, rtlSourceLocale);
-            CellStyle targetStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                    : getContentStyle(p_workBook);
+            CellStyle targetStyle = rtlTargetLocale ? m_style.getRtlContentStyle()
+                    : m_style.getContentStyle();
             cell_H.setCellStyle(targetStyle);
             col++;
 
@@ -797,8 +795,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 String sourcePreplexity = Double.toString(perplexity.getPerplexitySource());
                 cell_I.setCellValue(rtlTargetLocale ? EditUtil.toRtlString(sourcePreplexity)
                         : sourcePreplexity);
-                CellStyle sourcePreplexityStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                        : getContentStyle(p_workBook);
+                CellStyle sourcePreplexityStyle = rtlTargetLocale ? m_style.getRtlContentStyle()
+                        : m_style.getContentStyle();
                 cell_I.setCellStyle(sourcePreplexityStyle);
                 col++;
 
@@ -806,8 +804,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 String targetPreplexity = Double.toString(perplexity.getPerplexityTarget());
                 cell_J.setCellValue(rtlTargetLocale ? EditUtil.toRtlString(targetPreplexity)
                         : targetPreplexity);
-                CellStyle targetPreplexityStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                        : getContentStyle(p_workBook);
+                CellStyle targetPreplexityStyle = rtlTargetLocale ? m_style.getRtlContentStyle()
+                        : m_style.getContentStyle();
                 cell_J.setCellStyle(targetPreplexityStyle);
                 col++;
 
@@ -815,8 +813,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 String passFail = perplexity.getPerplexityResult() ? m_bundle.getString("lb_pass")
                         : m_bundle.getString("lb_fail");
                 cell_K.setCellValue(rtlTargetLocale ? EditUtil.toRtlString(passFail) : passFail);
-                CellStyle passFailStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                        : getContentStyle(p_workBook);
+                CellStyle passFailStyle = rtlTargetLocale ? m_style.getRtlContentStyle()
+                        : m_style.getContentStyle();
                 cell_K.setCellStyle(passFailStyle);
                 col++;
             }
@@ -878,7 +876,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             Row thirdRow = getRow(p_sheet, 3);
             Cell cell_A = getCell(thirdRow, 0);
             cell_A.setCellValue(m_bundle.getString("lb_no_mt_data"));
-            CellStyle style = getContentStyle(p_workbook);
+            CellStyle style = m_style.getContentStyle();
             style.setWrapText(false);
             cell_A.setCellStyle(style);
             return;
@@ -937,37 +935,37 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         // Company
         Cell cell_A = getCell(curRow, col);
         cell_A.setCellValue(getCompanyName(job.getCompanyId()));
-        cell_A.setCellStyle(getContentStyle(workBook));
+        cell_A.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Job ID
         Cell cell_B = getCell(curRow, col);
         cell_B.setCellValue(job.getJobId());
-        cell_B.setCellStyle(getContentStyle(workBook));
+        cell_B.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Job Name
         Cell cell_C = getCell(curRow, col);
         cell_C.setCellValue(job.getJobName());
-        cell_C.setCellStyle(getContentStyle(workBook));
+        cell_C.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Language
         Cell cell_D = getCell(curRow, col);
         cell_D.setCellValue(workflow.getTargetLocale().toString());
-        cell_D.setCellStyle(getContentStyle(workBook));
+        cell_D.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Workflow State
         Cell cell_E = getCell(curRow, col);
         cell_E.setCellValue(workflow.getState());
-        cell_E.setCellStyle(getContentStyle(workBook));
+        cell_E.setCellStyle(m_style.getContentStyle());
         col++;
 
         // MT Word Count
         Cell cell_F = getCell(curRow, col);
         cell_F.setCellValue(workflow.getMtTotalWordCount());
-        cell_F.setCellStyle(getContentStyle(workBook));
+        cell_F.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Perplexity passed word count
@@ -975,14 +973,14 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         {
             Cell cell = getCell(curRow, col);
             cell.setCellValue(workflow.getPerplexityWordCount());
-            cell.setCellStyle(getContentStyle(workBook));
+            cell.setCellStyle(m_style.getContentStyle());
             col++;
         }
 
         // Total Word Count
         Cell cell_G = getCell(curRow, col);
         cell_G.setCellValue(workflow.getTotalWordCount());
-        cell_G.setCellStyle(getContentStyle(workBook));
+        cell_G.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Average Edit Distance/char
@@ -1013,19 +1011,19 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         float averageEditDistance = ((float) totalLevDistance / (float) totalTargetLength * 100);
         Cell cell_H = getCell(curRow, col);
         cell_H.setCellValue(Double.valueOf(this.get2DigitFormater().format(averageEditDistance)));
-        cell_H.setCellStyle(getContentStyle(workBook));
+        cell_H.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Translation Error Rate (TER)
         Cell cell_I = getCell(curRow, col);
         cell_I.setCellValue(calculateTER(hypsegs, refsegs));
-        cell_I.setCellStyle(getContentStyle(workBook));
+        cell_I.setCellStyle(m_style.getContentStyle());
         col++;
 
         // Engine Name
         Cell cell_J = getCell(curRow, col);
         cell_J.setCellValue(mtEngineName);
-        cell_J.setCellStyle(getContentStyle(workBook));
+        cell_J.setCellStyle(m_style.getContentStyle());
         col++;
 
         row.inc();
@@ -1261,79 +1259,6 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         {
             logger.error(e);
         }
-    }
-
-    private void setAllCellStyleNull()
-    {
-        this.contentStyle = null;
-        this.headerStyle = null;
-        this.rtlContentStyle = null;
-    }
-
-    private CellStyle getHeaderStyle(Workbook p_workbook)
-    {
-        if (headerStyle == null)
-        {
-            Font headerFont = p_workbook.createFont();
-            headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-            headerFont.setColor(IndexedColors.BLACK.getIndex());
-            headerFont.setUnderline(Font.U_NONE);
-            headerFont.setFontName("Arial");
-            headerFont.setFontHeightInPoints((short) 9);
-
-            CellStyle cs = p_workbook.createCellStyle();
-            cs.setFont(headerFont);
-            cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
-            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-            cs.setBorderTop(CellStyle.BORDER_THIN);
-            cs.setBorderRight(CellStyle.BORDER_THIN);
-            cs.setBorderBottom(CellStyle.BORDER_THIN);
-            cs.setBorderLeft(CellStyle.BORDER_THIN);
-
-            headerStyle = cs;
-        }
-
-        return headerStyle;
-    }
-
-    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (contentStyle == null)
-        {
-            CellStyle style = p_workbook.createCellStyle();
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-            style.setFont(font);
-
-            contentStyle = style;
-        }
-
-        return contentStyle;
-    }
-
-    private CellStyle getRtlContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (rtlContentStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_RIGHT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            rtlContentStyle = style;
-        }
-
-        return rtlContentStyle;
     }
 
     public void setRegionStyle(Sheet sheet, CellRangeAddress cellRangeAddress, CellStyle cs)

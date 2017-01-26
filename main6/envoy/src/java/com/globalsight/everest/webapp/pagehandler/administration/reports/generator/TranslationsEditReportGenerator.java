@@ -741,7 +741,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             }
         }
 
-        if (targetPages.isEmpty())
+        if (targetPages == null || targetPages.isEmpty())
         {
             // If no corresponding target page exists, set the cell blank
             writeBlank(p_sheet, p_row, 11);

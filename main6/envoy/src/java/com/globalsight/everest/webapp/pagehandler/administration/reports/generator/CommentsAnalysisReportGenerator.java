@@ -49,7 +49,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -274,7 +273,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
         List<File> workBooks = new ArrayList<File>();
         String dateFormat = request.getParameter(WebAppConstants.DATE_FORMAT);
-        Workbook combinedWorkBook = new SXSSFWorkbook();
+        Workbook combinedWorkBook = new XSSFWorkbook();
         REPORT_STYLE = new ReportStyle(combinedWorkBook);
         List<Job> jobsList = new ArrayList<Job>();
         Set<String> stateSet = new HashSet<String>();
@@ -307,7 +306,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             }
             else
             {
-                setAllCellStyleNull();
                 Workbook workBook = new XSSFWorkbook();
                 REPORT_STYLE = new ReportStyle(workBook);
                 createReport(workBook, job, p_targetLocales, dateFormat, data);
@@ -329,7 +327,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             FileOutputStream out = new FileOutputStream(file);
             combinedWorkBook.write(out);
             out.close();
-            ((SXSSFWorkbook) combinedWorkBook).dispose();
             workBooks.add(file);
         }
 
@@ -1464,10 +1461,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             result.add(aCategory.getValue());
         }
         return result;
-    }
-
-    private void setAllCellStyleNull()
-    {
     }
 
     /**

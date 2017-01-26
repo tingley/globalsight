@@ -32,9 +32,15 @@ import com.globalsight.everest.page.pageexport.style.docx.Style;
 import com.globalsight.everest.page.pageexport.style.docx.StyleStyle;
 import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
 import com.globalsight.ling.docproc.extractor.msoffice2010.XmlUtil;
+import com.globalsight.util.StringUtil;
 
-public class DocumentUtil
+/**
+ * <p>Used by Word extractor v2.0.</p>
+ * <p><code>DocumentUtil</code> is used to merge tags.</p>
+ */
+public class DocumentUtil 
 {
+    // Used for compare tags. All attributes list in INGORE_ATT will be ignored during comparing tags.
     private static List<String> IGNORE_ATT = new ArrayList<String>();
     static
     {
@@ -46,7 +52,9 @@ public class DocumentUtil
         IGNORE_ATT.add("w:spacing");
         IGNORE_ATT.add("w:shd");
     }
-
+    
+    // All font attributes list in IGNORE_FONT_ATT will be ignored during comparing tags.
+    // The node name must be w:rFonts
     private static List<String> IGNORE_FONT_ATT = new ArrayList<String>();
     static
     {
@@ -54,7 +62,18 @@ public class DocumentUtil
         IGNORE_FONT_ATT.add("w:hint");
         IGNORE_FONT_ATT.add("w:eastAsia");
     }
-
+    
+    // All font attributes list in IGNORE_SPACE_ATT will be ignored during comparing tags.
+    // The node value must be space.
+    private static List<String> IGNORE_SPACE_ATT = new ArrayList<>();
+    static
+    {
+        IGNORE_SPACE_ATT.add("w:b");
+        IGNORE_SPACE_ATT.add("w:i");
+        IGNORE_SPACE_ATT.add("w:color");
+        IGNORE_SPACE_ATT.add("w:sz");
+    }
+    
     private XmlUtil util = new XmlUtil();
     private WordExtractor wordExtractor = null;
 
@@ -63,17 +82,17 @@ public class DocumentUtil
         removeSpellError(document);
         removeSmartTags(document);
         mergeSameNode(getWr(document));
+        mergeSameNotLinkNode(getWr(document));
         handleStyle(document);
         mergeNodes(getWr(document));
         handleHyperlink(document);
         handleInsDelStyle(document);
-
         mergeNodes(getWr(document));
     }
-
+    
     private void handleInsDelStyle(Document document)
     {
-        // do it again to reduce tag
+        //do it again to reduce tag
         for (int i = 0; i < 3; i++)
         {
             mergeNoContentWrInIns(document);
@@ -82,17 +101,22 @@ public class DocumentUtil
             handleDelStyle(document);
         }
     }
-
+    
+    /**
+     * Removes all spell error tags.
+     * 
+     * @param document
+     */
     private void removeSpellError(Document document)
     {
         List<Node> ns = util.getNodes(document, "w:proofErr");
-
+        
         for (Node node : ns)
         {
             node.getParentNode().removeChild(node);
         }
     }
-
+    
     private void handleStyle(Document document)
     {
         handleSimpleFld(document);
@@ -103,25 +127,25 @@ public class DocumentUtil
         handleComment(document);
         handleBookmark(document);
     }
-
+    
     /**
      * Remove smart tag can reduce the number of tag. Trados removed it too.
      */
     private void removeSmartTags(Document document)
     {
-        List<Node> ns = util.getNodes(document, "w:smartTag");
+        List<Node> ns =  util.getNodes(document, "w:smartTag");
         for (Node n : ns)
         {
             util.removeNode(n);
         }
     }
-
+    
     private void handleInternalStyle(Document document)
     {
         List<String> internals = wordExtractor.getInternals();
         if (internals != null && internals.size() > 0)
         {
-            List<Node> wrs = util.getNodes(document, "w:r");
+            List<Node> wrs =  util.getNodes(document, "w:r");
             for (Node wr : wrs)
             {
                 List<Node> rStyles = util.getNodes(wr, "w:rStyle");
@@ -144,21 +168,21 @@ public class DocumentUtil
             }
         }
     }
-
+    
     private void handleHyperlinkWithAtt(Node n)
     {
         NodeList ns = n.getChildNodes();
         if (ns.getLength() != 1)
             return;
-
+        
         Node wr = ns.item(0);
         if (wr == null || !"w:r".equals(wr.getNodeName()))
             return;
-
+        
         Node wt = util.getNode(wr, "w:t");
         if (wt == null)
             return;
-
+        
         util.removeNode(n);
         List<Node> cs = util.getChildNodes(wt);
         for (Node c : cs)
@@ -166,10 +190,10 @@ public class DocumentUtil
             wt.removeChild(c);
             n.appendChild(c);
         }
-
+        
         wt.appendChild(n);
     }
-
+    
     private void handleBookmark(Document document)
     {
         List<Node> ns = util.getNodes(document, "w:bookmarkStart");
@@ -178,11 +202,11 @@ public class DocumentUtil
             Node id = util.getAttribute(n, "w:id");
             if (id == null)
                 continue;
-
+            
             Node next = n.getNextSibling();
             if (next == null)
                 continue;
-
+            
             if ("w:bookmarkEnd".equals(next.getNodeName()))
             {
                 Node id2 = util.getAttribute(next, "w:id");
@@ -191,67 +215,67 @@ public class DocumentUtil
                     n.getParentNode().removeChild(n);
                     next.getParentNode().removeChild(next);
                 }
-
+                
                 continue;
             }
         }
-
+        
     }
-
+    
     private List<Node> getNextWrs(Node n)
     {
         List<Node> ns = new ArrayList<Node>();
-
+        
         Node next = n.getNextSibling();
         while (next != null && "w:r".equals(next.getNodeName()))
         {
             ns.add(next);
             next = next.getNextSibling();
         }
-
+        
         return ns;
     }
-
+    
     private boolean hasTextNode(Node wr)
     {
         return wr.getTextContent().length() > 0;
     }
-
+    
     private List<Node> getPrefixNoContentWr(Node wr)
     {
         List<Node> wrs = new ArrayList<Node>();
         wr = wr.getPreviousSibling();
-
+        
         while (wr != null)
         {
             Node wt = util.getNode(wr, "w:t", false);
             if (wt != null)
                 return wrs;
-
+            
             if (!hasTextNode(wr))
             {
                 wrs.add(wr);
             }
-
+            
             wr = wr.getNextSibling();
         }
-
+        
         return new ArrayList<Node>();
     }
-
+    
     private List<Node> getNoContentWr(Node wr)
     {
         List<Node> wrs = new ArrayList<Node>();
         wr = wr.getNextSibling();
-
+        
         while (wr != null)
         {
             Node wt = util.getNode(wr, "w:t", false);
             if (wt != null)
                 return wrs;
-
+            
             Node wt2 = util.getNode(wr, "w:instrText", true);
-            if (wt2 != null)
+            if (wt2 != null) 
                 return wrs;
             // GBS-4597, donot merge wr with element "<w:fldChar
             // w:fldCharType="begin"/>"
@@ -273,24 +297,24 @@ public class DocumentUtil
             {
                 wrs.add(wr);
             }
-
+            
             wr = wr.getNextSibling();
         }
-
+        
         return new ArrayList<Node>();
     }
-
+    
     private void mergeNoContentWr(Document document)
     {
         List<Node> wrs = getWr(document);
-
+        
         for (Node wr : wrs)
         {
             Node wt = util.getNode(wr, "w:t", false);
             if (wt != null)
             {
                 List<Node> nwrs = getNoContentWr(wr);
-
+                
                 if (nwrs.size() > 0)
                 {
                     Element em = wr.getOwnerDocument().createElement("wr");
@@ -299,14 +323,13 @@ public class DocumentUtil
                         nwr.getParentNode().removeChild(nwr);
                         em.appendChild(nwr);
                     }
-
+                    
                     wt.appendChild(em);
                 }
             }
         }
-
     }
-
+    
     private void mergeNoContentWrInIns(Document document)
     {
         List<Node> ins = util.getNodes(document, "w:ins");
@@ -314,13 +337,13 @@ public class DocumentUtil
         {
             List<Node> wrs = new ArrayList<Node>();
             getWr(n, wrs);
-
+            
             for (Node wr : wrs)
             {
                 Node wt = util.getNode(wr, "w:t", false);
                 if (wt != null)
                 {
-
+                    
                     List<Node> nwrs = getPrefixNoContentWr(wr);
                     if (nwrs.size() > 0)
                     {
@@ -330,12 +353,12 @@ public class DocumentUtil
                             nwr.getParentNode().removeChild(nwr);
                             em.appendChild(nwr);
                         }
-
+                        
                         wt.insertBefore(em, wt.getFirstChild());
                     }
-
+                    
                     nwrs = getNoContentWr(wr);
-
+                    
                     if (nwrs.size() > 0)
                     {
                         Element em = wr.getOwnerDocument().createElement("wr");
@@ -344,21 +367,21 @@ public class DocumentUtil
                             nwr.getParentNode().removeChild(nwr);
                             em.appendChild(nwr);
                         }
-
+                        
                         wt.appendChild(em);
                     }
                 }
             }
         }
         List<Node> wrs = getWr(document);
-
+        
         for (Node wr : wrs)
         {
             Node wt = util.getNode(wr, "w:t", false);
             if (wt != null)
             {
                 List<Node> nwrs = getNoContentWr(wr);
-
+                
                 if (nwrs.size() > 0)
                 {
                     Element em = wr.getOwnerDocument().createElement("wr");
@@ -367,34 +390,32 @@ public class DocumentUtil
                         nwr.getParentNode().removeChild(nwr);
                         em.appendChild(nwr);
                     }
-
+                    
                     wt.appendChild(em);
                 }
             }
         }
-
+        
     }
-
-    // <w:r w:rsidR="008106EF">
-    // <w:fldChar w:fldCharType="begin" />
-    // </w:r>
-    // <w:r w:rsidR="008106EF">
-    // <w:instrText xml:space="preserve"> HY</w:instrText>
-    // </w:r>
-    // <w:r w:rsidR="008106EF">
-    // <w:instrText xml:space="preserve">PERLINK
-    // "http://cdn.tripadvisor.com/pdfs/email/32NewPromoteAwards_US.pdf" \t
-    // "_blank" </w:instrText>
-    // </w:r>
-    // <w:r w:rsidR="008106EF">
-    // <w:fldChar w:fldCharType="separate" />
-    // </w:r>
-    // <w:r w:rsidRPr="00A02F53">
-    // <w:rPr>
-    // <w:rStyle w:val="Hyperlink" />
-    // </w:rPr>
-    // <w:t>new tip sheet</w:t>
-    // </w:r>
+    
+    //<w:r w:rsidR="008106EF">
+    //  <w:fldChar w:fldCharType="begin" />
+    //</w:r>
+    //<w:r w:rsidR="008106EF">
+    //  <w:instrText xml:space="preserve"> HY</w:instrText>
+    //</w:r>
+    //<w:r w:rsidR="008106EF">
+    //  <w:instrText xml:space="preserve">PERLINK "http://cdn.tripadvisor.com/pdfs/email/32NewPromoteAwards_US.pdf" \t "_blank" </w:instrText>
+    //</w:r>
+    //<w:r w:rsidR="008106EF">
+    //  <w:fldChar w:fldCharType="separate" />
+    //</w:r>
+    //<w:r w:rsidRPr="00A02F53">
+    //  <w:rPr>
+    //      <w:rStyle w:val="Hyperlink" />
+    //  </w:rPr>
+    //  <w:t>new tip sheet</w:t>
+    //</w:r>
     private void handleFldChar(Document document)
     {
         List<Node> ns = util.getNodes(document, "w:fldChar");
@@ -402,29 +423,29 @@ public class DocumentUtil
         {
             Node att = util.getAttribute(n, "w:fldCharType");
             List<Node> prefix = new ArrayList<Node>();
-
+            
             if (att != null && "begin".equals(att.getNodeValue()))
             {
                 prefix.clear();
-
+                
                 Node wr = n.getParentNode();
                 if (wr == null || !"w:r".equals(wr.getNodeName()))
                     continue;
-
+                
                 prefix.add(wr);
-
+                
                 boolean found = false;
                 Node next = wr.getNextSibling();
                 while (true)
                 {
                     prefix.add(next);
-
+                    
                     next = next.getNextSibling();
                     if (next == null || !"w:r".equals(next.getNodeName()))
                     {
                         break;
                     }
-
+                    
                     Node f = util.getNode(next, "w:fldChar", false);
                     if (f != null)
                     {
@@ -433,16 +454,16 @@ public class DocumentUtil
                         {
                             found = true;
                             prefix.add(next);
-
+                            
                             List<Node> wrs = getNextWrs(next);
                             if (wrs.size() > 1)
                             {
                                 mergeSameNode(wrs);
                                 mergeNodes(getNextWrs(next));
                             }
-
-                            next = next.getNextSibling();
-
+                            
+                            next = next.getNextSibling(); 
+                            
                             break;
                         }
                     }
@@ -453,29 +474,29 @@ public class DocumentUtil
                             break;
                     }
                 }
-
+                
                 if (!found)
                 {
                     continue;
                 }
-
+                
                 if (next == null || !"w:r".equals(next.getNodeName()))
                 {
                     continue;
                 }
-
+                
                 Node wt = util.getNode(next, "w:t", false);
                 if (wt == null)
                 {
                     continue;
                 }
-
+                
                 Node end = next.getNextSibling();
                 if (end == null)
                 {
                     continue;
                 }
-
+                
                 Node f = util.getNode(end, "w:fldChar", false);
                 if (f != null)
                 {
@@ -491,7 +512,7 @@ public class DocumentUtil
                             start.appendChild(p);
                         }
                         wt.insertBefore(start, wt.getFirstChild());
-
+                        
                         // end
                         Element endNode = wt.getOwnerDocument().createElement("fldChar");
                         endNode.setAttribute("type", "end");
@@ -503,21 +524,21 @@ public class DocumentUtil
             }
         }
     }
-
+    
     private void handleSimpleFld(Document document)
     {
         List<Node> ns = util.getNodes(document, "w:fldSimple");
-
+        
         for (Node n : ns)
         {
             Node wr = n.getFirstChild();
             if (!"w:r".equals(wr.getNodeName()) || wr.getNextSibling() != null)
                 continue;
-
+            
             Node wt = util.getNode(wr, "w:t");
             if (wt == null)
                 continue;
-
+            
             util.removeNode(n);
             List<Node> cs = util.getChildNodes(wt);
             for (Node c : cs)
@@ -525,62 +546,62 @@ public class DocumentUtil
                 wt.removeChild(c);
                 n.appendChild(c);
             }
-
+            
             wt.appendChild(n);
         }
     }
-
+    
     private void handleComment(Document document)
     {
         List<Node> ns = util.getNodes(document, "w:commentRangeStart");
-
+        
         for (Node n : ns)
         {
             Node id = util.getAttribute(n, "w:id");
             if (id == null)
                 continue;
-
+            
             List<Node> wrs = getNextWrs(n);
             if (wrs.size() > 1)
             {
                 mergeSameNode(wrs);
                 mergeNodes(getNextWrs(n));
             }
-
+            
             wrs = getNextWrs(n);
             if (wrs.size() != 1)
                 continue;
-
+            
             Node wr = n.getNextSibling();
             Node end = wr.getNextSibling();
             if (end == null || !"w:commentRangeEnd".equals(end.getNodeName()))
                 continue;
-
+            
             Node id2 = util.getAttribute(end, "w:id");
             if (id2 == null || !id2.getNodeValue().equals(id.getNodeValue()))
                 continue;
-
+                
             Node wt = util.getNode(wr, "w:t");
             if (wt == null)
                 continue;
-
+            
             n.getParentNode().removeChild(n);
             end.getParentNode().removeChild(end);
-
+            
             Element comment = wt.getOwnerDocument().createElement("comment");
             comment.setAttribute("w:id", id.getNodeValue());
-
+            
             List<Node> cs = util.getChildNodes(wt);
             for (Node c : cs)
             {
                 wt.removeChild(c);
                 comment.appendChild(c);
             }
-
+            
             wt.appendChild(comment);
         }
     }
-
+    
     // <w:del w:id="1" w:author="Nicole Chen" w:date="2014-07-07T18:30:00Z">
     // <w:r w:rsidDel="00EA6D88">
     // <w:delText xml:space="preserve">Globalization</w:delText>
@@ -588,13 +609,13 @@ public class DocumentUtil
     // </w:del>
     private void handleDelStyle(Document document)
     {
-        List<Node> ns = util.getNodes(document, "w:del");
+        List<Node> ns =  util.getNodes(document, "w:del");
         for (Node n : ns)
         {
             boolean isPrevious = true;
             Node wt = null;
             Node n1 = n.getPreviousSibling();
-            if (n1 != null)
+            if (n1 != null )
             {
                 String name = n1.getNodeName();
                 if (name.equalsIgnoreCase("w:r"))
@@ -602,12 +623,12 @@ public class DocumentUtil
                     wt = util.getNode(n1, "w:t", false);
                 }
             }
-
+            
             if (wt == null)
             {
                 isPrevious = false;
                 n1 = n.getNextSibling();
-                if (n1 != null)
+                if (n1 != null )
                 {
                     String name = n1.getNodeName();
                     if (name.equalsIgnoreCase("w:r"))
@@ -616,10 +637,10 @@ public class DocumentUtil
                     }
                 }
             }
-
+            
             if (wt == null)
                 continue;
-
+            
             Element em = n.getOwnerDocument().createElement("wr");
             Node p = n.getParentNode();
             if (isPrevious)
@@ -638,7 +659,7 @@ public class DocumentUtil
             em.appendChild(n);
         }
     }
-
+    
     // <w:ins w:id="2" w:author="Nicole Chen" w:date="2014-07-07T18:30:00Z">
     // <w:r w:rsidR="00EA6D88">
     // <w:rPr>
@@ -662,11 +683,11 @@ public class DocumentUtil
             NodeList ns = n.getChildNodes();
             if (ns.getLength() != 1)
                 continue;
-
+            
             Node wr = ns.item(0);
             if (wr == null || !"w:r".equals(wr.getNodeName()))
                 continue;
-
+            
             Node wt = util.getNode(wr, "w:t");
             if (wt == null)
             {
@@ -684,7 +705,7 @@ public class DocumentUtil
                         handle = true;
                     }
                 }
-
+                
                 if (!handle)
                 {
                     pwr = n.getNextSibling();
@@ -699,10 +720,10 @@ public class DocumentUtil
                         }
                     }
                 }
-
+                
                 continue;
             }
-
+            
             util.removeNode(n);
             List<Node> cs = util.getChildNodes(wt);
             for (Node c : cs)
@@ -710,11 +731,11 @@ public class DocumentUtil
                 wt.removeChild(c);
                 n.appendChild(c);
             }
-
+            
             wt.appendChild(n);
         }
     }
-
+    
     private void handleHyperlink(Document document)
     {
         List<Node> ns = util.getNodes(document, "w:hyperlink");
@@ -725,10 +746,10 @@ public class DocumentUtil
                 handleHyperlinkWithAtt(n);
                 continue;
             }
-
+            
             List<Node> wrs = new ArrayList<Node>();
             util.getAllNodes(n, "w:r", wrs);
-
+            
             for (Node wr : wrs)
             {
                 Node rPr = util.getNode(wr, "w:rPr", false);
@@ -737,9 +758,9 @@ public class DocumentUtil
                     rPr = wr.getOwnerDocument().createElement("w:rPr");
                     wr.insertBefore(rPr, wr.getFirstChild());
                 }
-
+                
                 Node hyperlink = null;
-
+                
                 NodeList list = rPr.getChildNodes();
                 for (int i = 0; i < list.getLength() && hyperlink == null; i++)
                 {
@@ -750,15 +771,14 @@ public class DocumentUtil
                         for (int j = 0; j < atts.getLength(); j++)
                         {
                             Node att = atts.item(j);
-                            if ("w:val".equals(att.getNodeName())
-                                    && "Hyperlink".equals(att.getNodeValue()))
+                            if ("w:val".equals(att.getNodeName()) && "Hyperlink".equals(att.getNodeValue()))
                             {
                                 hyperlink = ni;
                             }
                         }
                     }
                 }
-
+                
                 if (hyperlink == null)
                 {
                     Element h = wr.getOwnerDocument().createElement("w:rStyle");
@@ -766,21 +786,21 @@ public class DocumentUtil
                     rPr.appendChild(h);
                 }
             }
-
+            
             util.removeNode(n);
         }
     }
-
+    
     private void handleNoBreakHyphen(List<Node> ns)
     {
         for (int i = 0; i < ns.size() - 1; i++)
         {
             Node n1 = ns.get(i);
             Node n2 = ns.get(i + 1);
-
+            
             if (!n2.equals(n1.getNextSibling()))
                 continue;
-
+            
             if (isHyphenWr(n2))
             {
                 Node wt2 = util.getNode(n2, "w:t", false);
@@ -798,7 +818,7 @@ public class DocumentUtil
                         {
                             wt1.appendChild(wt1.getOwnerDocument().createTextNode("-"));
                         }
-
+                        
                         n2.getParentNode().removeChild(n2);
                         ns.remove(i + 1);
                         i--;
@@ -814,42 +834,41 @@ public class DocumentUtil
                     }
                     else
                     {
-                        wt2.insertBefore(wt2.getOwnerDocument().createTextNode("-"),
-                                wt2.getFirstChild());
+                        wt2.insertBefore(wt2.getOwnerDocument().createTextNode("-"), wt2.getFirstChild());
                     }
-
+                    
                     Node hyphen = util.getNode(n2, "w:noBreakHyphen", false);
                     hyphen.getParentNode().removeChild(hyphen);
                 }
             }
         }
     }
-
+    
     private List<Node> getWr(Document document)
     {
         Node n = document.getFirstChild();
-
+        
         List<Node> ns = new ArrayList<Node>();
         getWr(n, ns);
         return ns;
     }
-
+    
     private void getWr(Node root, List<Node> ns)
     {
         Node n = root.getFirstChild();
         if (n == null)
             return;
-
+        
         while (n != null)
         {
             if ("w:r".equals(n.getNodeName()) && !wordExtractor.isUnextractWr(n))
             {
                 ns.add(n);
             }
-
+            
             n = n.getNextSibling();
         }
-
+        
         n = root.getFirstChild();
         while (n != null)
         {
@@ -857,81 +876,178 @@ public class DocumentUtil
             n = n.getNextSibling();
         }
     }
-
+    
     private void mergeSameNode(List<Node> ns)
     {
         handleNoBreakHyphen(ns);
-
+        
         for (int i = 0; i < ns.size() - 1; i++)
         {
             Node n1 = ns.get(i);
             Node n2 = ns.get(i + 1);
-
+            
             if (!n2.equals(n1.getNextSibling()))
                 continue;
-
+            
             if (canMergeAsSame(n1, n2))
             {
                 mergeTo(n1, n2);
             }
         }
     }
-
+    
+    
+    /**
+     * 
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    *<w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>Na</w:t>
+    *</w:r>
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    *<w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:vertAlign w:val="subscript"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>2</w:t>
+    *</w:r>
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    <*w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>HPO</w:t>
+    *</w:r>
+    *<w:r w:rsidRPr="00F461D1">
+    *<w:rPr>
+    *<w:rFonts w:hAnsi="Times New Roman" w:ascii="Times New Roman" w:cs="Mangal" w:eastAsia="宋体"/>
+    *<w:kern w:val="1"/>
+    *<w:sz w:val="24"/>
+    *<w:szCs w:val="24"/>
+    *<w:vertAlign w:val="subscript"/>
+    *<w:lang w:eastAsia="hi-IN" w:bidi="hi-IN"/>
+    *</w:rPr>
+    *<w:t>4</w:t>
+    *</w:r>
+      @param ns
+     */
+    private void mergeSameNotLinkNode(List<Node> ns)
+    {
+        if (ns.size() < 3)
+            return;
+        
+        for (int i = 0; i < ns.size() - 1; i++)
+        {
+            Node n1 = ns.get(i);
+            int fj = -1;
+            
+            Node fn = n1;
+            for (int j = i + 1; j < ns.size() - 1; j++)
+            {
+                Node n2 = ns.get(j);
+                if (!n2.equals(fn.getNextSibling()))
+                    break;
+                
+                if (isSameNode(n1, n2) == 0)
+                {
+                    fj = j;
+                }
+                fn = n2;
+            }
+            
+            if (fj > 0)
+            {
+                if (i > 0 || fj < ns.size() - 1)
+                {
+                    mergeSameNotLinkNode(ns.subList(i, fj));
+                }
+                mergeNodes(ns.subList(i, fj));
+                i = fj;
+            }
+        }
+    }
+    
     private void mergeNodes(List<Node> ns)
     {
         for (int i = 0; i < ns.size() - 1; i++)
         {
             Node n1 = ns.get(i);
             Node n2 = ns.get(i + 1);
-
-            if (!n2.equals(n1.getNextSibling()))
+            
+            if (!n2.equals(getNextNotTextSibling(n1)))
                 continue;
-
+            
             if (canMerge(n1, n2))
             {
                 mergeTo(n1, n2);
             }
         }
     }
-
+    
+    private Node getNextNotTextSibling(Node node)
+    {
+        Node c = node.getNextSibling();
+        if (c == null)
+            return c;
+        
+        if (Node.TEXT_NODE  == c.getNodeType())
+            return getNextNotTextSibling(c);
+        
+        return c;
+    }
+    
     private Node getFirstTextNode(Node node)
     {
         Node c = node.getFirstChild();
         if (c == null)
             return null;
-
-        if (Node.TEXT_NODE == c.getNodeType())
+        
+        
+        if (Node.TEXT_NODE  == c.getNodeType())
             return c;
-
+        
         Node r = getFirstTextNode(c);
         while (r == null && c != null)
         {
             c = c.getNextSibling();
             r = getFirstTextNode(c);
         }
-
+        
         return r;
     }
-
+    
     private Node getLastTextNode(Node node)
     {
         Node c = node.getLastChild();
         if (c == null)
             return null;
-
-        if (Node.TEXT_NODE == c.getNodeType())
+        
+        
+        if (Node.TEXT_NODE  == c.getNodeType())
             return c;
-
+        
         Node r = getLastTextNode(c);
         while (r == null && c != null)
         {
             c = c.getPreviousSibling();
             r = getFirstTextNode(c);
         }
-
+        
         return r;
     }
-
+    
     private void addrPr(Node att, Node root)
     {
         Node n = util.getNode(root, "w:rPr");
@@ -940,46 +1056,64 @@ public class DocumentUtil
             n = root.getOwnerDocument().createElement("w:rPr");
             root.insertBefore(n, root.getFirstChild());
         }
-
+        
         Node a = att.cloneNode(true);
         n.appendChild(a);
     }
-
+    
     private boolean isHyphenWr(Node wr)
     {
         return util.getNode(wr, "w:noBreakHyphen", false) != null;
     }
-
-    private boolean isIgnoreAtt(Node n)
+    
+    private boolean isIgnoreAtt(Node n, boolean isSpace)
     {
         if (IGNORE_ATT.indexOf(n.getNodeName()) > -1)
             return true;
-
+        
+        if (isSpace && IGNORE_SPACE_ATT.indexOf(n.getNodeName()) > -1)
+        {
+            return true;
+        }
+        
         if ("w:rFonts".equals(n.getNodeName()))
         {
             List<Node> att = util.getAttributes(n);
-
+            
             for (Node a1 : att)
             {
                 String attname = a1.getNodeName();
                 if (IGNORE_FONT_ATT.indexOf(attname) < 0)
                     return false;
             }
-
+            
             return true;
         }
-
+        
+        if ("w:color".equals(n.getNodeName()))
+        {
+            List<Node> att = util.getAttributes(n);
+            if (att.size() == 1)
+            {
+                Node n1 = att.get(0);
+                if ("w:val".equals(n1.getNodeName()) && "000000".equals(n1.getNodeValue()))
+                {
+                    return true;
+                }
+            }
+        }
+        
         return false;
     }
-
+    
     private boolean canMergeAsComment(Node n1, Node n2)
     {
         Node wt1 = util.getNode(n1, "w:t", false);
         Node commentReference = util.getNode(n2, "w:commentReference", false);
-
+        
         if (wt1 == null || commentReference == null)
             return false;
-
+        
         List<Node> cs = util.getChildNodes(wt1);
         if (cs.size() > 0)
         {
@@ -989,48 +1123,48 @@ public class DocumentUtil
                 Node id = util.getAttribute(comment, "w:id");
                 if (id == null)
                     return false;
-
+                
                 Node id2 = util.getAttribute(commentReference, "w:id");
                 if (id2 == null)
                     return false;
-
+                
                 if (id.getNodeValue().equals(id2.getNodeValue()))
                 {
                     n2.getParentNode().removeChild(n2);
                     Element commentContent = n2.getOwnerDocument().createElement("commentContent");
-
+                    
                     List<Node> atts = util.getAttributes(n2);
                     for (Node att : atts)
                     {
                         commentContent.setAttribute(att.getNodeName(), att.getNodeValue());
                     }
-
+                    
                     List<Node> cs2 = util.getChildNodes(n2);
                     for (Node c : cs2)
                     {
                         c.getParentNode().removeChild(c);
                         commentContent.appendChild(c);
                     }
-
+                    
                     comment.appendChild(commentContent);
-
+                    
                     return true;
                 }
             }
         }
-
+        
         return false;
     }
-
+    
     private boolean canMergeAsSame(Node n1, Node n2)
     {
-        // has merged.
+        // has merged. 
         if (canMergeAsComment(n1, n2))
             return false;
-
+        
         if (util.getNode(n2, "w:br", false) != null)
             return false;
-
+        
         Node tab = util.getNode(n2, "w:tab", false);
         if (util.getNode(n2, "w:tab", false) != null)
         {
@@ -1038,26 +1172,26 @@ public class DocumentUtil
             if (sib == null || !"w:t".equals(sib.getNodeName()))
                 return false;
         }
-
+        
         Node wt1 = util.getNode(n1, "w:t", false);
         Node wt2 = util.getNode(n2, "w:t", false);
-
+        
         if (wt1 == null || wt2 == null)
             return false;
-
+        
         Node rPr1 = util.getNode(n1, "w:rPr", false);
         Node rPr2 = util.getNode(n2, "w:rPr", false);
-
+        
         List<Node> list1 = util.getChildNodes(rPr1);
         List<Node> list2 = util.getChildNodes(rPr2);
-
+        
         for (Node att1 : list1)
         {
             boolean found = false;
             for (Node att2 : list2)
             {
                 int n = isSameNode(att1, att2);
-
+                
                 if (n == 0)
                 {
                     list2.remove(att2);
@@ -1065,38 +1199,38 @@ public class DocumentUtil
                     break;
                 }
             }
-
+            
             if (!found)
             {
-                if (isIgnoreAtt(att1))
+                if (isIgnoreAtt(att1, StringUtil.isEmpty(wt1.getTextContent())))
                 {
                     att1.getParentNode().removeChild(att1);
                     continue;
                 }
-
+                    
                 return false;
             }
         }
-
+        
         for (Node att2 : list2)
         {
-            if (isIgnoreAtt(att2))
+            if (isIgnoreAtt(att2, StringUtil.isEmpty(wt2.getTextContent())))
             {
                 att2.getParentNode().removeChild(att2);
                 continue;
             }
-
+            
             return false;
         }
-
+        
         return true;
     }
-
+    
     private boolean canMerge(Node n1, Node n2)
     {
         if (util.getNode(n2, "w:br", false) != null)
             return false;
-
+        
         Node tab = util.getNode(n2, "w:tab", false);
         if (util.getNode(n2, "w:tab", false) != null)
         {
@@ -1104,38 +1238,49 @@ public class DocumentUtil
             if (sib == null || !"w:t".equals(sib.getNodeName()))
                 return false;
         }
-
+        
+        Node wp = n1.getParentNode();
+        List<Node> wpPrs = new ArrayList<Node>();
+        if (wp != null && "w:p".equals(wp.getNodeName()))
+        {
+            Node wpPr = util.getNode(wp, "w:pPr", false);
+            if (wpPr != null)
+            {
+                wpPrs = util.getChildNodes(util.getNode(wpPr, "w:rPr", false));
+            }
+        }
+        
         Node wt1 = util.getNode(n1, "w:t", false);
         Node wt2 = util.getNode(n2, "w:t", false);
-
+        
         if (wt1 == null || wt2 == null)
             return false;
-
+        
         Node rPr1 = util.getNode(n1, "w:rPr", false);
         Node rPr2 = util.getNode(n2, "w:rPr", false);
-
+        
         List<Node> rprs1 = new ArrayList<Node>();
         List<Node> rprs2 = new ArrayList<Node>();
-
+        
         List<Node> rprs11 = new ArrayList<Node>();
         List<Node> rprs22 = new ArrayList<Node>();
-
+        
         List<Node> removeRprs = new ArrayList<Node>();
         List<Node> addRprs = new ArrayList<Node>();
-
+        
         List<Node> list1 = util.getChildNodes(rPr1);
         List<Node> list2 = util.getChildNodes(rPr2);
-
+        
         Map<String, Style> m = getAllStylesMap();
-
+        
         for (Node att1 : list1)
         {
             boolean found = false;
-
+            
             for (Node att2 : list2)
             {
                 int n = isSameNode(att1, att2);
-
+                
                 if (n == 0)
                 {
                     list2.remove(att2);
@@ -1153,30 +1298,57 @@ public class DocumentUtil
                     }
                 }
             }
-
+            
             if (!found)
             {
-                if (isIgnoreAtt(att1))
+                if (isIgnoreAtt(att1, StringUtil.isEmpty(wt1.getTextContent())))
                 {
                     att1.getParentNode().removeChild(att1);
                     continue;
                 }
-
+                
+                // is exist in w:pPr.
+                for (Node att2 : wpPrs)
+                {
+                    if (isSameNode(att1, att2) == 0)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (found)
+                    continue;
+                
                 rprs1.add(att1);
             }
         }
-
+        
         for (Node att2 : list2)
         {
-            if (isIgnoreAtt(att2))
+            if (isIgnoreAtt(att2, StringUtil.isEmpty(wt2.getTextContent())))
             {
                 att2.getParentNode().removeChild(att2);
                 continue;
             }
-
+            
+            boolean found = false;
+            // is exist in w:pPr.
+            for (Node att3 : wpPrs)
+            {
+                if (isSameNode(att3, att2) == 0)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (found)
+                continue;
+            
             rprs2.add(att2);
         }
-
+        
         for (Node att : rprs1)
         {
             Style s = m.get(att.getNodeName());
@@ -1186,7 +1358,7 @@ public class DocumentUtil
             }
         }
         rprs1.removeAll(rprs11);
-
+        
         for (Node att : rprs2)
         {
             Style s = m.get(att.getNodeName());
@@ -1196,62 +1368,62 @@ public class DocumentUtil
             }
         }
         rprs2.removeAll(rprs22);
-
+        
         for (Node r : removeRprs)
         {
             r.getParentNode().removeChild(r);
         }
-
+        
         for (Node r : addRprs)
         {
             addrPr(r, n2);
         }
-
+        
         List<Style> styles = DocxStyleUtil.getAllStyles();
-
+        
         for (Node att : rprs1)
         {
             Style s = Style.getStyle(att, styles);
             s.removeStyle(att);
         }
-
+        
         for (Node att : rprs2)
         {
             Style s = Style.getStyle(att, styles);
             s.removeStyle(att);
         }
-
+        
         addAtt(rprs11, wt1);
         addAtt(rprs22, wt2);
-
+        
         return true;
     }
-
+    
     private void addAtt(List<Node> atts, Node at)
     {
         if (atts.size() == 0)
-            return;
-
+            return ;
+        
         Element e = at.getOwnerDocument().createElement("rpr");
         Element ec = at.getOwnerDocument().createElement("rprChild");
         e.appendChild(ec);
-
+        
         for (Node att : atts)
         {
             ec.appendChild(att);
         }
-
+        
         List<Node> cs = util.getChildNodes(at);
-
+        
         for (Node c : cs)
         {
             at.removeChild(c);
             e.appendChild(c);
         }
-
+        
         at.appendChild(e);
     }
-
+    
     private Map<String, Style> getAllStylesMap()
     {
         Map<String, Style> styles = new HashMap<String, Style>();
@@ -1262,18 +1434,18 @@ public class DocumentUtil
         }
         return styles;
     }
-
+    
     private void mergeText(Node n1, Node n2)
     {
         List<Node> cs = util.getChildNodes(n1);
         Node f = n2.getFirstChild();
-
+        
         for (int i = 0; i < cs.size() - 1; i++)
         {
             Node c = cs.get(i);
             n2.insertBefore(c, f);
         }
-
+        
         Node c = cs.get(cs.size() - 1);
         if (Node.TEXT_NODE != c.getNodeType() && isSameNode(c, f) == 0)
         {
@@ -1284,64 +1456,65 @@ public class DocumentUtil
             n2.insertBefore(c, f);
         }
     }
-
+    
     private void mergeTo(Node n1, Node n2)
     {
         Node wt1 = util.getNode(n1, "w:t", false);
         Node wt2 = util.getNode(n2, "w:t", false);
-
+        
         if (wt1 != null && wt2 != null)
         {
             mergeText(wt1, wt2);
-
+            
             Node rPr2 = util.getNode(n2, "w:rPr", false);
             if (rPr2 == null)
             {
                 Element e = n2.getOwnerDocument().createElement("w:rPr");
                 n2.insertBefore(e, wt2);
             }
-
+            
             Element e = (Element) wt2;
             e.setAttribute("xml:space", "preserve");
-
+            
             if (util.getNode(n1, "w:br", false) != null)
             {
                 Element br = n2.getOwnerDocument().createElement("w:br");
                 n2.insertBefore(br, wt2);
             }
-
+            
             if (util.getNode(n1, "w:tab", false) != null)
             {
                 Element br = n2.getOwnerDocument().createElement("w:tab");
                 n2.insertBefore(br, wt2);
             }
-
+                
             n1.getParentNode().removeChild(n1);
         }
     }
-
+    
     private boolean isSameFont(Node n1, Node n2)
     {
         List<Node> att1 = util.getAttributes(n1);
         List<Node> att2 = util.getAttributes(n2);
-
+        
         for (Node a1 : att1)
         {
             String attname = a1.getNodeName();
             if (IGNORE_FONT_ATT.indexOf(attname) > -1)
                 continue;
-
+            
             boolean found = false;
             for (Node a2 : att2)
             {
                 String value = a1.getNodeValue();
-
+                
                 String attname2 = a2.getNodeName();
                 String value2 = a2.getNodeValue();
-
+                
                 if (attname.equals(attname2))
                 {
-                    if (value == null && value2 == null || value != null && value.equals(value2))
+                    if (value == null && value2 == null 
+                            || value != null && value.equals(value2))
                     {
                         found = true;
                         att2.remove(a2);
@@ -1349,69 +1522,75 @@ public class DocumentUtil
                     }
                 }
             }
-
+            
             if (!found)
                 return false;
         }
-
+        
         for (Node a2 : att2)
         {
             String attname = a2.getNodeName();
             if (IGNORE_FONT_ATT.indexOf(attname) < 0)
                 return false;
         }
-
+        
         return true;
     }
-
+    
     /**
      * 
      * @param n1
      * @param n2
-     * @return 0: is same 1: is similar -1: different
+     * @return 0: is same
+     *         1: is similar
+     *        -1: different
      */
     private int isSameNode(Node n1, Node n2)
     {
         if (n1.getNodeType() != n2.getNodeType())
             return -1;
-
+        
         if (n1.getNodeName() != n2.getNodeName())
             return -1;
-
+        
+        // not merge rpr node.
+        if ("rpr".equals(n1.getNodeName()) || "rpr".equals(n2.getNodeName()))
+            return -1;
+        
         NamedNodeMap attrs1 = n1.getAttributes();
         NamedNodeMap attrs2 = n2.getAttributes();
-
+        
         int result = 0;
         if (attrs1 != null)
         {
             if (attrs2 == null)
                 return -1;
-
+            
             if ("w:rFonts".equals(n2.getNodeName()))
             {
                 if (isSameFont(n1, n2))
                     return 0;
-
+                
                 result = 1;
             }
             else
             {
                 if (attrs1.getLength() != attrs2.getLength())
                     return -1;
-
+                
                 for (int i = 0; i < attrs1.getLength(); ++i)
                 {
                     Node att = attrs1.item(i);
                     String attname = att.getNodeName();
                     String value = att.getNodeValue();
-
+                    
                     Node att2 = attrs2.item(i);
                     String attname2 = att2.getNodeName();
                     String value2 = att2.getNodeValue();
-
+                    
                     if (!attname.equals(attname2))
                         return -1;
-
+                    
                     if (!value.equals(value2))
                     {
                         if ("w:val".equals(attname))
@@ -1426,16 +1605,16 @@ public class DocumentUtil
                 }
             }
         }
-
+        
         return result;
     }
-
-    public WordExtractor getWordExtractor()
+    
+    public WordExtractor getWordExtractor() 
     {
         return wordExtractor;
     }
 
-    public void setWordExtractor(WordExtractor wordExtractor)
+    public void setWordExtractor(WordExtractor wordExtractor) 
     {
         this.wordExtractor = wordExtractor;
     }

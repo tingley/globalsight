@@ -96,10 +96,12 @@ public interface ReportConstants
 
     public static final String REPORT_QA_CHECKS_REPORT = "QAChecksReport";
     public static final String PREFIX_QA_CHECKS_REPORT = "QCR";
-    
+
     public static final String LOCPROFILE_WFTEMPLATE_REPORT = "L10nProfileWfTemplateReport";
 
     // Attribute name in request/session
+    public static final String JOBIDS = "jobIds";
+    public static final String JOBNAMELIST = "jobNameList";
     public static final String JOB_IDS = "inputJobIDS";
     public static final String REPORT_TYPE = "reportType";
     public static final String REPORTJOBINFO_LIST = "reportsJobInfoList";
@@ -107,7 +109,7 @@ public interface ReportConstants
     public static final String PROJECT_LIST = "reportsProjectList";
     public static final String L10N_PROFILES = "l10nProfiles";
     public static final String SUB_DIR = "subDir";
-    
+
     public static final String SOURCE_EQUAL_TARGET_EXACT_MATCH = "Exact Match";
     public static final String SOURCE_EQUAL_TARGET_UNTRANSLATED = "Untranslated";
     public static final String SOURCE_EQUAL_TARGET_TRANSLATED_OR_APPROVED = "Translated/Approved";
@@ -120,18 +122,14 @@ public interface ReportConstants
     {
         private static final long serialVersionUID = -4245555507397871284L;
         {
-            put(REVIEWERS_COMMENTS_REPORT,
-                    REVIEWERS_COMMENTS_REPORT_ABBREVIATION);
-            put(REVIEWERS_COMMENTS_SIMPLE_REPORT,
-                    REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION);
+            put(REVIEWERS_COMMENTS_REPORT, REVIEWERS_COMMENTS_REPORT_ABBREVIATION);
+            put(REVIEWERS_COMMENTS_SIMPLE_REPORT, REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION);
             put(TRANSLATIONS_EDIT_REPORT, TRANSLATIONS_EDIT_REPORT_ABBREVIATION);
-            put(IMPLEMENTED_COMMENTS_CHECK_REPORT,
-                    IMPLEMENTED_COMMENTS_CHECK_REPORT_ABBREVIATION);
+            put(IMPLEMENTED_COMMENTS_CHECK_REPORT, IMPLEMENTED_COMMENTS_CHECK_REPORT_ABBREVIATION);
             put(ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR,
                     ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR_ABBREVIATION);
             put(POST_REVIEW_QA_REPORT, POST_REVIEW_REPORT_ABBREVIATION);
-            put(TRANSLATION_VERIFICATION_REPORT,
-                    TRANSLATIONS_VERIFICATION_REPORT_ABBREVIATION);
+            put(TRANSLATION_VERIFICATION_REPORT, TRANSLATIONS_VERIFICATION_REPORT_ABBREVIATION);
         }
     };
 

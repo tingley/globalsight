@@ -12,6 +12,8 @@
                  com.globalsight.everest.webapp.pagehandler.PageHandler,
                  com.globalsight.util.edit.EditUtil,
                  com.globalsight.util.GlobalSightLocale,
+                 com.globalsight.util.SortUtil,
+                 com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
                  java.util.Locale,
                  java.util.ResourceBundle"
           session="true"
@@ -24,8 +26,6 @@
     }
     ResourceBundle bundle = PageHandler.getBundle(session);
     
-   	List<ReportJobInfo> jobList = (ArrayList<ReportJobInfo>)
-   	     request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
    	List<Project> projectList = (ArrayList<Project>)
    	     request.getAttribute(ReportConstants.PROJECT_LIST);
     List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
@@ -51,6 +51,7 @@
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
 var alertInfo;
+var reportJobInfo;
 
 $(document).ready(function(){
 	$("#csf").datepicker({
@@ -70,19 +71,6 @@ $(document).ready(function(){
 		}
 	});
 });
-
-// Set the ReportJobInfo datas to the JS(jobInfos) 
-var jobInfos = new Array();
-<%
-for(int i=0; i<jobList.size(); i++)  
-{
-    ReportJobInfo j = jobList.get(i);
-%>
-	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=EditUtil.encodeTohtml(j.getJobName())%>", <%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
-<%
-}
-%>
-// Finished Set the ReportJobInfo datas to the JS.
 
 function setDisableTRWrapper(trid)
 {
@@ -187,28 +175,57 @@ function fnDoCancel() {
   });
 }
 
+function validateForm()
+{
+    if(lisaQAForm.reportOnJobId.checked)
+    {
+        var jobIDArr =  lisaQAForm.jobIds.value.split(",");
+		if(!validateIDS(jobIDArr, null))
+        {
+           $("#jobNameList").attr("selected", true);
+           return ('<%=bundle.getString("lb_invalid_jobid")%>');
+        }
+    }
+    if(lisaQAForm.reportOnJobName.checked) {
+        var len = $("#jobNameList").find("option:selected").length;
+        if(len == 0) {
+            var ops = $("#jobNameList").children();
+            if(ops.length == 0) {
+                return ('<%=bundle.getString("msg_invalid_jobName")%>');
+            } else {
+                ops.attr("selected", true);
+            }
+	    }
+	}
+    var startVal=lisaQAForm.<%=creationStart%>.value;
+	if(startVal){
+		defautSelect();
+		  return ""; 
+	}
+	
+	var endVal=lisaQAForm.<%=creationEnd%>.value;
+	if(endVal)
+	{
+		defautSelect();
+        return ""; 
+	}
+    return "";
+}
+
 function doSubmit()
 {
-   	var msg =  dataSelectAll();
-   	if (msg != "")
-   	{
-    	alert(msg);
-    	return;
-   	}
-   
-   	alertInfo = null;
+	var msg = validateForm();
+    if (msg != "")
+    {
+        alert(msg);
+        return;
+    }
 	var jobIDArr = fnGetSelectedJobIds();
 	if(jobIDArr == null || jobIDArr.length == 0)
 	{
 		if(alertInfo != null)
 			alert(alertInfo); 
 		return;	
-	}	
-
-	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
-	{
-		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
-		return;
 	}
 	
 	var dataoptions;
@@ -280,7 +297,7 @@ function doSubmit()
 function fnGetSelectedJobIds()
 {
 	var jobIDArr = new Array();
-	if(document.getElementsByName("reportOn")[0].checked)
+	if(lisaQAForm.reportOnJobId.checked)
 	{
 		var jobIDText = document.getElementById("jobIds").value;
 		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
@@ -289,7 +306,7 @@ function fnGetSelectedJobIds()
 			return;
 		}
 		jobIDArr = jobIDText.split(",");
-		if(!validateIDS(jobIDArr, jobInfos))
+		if(!validateIDS(jobIDArr, null))
         {
 			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
 			return;
@@ -306,7 +323,7 @@ function fnGetSelectedJobIds()
 			}
 		}
 		
-		if(!validateIDS(jobIDArr, jobInfos))
+		if(!validateIDS(jobIDArr, null))
 	    {
 			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
 			return;
@@ -319,71 +336,100 @@ function fnGetSelectedJobIds()
 
 function filterJob()
 {
-	if(document.getElementsByName("reportOn")[0].checked)
-	{
-		return;
-	}
-	
-	var jobNameList = document.getElementById("jobNameList");
-	var projectNameList = document.getElementById("projectNameList");
-	var jobStatus = document.getElementById("jobStatus");
-	var targetLocalesList = document.getElementById("targetLocalesList");
-	
-	// selected project 
-	var currSelectValueProject = new Array();
-	for(i=0;i<projectNameList.length;i++)
-	{
-		var op= projectNameList.options[i];
-		if(op.selected)
-		{
-	    	currSelectValueProject.push(op.value);
-		}
-	}
-	   
-	// selected job status 
-	var currSelectValueJobStatus = new Array();
-	for(i=0;i<jobStatus.length;i++)
-	{
-		var op= jobStatus.options[i];
-		if(op.selected)
-		{
-	    	currSelectValueJobStatus.push(op.value);
-		}
-	} 
-	   
-	// selected target locales 
-	var currSelectValueTargetLocale = new Array();
-	for(i=0;i<targetLocalesList.length;i++)
-	{
-		var op= targetLocalesList.options[i];
-		if(op.selected)
-		{
-	    	currSelectValueTargetLocale.push(op.value);
-		}
-	}
-	
-	jobNameList.options.length=0;
-	
-	// Insert jobNameList select options 
-	for(var i=0; i<jobInfos.length; i++)
-	{
-		if(contains(currSelectValueProject, jobInfos[i].projectId)
-			&& contains(currSelectValueJobStatus, jobInfos[i].jobStatus)
-			&& containsArray(currSelectValueTargetLocale, jobInfos[i].targetLocals))
-		{
-			addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
-		}
-	}
+    if(lisaQAForm.reportOnJobId.checked)
+    {
+        return;
+    }
+
+    // If job list is null, initialize it first.
+    if (reportJobInfo == null)
+    {
+    	var varItem = new Option("Loading jobs, please wait ...", "-1");
+    	lisaQAForm.jobNameList.options.add(varItem);
+    	lisaQAForm.submitButton.disabled = true;
+
+        var url ="${self.pageURL}&activityName=xlsReportCommentsAnalysis&action=getReportJobInfo";
+        $.getJSON(url, function(data) {
+			reportJobInfo = data;
+			filterJob2();
+	    });
+    }
+    else
+    {
+        filterJob2();
+    }
+}
+
+function filterJob2()
+{
+	lisaQAForm.jobNameList.options.length = 0;
+
+    //selected job status
+    var currSelectValueJobStatus = new Array();
+    for(i = 0; i < lisaQAForm.jobStatus.length; i++)
+    {
+        var op = lisaQAForm.jobStatus.options[i];
+        if(op.selected)
+        {
+            currSelectValueJobStatus.push(op.value);
+        }
+    }
+
+    //selected target locales
+    var currSelectValueTargetLocale = new Array();
+    for(i = 0; i < lisaQAForm.targetLocalesList.length; i++)
+    {
+        var op = lisaQAForm.targetLocalesList.options[i];
+        if(op.selected)
+        {
+            currSelectValueTargetLocale.push(op.value);
+        }
+    }
+
+    //selected project
+    var currSelectValueProject = new Array();
+    for(i = 0; i < lisaQAForm.projectNameList.length; i++)
+    {
+        var op = lisaQAForm.projectNameList.options[i];
+        if(op.selected)
+        {
+            currSelectValueProject.push(op.value);
+        }
+    }
+
+    $(reportJobInfo).each(function(i, item) {
+        if(contains(currSelectValueProject, item.projectId)
+ 	        && contains(currSelectValueJobStatus, item.jobState))
+        {
+            var isLocaleFlag = "false";
+            $.each(item.targetLocales, function(i, item) {
+                if (contains(currSelectValueTargetLocale, item)) {
+                    isLocaleFlag = "true";
+                    //break the target locales check for performance
+                    return false;
+                }
+            });
+            if(isLocaleFlag == "true")
+            {
+                var varItem = new Option(item.jobName, item.jobId);
+                varItem.setAttribute("title", item.jobName);
+                lisaQAForm.jobNameList.options.add(varItem);
+            }
+        }
+     });
+
+    if(lisaQAForm.jobNameList.options.length==0)
+    {
+    	lisaQAForm.submitButton.disabled=true;
+    }
+    else
+    {
+    	lisaQAForm.submitButton.disabled=false;
+    }
 }
 
 function doOnload()
 {
-	// Initial jobNameList select options 
-	for(var i=0; i<jobInfos.length; i++)
-	{
-		addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
-	}
-	
 	// Set the jobIds as default check. 
 	setDisableTRWrapper("idTRJobNames");
 }
@@ -418,22 +464,25 @@ function sortNumber(a,b)
         <td class="standardText"><%=bundle.getString("lb_report_on")%></td>
         <td class="standardText" VALIGN="BOTTOM">
             <table cellspacing=0>
-                <tr id="idTRJobIds">
-                    <td><input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%></td>
-                    <td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
-                </tr>
-                <tr id="idTRJobNames">
-                    <td><input type="radio" id="idTRJobNamesRadio" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:</td>
-                    <td class="standardText" VALIGN="BOTTOM"><select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;"></select></td>
-                </tr>
-            </table>
+            <tr id="idTRJobIds">
+                <td><input type="radio" id="reportOnJobId" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%></td>
+                <td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
+            </tr>
+            <tr id="idTRJobNames">
+                <td><input type="radio" id="reportOnJobName" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:</td>
+                <td>
+                <select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;" disabled>
+                </select>
+                </td>
+            </tr>
+        </table>
         </td>
     </tr>
 
     <tr id="idTRProject">
         <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select id="projectNameList" name="projectNameList" MULTIPLE size="4" onChange="filterJob()">
+        <select id="projectNameList" name="projectNameList" MULTIPLE size=4 onChange="filterJob()" disabled>
             <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
             for (Project p : projectList)
@@ -448,7 +497,7 @@ function sortNumber(a,b)
     <tr id="idTRJobStatus">
         <td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select id="jobStatus" name="jobStatus" MULTIPLE size="4" onChange="filterJob()">
+        <select id="jobStatus" name="jobStatus" multiple="true" size=6 onChange="filterJob()" disabled>
             <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
             <option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
             <option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
@@ -465,6 +514,7 @@ function sortNumber(a,b)
         <select name="targetLocalesList" id="targetLocalesList" MULTIPLE size="4" onChange="filterJob()">
             <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
+			SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
             for (GlobalSightLocale gsl : targetLocales)
             {
 %>    		<option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
@@ -511,7 +561,7 @@ function sortNumber(a,b)
 
     <tr style="height: 20px;"></tr>
     <tr>
-        <td><input type="button" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
+        <td><input type="button" id="submitButton" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
         <td><input type="button" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="fnDoCancel();"></TD>
     </tr>
 </table>

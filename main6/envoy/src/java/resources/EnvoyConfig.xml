@@ -2685,7 +2685,9 @@
       <WebPage pageName="ONLINEJOBSFORIPTRANSLATOR" isDefault="true" jspName="/envoy/administration/reports/onlineJobsReportForIPTranslator.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportActivityDuration">
-      <WebPage pageName="ACTIVITYDURATION" isDefault="true" jspName="/envoy/administration/reports/activityDurationReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="ACTIVITYDURATION" isDefault="true" jspName="/envoy/administration/reports/activityDurationReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="ACTIVITYDURATION"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportJobStatus">
       <WebPage pageName="JOBSTATUS" isDefault="true" jspName="/envoy/administration/reports/jobStatusXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
@@ -2714,16 +2716,24 @@
       <WebPage pageName="SLA" isDefault="true" jspName="/envoy/administration/reports/slaXlsReportWebForum.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportLanguageSignOff">
-      <WebPage pageName="REVIEWERLISAQA" isDefault="true" jspName="/envoy/administration/reports/LisaQALanguageSignOffReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="REVIEWERLISAQA" isDefault="true" jspName="/envoy/administration/reports/LisaQALanguageSignOffReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="REVIEWERLISAQA"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportLanguageSignOffSimple">
-      <WebPage pageName="REVIEWERLISAQASIMPLE" isDefault="true" jspName="/envoy/administration/reports/LisaQALanguageSignOffSimpleReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="REVIEWERLISAQASIMPLE" isDefault="true" jspName="/envoy/administration/reports/LisaQALanguageSignOffSimpleReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="REVIEWERLISAQASIMPLE"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportCommentsAnalysis">
-      <WebPage pageName="COMMENTSANALYSIS" isDefault="true" jspName="/envoy/administration/reports/LisaQACommentsAnalysisReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="COMMENTSANALYSIS" isDefault="true" jspName="/envoy/administration/reports/LisaQACommentsAnalysisReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="COMMENTSANALYSIS"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportScorecard">
-      <WebPage pageName="SORRECARDREPORT" isDefault="true" jspName="/envoy/administration/reports/ScorecardReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="SORRECARDREPORT" isDefault="true" jspName="/envoy/administration/reports/ScorecardReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="SORRECARDREPORT"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportPostReviewQA">
       <WebPage pageName="POSTREVIEWQA" isDefault="true" jspName="/envoy/administration/reports/PostReviewQAReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
@@ -2744,10 +2754,14 @@
       <WebPage pageName="TRANSLATIONPROGRESS" isDefault="true" jspName="/envoy/administration/reports/translationProgressXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="implementedCommentsCheck">
-      <WebPage pageName="IMPLEMENTCOMMENTSCHK" isDefault="true" jspName="/envoy/administration/reports/ImplementedCommentsCheckReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="IMPLEMENTCOMMENTSCHK" isDefault="true" jspName="/envoy/administration/reports/ImplementedCommentsCheckReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="IMPLEMENTCOMMENTSCHK"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportCharacterCount">
-      <WebPage pageName="CharacterCount" isDefault="true" jspName="/envoy/administration/reports/characterCountReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="CharacterCount" isDefault="true" jspName="/envoy/administration/reports/characterCountReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="CharacterCount"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="MTPostEditDistanceReport">
       <WebPage pageName="mtPostED" isDefault="true" jspName="/envoy/administration/reports/mtPostEditDistanceReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">

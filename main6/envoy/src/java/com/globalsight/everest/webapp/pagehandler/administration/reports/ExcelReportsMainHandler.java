@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -64,7 +64,7 @@ public class ExcelReportsMainHandler extends PageHandler
     // Some reports are using 6 job states (no "pending"), while the others are
     // using all 7 states, a bit strange. Do not change previous behavior for
     // now.
-    private static List<String> reportNameListUsing6States= new ArrayList<String>();
+    private static List<String> reportNameListUsing6States = new ArrayList<String>();
     static
     {
         // Translations Edit Report
@@ -85,7 +85,7 @@ public class ExcelReportsMainHandler extends PageHandler
         reportNameListUsing6States.add("xlsReportComment");
         // Vendor PO
         reportNameListUsing6States.add("xlsReportVendorPO");
-        //Post-Review QA Report
+        // Post-Review QA Report
         reportNameListUsing6States.add("xlsReportPostReviewQA");
         // Translation Verification report
         reportNameListUsing6States.add("xlsReportTranslationVerification");
@@ -97,15 +97,23 @@ public class ExcelReportsMainHandler extends PageHandler
     {
         // Detailed Word Counts by Job
         asynJobListReports.add("xlsReportFileList");
-        // MT Post Edit Distance Report
         asynJobListReports.add("MTPostEditDistanceReport");
+        asynJobListReports.add("implementedCommentsCheck");
+        asynJobListReports.add("xlsReportTranslationVerification");
+        asynJobListReports.add("xlsReportTranslationsEdit");
+        asynJobListReports.add("xlsReportPostReviewQA");
+        asynJobListReports.add("xlsReportCharacterCount");
+        asynJobListReports.add("xlsReportScorecard");
+        asynJobListReports.add("xlsReportCommentsAnalysis");
+        asynJobListReports.add("xlsReportLanguageSignOff");
+        asynJobListReports.add("xlsReportLanguageSignOffSimple");
+        asynJobListReports.add("xlsReportActivityDuration");
     }
 
     @Override
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, EnvoyServletException
     {
         String activityName = (String) p_request.getParameter("activityName");
         String action = p_request.getParameter("action");
@@ -164,15 +172,14 @@ public class ExcelReportsMainHandler extends PageHandler
     {
         try
         {
-			targetLocales = new ArrayList<GlobalSightLocale>(ServerProxy
-					.getLocaleManager().getAllTargetLocales());
-			SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(
-					getUILocale()));
+            targetLocales = new ArrayList<GlobalSightLocale>(
+                    ServerProxy.getLocaleManager().getAllTargetLocales());
+            SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(getUILocale()));
 
-			projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
-					.getProjectsByUser(p_curUserId);
-			SortUtil.sort(projectList, new ProjectComparator(getUILocale()));
-		}
+            projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
+                    .getProjectsByUser(p_curUserId);
+            SortUtil.sort(projectList, new ProjectComparator(getUILocale()));
+        }
         catch (Exception e)
         {
             LOGGER.error("Getting target locales or project error", e);
@@ -193,7 +200,7 @@ public class ExcelReportsMainHandler extends PageHandler
                 jsonObject = new JSONObject();
                 GlobalSightLocale targetLocale = wf.getTargetLocale();
                 jsonObject.put("targetLocId", targetLocale.getId());
-                jsonObject.put("targetLocName",targetLocale.getDisplayName(uiLocale));
+                jsonObject.put("targetLocName", targetLocale.getDisplayName(uiLocale));
                 jsonArray.add(jsonObject);
             }
             return jsonArray.toJSONString();
@@ -234,8 +241,8 @@ public class ExcelReportsMainHandler extends PageHandler
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
         {
             filterReportJobInfoByProject(reportJobInfoList);
-            SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
-                    JobComparator.NAME, getUILocale()));
+            SortUtil.sort(reportJobInfoList,
+                    new ReportJobInfoComparator(JobComparator.NAME, getUILocale()));
         }
 
         return reportJobInfoList;
@@ -253,8 +260,8 @@ public class ExcelReportsMainHandler extends PageHandler
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
         {
             filterReportJobInfoByProject(reportJobInfoList);
-            SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
-                    JobComparator.NAME, getUILocale()));
+            SortUtil.sort(reportJobInfoList,
+                    new ReportJobInfoComparator(JobComparator.NAME, getUILocale()));
         }
 
         return reportJobInfoList;
@@ -270,8 +277,8 @@ public class ExcelReportsMainHandler extends PageHandler
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
         {
             filterReportJobInfoByProject(reportJobInfoList);
-            SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
-                    JobComparator.NAME, getUILocale()));
+            SortUtil.sort(reportJobInfoList,
+                    new ReportJobInfoComparator(JobComparator.NAME, getUILocale()));
         }
 
         return reportJobInfoList;
@@ -279,12 +286,10 @@ public class ExcelReportsMainHandler extends PageHandler
 
     // If job does not belong to projects current user is member of, remove this
     // job.
-    private void filterReportJobInfoByProject(
-            List<ReportJobInfo> reportJobInfoList)
+    private void filterReportJobInfoByProject(List<ReportJobInfo> reportJobInfoList)
     {
         Set<String> projectIds = getProjectIdSet();
-        for (Iterator<ReportJobInfo> it = reportJobInfoList.iterator(); it
-                .hasNext();)
+        for (Iterator<ReportJobInfo> it = reportJobInfoList.iterator(); it.hasNext();)
         {
             ReportJobInfo info = it.next();
             if (!projectIds.contains(info.getProjectId()))

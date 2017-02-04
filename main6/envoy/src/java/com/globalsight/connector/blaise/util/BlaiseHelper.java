@@ -194,6 +194,49 @@ public class BlaiseHelper
         return results;
     }
 
+    private List<TranslationInboxEntryVo> convertToGS(List<InboxEntry> entries, TranslationAgencyClient client)
+            throws Exception
+    {
+        if (entries == null || entries.size() == 0 || client == null)
+            return new ArrayList<TranslationInboxEntryVo>();
+
+        List<TranslationInboxEntryVo> vos = new ArrayList<>(entries.size());
+        Set<Long> idSets = new HashSet<>();
+        for (InboxEntry entry : entries)
+            idSets.add(entry.getId());
+        long runTime = System.currentTimeMillis();
+        Map<InboxEntry, PublicationTypeUsageDetails> usages = client.mapPublicationTypeUsages(idSets);
+        logger.debug("Get all usages by id set used " + (System.currentTimeMillis() - runTime) + " ms");
+        runTime = System.currentTimeMillis();
+        Map<InboxEntry, TranslationStatisticsDetails> counts = client.mapTranslationStatistics(idSets);
+        logger.debug("Get all word count by id set used " + (System.currentTimeMillis() - runTime) + " ms");
+
+        boolean hasUsages = usages != null && usages.size() > 0;
+        boolean hasCounts = counts != null && counts.size() > 0;
+        PublicationTypeUsageDetails usage;
+        TranslationStatisticsDetails detailCount;
+
+        runTime = System.currentTimeMillis();
+        for (InboxEntry entry : entries)
+        {
+            TranslationInboxEntryVo vo = new TranslationInboxEntryVo((TranslationInboxEntry) entry);
+            if (hasUsages) {
+                usage = usages.get(entry);
+                if (usage != null)
+                    vo.setUsages(usage.getTypes());
+            }
+            if (hasCounts) {
+                detailCount = counts.get(entry);
+                if (detailCount != null)
+                    vo.setWordCount(detailCount.getNewSentencesWords());
+            }
+            vos.add(vo);
+        }
+        logger.debug("Changed objects to GS used " + (System.currentTimeMillis() - runTime) + " ms");
+
+        return vos;
+    }
+
     /**
      * Convert Blaise translation inbox entry to GlobalSight TranslationInboxEntryVo object
      *
@@ -204,11 +247,14 @@ public class BlaiseHelper
      */
     private TranslationInboxEntryVo convert(TranslationInboxEntry entry, TranslationAgencyClient client) throws Exception
     {
+        long runTime = System.currentTimeMillis();
         TranslationInboxEntryVo vo = new TranslationInboxEntryVo(entry);
+        //logger.info("Convert TranslationInboxEntry directly used " + (System.currentTimeMillis() - runTime) + " ms");
         Set<Long> idSet = new HashSet<>(1);
         idSet.add(entry.getId());
         List<String> entryUsages = new ArrayList<>();
         // Fetch usages of entry
+        runTime = System.currentTimeMillis();
         Map<InboxEntry, PublicationTypeUsageDetails> usages = client.mapPublicationTypeUsages(idSet);
         if (usages != null)
         {
@@ -221,7 +267,9 @@ public class BlaiseHelper
             }
         }
         vo.setUsages(entryUsages);
+        //logger.info("Fetch usages of entry used " + (System.currentTimeMillis() - runTime) + " ms");
 
+        runTime = System.currentTimeMillis();
         Map<InboxEntry, TranslationStatisticsDetails> counts = client.mapTranslationStatistics(idSet);
         int wordCount = 0;
         if (counts != null)
@@ -233,6 +281,7 @@ public class BlaiseHelper
             }
         }
         vo.setWordCount(wordCount);
+        //logger.info("Fetch word count of entry usd " + (System.currentTimeMillis() - runTime) + " ms");
 
         return vo;
     }

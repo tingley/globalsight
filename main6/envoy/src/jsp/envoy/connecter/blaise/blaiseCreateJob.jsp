@@ -858,7 +858,15 @@ $(document).ready(function ()
 		                <%=blaiseInboxEntry.getType() == null ? "" : blaiseInboxEntry.getType()%>
 		            </amb:column>
 
-		            <amb:column label="lb_description" sortBy="<%=BlaiseInboxEntryComparator.DESCRIPTION%>" filter="descriptionFilter" filterValue="<%=descriptionFilter%>" width="15%">
+					<amb:column label="lb_blaise_usages" width="10%">
+						<%=blaiseInboxEntry.getUsages2UI() == null ? "" : blaiseInboxEntry.getUsages2UI()%>
+					</amb:column>
+
+						<amb:column label="lb_words" width="10%">
+							<%=blaiseInboxEntry.getWordCount()%>
+						</amb:column>
+
+					<amb:column label="lb_description" sortBy="<%=BlaiseInboxEntryComparator.DESCRIPTION%>" filter="descriptionFilter" filterValue="<%=descriptionFilter%>" width="15%">
 		                <%=blaiseInboxEntry.getDescription() == null ? "" : blaiseInboxEntry.getDescription()%>
 		            </amb:column>
 

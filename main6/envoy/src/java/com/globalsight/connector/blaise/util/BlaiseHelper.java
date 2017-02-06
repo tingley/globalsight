@@ -16,33 +16,13 @@
  */
 package com.globalsight.connector.blaise.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.zip.GZIPInputStream;
-
-import org.apache.log4j.Logger;
-
 import com.cognitran.blaise.translation.api.ClientFactory;
 import com.cognitran.blaise.translation.api.TranslationAgencyClient;
 import com.cognitran.client.IncompatibleVersionException;
 import com.cognitran.core.model.util.Collections;
+import com.cognitran.translation.client.PublicationTypeUsageDetails;
 import com.cognitran.translation.client.TranslationPageCommand;
+import com.cognitran.translation.client.TranslationStatisticsDetails;
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.cognitran.workflow.client.InboxEntry;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
@@ -55,6 +35,15 @@ import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 public class BlaiseHelper
 {
@@ -186,19 +175,8 @@ public class BlaiseHelper
             }
 
             List<InboxEntry> inboxEntries = client.listInbox(command);
-            for (InboxEntry entry : inboxEntries)
-            {
-                try
-                {
-                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                            (TranslationInboxEntry) entry);
-                    results.add(vo);
-                }
-                catch (Exception ignore)
-                {
-                    // ignore this entry if it has no required target locale
-                }
-            }
+
+            results = convertToGS(inboxEntries, client);
         }
         catch (Exception e)
         {
@@ -206,6 +184,98 @@ public class BlaiseHelper
         }
 
         return results;
+    }
+
+    private List<TranslationInboxEntryVo> convertToGS(List<InboxEntry> entries, TranslationAgencyClient client)
+            throws Exception
+    {
+        if (entries == null || entries.size() == 0 || client == null)
+            return new ArrayList<TranslationInboxEntryVo>();
+
+        List<TranslationInboxEntryVo> vos = new ArrayList<>(entries.size());
+        Set<Long> idSets = new HashSet<>();
+        for (InboxEntry entry : entries)
+            idSets.add(entry.getId());
+        long runTime = System.currentTimeMillis();
+        Map<InboxEntry, PublicationTypeUsageDetails> usages = client.mapPublicationTypeUsages(idSets);
+        logger.debug("Get all usages by id set used " + (System.currentTimeMillis() - runTime) + " ms");
+        runTime = System.currentTimeMillis();
+        Map<InboxEntry, TranslationStatisticsDetails> counts = client.mapTranslationStatistics(idSets);
+        logger.debug("Get all word count by id set used " + (System.currentTimeMillis() - runTime) + " ms");
+
+        boolean hasUsages = usages != null && usages.size() > 0;
+        boolean hasCounts = counts != null && counts.size() > 0;
+        PublicationTypeUsageDetails usage;
+        TranslationStatisticsDetails detailCount;
+
+        runTime = System.currentTimeMillis();
+        for (InboxEntry entry : entries)
+        {
+            TranslationInboxEntryVo vo = new TranslationInboxEntryVo((TranslationInboxEntry) entry);
+            if (hasUsages) {
+                usage = usages.get(entry);
+                if (usage != null)
+                    vo.setUsages(usage.getTypes());
+            }
+            if (hasCounts) {
+                detailCount = counts.get(entry);
+                if (detailCount != null)
+                    vo.setWordCount(detailCount.getNewSentencesWords());
+            }
+            vos.add(vo);
+        }
+        logger.debug("Changed objects to GS used " + (System.currentTimeMillis() - runTime) + " ms");
+
+        return vos;
+    }
+
+    /**
+     * Convert Blaise translation inbox entry to GlobalSight TranslationInboxEntryVo object
+     *
+     * @param entry Translation inbox entry object got from Blaise
+     * @param client Blaise client connection
+     * @return TranslationInboxEntryVo GlobalSight translation inbox entry object
+     * @throws Exception
+     */
+    private TranslationInboxEntryVo convert(TranslationInboxEntry entry, TranslationAgencyClient client) throws Exception
+    {
+        long runTime = System.currentTimeMillis();
+        TranslationInboxEntryVo vo = new TranslationInboxEntryVo(entry);
+        //logger.info("Convert TranslationInboxEntry directly used " + (System.currentTimeMillis() - runTime) + " ms");
+        Set<Long> idSet = new HashSet<>(1);
+        idSet.add(entry.getId());
+        List<String> entryUsages = new ArrayList<>();
+        // Fetch usages of entry
+        runTime = System.currentTimeMillis();
+        Map<InboxEntry, PublicationTypeUsageDetails> usages = client.mapPublicationTypeUsages(idSet);
+        if (usages != null)
+        {
+            for (Map.Entry<InboxEntry, PublicationTypeUsageDetails> item : usages.entrySet())
+            {
+                if (entry.getId() == item.getKey().getId() && item.getValue() != null)
+                {
+                    entryUsages = item.getValue().getTypes();
+                }
+            }
+        }
+        vo.setUsages(entryUsages);
+        //logger.info("Fetch usages of entry used " + (System.currentTimeMillis() - runTime) + " ms");
+
+        runTime = System.currentTimeMillis();
+        Map<InboxEntry, TranslationStatisticsDetails> counts = client.mapTranslationStatistics(idSet);
+        int wordCount = 0;
+        if (counts != null)
+        {
+            for (Map.Entry<InboxEntry, TranslationStatisticsDetails> detailsEntry : counts.entrySet())
+            {
+                if (entry.getId() == detailsEntry.getKey().getId() && detailsEntry.getValue() != null)
+                    wordCount = detailsEntry.getValue().getNewSentencesWords();
+            }
+        }
+        vo.setWordCount(wordCount);
+        //logger.info("Fetch word count of entry usd " + (System.currentTimeMillis() - runTime) + " ms");
+
+        return vo;
     }
 
     public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids, TranslationPageCommand command)
@@ -223,19 +293,7 @@ public class BlaiseHelper
         try
         {
             List<InboxEntry> inboxEntries = client.listInbox(ids, command);
-            for (InboxEntry entry : inboxEntries)
-            {
-                try
-                {
-                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                            (TranslationInboxEntry) entry);
-                    results.add(vo);
-                }
-                catch (Exception ignore)
-                {
-                    // ignore this entry if it has no required target locale
-                }
-            }
+            results = convertToGS(inboxEntries, client);
         }
         catch (Exception e)
         {
@@ -281,19 +339,7 @@ public class BlaiseHelper
             }
 
             List<InboxEntry> inboxEntries = client.listReferences(parentId, command);
-            for (InboxEntry entry : inboxEntries)
-            {
-                try
-                {
-                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                            (TranslationInboxEntry) entry);
-                    results.add(vo);
-                }
-                catch (Exception ignore)
-                {
-                    // ignore this entry if it has no required target locale
-                }
-            }
+            results = convertToGS(inboxEntries, client);
         }
         catch (Exception e)
         {
@@ -338,6 +384,37 @@ public class BlaiseHelper
 			}
 		}
     }
+
+    public void claim(List<Long> ids)
+    {
+        try
+        {
+            TranslationAgencyClient client = getTranslationClient();
+            if (client == null)
+            {
+                logger.error("TranslationAgencyClient is null, entry cannot be claimed: " + ids);
+                return;
+            }
+
+            if (ids == null || ids.size() == 0)
+                return;
+
+            Set<Long> idSets = new HashSet<Long>(ids);
+            client.claim(idSets);
+        }
+        catch (Exception e)
+        {
+            if (e.getMessage().toLowerCase().contains("task already claimed"))
+            {
+                logger.warn("Warning when claim entry(" + ids + "): " + e.getMessage());
+            }
+            else
+            {
+                logger.error("Error when claim entry: " + ids, e);
+            }
+        }
+    }
+
 
     /**
      * Download XLIFF file. Note that current entry must be claimed already.

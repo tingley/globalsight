@@ -430,6 +430,9 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("scorecard", scorecardMap);
             sessionMgr.setAttribute("isScored", isScored);
             sessionMgr.setAttribute("scorecardComment", scorecardComment);
+
+            task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+            TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
         }
         else if (TASK_ACTION_SAVE_DQF.equals(action))
         {
@@ -473,6 +476,9 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("fluencyScore", fluencyScore);
             sessionMgr.setAttribute("adequacyScore", adequacyScore);
             sessionMgr.setAttribute("isDQFDone", true);
+
+            task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+            TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
         }
         else if ("leverageMT".equals(action))
         {

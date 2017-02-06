@@ -18,7 +18,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -58,6 +60,7 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
@@ -66,19 +69,18 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageSegment;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
+import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
@@ -101,7 +103,6 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     private CellStyle hightLightStyle = null;
 
     protected String m_companyName = "";
-    protected List<Long> m_jobIDS = new ArrayList<Long>();
     protected List<GlobalSightLocale> m_targetLocales = new ArrayList<GlobalSightLocale>();
 
     private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
@@ -116,6 +117,26 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
 
     private Locale uiLocale = new Locale("en", "US");
     String m_userId;
+    private RequestData data = new RequestData();
+
+    private class RequestData
+    {
+        // Report on job Ids
+        boolean reportOnJobIds = true;
+
+        // Need to search job by projects, status, date
+        boolean needSearchJob = false;
+
+        ArrayList<GlobalSightLocale> trgLocaleList = new ArrayList<GlobalSightLocale>();
+
+        List<Long> projectIdList = new ArrayList<Long>();
+
+        List<String> jobStateList = new ArrayList<String>();
+
+        List<String> workflowStateList = new ArrayList<String>();
+
+        List<Long> jobIds = new ArrayList<Long>();
+    };
 
     /**
      * Implemented Comments CheckReport Generator Constructor.
@@ -140,16 +161,10 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         {
             uiLocale = Locale.US;
         }
-
-        if (p_request.getParameter(ReportConstants.JOB_IDS) != null)
-        {
-            m_jobIDS = ReportHelper.getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
-            GlobalSightLocaleComparator comparator = new GlobalSightLocaleComparator(
-                    GlobalSightLocaleComparator.ISO_CODE, uiLocale);
-            m_targetLocales = ReportHelper.getTargetLocaleList(
-                    p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), comparator);
-        }
         bundle = PageHandler.getBundle(request.getSession());
+        setProjectIdList(p_request);
+        setTargetLocales(p_request);
+        setStates(p_request);
 
     }
 
@@ -171,12 +186,12 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     {
         if (p_jobIDS == null || p_jobIDS.size() == 0)
         {
-            p_jobIDS = m_jobIDS;
-            p_targetLocales = m_targetLocales;
+            p_jobIDS = data.jobIds;
+            p_targetLocales = data.trgLocaleList;
         }
-        else if (m_jobIDS == null || m_jobIDS.size() == 0)
+        else if (data.jobIds == null || data.jobIds.size() == 0)
         {
-            m_jobIDS = p_jobIDS;
+            data.jobIds = p_jobIDS;
         }
 
         File[] reports = generateReports(p_jobIDS, p_targetLocales);
@@ -202,12 +217,12 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
 
         if (p_jobIDS == null || p_jobIDS.size() == 0)
         {
-            p_jobIDS = m_jobIDS;
-            p_targetLocales = m_targetLocales;
+            p_jobIDS = data.jobIds;
+            p_targetLocales = data.trgLocaleList;
         }
-        else if (m_jobIDS == null || m_jobIDS.size() == 0)
+        else if (data.jobIds == null || data.jobIds.size() == 0)
         {
-            m_jobIDS = p_jobIDS;
+            data.jobIds = p_jobIDS;
         }
         List<File> workBooks = new ArrayList<File>();
         String dateFormat = request.getParameter(WebAppConstants.DATE_FORMAT);
@@ -969,6 +984,178 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     }
 
     /**
+     * Sets projects.
+     */
+    private void setProjectIdList(HttpServletRequest p_request)
+    {
+        data.projectIdList.clear();
+        // set the project Id
+        String[] projectIds = p_request.getParameterValues("projectNameList");
+        if (projectIds != null)
+        {
+            for (int i = 0; i < projectIds.length; i++)
+            {
+                String id = projectIds[i];
+                if (id.equals("*"))
+                {
+                    break;
+                }
+                else
+                {
+                    data.projectIdList.add(new Long(id));
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets target locales.
+     */
+    @SuppressWarnings("unchecked")
+    private void setTargetLocales(HttpServletRequest p_request)
+            throws LocaleManagerException, RemoteException, GeneralException
+    {
+        data.trgLocaleList.clear();
+        String[] paramTrgLocales = p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST);
+        if (paramTrgLocales != null)
+        {
+            for (int i = 0; i < paramTrgLocales.length; i++)
+            {
+                if ("*".equals(paramTrgLocales[i]))
+                {
+                    data.trgLocaleList = new ArrayList<GlobalSightLocale>(
+                            ServerProxy.getLocaleManager().getAllTargetLocales());
+                    break;
+                }
+                else
+                {
+                    long localeId = Long.parseLong(paramTrgLocales[i]);
+                    GlobalSightLocale locale = null;
+                    try
+                    {
+                        locale = ServerProxy.getLocaleManager().getLocaleById(localeId);
+                    }
+                    catch (Exception e)
+                    {
+                    }
+
+                    if (locale != null && !data.trgLocaleList.contains(locale))
+                    {
+                        data.trgLocaleList.add(locale);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets job status.
+     */
+    private void setStates(HttpServletRequest p_request)
+    {
+        String reportOn = (String) p_request.getParameter("reportOn");
+        data.reportOnJobIds = "jobIds".equals(reportOn);
+
+        if (data.reportOnJobIds)
+        {
+            // Report on Job IDs
+            data.jobIds.clear();
+            String jobIdsStr = p_request.getParameter("jobIds");
+            if (jobIdsStr != null && jobIdsStr.length() != 0)
+            {
+                String[] jobIds = jobIdsStr.split(",");
+                long jobId = 0;
+                for (int i = 0; i < jobIds.length; i++)
+                {
+                    try
+                    {
+                        jobId = Long.valueOf(jobIds[i].trim());
+                    }
+                    catch (Exception e)
+                    {
+                        continue;
+                    }
+                    if (!data.jobIds.contains(jobId))
+                    {
+                        data.jobIds.add(jobId);
+                    }
+                }
+            }
+            data.needSearchJob = false;
+        }
+        else
+        {
+            String[] jobIds = p_request.getParameterValues("jobNameList");
+            data.needSearchJob = (jobIds == null);
+            if (!data.needSearchJob)
+            {
+                data.jobIds.clear();
+                long jobId = 0;
+                for (int i = 0; i < jobIds.length; i++)
+                {
+                    jobId = Long.valueOf(jobIds[i]);
+                    if (!data.jobIds.contains(jobId))
+                    {
+                        data.jobIds.add(jobId);
+                    }
+                }
+            }
+            else
+            {
+                data.jobStateList.clear();
+                data.workflowStateList.clear();
+                String[] states = p_request.getParameterValues("jobStatus");
+                List<String> lst = new ArrayList<String>();
+                if (states != null)
+                {
+                    lst = Arrays.asList(states);
+                }
+                if (lst.contains("*"))
+                {
+                    data.jobStateList.add(Job.DISPATCHED);
+                    data.workflowStateList.add(Workflow.DISPATCHED);
+                    data.jobStateList.add(Job.LOCALIZED);
+                    data.workflowStateList.add(Workflow.LOCALIZED);
+                    data.jobStateList.add(Job.EXPORTED);
+                    data.jobStateList.add(Job.EXPORT_FAIL);
+                    data.workflowStateList.add(Workflow.EXPORTED);
+                    data.workflowStateList.add(Workflow.EXPORT_FAILED);
+                    data.jobStateList.add(Job.ARCHIVED);
+                    data.workflowStateList.add(Workflow.ARCHIVED);
+                }
+                else
+                {
+                    if (lst.contains(Job.DISPATCHED))
+                    {
+                        data.jobStateList.add(Job.DISPATCHED);
+                        data.workflowStateList.add(Workflow.DISPATCHED);
+                    }
+                    if (lst.contains(Job.LOCALIZED))
+                    {
+                        data.jobStateList.add(Job.LOCALIZED);
+                        data.workflowStateList.add(Workflow.LOCALIZED);
+                    }
+                    if (lst.contains(Job.EXPORTED))
+                    {
+                        data.jobStateList.add(Job.EXPORTED);
+                        data.workflowStateList.add(Workflow.EXPORTED);
+                    }
+                    if (lst.contains(Job.EXPORT_FAIL))
+                    {
+                        data.jobStateList.add(Job.EXPORT_FAIL);
+                        data.workflowStateList.add(Workflow.EXPORT_FAILED);
+                    }
+                    if (lst.contains(Job.ARCHIVED))
+                    {
+                        data.jobStateList.add(Job.ARCHIVED);
+                        data.workflowStateList.add(Workflow.ARCHIVED);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Create workbook name areas for category failure drop down list, it is
      * from "AA8" to "AAn".
      * <P>
@@ -1043,19 +1230,14 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     @Override
     public void setPercent(int p_finishedJobNum)
     {
-        ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS,
-                100 * p_finishedJobNum / m_jobIDS.size(), getReportType());
+        ReportGeneratorHandler.setReportsMapByGenerator(m_userId, data.jobIds,
+                100 * p_finishedJobNum / data.jobIds.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
-        ReportsData data = ReportGeneratorHandler.getReportsMap(m_userId, m_jobIDS,
-                getReportType());
-        if (data != null)
-            return data.isCancle();
-
-        return false;
+        return ReportGeneratorHandler.isCancelled(m_userId, null, getReportType());
     }
 
     /**

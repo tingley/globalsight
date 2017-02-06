@@ -60,129 +60,122 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
+import jodd.util.StringUtil;
+
 /**
  * Generate Report handler. The handle can be used for generating reports,
  * getting the percent of reports, cancelling the reports.
  */
-public class ReportGeneratorHandler extends PageHandler implements
-        ReportConstants
+public class ReportGeneratorHandler extends PageHandler implements ReportConstants
 {
-    static private final Logger logger = Logger
-            .getLogger(ReportGeneratorHandler.class);
+    static private final Logger logger = Logger.getLogger(ReportGeneratorHandler.class);
 
-    private static Map<String, ReportGenerator> m_generatorMap = 
-            new ConcurrentHashMap<String, ReportGenerator>();
-    private static Map<String, ReportInfo> m_reportResultMap = 
-            new ConcurrentHashMap<String, ReportInfo>();
-    
+    private static Map<String, ReportGenerator> m_generatorMap = new ConcurrentHashMap<String, ReportGenerator>();
+    private static Map<String, ReportInfo> m_reportResultMap = new ConcurrentHashMap<String, ReportInfo>();
+
     private boolean pageReturn = false;
 
     @ActionHandler(action = ACTION_CANCEL_REPORT, formClass = "")
-    public void cancelGenerateReport(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void cancelGenerateReport(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
-    	HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession
-                .getAttribute(WebAppConstants.USER_NAME);
-        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
+        HttpSession userSession = p_request.getSession();
+        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
+        List<Long> reportJobIDS = ReportHelper
+                .getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
         String reportType = p_request.getParameter(ReportConstants.REPORT_TYPE);
-        
+
         String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
         ReportGenerator generator = m_generatorMap.get(key);
-        
+
         if (generator != null)
         {
-        	Cancelable cancelable = (Cancelable) generator;
-        	cancelable.cancel();
+            Cancelable cancelable = (Cancelable) generator;
+            cancelable.cancel();
         }
     }
-    
+
     /**
      * Gets Reports
      */
     @ActionHandler(action = GET_REPORT, formClass = "")
-    public void getReport(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void getReport(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession
-                .getAttribute(WebAppConstants.USER_NAME);
-        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
+        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
+        List<Long> reportJobIDS = ReportHelper
+                .getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
         String reportType = p_request.getParameter(ReportConstants.REPORT_TYPE);
-        
+
         String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
         ReportInfo info = m_reportResultMap.get(key);
-    	if (info != null)
-    	{
-    		File[] reports = info.getFiles();
-    		ReportHelper.sendFiles(reports, null, p_response);
-    	}
+        if (info != null)
+        {
+            File[] reports = info.getFiles();
+            ReportHelper.sendFiles(reports, null, p_response);
+        }
     }
-    
+
     /**
-     * Operate Generate Report Request from Activity Download Report Page.
-     * The reports are TranslationsEditReport and ReviewersCommentsReport.
+     * Operate Generate Report Request from Activity Download Report Page. The
+     * reports are TranslationsEditReport and ReviewersCommentsReport.
      */
     @ActionHandler(action = GENERATE_REPORT, formClass = "")
-    public void generateOneReport(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void generateOneReport(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession
-                .getAttribute(WebAppConstants.USER_NAME);
-        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
-        List<GlobalSightLocale> reportTargetLocales = ReportHelper
-                .getTargetLocaleList(p_request
-                        .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
-                        null);
+        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
+        List<Long> reportJobIDS = ReportHelper
+                .getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
+        List<GlobalSightLocale> reportTargetLocales = ReportHelper.getTargetLocaleList(
+                p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), null);
         String reportType = p_request.getParameter(ReportConstants.REPORT_TYPE);
         String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
         ReportInfo info = new ReportInfo();
-    	m_reportResultMap.put(key, info);
-    	
-        try 
+        m_reportResultMap.put(key, info);
+
+        try
         {
             // Initial Reports percent and status for m_reportsDataMap.
-            ReportHelper.setReportsData(userId, reportJobIDS, reportType, 0, ReportsData.STATUS_INPROGRESS);
-            
-            ReportGenerator generator = ReportGeneratorFactory
-                    .getReportGenerator(reportType, p_request, p_response);
-	        
-	        if (generator instanceof Cancelable) 
-	        {
-				m_generatorMap.put(key, generator);
-			}
-	        
-	        File[] files = generator.generateReports(reportJobIDS,
-	                reportTargetLocales);
-	        info.setFiles(files);
-	        
-	        // Set Reports percent and status for m_reportsDataMap.
-	        ReportHelper.setReportsData(userId, reportJobIDS, reportType, 100, ReportsData.STATUS_FINISHED);
+            ReportHelper.setReportsData(userId, reportJobIDS, reportType, 0,
+                    ReportsData.STATUS_INPROGRESS);
+
+            ReportGenerator generator = ReportGeneratorFactory.getReportGenerator(reportType,
+                    p_request, p_response);
+
+            if (generator instanceof Cancelable)
+            {
+                m_generatorMap.put(key, generator);
+            }
+
+            File[] files = generator.generateReports(reportJobIDS, reportTargetLocales);
+            info.setFiles(files);
+
+            // Set Reports percent and status for m_reportsDataMap.
+            ReportHelper.setReportsData(userId, reportJobIDS, reportType, 100,
+                    ReportsData.STATUS_FINISHED);
         }
         finally
         {
-        	info.setFinished(true);
-		}
+            info.setFinished(true);
+        }
     }
-    
+
     /**
      * Generate Reports
      */
     @ActionHandler(action = GENERATE_REPORTS, formClass = "")
-    public void generateReports(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void generateReports(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession
-                .getAttribute(WebAppConstants.USER_NAME);
+        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
         List<GlobalSightLocale> reportTargetLocales = ReportHelper.getTargetLocaleList(
                 p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), null);
-        List<String> reportTypeList = ReportHelper.getListOfStr(
-                p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
+        List<String> reportTypeList = ReportHelper
+                .getListOfStr(p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
         List<Long> reportJobIDS = getReportJobIDS(p_request, reportTypeList);
         ReportGenerator generator = null;
 
@@ -196,22 +189,22 @@ public class ReportGeneratorHandler extends PageHandler implements
             return;
         }
         // Initial Reports percent and status for m_reportsDataMap.
-        ReportHelper.setReportsData(userId, reportJobIDS, reportTypeList, 
-                0, ReportsData.STATUS_INPROGRESS);
+        ReportHelper.setReportsData(userId, reportJobIDS, reportTypeList, 0,
+                ReportsData.STATUS_INPROGRESS);
 
         List<File> reports = new ArrayList<File>();
         if (reportTypeList.size() == 1)
         {
             String reportType = reportTypeList.get(0);
-            generator = ReportGeneratorFactory.getReportGenerator(reportType,
-                    p_request, p_response);
-            
-            if (generator instanceof Cancelable)  
+            generator = ReportGeneratorFactory.getReportGenerator(reportType, p_request,
+                    p_response);
+
+            if (generator instanceof Cancelable)
             {
-				String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
-				m_generatorMap.put(key, generator);
-			}
-            
+                String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
+                m_generatorMap.put(key, generator);
+            }
+
             File[] files = generator.generateReports(reportJobIDS, reportTargetLocales);
             ReportHelper.addFiles(reports, files);
         }
@@ -223,141 +216,176 @@ public class ReportGeneratorHandler extends PageHandler implements
                 {
                     if (logger.isDebugEnabled())
                     {
-                        logger.debug("cancelGenerateReports:" + userId
-                                + reportJobIDS);                        
+                        logger.debug("cancelGenerateReports:" + userId + reportJobIDS);
                     }
                     generator = null;
                     return;
                 }
-                generator = ReportGeneratorFactory.getReportGenerator(
-                        reportType, p_request, p_response);
-                File[] files = generator.generateReports(reportJobIDS,
-                        reportTargetLocales);
+                generator = ReportGeneratorFactory.getReportGenerator(reportType, p_request,
+                        p_response);
+                File[] files = generator.generateReports(reportJobIDS, reportTargetLocales);
                 ReportHelper.addFiles(reports, files);
             }
         }
-        
+
         if (reports != null && reports.size() > 0)
         {
             // Set Reports percent and status for m_reportsDataMap.
-            ReportHelper.setReportsData(userId, reportJobIDS, reportTypeList, 
-                    100, ReportsData.STATUS_FINISHED);
+            ReportHelper.setReportsData(userId, reportJobIDS, reportTypeList, 100,
+                    ReportsData.STATUS_FINISHED);
             String fileName = getDownloadFileName(reports, reportJobIDS);
             ReportHelper.sendFiles(reports, fileName, p_response);
         }
         else
         {
-            if(generator.isCancelled())
+            if (generator.isCancelled())
             {
                 p_response.sendError(p_response.SC_NO_CONTENT);
                 return;
             }
-                
+
             StringBuffer msg = new StringBuffer();
             msg.append("Can't create the report. Please check the options.");
             ErrorBean errorBean = new ErrorBean(0, msg.toString());
             p_request.setAttribute(WebAppConstants.ERROR_BEAN_NAME, errorBean);
-            p_request.getRequestDispatcher(ReportConstants.ERROR_PAGE).forward(p_request, p_response);
+            p_request.getRequestDispatcher(ReportConstants.ERROR_PAGE).forward(p_request,
+                    p_response);
         }
-        generator = null;            
+        generator = null;
+    }
+
+    /**
+     * Gets report job ids according to parameters in different cases.
+     * 
+     * @since GBS-4619
+     */
+    private List<Long> getReportJobIDS(HttpServletRequest p_request)
+    {
+        List<Long> reportJobIDS = null;
+        String inputJobIds = p_request.getParameter(ReportConstants.JOB_IDS);
+        if (StringUtil.isNotEmpty(inputJobIds))
+        {
+            reportJobIDS = ReportHelper.getListOfLong(inputJobIds);
+        }
+        else
+        {
+            String jobIds = p_request.getParameter(ReportConstants.JOBIDS);
+            if (StringUtil.isNotEmpty(jobIds))
+            {
+                reportJobIDS = ReportHelper.getListOfLong(jobIds);
+            }
+            else
+            {
+                String[] jobIdsInNameList = p_request
+                        .getParameterValues(ReportConstants.JOBNAMELIST);
+                if (jobIdsInNameList != null && jobIdsInNameList.length > 0)
+                {
+                    reportJobIDS = new ArrayList<Long>();
+                    for (String jobId : jobIdsInNameList)
+                    {
+                        reportJobIDS.add(Long.valueOf(jobId));
+                    }
+                }
+            }
+        }
+        return reportJobIDS;
     }
 
     /**
      * Get Selected Job IDS for generating report.
-     * @throws ParseException 
+     * 
+     * @throws ParseException
      */
     private List<Long> getReportJobIDS(HttpServletRequest p_request, List<String> reportTypeList)
             throws Exception
     {
-        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));     
+        List<Long> reportJobIDS = getReportJobIDS(p_request);
         String dateRange = p_request.getParameter("dateRange");
         if (!"Y".equals(dateRange))
         {
             return reportJobIDS;
         }
-        
+
         JobSearchParameters searchParams = new JobSearchParameters();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");        
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String paramCreateDateStart = p_request.getParameter(JobSearchConstants.CREATION_START);
-        if (paramCreateDateStart != null && paramCreateDateStart != "")
+        if (StringUtil.isNotEmpty(paramCreateDateStart))
         {
             searchParams.setCreationStart(simpleDateFormat.parse(paramCreateDateStart));
         }
         String paramCreateDateEnd = p_request.getParameter(JobSearchConstants.CREATION_END);
-        if (paramCreateDateEnd != null && paramCreateDateEnd != "")
+        if (StringUtil.isNotEmpty(paramCreateDateEnd))
         {
             Date endDate = simpleDateFormat.parse(paramCreateDateEnd);
             long endLong = endDate.getTime() + (24 * 60 * 60 * 1000 - 1);
             searchParams.setCreationEnd(new Date(endLong));
         }
 
-        ArrayList<Job> queriedJobs = new ArrayList<Job>(ServerProxy
-                .getJobHandler().getJobs(searchParams));
+        ArrayList<Job> queriedJobs = new ArrayList<Job>(
+                ServerProxy.getJobHandler().getJobs(searchParams));
         List<Long> queriedIds = new ArrayList<Long>();
         for (Job job : queriedJobs)
         {
             queriedIds.add(job.getId());
         }
         reportJobIDS.retainAll(queriedIds);
-        
+
         return reportJobIDS;
     }
 
-    
     /**
      * Generate Summary Report
      */
     @ActionHandler(action = ACTION_GENERATE_SUMMARY_PERCENT, formClass = "")
-    public void generateSummaryReport(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void generateSummaryReport(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         SummaryReportGenerator generator = new SummaryReportGenerator();
         ReportSearchOptions searchOptions = generator.getSearchOptions(p_request);
         File[] file = generator.generateReports(searchOptions);
-        
+
         generator = null;
         ReportHelper.sendFiles(file, null, p_response);
     }
-    
+
     /**
      * Check if selected jobs are using same source locale.
      */
     @ActionHandler(action = ACTION_CHECK_SOURCE_LOCALE, formClass = "")
-    public void checkSourceLocale(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
-    {   
-    	List<Long> reportJobIDS = getReportJobIDS(p_request, null);   	
-    	JSONObject jsonObj = new JSONObject();
-    	List<GlobalSightLocale> reportTargetLocales = ReportHelper.getTargetLocaleList(
-    	        p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), null);
-    	if(checkSourceLocale(reportJobIDS, reportTargetLocales))
-    	{   		
-    		jsonObj.put("differentSource", true);
-    		jsonObj.put("info", "Selected jobs are not using same source locale, please reset.");
-    	}
-    	else
-    	{
-    		jsonObj.put("differentSource", false);
-		}
-    	p_response.getWriter().write(jsonObj.toString());
+    public void checkSourceLocale(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
+    {
+        List<Long> reportJobIDS = getReportJobIDS(p_request, null);
+        JSONObject jsonObj = new JSONObject();
+        List<GlobalSightLocale> reportTargetLocales = ReportHelper.getTargetLocaleList(
+                p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), null);
+        if (checkSourceLocale(reportJobIDS, reportTargetLocales))
+        {
+            jsonObj.put("differentSource", true);
+            jsonObj.put("info", "Selected jobs are not using same source locale, please reset.");
+        }
+        else
+        {
+            jsonObj.put("differentSource", false);
+        }
+        p_response.getWriter().write(jsonObj.toString());
     }
 
     /**
      * Gets the ReportsData.
      */
     @ActionHandler(action = ACTION_GET_REPORTSDATA, formClass = "")
-    public void getReportsData(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void getReportsData(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         String json = "";
         HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession
-                .getAttribute(WebAppConstants.USER_NAME);
-        List<String> reportTypeList = ReportHelper.getListOfStr(
-                p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
+        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
+        List<String> reportTypeList = ReportHelper
+                .getListOfStr(p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
         List<Long> reportJobIDS = getReportJobIDS(p_request, reportTypeList);
-        // just for LisaQACommentsAnalysisReportWebForm.jsp and activityDurationReportWebForm.jsp
+        // just for LisaQACommentsAnalysisReportWebForm.jsp and
+        // activityDurationReportWebForm.jsp
         String dateRange = p_request.getParameter("dateRange");
         if ("Y".equals(dateRange) && reportJobIDS.size() == 0)
         {
@@ -377,24 +405,23 @@ public class ReportGeneratorHandler extends PageHandler implements
         {
             json = "{}";
         }
-        
+
         p_response.getWriter().write(json);
     }
-    
+
     /**
      * Gets the percent of Reports.
      */
     @ActionHandler(action = ACTION_GET_PERCENT, formClass = "")
-    public void getPercent(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void getPercent(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession
-                .getAttribute(WebAppConstants.USER_NAME);
-        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
-        List<String> reportTypeList = ReportHelper.getListOfStr(
-                p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
+        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
+        List<Long> reportJobIDS = ReportHelper
+                .getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
+        List<String> reportTypeList = ReportHelper
+                .getListOfStr(p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
 
         ReportsData data = ReportDBUtil.getReportsData(userId, reportJobIDS, reportTypeList);
         if (data != null)
@@ -402,7 +429,7 @@ public class ReportGeneratorHandler extends PageHandler implements
             String json = data.toJSON();
             if (logger.isDebugEnabled())
             {
-                logger.debug("GETPERCENT METHOD:" + json);                
+                logger.debug("GETPERCENT METHOD:" + json);
             }
             if (data.getPercent() >= 100)
             {
@@ -416,14 +443,13 @@ public class ReportGeneratorHandler extends PageHandler implements
      * Set the cancel status for the Reports.
      */
     @ActionHandler(action = ACTION_CANCEL_REPORTS, formClass = "")
-    public void cancelReports(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void cancelReports(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession
-                .getAttribute(WebAppConstants.USER_NAME);
-        List<String> reportTypeList = ReportHelper.getListOfStr(
-                p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
+        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
+        List<String> reportTypeList = ReportHelper
+                .getListOfStr(p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
         List<Long> reportJobIDS = getReportJobIDS(p_request, reportTypeList);
 
         ReportsData data = ReportDBUtil.getReportsData(userId, reportJobIDS, reportTypeList);
@@ -432,13 +458,13 @@ public class ReportGeneratorHandler extends PageHandler implements
             data.setStatus(ReportsData.STATUS_CANCEL);
             ReportDBUtil.updateReportsData(data);
         }
-        
+
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("status", "success");
         p_response.getWriter().write(jsonObj.toString());
         return;
     }
-    
+
     /**
      * Set the cancel status for the Reports.
      */
@@ -450,33 +476,34 @@ public class ReportGeneratorHandler extends PageHandler implements
         String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
         String reportJobIDStr = p_request.getParameter(JOB_IDS);
         String reportTypeListStr = p_request.getParameter(ReportConstants.REPORT_TYPE);
-        
-        ReportDBUtil.updateReportsDataStatus(userId, reportJobIDStr, reportTypeListStr, ReportsData.STATUS_CANCEL);
-        
+
+        ReportDBUtil.updateReportsDataStatus(userId, reportJobIDStr, reportTypeListStr,
+                ReportsData.STATUS_CANCEL);
+
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("status", "success");
         p_response.getWriter().write(jsonObj.toString());
         return;
     }
 
-
     /**
      * Set the Report percent by Report Generator.
      */
-    public static void setReportsMapByGenerator(String p_userId,
-            List<Long> p_reportJobIDS, double p_percent, String p_reportType)
+    public static void setReportsMapByGenerator(String p_userId, List<Long> p_reportJobIDS,
+            double p_percent, String p_reportType)
     {
         List<String> reportTypeList = new ArrayList<String>();
         reportTypeList.add(p_reportType);
-        ReportDBUtil.saveOrUpdateReportsData(p_userId, p_reportJobIDS, reportTypeList, null, p_percent);
+        ReportDBUtil.saveOrUpdateReportsData(p_userId, p_reportJobIDS, reportTypeList, null,
+                p_percent);
     }
 
     /**
      * Gets ReportsData from m_reportsDataMap, for detect whether canceled the
      * reports.
      */
-    public static ReportsData getReportsMap(String p_userId,
-            List<Long> p_reportJobIDS, String p_reportType)
+    public static ReportsData getReportsMap(String p_userId, List<Long> p_reportJobIDS,
+            String p_reportType)
     {
         List<String> reportTypeList = new ArrayList<String>();
         reportTypeList.add(p_reportType);
@@ -484,9 +511,10 @@ public class ReportGeneratorHandler extends PageHandler implements
         return data;
     }
 
-    public static boolean isCancelled(String p_userId, List<Long> p_reportJobIDS, String p_reportType)
+    public static boolean isCancelled(String p_userId, List<Long> p_reportJobIDS,
+            String p_reportType)
     {
-        ReportsData data = getReportsMap(p_userId, p_reportJobIDS, p_reportType);        
+        ReportsData data = getReportsMap(p_userId, p_reportJobIDS, p_reportType);
         if (data != null)
         {
             return data.isCancle();
@@ -494,7 +522,7 @@ public class ReportGeneratorHandler extends PageHandler implements
 
         return false;
     }
-    
+
     /**
      * Invokes this PageHandler
      * 
@@ -507,17 +535,16 @@ public class ReportGeneratorHandler extends PageHandler implements
      * @param p_context
      *            context the Servlet context
      */
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, EnvoyServletException
     {
         pageReturn = false;
-        
+
         beforeAction(p_request, p_response);
 
         callAction(p_request, p_response);
-        
+
         if (pageReturn)
         {
             return;
@@ -525,17 +552,14 @@ public class ReportGeneratorHandler extends PageHandler implements
 
         afterAction(p_request, p_response);
 
-        if (!GENERATE_REPORTS.equalsIgnoreCase(p_request
-                .getParameter("linkName")))
+        if (!GENERATE_REPORTS.equalsIgnoreCase(p_request.getParameter("linkName")))
         {
-            super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                    p_context);
+            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
         }
     }
 
-    private void callAction(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws EnvoyServletException,
-            ServletException, IOException
+    private void callAction(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws EnvoyServletException, ServletException, IOException
     {
         String action = p_request.getParameter("action");
         if (action == null)
@@ -543,13 +567,13 @@ public class ReportGeneratorHandler extends PageHandler implements
             // Job Details Page rewrite.Job Summary need.
             JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
             Job job = jobSummaryHelper.getJobByRequest(p_request);
-            boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
-                    p_response, p_request.getServletContext(), job);
+            boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request, p_response,
+                    p_request.getServletContext(), job);
             if (!isOk)
             {
                 pageReturn = true;
             }
-            
+
             return;
         }
 
@@ -576,18 +600,16 @@ public class ReportGeneratorHandler extends PageHandler implements
         }
     }
 
-    public void beforeAction(HttpServletRequest p_request,
-            HttpServletResponse response)
+    public void beforeAction(HttpServletRequest p_request, HttpServletResponse response)
     {
     }
 
-    public void afterAction(HttpServletRequest request,
-            HttpServletResponse response)
+    public void afterAction(HttpServletRequest request, HttpServletResponse response)
     {
     }
 
     // Get Download file name for reports.
-    public static String getDownloadFileName(List<File> p_reports, List<Long> p_reportJobIDS) 
+    public static String getDownloadFileName(List<File> p_reports, List<Long> p_reportJobIDS)
             throws JobException, RemoteException, GeneralException, NamingException
     {
         if (p_reports == null || p_reports.size() == 0)
@@ -601,65 +623,68 @@ public class ReportGeneratorHandler extends PageHandler implements
             {
                 long jobId = p_reportJobIDS.get(0);
                 Job job = ServerProxy.getJobHandler().getJobById(jobId);
-                fileName.append("-[").append(job.getJobName()).append("][").append(jobId).append("]");
+                fileName.append("-[").append(job.getJobName()).append("][").append(jobId)
+                        .append("]");
             }
             fileName.append(".zip");
 
             return fileName.toString();
         }
     }
-    
-    private boolean checkSourceLocale(List<Long> p_jobIDS, List<GlobalSightLocale> reportTargetLocales) throws Exception
+
+    private boolean checkSourceLocale(List<Long> p_jobIDS,
+            List<GlobalSightLocale> reportTargetLocales) throws Exception
     {
-    	boolean differentSource = false;
-    	if(reportTargetLocales == null)
-    	{
-    		reportTargetLocales = new ArrayList<GlobalSightLocale>(ServerProxy
-                    .getLocaleManager().getAllTargetLocales());
-    	}
-    	for(GlobalSightLocale targetLocale :reportTargetLocales)
-    	{
-    		if(differentSource)
-    		{
-    			break;
-    		}
-        	GlobalSightLocale sourceLocale = null;
-        	for (long jobID : p_jobIDS)
-        	{
-        		Job job = ServerProxy.getJobHandler().getJobById(jobID);
-        		if (job == null)
-        		{
+        boolean differentSource = false;
+        if (reportTargetLocales == null)
+        {
+            reportTargetLocales = new ArrayList<GlobalSightLocale>(
+                    ServerProxy.getLocaleManager().getAllTargetLocales());
+        }
+        for (GlobalSightLocale targetLocale : reportTargetLocales)
+        {
+            if (differentSource)
+            {
+                break;
+            }
+            GlobalSightLocale sourceLocale = null;
+            for (long jobID : p_jobIDS)
+            {
+                Job job = ServerProxy.getJobHandler().getJobById(jobID);
+                if (job == null)
+                {
                     continue;
-        		}
-        		Set<Workflow> wfSet = (Set<Workflow>) job.getWorkflows();
-        		boolean containTargetLocale = false;
-        		for(Workflow wf:wfSet)
-        		{
-        			if(wf.getTargetLocale().equals(targetLocale))
-        			{
-        				containTargetLocale = true;
-        			}
-        		}
-        		if(!containTargetLocale)
-        		{
-        			continue;
-        		}
-        		if(sourceLocale == null)
-        		{
-        			sourceLocale = job.getSourceLocale();
-        			continue;
-        		}
-        		if(!sourceLocale.equals(job.getSourceLocale())){
-        			differentSource = true;
-        			break;
-        		}
-        	}
-    	}
-    	return differentSource;
+                }
+                Set<Workflow> wfSet = (Set<Workflow>) job.getWorkflows();
+                boolean containTargetLocale = false;
+                for (Workflow wf : wfSet)
+                {
+                    if (wf.getTargetLocale().equals(targetLocale))
+                    {
+                        containTargetLocale = true;
+                    }
+                }
+                if (!containTargetLocale)
+                {
+                    continue;
+                }
+                if (sourceLocale == null)
+                {
+                    sourceLocale = job.getSourceLocale();
+                    continue;
+                }
+                if (!sourceLocale.equals(job.getSourceLocale()))
+                {
+                    differentSource = true;
+                    break;
+                }
+            }
+        }
+        return differentSource;
     }
-    
+
     private static void logInfo(String p_msg)
     {
-        //logger.info(p_msg);
+        // logger.info(p_msg);
     }
 }

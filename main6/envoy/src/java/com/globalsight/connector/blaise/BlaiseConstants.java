@@ -27,5 +27,5 @@ public interface BlaiseConstants
     String ENCODING = "UTF-8";
 
     String USAGE_TYPE_HDU = "HD_HDU_MANUAL";
-    String USAGE_TYPE_EDM = "HD_EDM_MANUAL";
+    String USAGE_TYPE_EDM = "HD_ISHEET";
 }

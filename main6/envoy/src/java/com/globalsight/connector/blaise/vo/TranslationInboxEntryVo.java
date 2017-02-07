@@ -34,9 +34,8 @@ public class TranslationInboxEntryVo
     private List<String> usages = null;
     private int wordCount = 0;
     private boolean isUsageOfHDU = false;
-    private boolean isUsageOfEDM = false;
+    private boolean isUsageOfIsSheet = false;
     private boolean isOtherUsages = false;
-    private boolean isNoNeedToTranslate = false;
 
 	// GlobalSight Job ID if job created
 	private List<Long> jobIds = null;
@@ -116,7 +115,7 @@ public class TranslationInboxEntryVo
 				if (BlaiseConstants.USAGE_TYPE_HDU.equals(usage))
 					isUsageOfHDU = true;
 				else if (BlaiseConstants.USAGE_TYPE_EDM.equals(usage))
-					isUsageOfEDM = true;
+					isUsageOfIsSheet = true;
 				else
 				    isOtherUsages = true;
 			}
@@ -128,9 +127,9 @@ public class TranslationInboxEntryVo
         return isUsageOfHDU;
     }
 
-    public boolean isUsageOfEDM()
+    public boolean isUsageOfIsSheet()
     {
-        return isUsageOfEDM;
+        return isUsageOfIsSheet;
     }
 
     public boolean isOtherUsages()

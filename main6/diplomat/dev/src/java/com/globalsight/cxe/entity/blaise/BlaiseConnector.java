@@ -39,6 +39,17 @@ public class BlaiseConnector extends PersistentObject
     private long defaultFileProfileId = -1L;
     private long jobAttributeGroupId = -1L;
     private boolean combined = true;
+    private long lastMaxEntryId = -1L;
+
+    public long getLastMaxEntryId()
+    {
+        return lastMaxEntryId;
+    }
+
+    public void setLastMaxEntryId(long lastMaxEntryId)
+    {
+        this.lastMaxEntryId = lastMaxEntryId;
+    }
 
     public String getPullDays()
     {
@@ -200,7 +211,6 @@ public class BlaiseConnector extends PersistentObject
         this.companyId = companyId;
     }
 
-    // Utility
     public String getCompanyName()
     {
         return CompanyWrapper.getCompanyNameById(companyId);

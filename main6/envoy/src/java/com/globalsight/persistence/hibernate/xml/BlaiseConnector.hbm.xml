@@ -40,5 +40,7 @@
                   type="long" not-null="true" />
         <property name="combined" column="IS_COMBINED" type="yes_no"
                   not-null="true" unique="false" />
+        <property name="lastMaxEntryId" column="LAST_MAX_ENTRY_ID" length="20"
+                  type="long" not-null="true" />
     </class>
 </hibernate-mapping>

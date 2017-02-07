@@ -59,6 +59,7 @@ public class BlaiseHelper
 
     private BlaiseConnector blc = null;
     private TranslationAgencyClient client = null;
+    private BlaiseEntryCollect entryCollect = null;
 
     private static List<String> specialChars = new ArrayList<String>();
 
@@ -194,6 +195,9 @@ public class BlaiseHelper
         return results;
     }
 
+    /**
+     * Converts a set of Blaise inbox entries to GlobalSight TranslationInboxEntryVo objects
+     */
     private List<TranslationInboxEntryVo> convertToGS(List<InboxEntry> entries, TranslationAgencyClient client)
             throws Exception
     {
@@ -238,12 +242,7 @@ public class BlaiseHelper
     }
 
     /**
-     * Convert Blaise translation inbox entry to GlobalSight TranslationInboxEntryVo object
-     *
-     * @param entry Translation inbox entry object got from Blaise
-     * @param client Blaise client connection
-     * @return TranslationInboxEntryVo GlobalSight translation inbox entry object
-     * @throws Exception
+     * Converts Blaise translation inbox entry to GlobalSight TranslationInboxEntryVo object
      */
     private TranslationInboxEntryVo convert(TranslationInboxEntry entry, TranslationAgencyClient client) throws Exception
     {
@@ -284,6 +283,95 @@ public class BlaiseHelper
         //logger.info("Fetch word count of entry usd " + (System.currentTimeMillis() - runTime) + " ms");
 
         return vo;
+    }
+
+    public void groupInboxEntries()
+    {
+        long lastMaxEntryId = blc.getLastMaxEntryId();
+        long maxInboxEntryId = getMaxInboxEntryId();
+        if (maxInboxEntryId <= lastMaxEntryId)
+            return;
+
+        TranslationPageCommand command = new TranslationPageCommand();
+        command.sortById();
+        command.setSortDesc(true);
+
+        int count = getInboxEntryCount(command);
+        int pageIndex = 0;
+        int pageSize = 100;
+        int roundTimes = count % pageSize;
+        roundTimes = roundTimes == 0 ? roundTimes : roundTimes + 1;
+        if (roundTimes == 0)
+            return;
+        List<TranslationInboxEntryVo> entries = null;
+        List<TranslationInboxEntryVo> hduEntries = null;
+        List<TranslationInboxEntryVo> inSheetEntries = null;
+        List<TranslationInboxEntryVo> otherEntries = null;
+        command.setPageSize(pageSize);
+
+        for (int i = 0; i < roundTimes; i++)
+        {
+            command.setPageIndex(i);
+            entries = listInbox(command);
+            if (entries == null || entries.size() == 0)
+                continue;
+            hduEntries = new ArrayList<>();
+            inSheetEntries = new ArrayList<>();
+            otherEntries = new ArrayList<>();
+            for (TranslationInboxEntryVo vo : entries)
+            {
+            }
+        }
+    }
+
+    public boolean isHDUType(TranslationInboxEntryVo vo)
+    {
+        if (vo == null)
+            return false;
+        return false;
+    }
+
+    private void filterEntryByUsages(List<TranslationInboxEntryVo> entries)
+    {
+
+    }
+
+    public BlaiseEntryCollect getEntryCollect()
+    {
+        if (entryCollect == null)
+            entryCollect = new BlaiseEntryCollect();
+        return entryCollect;
+    }
+
+    /**
+     * Gets maximum inbox entry id
+     */
+    public long getMaxInboxEntryId()
+    {
+        TranslationPageCommand command = new TranslationPageCommand(0, 1);
+        command.sortById();
+        command.setSortDesc(true);
+
+        TranslationAgencyClient client = getTranslationClient();
+        if (client == null)
+        {
+            logger.error("TranslationAgencyClient is null, cannot list inbox entry");
+            return -1L;
+        }
+        try
+        {
+            List<InboxEntry> entries = client.listInbox(command);
+            if (entries == null || entries.size() == 0)
+                return -1L;
+            TranslationInboxEntry entry = (TranslationInboxEntry) entries.get(0);
+
+            return entry.getId();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when invoke getMaxInboxEntryId method", e);
+            return -1L;
+        }
     }
 
     public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids, TranslationPageCommand command)

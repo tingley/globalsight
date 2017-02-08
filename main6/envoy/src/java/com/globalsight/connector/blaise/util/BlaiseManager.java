@@ -16,23 +16,19 @@
  */
 package com.globalsight.connector.blaise.util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import org.apache.log4j.Logger;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
 
 public class BlaiseManager
 {
@@ -56,6 +52,39 @@ public class BlaiseManager
         }
 
         return HibernateUtil.search(hql, map);
+    }
+
+    public static List<?> getConnectors()
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select * from connector_blaise where is_active='Y'");
+            while (rs.next())
+            {
+                logger.info("========= " + rs.getString("company_id"));
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                try
+                {
+                    conn.close();
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+        return null;
     }
 
     public static BlaiseConnector getBlaiseConnectorById(long blaiseConnectorId)

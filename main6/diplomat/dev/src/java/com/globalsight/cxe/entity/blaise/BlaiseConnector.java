@@ -40,6 +40,17 @@ public class BlaiseConnector extends PersistentObject
     private long jobAttributeGroupId = -1L;
     private boolean combined = true;
     private long lastMaxEntryId = -1L;
+    private String loginUser = "";
+
+    public String getLoginUser()
+    {
+        return loginUser;
+    }
+
+    public void setLoginUser(String loginUser)
+    {
+        this.loginUser = loginUser;
+    }
 
     public long getLastMaxEntryId()
     {

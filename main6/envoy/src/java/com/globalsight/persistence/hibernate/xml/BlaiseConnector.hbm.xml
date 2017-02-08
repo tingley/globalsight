@@ -42,5 +42,7 @@
                   not-null="true" unique="false" />
         <property name="lastMaxEntryId" column="LAST_MAX_ENTRY_ID" length="20"
                   type="long" not-null="true" />
+        <property name="loginUser" length="30" column="LOGIN_USER" type="string"
+                  not-null="false" unique="false" />
     </class>
 </hibernate-mapping>

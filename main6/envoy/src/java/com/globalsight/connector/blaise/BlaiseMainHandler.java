@@ -126,7 +126,7 @@ public class BlaiseMainHandler extends PageActionHandler
                 for (TranslationInboxEntryVo entry : entries) {
                     if (entry.isUsageOfHDU())
                         hduEntries.add(entry);
-                    else if (entry.isUsageOfEDM())
+                    else if (entry.isUsageOfIsSheet())
                         edmEntries.add(entry);
                     else
                         otherEntries.add(entry);

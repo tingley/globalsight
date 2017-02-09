@@ -744,7 +744,19 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
     localData=null;
-    o_form.submit();   
+    var submintAction = url_refresh+"&action=comment";
+    var formParam = $("#CommentForm").serialize();
+    $.ajax({
+        type:'post',      
+        url:submintAction,  
+        data:formParam,  
+        cache:false,  
+        dataType:'json',  
+        success:function(data)
+        {
+        }  
+    });
+    //o_form.submit();   
 }
 
 function contextForX(e)

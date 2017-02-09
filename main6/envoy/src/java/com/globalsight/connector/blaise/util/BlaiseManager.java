@@ -54,22 +54,47 @@ public class BlaiseManager
         return HibernateUtil.search(hql, map);
     }
 
+    /**
+     * Gets all  Blaise server connectors
+     */
     public static List<?> getConnectors()
     {
+        ArrayList<BlaiseConnector> connectors = new ArrayList<>();
         Connection conn = null;
         try
         {
             conn = DbUtil.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("select * from connector_blaise where is_active='Y'");
+            BlaiseConnector connector;
             while (rs.next())
             {
-                logger.info("========= " + rs.getString("company_id"));
+                connector = new BlaiseConnector();
+                connector.setId(rs.getInt("ID"));
+                connector.setName(rs.getString("Name"));
+                connector.setUrl(rs.getString("URL"));
+                connector.setUsername(rs.getString("User_Name"));
+                connector.setPassword(rs.getString("Password"));
+                connector.setClientCoreVersion(rs.getString("CLIENT_CORE_VERSION"));
+                connector.setClientCoreRevision(rs.getInt("CLIENT_CORE_REVISION"));
+                connector.setWorkflowId(rs.getString("WORKFLOW_ID"));
+                connector.setIsActive("Y".equalsIgnoreCase(rs.getString("IS_ACTIVE")));
+                connector.setCompanyId(rs.getLong("COMPANY_ID"));
+                connector.setAutomatic("Y".equalsIgnoreCase(rs.getString("IS_AUTOMATIC")));
+                connector.setPullDays(rs.getString("PULL_DAYS"));
+                connector.setPullHour(rs.getInt("PULL_HOUR"));
+                connector.setDefaultFileProfileId(rs.getLong("DEFAULT_FILE_PROFILE_ID"));
+                connector.setMinProcedureWords(rs.getInt("MIN_PROCEDURE_WORDS"));
+                connector.setCombined("Y".equals(rs.getString("IS_COMBINED")));
+                connector.setLastMaxEntryId(rs.getLong("LAST_MAX_ENTRY_ID"));
+                connector.setLoginUser(rs.getString("LOGIN_USER"));
+
+                connectors.add(connector);
             }
         }
         catch (Exception e)
         {
-
+            logger.error("Error found when invoking getConnectors().", e);
         }
         finally
         {
@@ -77,14 +102,14 @@ public class BlaiseManager
             {
                 try
                 {
-                    conn.close();
+                    DbUtil.returnConnection(conn);
                 }
                 catch (Exception e)
                 {
                 }
             }
         }
-        return null;
+        return connectors;
     }
 
     public static BlaiseConnector getBlaiseConnectorById(long blaiseConnectorId)

@@ -9,9 +9,14 @@ import org.apache.log4j.Logger;
 public class BlaiseAutoHelper
 {
     private static Logger logger = Logger.getLogger(BlaiseAutoHelper.class);
+    private static boolean running = false;
 
     public static void runAutomatic(BlaiseConnector bc)
     {
-        logger.info("===========run automatic===========");
+        if (running || bc == null)
+            return;
+
+        BlaiseHelper helper = new BlaiseHelper(bc);
+
     }
 }

@@ -16,32 +16,16 @@
  */
 package com.globalsight.connector.blaise.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.zip.GZIPInputStream;
-
-import com.cognitran.translation.client.PublicationTypeUsageDetails;
-import com.cognitran.translation.client.TranslationStatisticsDetails;
-import com.globalsight.connector.blaise.BlaiseConstants;
-import com.globalsight.util.Entry;
-import org.apache.log4j.Logger;
-
 import com.cognitran.blaise.translation.api.ClientFactory;
 import com.cognitran.blaise.translation.api.TranslationAgencyClient;
 import com.cognitran.client.IncompatibleVersionException;
 import com.cognitran.core.model.util.Collections;
+import com.cognitran.translation.client.PublicationTypeUsageDetails;
 import com.cognitran.translation.client.TranslationPageCommand;
+import com.cognitran.translation.client.TranslationStatisticsDetails;
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.cognitran.workflow.client.InboxEntry;
+import com.globalsight.connector.blaise.BlaiseConstants;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
@@ -52,6 +36,15 @@ import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 public class BlaiseHelper
 {
@@ -174,18 +167,7 @@ public class BlaiseHelper
             }
 
             List<InboxEntry> inboxEntries = client.listInbox(command);
-            for (InboxEntry entry : inboxEntries)
-            {
-                try
-                {
-                    TranslationInboxEntryVo vo = convert((TranslationInboxEntry)entry, client);
-                    results.add(vo);
-                }
-                catch (Exception ignore)
-                {
-                    // ignore this entry if it has no required target locale
-                }
-            }
+            results = convertToGS(inboxEntries, client);
         }
         catch (Exception e)
         {

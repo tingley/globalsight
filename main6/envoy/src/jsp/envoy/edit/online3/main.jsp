@@ -583,7 +583,7 @@ var lb_title = "<%=bundle.getString("lb_segment_details")%>";
 <INPUT TYPE="hidden" NAME="subId" VALUE="">
 <INPUT TYPE="hidden" NAME="ptags" VALUE="">
 </FORM>
-<FORM name="CommentForm" METHOD="POST" action="<%=url_refresh%>&action=comment">
+<FORM name="CommentForm" id="CommentForm" METHOD="POST" action="<%=url_refresh%>&action=comment">
 <input type="hidden" name="tuId"        value="">
 <input type="hidden" name="tuvId"       value="">
 <input type="hidden" name="subId"       value="">

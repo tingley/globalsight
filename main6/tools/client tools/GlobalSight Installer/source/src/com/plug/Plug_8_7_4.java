@@ -16,19 +16,19 @@
  */
 package com.plug;
 
-import java.io.File;
-
-import org.apache.log4j.Logger;
-
 import com.util.FileUtil;
 import com.util.ServerUtil;
+import org.apache.log4j.Logger;
 
-public class Plug_8_7_4 implements Plug
+import java.io.File;
+
+public class Plug_8_7_4 implements com.plug.Plug
 {
     private static Logger log = Logger.getLogger(Plug_8_7_4.class);
 
     private static final String JAR_XML_APIS = "/jboss/server/standalone/deployments/globalsight.ear/lib/xml-apis-1.3.04.jar";
     private static final String JAR_XML_APIS_EXT = "/jboss/server/standalone/deployments/globalsight.ear/lib/xml-apis-ext-1.3.04.jar";
+    private static final String JAR_BLAISE_APIS = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.4.0-RC1-jar-with-dependencies.jar";
 
     @Override
     public void run()
@@ -36,6 +36,9 @@ public class Plug_8_7_4 implements Plug
         // GBS-4660: delete xml-apis*.jar from build
         deleteFiles(ServerUtil.getPath() + JAR_XML_APIS);
         deleteFiles(ServerUtil.getPath() + JAR_XML_APIS_EXT);
+
+        // GBS-4595: delete blaise*.jar from build
+        deleteFiles(ServerUtil.getPath() + JAR_BLAISE_APIS);
     }
 
     private void deleteFiles(String path)

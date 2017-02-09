@@ -16,12 +16,6 @@
  */
 package com.globalsight.everest.jobhandler.jobcreation;
 
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
@@ -33,7 +27,13 @@ import com.globalsight.everest.workflowmanager.JobStatePostThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import org.apache.log4j.Logger;
+
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This class monitors the job creation process with different states before
@@ -136,8 +136,10 @@ public class JobCreationMonitor
             job.setCreateDate(ts);
             job.setTimestamp(ts);
             job.setJobType(jobType);
-            long companyId = Long.parseLong(CompanyThreadLocal.getInstance()
-                    .getValue());
+            String companyIdString = CompanyThreadLocal.getInstance().getValue();
+            if (StringUtil.isEmpty(companyIdString))
+                companyIdString = "1000";
+            long companyId = Long.parseLong(companyIdString);
             job.setCompanyId(companyId);
 
             HibernateUtil.save(job);

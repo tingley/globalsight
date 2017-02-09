@@ -283,7 +283,8 @@ function validName()
         <tr>
             <td class="standardText"><%= bundle.getString("lb_default_file_profile")%>:</td>
             <td class="standardText">
-                <select id="defaultFileProfileId" name="defaultFileProfileId" class="standardText">
+                <select id="defaultFileProfileId" name="defaultFileProfileId" class="standardText" onchange="fileProfileChanged();">
+                    <option value=""><%=bundle.getString("lb_choose") %></option>
                     <%
                         if (fps != null && fps.size() > 0) {
                             for (FileProfileImpl fp : fps) {
@@ -361,41 +362,61 @@ function validName()
 </div>
 </div>
 <script>
+    function fileProfileChanged()
+    {
+        if ($("#defaultFileProfileId").val() == "")
+            return;
+        $.ajax({
+            url: "blaiseAjax.jsp",
+            type: "POST",
+            async: "false",
+            data: {
+                action: "getAttributes",
+                fpId: $("#defaultFileProfileId").val()
+            },
+            dataType: "json",
+            success: function(data, textStatus, jqXHR) {
+                if (data != "") {
+                    alert("data == " + data);
+                }
+            }
+        })
+    }
     function changeAttributeGroup()
     {
         if ($("#jobAttributeGroupId").val() == "-1")
             return;
-        $.ajax({
-            url:'blaiseAjax.jsp',
-            type:'POST', //GET
-            async:true,    //或false,是否异步
-            data:{
-                type:'jag'
-            },
-            timeout:5000,    //超时时间
-            dataType:'text',    //返回的数据格式：json/xml/html/script/jsonp/text
-            success:function(data,textStatus,jqXHR){
-                if (data != "") {
-                    var tableContent = "";
-                    var attributes = data.split(";");
-                    for (var i=0;i<attributes.length;i++) {
-                        var attrData = attributes[i].split(",");
-                        tableContent += "<tr><td class='standardText'>" + attrData[1] + "</td><td>" + attrData[2] + "</td>";
-                        tableContent += "<td>";
-                        if (attrData[3] == "Y")
-                            tableContent += "Yes";
-                        else
-                            tableContent += "No";
-                    }
-                }
-            },
-            error:function(xhr,textStatus){
-            },
-            complete:function(){
-                console.log('结束')
-            }
-        })
-
+//        $.ajax({
+//            url:'blaiseAjax.jsp',
+//            type:'POST', //GET
+//            async:true,    //或false,是否异步
+//            data:{
+//                action:'test'
+//            },
+//            timeout:5000,    //超时时间
+//            dataType:'text',    //返回的数据格式：json/xml/html/script/jsonp/text
+//            success:function(data,textStatus,jqXHR){
+//                if (data != "") {
+//                    var tableContent = "";
+//                    var attributes = data.split(";");
+//                    for (var i=0;i<attributes.length;i++) {
+//                        var attrData = attributes[i].split(",");
+//                        tableContent += "<tr><td class='standardText'>" + attrData[1] + "</td><td>" + attrData[2] + "</td>";
+//                        tableContent += "<td>";
+//                        if (attrData[3] == "Y")
+//                            tableContent += "Yes";
+//                        else
+//                            tableContent += "No";
+//                    }
+//                }
+//            },
+//            error:function(xhr,textStatus){
+//            },
+//            complete:function(){
+//                console.log('结束')
+//            }
+//        })
+//
     }
 </script>
 </body>

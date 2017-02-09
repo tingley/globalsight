@@ -25,29 +25,33 @@ public class BlaiseTimerTask implements Runnable
     {
         try
         {
-//            logger.info("************ In BlaiseTimerTask *****************");
+            logger.info("************ In BlaiseTimerTask *****************");
             List blaiseConnectors = BlaiseManager.getConnectors();
             if (blaiseConnectors == null || blaiseConnectors.size() == 0)
                 return;
-            logger.info("=========== " + blaiseConnectors.size());
+
             BlaiseConnector connector;
             for (int i = 0, size = blaiseConnectors.size(); i < size; i++)
             {
-                connector = (BlaiseConnector)blaiseConnectors.get(i);
+                connector = (BlaiseConnector) blaiseConnectors.get(i);
                 if (connector.isAutomatic() && StringUtil.isNotEmpty(connector.getPullDays()))
                 {
                     //is an automatic connector
                     String pullDays = connector.getPullDays();
+                    if (!pullDays.endsWith(","))
+                        pullDays += ",";
                     Calendar calendar = Calendar.getInstance();
                     String currentDayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) - 1) + ",";
-                    logger.info("**** pullDays == " + pullDays + ", currentDaysOfWeek == " + currentDayOfWeek);
+                    logger.info("**** pullDays == " + pullDays + ", currentDaysOfWeek == "
+                            + currentDayOfWeek + ", hour == " + connector.getPullHour() + ", "
+                            + calendar.get(Calendar.HOUR_OF_DAY));
                     if (pullDays.indexOf(currentDayOfWeek) > -1)
                     {
                         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
                         if (connector.getPullHour() == currentHour)
                         {
                             //match the time condition
-                            BlaiseAutoHelper.runAutomatic(connector);
+                            BlaiseAutoHelper.getInstance().runAutomatic(connector);
                         }
                     }
                 }
@@ -60,8 +64,7 @@ public class BlaiseTimerTask implements Runnable
 
     }
 
-    @Override
-    public void run()
+    @Override public void run()
     {
         try
         {

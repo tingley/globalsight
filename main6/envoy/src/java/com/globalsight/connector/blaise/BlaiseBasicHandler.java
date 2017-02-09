@@ -16,32 +16,31 @@
  */
 package com.globalsight.connector.blaise;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ResourceBundle;
+import com.globalsight.connector.blaise.util.BlaiseAutoHelper;
+import com.globalsight.connector.blaise.util.BlaiseHelper;
+import com.globalsight.connector.blaise.util.BlaiseManager;
+import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.cxe.entity.customAttribute.AttributeSet;
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.ActionHandler;
+import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.globalsight.cxe.entity.customAttribute.AttributeSet;
-import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
-import org.apache.log4j.Logger;
-import org.json.JSONObject;
-
-import com.globalsight.connector.blaise.util.BlaiseHelper;
-import com.globalsight.connector.blaise.util.BlaiseManager;
-import com.globalsight.cxe.entity.blaise.BlaiseConnector;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.webapp.pagehandler.ActionHandler;
-import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class BlaiseBasicHandler extends PageActionHandler
 {
@@ -131,4 +130,24 @@ public class BlaiseBasicHandler extends PageActionHandler
 	{
 
 	}
+
+    @ActionHandler(action = "getAttributes", formClass = "")
+    public void getAttributes(HttpServletRequest request,
+            HttpServletResponse response)
+    {
+        String action = request.getParameter("action");
+        if ("getAttributes".equals(action))
+        {
+            String fpId = request.getParameter("fpId");
+            String data = BlaiseAutoHelper.getInstance().getJobAttributes(fpId);
+            try
+            {
+                response.getWriter().print(data);
+            }
+            catch (Exception e)
+            {
+                logger.error("Error found. ", e);
+            }
+        }
+    }
 }

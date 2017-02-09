@@ -26,15 +26,24 @@ import com.cognitran.translation.client.TranslationStatisticsDetails;
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.cognitran.workflow.client.InboxEntry;
 import com.globalsight.connector.blaise.BlaiseConstants;
+import com.globalsight.connector.blaise.CreateBlaiseJobThread;
+import com.globalsight.connector.blaise.form.CreateBlaiseJobForm;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.entity.customAttribute.AttributeClone;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.BlaiseInboxEntryComparator;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import org.apache.log4j.Logger;
 
@@ -44,6 +53,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.GZIPInputStream;
 
 public class BlaiseHelper
@@ -273,43 +284,168 @@ public class BlaiseHelper
         long maxInboxEntryId = getMaxInboxEntryId();
         if (maxInboxEntryId <= lastMaxEntryId)
             return;
-
-        TranslationPageCommand command = new TranslationPageCommand();
-        command.sortById();
-        command.setSortDesc(true);
-
-        int count = getInboxEntryCount(command);
-        int pageIndex = 0;
-        int pageSize = 100;
-        int roundTimes = count % pageSize;
-        roundTimes = roundTimes == 0 ? roundTimes : roundTimes + 1;
-        if (roundTimes == 0)
-            return;
-        List<TranslationInboxEntryVo> entries = null;
-        List<TranslationInboxEntryVo> hduEntries = null;
-        List<TranslationInboxEntryVo> inSheetEntries = null;
-        List<TranslationInboxEntryVo> otherEntries = null;
-        command.setPageSize(pageSize);
-
-        for (int i = 0; i < roundTimes; i++)
+        String userId = blc.getLoginUser();
+        if (StringUtil.isEmpty(userId))
+            userId = "qaadmin";
+        try
         {
-            command.setPageIndex(i);
-            entries = listInbox(command);
-            if (entries == null || entries.size() == 0)
-                continue;
-            hduEntries = new ArrayList<>();
-            inSheetEntries = new ArrayList<>();
-            otherEntries = new ArrayList<>();
-            for (TranslationInboxEntryVo vo : entries)
+            long fileProfileId = blc.getDefaultFileProfileId();
+            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                    .getFileProfileById(fileProfileId, false);
+            long lpId = fp.getL10nProfileId();
+            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(lpId);
+            Locale sourceLocale = lp.getSourceLocale().getLocale();
+            GlobalSightLocale[] targetLocales = lp.getTargetLocales();
+            ArrayList<String> targetLocaleList = new ArrayList<>();
+            if (targetLocales != null)
             {
+                for (GlobalSightLocale locale : targetLocales)
+                    targetLocaleList.add(fixLocale(locale.getLocaleCode()));
             }
+            User user = ServerProxy.getUserManager().getUser(userId);
+            long companyId = blc.getCompanyId();
+
+            String[] locales = new String[]{"de_DE", "fr_FR", "it_IT"};
+            TranslationPageCommand command = initTranslationPageCommand(0, 5, null,
+                    sourceLocale.toString(), "de_DE", null, null, 0, false);
+            command.sortById();
+            command.setSortDesc(false);
+
+//            int count = getInboxEntryCount(command);
+//            int pageIndex = 0;
+//            int pageSize = 100;
+//            int roundTimes = count % pageSize;
+//            roundTimes = roundTimes == 0 ? roundTimes : roundTimes + 1;
+//            if (roundTimes == 0)
+//                return;
+            int roundTimes = 5;
+            List<TranslationInboxEntryVo> entries = null;
+            List<TranslationInboxEntryVo> hduEntries = null;
+            List<TranslationInboxEntryVo> inSheetEntries = null;
+            List<TranslationInboxEntryVo> otherEntries = null;
+            command.setPageSize(5);
+            int index = 0;
+            for (int i = 0; i < roundTimes; i++)
+            {
+                if (index > 2)
+                    index = 0;
+                command = initTranslationPageCommand(10*i, 5, null,
+                        sourceLocale.toString(), locales[index], null, null, 0, false);
+                index++;
+                command.sortById();
+                command.setSortDesc(false);
+                command.setPageIndex(i);
+                entries = listInbox(command);
+                if (entries == null || entries.size() == 0)
+                    continue;
+                hduEntries = new ArrayList<>();
+                inSheetEntries = new ArrayList<>();
+                otherEntries = new ArrayList<>();
+                Set<Long> entryIds = new HashSet<>();
+                for (TranslationInboxEntryVo vo : entries)
+                {
+                    logger.info("*** Entry ****");
+                    logger.info("getDisplaySourceLocale == " + vo.getDisplaySourceLocale());
+                    logger.info("getDisplayTargetLocale == " + vo.getDisplayTargetLocale());
+                    logger.info("getType == " + vo.getType());
+                    logger.info("getUsages2UI == " + vo.getUsages2UI());
+                    logger.info("getDescription == " + vo.getDescription());
+                    logger.info("getRelatedObjectId == " + vo.getRelatedObjectId());
+                    logger.info("entry source locale == " + vo.getSourceLocale().toString());
+                    Locale tmp = vo.getSourceLocale();
+                    if (!tmp.equals(sourceLocale))
+                        continue;
+                    String targetLocale = vo.getDisplayTargetLocale();
+                    logger.info("entry target locale == " + targetLocale);
+                    if (vo.isUsageOfIsSheet() && isInSheetType(vo))
+                        inSheetEntries.add(vo);
+                    else if (vo.isUsageOfHDU() && isHDUType(vo))
+                        hduEntries.add(vo);
+                    else
+                        otherEntries.add(vo);
+                    entryIds.add(vo.getEntry().getId());
+                }
+                claim(entryIds);
+
+                ExecutorService pool = Executors.newFixedThreadPool(5);
+                CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
+                blaiseForm.setPriority("3");
+                blaiseForm.setBlaiseConnectorId(String.valueOf(blc.getId()));
+                blaiseForm.setCombineByLangs("on");
+                blaiseForm.setUserName(user.getUserId());
+                int size = 0;
+                ArrayList<FileProfile> fps = null;
+                if (inSheetEntries != null && inSheetEntries.size()>0) {
+                    size = inSheetEntries.size();
+                    logger.info("inSheetEntries == " + size);
+                    fps = new ArrayList<>(size);
+                    for (int j = 0; j < size; j++)
+                    {
+                        fps.add(fp);
+                    }
+                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, String.valueOf(companyId),
+                            blc, blaiseForm, inSheetEntries, fps, null,
+                            null, JobImpl.createUuid(), null);
+                    Thread t = new MultiCompanySupportedThread(runnable);
+                    pool.execute(t);
+                }
+                if (otherEntries != null && otherEntries.size()>0)
+                {
+                    size = otherEntries.size();
+                    logger.info("otherEntries == " + size);
+                    fps = new ArrayList<>(size);
+                    for (int j = 0; j < size; j++)
+                    {
+                        fps.add(fp);
+                    }
+                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, String.valueOf(companyId),
+                            blc, blaiseForm, otherEntries, fps, null,
+                            null, JobImpl.createUuid(), null);
+                    Thread t = new MultiCompanySupportedThread(runnable);
+                    pool.execute(t);
+                }
+                if (hduEntries != null && hduEntries.size()>0)
+                {
+                    size = hduEntries.size();
+                    logger.info("hduEntries == " + size);
+                    fps = new ArrayList<>(size);
+                    for (int j = 0; j < size; j++)
+                    {
+                        fps.add(fp);
+                    }
+                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, String.valueOf(companyId),
+                            blc, blaiseForm, hduEntries, fps, null,
+                            null, JobImpl.createUuid(), null);
+                    Thread t = new MultiCompanySupportedThread(runnable);
+                    pool.execute(t);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error found. ", e);
         }
     }
 
     public boolean isHDUType(TranslationInboxEntryVo vo)
     {
-        if (vo == null)
+        if (vo == null || !vo.isUsageOfHDU())
             return false;
+        String type = vo.getType();
+        if (type.equals(BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT) || type
+                .equals(BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT) || type
+                .equals(BlaiseConstants.GS_TYPE_GRAPHIC) || type
+                .equals(BlaiseConstants.GS_TYPE_PROCEDURE))
+            return true;
+        return false;
+    }
+
+    public boolean isInSheetType(TranslationInboxEntryVo vo)
+    {
+        if (vo == null || !vo.isUsageOfIsSheet())
+            return false;
+        String type = vo.getType();
+        if (type.equals(BlaiseConstants.GS_TYPE_STANDALONE) || type
+                .equals(BlaiseConstants.GS_TYPE_GRAPHIC))
+            return true;
         return false;
     }
 

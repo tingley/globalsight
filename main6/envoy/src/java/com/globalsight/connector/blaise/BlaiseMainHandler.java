@@ -78,9 +78,9 @@ public class BlaiseMainHandler extends PageActionHandler
                 pullDays.append(tmp).append(",");
         }
         tmp = pullDays.toString();
-        if (tmp != null && tmp.length() > 0)
-            tmp = tmp.substring(0, tmp.length() - 1);
         connector.setPullDays(tmp);
+        tmp = request.getParameter("pullHour");
+        connector.setPullHour(Integer.parseInt(tmp));
         tmp = request.getParameter("automatic");
         connector.setAutomatic("true".equals(tmp));
         tmp = request.getParameter("combined");

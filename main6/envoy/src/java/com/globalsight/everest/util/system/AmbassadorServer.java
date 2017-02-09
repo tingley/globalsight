@@ -41,6 +41,7 @@ import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -291,10 +292,13 @@ public class AmbassadorServer
             Thread thread = new MultiCompanySupportedThread(actrunnable);
             thread.start();
 
+            // Sets up a timer task, it will be run per 60 minutes
             ScheduledExecutorService service = Executors
                     .newSingleThreadScheduledExecutor();
             BlaiseTimerTask timerTask = new BlaiseTimerTask();
-            service.scheduleAtFixedRate(timerTask, 2, 10, TimeUnit.SECONDS);
+            Calendar now = Calendar.getInstance();
+            int delayTime = 60 - now.get(Calendar.MINUTE);
+            service.scheduleAtFixedRate(timerTask, delayTime, 60, TimeUnit.MINUTES);
         }
         catch (Exception e)
         {

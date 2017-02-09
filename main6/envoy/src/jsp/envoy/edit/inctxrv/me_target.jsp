@@ -376,8 +376,19 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
     main.localData=null;
-    o_form.submit();
-    
+    var submintAction = "<%=url_refresh%>";
+    var formParam = $("#CommentForm").serialize();
+    $.ajax({
+        type:'post',      
+        url:submintAction,  
+        data:formParam,  
+        cache:false,  
+        dataType:'json',  
+        success:function(data)
+        {
+        }  
+    });
+    window.top.RefreshCommentPane();
 }
 
 function SaveComment(tuId, tuvId, subId, action, title, comment, priority, status, category, severity)
@@ -1365,7 +1376,7 @@ function doSegmentFilter(p_segmentFilter)
 <INPUT TYPE="hidden" NAME="refresh" VALUE="0">
 <INPUT type="hidden" NAME="trgViewLocale" VALUE="">
 </FORM>
-<FORM name="CommentForm" METHOD="POST" action="<%=url_refresh%>">
+<FORM name="CommentForm" id="CommentForm" METHOD="POST" action="<%=url_refresh%>">
 <input type="hidden" name="tuId"        value="">
 <input type="hidden" name="tuvId"       value="">
 <input type="hidden" name="subId"       value="">

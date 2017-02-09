@@ -268,6 +268,11 @@ public class PtagPageGenerator
         }
     }
     
+    /**
+     * Make the source and target 'i' values change to the same value
+     * @param p_OSD Need to fix data
+     * @since GBS-4581 : 100% match ignores i value in bpt tag
+     * */
 	private void fixAttributeIX(OfflineSegmentData p_OSD)
 	{
 		Element troot = getDom(
@@ -277,23 +282,8 @@ public class PtagPageGenerator
 				"<seg>" + p_OSD.getDisplaySourceText() + "</seg>")
 				.getRootElement();
 
-		fixAttributeIX(sroot, troot);
-
-		int firstIndex = 5;
-		int sEndIndex = sroot.asXML().length() - 6;
-		int tEndIndex = troot.asXML().length() - 6;
-		// Save the modified segments back into the tuvs.
-		p_OSD.setDisplaySourceText(sroot.asXML().substring(firstIndex,
-				sEndIndex));
-		p_OSD.setDisplayTargetText(troot.asXML().substring(firstIndex,
-				tEndIndex));
-	}
-	
-	private void fixAttributeIX(Element p_sroot, Element p_troot)
-    {
-        // First use the same "i" across source and target tuvs.
-        List bpts = p_sroot.selectNodes("//bpt");
-
+		// First use the same "i" across source and target tuvs.
+        List bpts = sroot.selectNodes("//bpt");
         for (int i = 0, max = bpts.size(); i < max; i++)
         {
             Element bpt = (Element) bpts.get(i);
@@ -305,13 +295,23 @@ public class PtagPageGenerator
             // Don't crash here because of it. Fix it elsewhere.
             if (xAttr != null && iAttr != null)
             {
-                fixAttributeI(xAttr, iAttr, p_troot);
+                fixAttributeI(xAttr, iAttr, troot);
             }
         }
-    }
+
+		int firstIndex = 5;
+		int sEndIndex = sroot.asXML().length() - 6;
+		int tEndIndex = troot.asXML().length() - 6;
+		// Save the modified segments back into the tuvs.
+		p_OSD.setDisplaySourceText(sroot.asXML().substring(firstIndex,
+				sEndIndex));
+		p_OSD.setDisplayTargetText(troot.asXML().substring(firstIndex,
+				tEndIndex));
+	}
 	
     /**
      * Fixes a single "i" attribute in all other TUVs based on the "x".
+     * @since GBS-4581 : 100% match ignores i value in bpt tag
      */
     private void fixAttributeI(String p_x, String p_i, Element p_root)
 	{

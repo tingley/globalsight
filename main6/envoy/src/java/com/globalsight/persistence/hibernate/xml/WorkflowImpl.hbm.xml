@@ -134,7 +134,7 @@
 		</set>
 		<set name="workflowCommentSet" inverse="true" cascade="all">
 			<key column="COMMENT_OBJECT_ID" />
-			<one-to-many class="com.globalsight.everest.comment.CommentImpl" />
+			<one-to-many class="com.globalsight.everest.comment.WorkflowComment" />
 		</set>
 		<set name="workflowOwnerSet" inverse="true" cascade="all">
 			<key column="WORKFLOW_ID" />

@@ -345,8 +345,8 @@ public class CompanyRemoval
 //    private static final String SQL_JOB_DELETE_COST_WORKFLOW = "delete from COST where COSTABLE_OBJECT_TYPE='W' and COSTABLE_OBJECT_ID in";
 //    private static final String SQL_JOB_DELETE_COST_TASK = "delete from COST where COSTABLE_OBJECT_TYPE='T' and COSTABLE_OBJECT_ID in ";
 
-    private static final String SQL_JOB_DELETE_COMMENTS = "delete from COMMENTS where COMMENT_OBJECT_TYPE='J' and COMMENT_OBJECT_ID=?";
-    private static final String SQL_JOB_DELETE_TASK_COMMENTS = "delete from COMMENTS where COMMENT_OBJECT_TYPE='T' and COMMENT_OBJECT_ID in ";
+    private static final String SQL_JOB_DELETE_COMMENTS = "delete from JOB_COMMENTS where COMMENT_OBJECT_ID=?";
+    private static final String SQL_JOB_DELETE_TASK_COMMENTS = "delete from TASK_COMMENTS where COMMENT_OBJECT_ID in ";
     private static final String SQL_JOB_DELETE_TASK_INTERIM = "delete from TASK_INTERIM where TASK_ID in ";
     
 //    private static final String SQL_JOB_DELETE_ADDING_SOURCE_PAGE = "delete from Adding_Source_Page where JOB_ID=?";
@@ -359,7 +359,7 @@ public class CompanyRemoval
 
     private static final String SQL_JOB_QUERY_LEVERAGE_GROUP = "select LG_ID from SOURCE_PAGE_LEVERAGE_GROUP where SP_ID in ";
 
-    private static final String SQL_JOB_QUERY_TASK_COMMENTS = "select ID from COMMENTS where COMMENT_OBJECT_TYPE='T' and COMMENT_OBJECT_ID in ";
+    private static final String SQL_JOB_QUERY_TASK_COMMENTS = "select ID from TASK_COMMENTS where COMMENT_OBJECT_ID in ";
 
     private static final String SQL_JOB_QUERY_EXTERNAL_PAGE = "select EXTERNAL_PAGE_ID from SOURCE_PAGE where ID in ";
 

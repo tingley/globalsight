@@ -191,8 +191,7 @@ public class CommentManagerLocal implements CommentManager
     private ArrayList<String> getActivityCommentIds(Task p_task)
     {
         ArrayList<String> arr = new ArrayList<String>(); 
-        String sql = "select ID from comments where COMMENT_OBJECT_ID = :COID"
-                + " and COMMENT_OBJECT_TYPE='T'";
+        String sql = "select ID from task_comments where COMMENT_OBJECT_ID = :COID";
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("COID", p_task.getId());
         List<?> list =  HibernateUtil.searchWithSql(sql, map);
@@ -388,34 +387,41 @@ public class CommentManagerLocal implements CommentManager
                     null);
         }
 
-        Comment comment = null;
+        Comment c = null;
+        
         Session session = HibernateUtil.getSession();
         Transaction transaction = session.beginTransaction();
 
         try
         {
-            comment = new CommentImpl(p_date, p_creatorUserId, p_comment, p_wo);
-            session.save(comment);
-
             if (p_wo instanceof Job)
             {
+                c = new JobComment(p_date, p_creatorUserId, p_comment, p_wo);
+                session.save(c);
+                
                 Job job = (Job) session.get(JobImpl.class,
                         new Long(p_wo.getId()));
-                job.addJobComment(comment);
+                job.addJobComment(c);
                 session.update(job);
             }
             else if (p_wo instanceof Workflow)
             {
+                c = new WorkflowComment(p_date, p_creatorUserId, p_comment, p_wo);
+                session.save(c);
+                
                 Workflow workflow = (Workflow) session.get(WorkflowImpl.class,
                         new Long(p_wo.getId()));
-                workflow.addWorkflowComment(comment);
+                workflow.addWorkflowComment(c);
                 session.update(workflow);
             }
             else if (p_wo instanceof Task)
             {
+                c = new TaskComment(p_date, p_creatorUserId, p_comment, p_wo);
+                session.save(c);
+                
                 Task task = (TaskImpl) session.get(TaskImpl.class, new Long(
                         p_wo.getId()));
-                task.addTaskComment(comment);
+                task.addTaskComment(c);
                 session.update(task);
             }
 
@@ -450,11 +456,14 @@ public class CommentManagerLocal implements CommentManager
 
         // session.close();
 
-        return comment;
+        return c;
     }
 
     /**
+     * Replaced by CommentUtil.updateComment(long, String, String).
+     * 
      * @see CommentManager.updateComment(long, String, String)
+     * @deprecated
      */
     public Comment updateComment(long p_commentId, String p_modifierUserId,
             String p_commentString) throws RemoteException, CommentException

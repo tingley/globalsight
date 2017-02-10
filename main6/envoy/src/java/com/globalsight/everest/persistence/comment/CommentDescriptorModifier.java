@@ -26,12 +26,7 @@ public class CommentDescriptorModifier
 
     // public variables used for identifying the comments table and fields
     public static final String TABLE_NAME = "COMMENTS";
-    public static final String OBJECT_TYPE_FIELD = "COMMENT_OBJECT_TYPE";
     public static final String OBJECT_ID_FIELD = "COMMENT_OBJECT_ID";
-
-    // the object types that comments can be attached to.
-    public static final String JOB_TYPE = "J";      // job
-    public static final String TASK_TYPE = "T";     // task
 
     // package level
     static final String COMMENT_ID = "commentId";

@@ -34,6 +34,7 @@
           <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>" >
                 <input type="radio" name="radioBtn" value="<%=taskcomment.getCommentId()%>"
                     onclick="enableButtons('editActBtn')">
+                <input type="hidden" name="commentType<%=taskcomment.getCommentId()%>" value="task">    
             </amb:permission>
             </amb:column>
             <amb:column label="lb_target_locale" width="10%" sortBy="<%=TaskCommentInfoComparator.LOCALE%>">

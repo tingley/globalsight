@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.Rate;
-import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -457,8 +456,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public void addTaskComment(Comment p_taskComment)
     {
         m_taskComments.add(p_taskComment);
-
-        CommentHelper.filterInvalidComments(m_taskComments, Comment.COMMENT_OBJECT_TYPE_TASK);
     }
 
     /**
@@ -488,8 +485,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         {
             m_taskComments = p_taskComments;
         }
-
-        CommentHelper.filterInvalidComments(m_taskComments, Comment.COMMENT_OBJECT_TYPE_TASK);
     }
 
     /**

@@ -27,10 +27,6 @@ public interface Comment
     public static int WORKFLOW = 2;
     public static int TASK = 3;
 
-    public static String COMMENT_OBJECT_TYPE_JOB = "J";
-    public static String COMMENT_OBJECT_TYPE_WORKFLOW = "W";
-    public static String COMMENT_OBJECT_TYPE_TASK = "T";
-
     /**
      * Get the id of this task comment.
      * @return The task's comment id.

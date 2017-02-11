@@ -88,7 +88,7 @@
         <bag name="taskComments" inverse="true" cascade="save-update">
             <key column="COMMENT_OBJECT_ID" />
             <one-to-many
-                class="com.globalsight.everest.comment.CommentImpl" />
+                class="com.globalsight.everest.comment.TaskComment" />
         </bag>
 
         <set name="workSet" inverse="true" cascade="all">

@@ -85,7 +85,7 @@
 
 		<set name="jobCommentSet" inverse="true" cascade="save-update">
 			<key column="COMMENT_OBJECT_ID" />
-			<one-to-many class="com.globalsight.everest.comment.CommentImpl" />
+			<one-to-many class="com.globalsight.everest.comment.JobComment" />
 		</set>
 		<set name="requestSet" inverse="true" cascade="save-update">
 			<key column="JOB_ID" />

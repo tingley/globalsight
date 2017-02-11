@@ -837,8 +837,14 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     }
                     else
                     {
-                        comment = TaskHelper.updateComment(commentObj.getId(), p_user.getUserId(),
-                                commentText);
+                        if (commentObj instanceof JobComment)
+                        {
+                            comment = CommentUtil.updateJobComment(commentObj.getId(), p_user.getUserId(), commentText);
+                        }
+                        else
+                        {
+                            comment = CommentUtil.updateTaskComment(commentObj.getId(), p_user.getUserId(), commentText);
+                        }
                     }
                 }
                 else if (wo instanceof Job)
@@ -853,8 +859,14 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     else
                     {
                         // update comment
-                        comment = TaskHelper.updateComment(commentObj.getId(), p_user.getUserId(),
-                                commentText);
+                        if (commentObj instanceof JobComment)
+                        {
+                            comment = CommentUtil.updateJobComment(commentObj.getId(), p_user.getUserId(), commentText);
+                        }
+                        else 
+                        {
+                            comment = CommentUtil.updateTaskComment(commentObj.getId(), p_user.getUserId(), commentText);
+                        }
                     }
 
                     // refresh the job work object since the comment has been

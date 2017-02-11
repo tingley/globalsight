@@ -862,8 +862,6 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     public void addJobComment(Comment p_comment)
     {
         m_jobComments.add(p_comment);
-
-        CommentHelper.filterInvalidComments(m_jobComments, Comment.COMMENT_OBJECT_TYPE_JOB);
     }
 
     /**
@@ -893,8 +891,6 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             m_jobComments = p_comments;
         }
-
-        CommentHelper.filterInvalidComments(m_jobComments, Comment.COMMENT_OBJECT_TYPE_JOB);
     }
 
     public void setJobCommentSet(Set p_comments)
@@ -907,8 +903,6 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             m_jobComments = new ArrayList(p_comments);
         }
-
-        CommentHelper.filterInvalidComments(m_jobComments, Comment.COMMENT_OBJECT_TYPE_JOB);
     }
 
     /**

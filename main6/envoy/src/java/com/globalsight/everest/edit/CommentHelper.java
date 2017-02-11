@@ -31,23 +31,16 @@
 
 package com.globalsight.everest.edit;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.foundation.WorkObject;
-import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.workflowmanager.Workflow;
 
 public class CommentHelper
 {
@@ -120,55 +113,5 @@ public class CommentHelper
 
         }
         return result;
-    }
-
-    /**
-     * It relies on "COMMENT_OBJECT_ID" and "COMMENT_OBJECT_TYPE" of "comments"
-     * table to locate job/task/workflow comments. But current hibernate hbm.xml
-     * can not differ comment object type, need extra filtering.
-     * 
-     * @param comments
-     * @param expectedObjectType
-     *            - "J", "T" or "W".
-     * 
-     */
-    public static void filterInvalidComments(Collection<Comment> comments, String expectedObjectType)
-    {
-        if (comments == null || comments.size() == 0)
-            return;
-
-        try
-        {
-            Iterator<Comment> it = comments.iterator();
-            while (it.hasNext())
-            {
-                WorkObject wo = it.next().getWorkObject();
-                if (Comment.COMMENT_OBJECT_TYPE_JOB.equalsIgnoreCase(expectedObjectType))
-                {
-                    if (!(wo instanceof Job))
-                    {
-                        it.remove();
-                    }
-                }
-                else if (Comment.COMMENT_OBJECT_TYPE_TASK.equalsIgnoreCase(expectedObjectType))
-                {
-                    if (!(wo instanceof Task))
-                    {
-                        it.remove();
-                    }
-                }
-                else if (Comment.COMMENT_OBJECT_TYPE_WORKFLOW.equalsIgnoreCase(expectedObjectType))
-                {
-                    if (!(wo instanceof Workflow))
-                    {
-                        it.remove();
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            logger.warn(e);
-        }
     }
 }

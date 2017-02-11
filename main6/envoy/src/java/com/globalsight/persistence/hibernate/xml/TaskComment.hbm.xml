@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.comment.TaskComment"
+        table="TASK_COMMENTS">
+        <id name="id" column="ID" type="long">
+            <generator class="assigned" />
+        </id>
+        <property name="commentString" length="4000"
+            column="COMMENT_TEXT" type="string" not-null="false"
+            unique="false" />
+        <property name="createDate" column="CREATE_DATE" type="timestamp"
+            not-null="true" unique="false" />
+        <property name="creatorId" length="82" column="CREATOR_USER_ID"
+            type="string" not-null="true" unique="false" />
+        <many-to-one name="object" column="COMMENT_OBJECT_ID"
+            class="com.globalsight.everest.taskmanager.TaskImpl"
+            not-null="true" />
+    </class>
+</hibernate-mapping>

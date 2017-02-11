@@ -1,3 +1,5 @@
+<%@page import="com.globalsight.everest.comment.TaskComment"%>
+<%@page import="com.globalsight.everest.comment.JobComment"%>
 <%@ page
      	contentType="text/html; charset=UTF-8"
 		errorPage="/envoy/common/error.jsp"
@@ -88,7 +90,12 @@
 		                    "=" + ((Task)wo).getState() +
 		                    "&toTask=ture";
           if(comment != null){
-        	  attachStr += "&commentId="+comment.getId();
+        	    attachStr += "&commentId="+comment.getId();
+        	    if (comment instanceof JobComment) {
+	            	attachStr += "&commentType=job";
+	            } else if (comment instanceof TaskComment) {
+	            	attachStr += "&commentType=task";
+	            }
           }
           
             if (commentStr.equals(""))
@@ -121,7 +128,13 @@
 		                     "=" + ((Job)wo).getJobId() +
 		                     "&toJob=ture";
             if(comment != null){
-          	  attachStr += "&commentId="+comment.getId();
+          	    attachStr += "&commentId="+comment.getId();
+          	  
+	          	if (comment instanceof JobComment) {
+	            	attachStr += "&commentType=job";
+	            } else if (comment instanceof TaskComment) {
+	            	attachStr += "&commentType=task";
+	            }
             }
             
             if (commentStr.equals(""))

@@ -33,11 +33,10 @@ public class CommentUnnamedQueries
     private static final String TASKS_BY_JOB_ID_AND_LOCALES_PREFIX =  
         "select ti.name, c.id, c.create_date, c.creator_user_id, c.comment_text, " +
         "l.iso_lang_code, l.iso_country_code from locale l, " +
-        " task_info ti, comments c, workflow w where ti.workflow_id = w.iflow_instance_id " +
+        " task_info ti, task_comments c, workflow w where ti.workflow_id = w.iflow_instance_id " +
         " and w.job_id = ";
     private static final String TASKS_BY_JOB_ID_AND_LOCALES_SUFFIX = 
-        " and c.comment_object_type = 'T' and " +
-        " c.comment_object_id = ti.task_id and w.target_locale_id = l.id";
+        " and c.comment_object_id = ti.task_id and w.target_locale_id = l.id";
 
     //
     // PUBLIC STATIC METHODS

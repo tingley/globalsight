@@ -344,15 +344,36 @@ public class BlaiseHelper
             List<TranslationInboxEntryVo> hduEntries = null;
             List<TranslationInboxEntryVo> inSheetEntries = null;
             List<TranslationInboxEntryVo> otherEntries = null;
-            for (String trgLocale : targetLocaleList) {
-                TranslationPageCommand command = initTranslationPageCommand(0, blc.getQaCount(), null,
-                        sourceLocale.toString(), trgLocale, null, null, 0, false);
+            TranslationPageCommand command = null;
+            int count = blc.getQaCount();
+            int fetchCount = 0;
+            List<Long> existedEntryIds = getEntryIdsInGS(blc.getId());
+            long tmpEntryId = -1L;
+            int pageIndex = 0;
+            String tmp;
+            while (fetchCount < count) {
+                command = initTranslationPageCommand(pageIndex, blc.getQaCount(),
+                        null,
+                        sourceLocale.toString(), null, null, null, 0, false);
                 command.sortById();
                 command.setSortDesc(false);
                 entries = listInbox(command);
-                if (entries != null)
-                    totalEntries.addAll(entries);
+                if (entries != null) {
+                    for (TranslationInboxEntryVo vo : entries)
+                    {
+                        tmpEntryId = vo.getEntry().getId();
+                        tmp = vo.getEntry().getTargetLocale().getLocaleCode();
+                        if (existedEntryIds.contains(tmpEntryId) || !targetLocaleList.contains(tmp))
+                            continue;
+                        totalEntries.add(vo);
+                        fetchCount++;
+                        if (fetchCount == count)
+                            break;
+                    }
+                }
+                pageIndex++;
             }
+
             if (totalEntries != null && totalEntries.size() > 0)
             {
                 hduEntries = new ArrayList<>();
@@ -361,19 +382,6 @@ public class BlaiseHelper
                 Set<Long> entryIds = new HashSet<>();
                 for (TranslationInboxEntryVo vo : totalEntries)
                 {
-                    logger.info("*** Entry ****");
-                    logger.info("getDisplaySourceLocale == " + vo.getDisplaySourceLocale());
-                    logger.info("getDisplayTargetLocale == " + vo.getDisplayTargetLocale());
-                    logger.info("getType == " + vo.getType());
-                    logger.info("getUsages2UI == " + vo.getUsages2UI());
-                    logger.info("getDescription == " + vo.getDescription());
-                    logger.info("getRelatedObjectId == " + vo.getRelatedObjectId());
-                    logger.info("entry source locale == " + vo.getSourceLocale().toString());
-                    Locale tmp = vo.getSourceLocale();
-                    if (!tmp.equals(sourceLocale))
-                        continue;
-                    String targetLocale = vo.getDisplayTargetLocale();
-                    logger.info("entry target locale == " + targetLocale);
                     if (vo.isUsageOfIsSheet() && isInSheetType(vo))
                         inSheetEntries.add(vo);
                     else if (vo.isUsageOfHDU() && isHDUType(vo))
@@ -392,7 +400,8 @@ public class BlaiseHelper
                     }
                 }
 
-                BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class, fp.getL10nProfileId());
+                BasicL10nProfile l10Profile = HibernateUtil
+                        .get(BasicL10nProfile.class, fp.getL10nProfileId());
                 ExecutorService pool = Executors.newFixedThreadPool(5);
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setPriority("3");
@@ -411,7 +420,8 @@ public class BlaiseHelper
                         fps.add(fp);
                     }
                     String attributeString = getJobAttributeString(blc.getId(), "I");
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
+                            l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             String.valueOf(companyId),
                             blc, blaiseForm, inSheetEntries, fps, null,
@@ -429,11 +439,12 @@ public class BlaiseHelper
                         fps.add(fp);
                     }
                     String attributeString = getJobAttributeString(blc.getId(), "A");
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
+                            l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             String.valueOf(companyId),
                             blc, blaiseForm, otherEntries, fps, null,
-                            null, JobImpl.createUuid(), null);
+                            null, JobImpl.createUuid(), jobAttributes);
                     Thread t = new MultiCompanySupportedThread(runnable);
                     pool.execute(t);
                 }
@@ -447,11 +458,12 @@ public class BlaiseHelper
                         fps.add(fp);
                     }
                     String attributeString = getJobAttributeString(blc.getId(), "H");
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
+                            l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             String.valueOf(companyId),
                             blc, blaiseForm, hduEntries, fps, null,
-                            null, JobImpl.createUuid(), null);
+                            null, JobImpl.createUuid(), jobAttributes);
                     Thread t = new MultiCompanySupportedThread(runnable);
                     pool.execute(t);
                 }
@@ -471,13 +483,35 @@ public class BlaiseHelper
         {
             conn = DbUtil.getConnection();
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select attribute_id, attribute_value from "
-                    + "connector_blaise_attributes where connector_id=" + blcId + " and "
-                    + "blaise_job_type='" + blaiseJobType + "'");
+            ResultSet rs = stmt
+                    .executeQuery("select attribute_id, attribute_value, attribute_type from "
+                            + "connector_blaise_attributes where connector_id=" + blcId + " and "
+                            + "blaise_job_type='" + blaiseJobType + "'");
             StringBuilder data = new StringBuilder();
+            long attrId;
+            String attrValue;
+            String attrType;
             while (rs.next())
             {
-                data.append("5,.,").append(rs.getLong(1)).append(",.,").append(rs.getString(2))
+                attrId = rs.getLong(1);
+                attrValue = rs.getString(2);
+                attrType = rs.getString(3);
+                if ("choiceList".equalsIgnoreCase(attrType))
+                {
+                    Attribute attribute = HibernateUtil.get(Attribute.class, attrId);
+                    ListCondition lc = (ListCondition) attribute.getCondition();
+                    List<SelectOption> options = lc.getSortedAllOptions();
+                    long tmpAttrValue = Long.parseLong(attrValue);
+                    for (SelectOption so : options)
+                    {
+                        if (so.getId() == tmpAttrValue)
+                        {
+                            attrValue = so.getValue();
+                            break;
+                        }
+                    }
+                }
+                data.append("5,.,").append(attrId).append(",.,").append(attrValue)
                         .append(";.;");
             }
             result = data.toString();
@@ -1378,13 +1412,14 @@ public class BlaiseHelper
 
             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO "
                     + "connector_blaise_attributes (Connector_ID,Attribute_ID,Attribute_Value,"
-                    + "Attribute_Type,Blaise_job_type) values (?, ?, ?, '', ?)");
+                    + "Attribute_Type,Blaise_job_type) values (?, ?, ?, ?, ?)");
             for (BlaiseConnectorAttribute attribute : attributes)
             {
                 pstmt.setLong(1, attribute.getBlaiseConnectorId());
                 pstmt.setLong(2, attribute.getAttributeId());
                 pstmt.setString(3, attribute.getAttributeValue());
-                pstmt.setString(4, attribute.getBlaiseJobType());
+                pstmt.setString(4, attribute.getAttributeType());
+                pstmt.setString(5, attribute.getBlaiseJobType());
                 pstmt.addBatch();
             }
             pstmt.executeBatch();
@@ -1415,6 +1450,7 @@ public class BlaiseHelper
             }
         }
     }
+
     private List<JobAttribute> getJobAttributes(String attributeString,
             BasicL10nProfile l10Profile)
     {
@@ -1494,5 +1530,42 @@ public class BlaiseHelper
         }
 
         return jobAttributeList;
+    }
+
+    public List<Long> getEntryIdsInGS(long blcId)
+    {
+        List<Long> ids = new ArrayList<>();
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                    "select blaise_entry_id from connector_blaise_job where blaise_connector_id="
+                            + blcId);
+            while (rs.next())
+            {
+                ids.add(rs.getLong(1));
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error found when getEntryIdsInGS.", e);
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                try
+                {
+                    DbUtil.returnConnection(conn);
+                }
+                catch (Exception e)
+                {
+                }
+            }
+
+        }
+        return ids;
     }
 }

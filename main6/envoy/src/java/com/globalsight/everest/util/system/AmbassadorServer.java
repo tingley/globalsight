@@ -297,8 +297,9 @@ public class AmbassadorServer
                     .newSingleThreadScheduledExecutor();
             BlaiseTimerTask timerTask = new BlaiseTimerTask();
             Calendar now = Calendar.getInstance();
-            int delayTime = 60 - now.get(Calendar.MINUTE);
-            service.scheduleAtFixedRate(timerTask, delayTime, 60, TimeUnit.MINUTES);
+            //int delayTime = 60 - now.get(Calendar.MINUTE);
+            int delayTime = 0;
+            service.scheduleAtFixedRate(timerTask, delayTime, 5, TimeUnit.MINUTES);
         }
         catch (Exception e)
         {

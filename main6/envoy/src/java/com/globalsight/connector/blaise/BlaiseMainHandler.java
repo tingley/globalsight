@@ -24,6 +24,7 @@ import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.cxe.entity.customAttribute.*;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -107,34 +108,32 @@ public class BlaiseMainHandler extends PageActionHandler
         while (names.hasMoreElements()) {
             String param = names.nextElement();
             String value;
+            attribute = new BlaiseConnectorAttribute();
+            value = request.getParameter(param);
+            attribute.setBlaiseConnectorId(connectorId);
+            if (!param.startsWith("anyAttr") && !param.startsWith("hduAttr")
+                    && !param.startsWith("isheetAttr"))
+                continue;
             if (param.startsWith("anyAttr")) {
-                value = request.getParameter(param);
                 param = param.substring("anyAttr".length());
-                attribute = new BlaiseConnectorAttribute();
                 attribute.setBlaiseJobType("A");
-                attribute.setBlaiseConnectorId(connectorId);
-                attribute.setAttributeId(Integer.parseInt(param));
-                attribute.setAttributeValue(value);
-                attributes.add(attribute);
             } else if (param.startsWith("hduAttr")) {
-                value = request.getParameter(param);
                 param = param.substring("hudAttr".length());
-                attribute = new BlaiseConnectorAttribute();
                 attribute.setBlaiseJobType("H");
-                attribute.setBlaiseConnectorId(connectorId);
-                attribute.setAttributeId(Integer.parseInt(param));
-                attribute.setAttributeValue(value);
-                attributes.add(attribute);
             } else if (param.startsWith("isheetAttr")) {
-                value = request.getParameter(param);
                 param = param.substring("isheetAttr".length());
-                attribute = new BlaiseConnectorAttribute();
                 attribute.setBlaiseJobType("I");
-                attribute.setBlaiseConnectorId(connectorId);
-                attribute.setAttributeId(Integer.parseInt(param));
-                attribute.setAttributeValue(value);
-                attributes.add(attribute);
             }
+            long attrId = Long.parseLong(param);
+            Attribute attribute1 = HibernateUtil.get(Attribute.class, attrId);
+            Condition condition = attribute1.getCondition();
+            if (condition instanceof ListCondition)
+                attribute.setAttributeType("choiceList");
+            else if (condition instanceof TextCondition)
+                attribute.setAttributeType("text");
+            attribute.setAttributeId(attrId);
+            attribute.setAttributeValue(value);
+            attributes.add(attribute);
         }
         BlaiseHelper.saveConnectorAttributes(attributes);
     }

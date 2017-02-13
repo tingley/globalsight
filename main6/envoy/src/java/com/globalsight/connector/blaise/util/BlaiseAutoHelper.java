@@ -47,7 +47,10 @@ public class BlaiseAutoHelper
             return;
 
         BlaiseHelper helper = new BlaiseHelper(bc);
-        running = true;
+        synchronized (new Object())
+        {
+            running = true;
+        }
         helper.groupInboxEntries();
         running = false;
     }

@@ -16,19 +16,6 @@
  */
 package com.globalsight.connector.blaise;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 import com.globalsight.connector.blaise.form.CreateBlaiseJobForm;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
@@ -49,6 +36,12 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 public class CreateBlaiseJobThread  extends Thread
 {
@@ -64,6 +57,7 @@ public class CreateBlaiseJobThread  extends Thread
     List<JobAttribute> jobAttribtues = null;
     private List<TranslationInboxEntryVo> entries = new ArrayList<TranslationInboxEntryVo>();
     private List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
+    private HashMap<String, String> file2TargetLocale = new HashMap<>();
 
     public CreateBlaiseJobThread(User user, String currentCompanyId, BlaiseConnector conn,
             CreateBlaiseJobForm blaiseForm, List<TranslationInboxEntryVo> entries,
@@ -128,7 +122,8 @@ public class CreateBlaiseJobThread  extends Thread
                 int exitValue = (int) tmp[1];
 
                 String key = jobName + fileName + ++count;
-                CxeProxy.setTargetLocales(key, targetLocale);
+                String targetLocaleString = file2TargetLocale.get(fileName);
+                CxeProxy.setTargetLocales(key, targetLocaleString);
                 CxeProxy.importFromFileSystem(fileName, String.valueOf(job.getId()), jobName,
                         fileProfileId, pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
                         CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
@@ -223,6 +218,10 @@ public class CreateBlaiseJobThread  extends Thread
             filePath.append(BlaiseHelper.getEntryFileName(curEntry));
             String externalPageId = filePath.toString();
             descList.add(externalPageId);
+
+            String targetLocale = curEntry.getTargetLocale().getLanguage() + "_" + curEntry.getTargetLocale().getCountry();
+            targetLocale = BlaiseHelper.fixLocale(targetLocale);
+            file2TargetLocale.put(externalPageId, targetLocale);
 
             File srcFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
                     + File.separator + externalPageId);

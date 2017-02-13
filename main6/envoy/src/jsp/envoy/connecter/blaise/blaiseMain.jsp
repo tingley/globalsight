@@ -214,7 +214,6 @@ function filterItems(e)
             <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_connect")%>" name="connectBtn" id="connectBtn" disabled onclick="connect();">
             <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"  name="removeBtn" id="removeBtn" disabled onclick="removeBlaiseConnctor();">
             <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."  name="newBtn" onclick="newBlaiseConnector();">
-            <INPUT TYPE="BUTTON" VALUE="Demo to Run (Procedure)"  name="demoBtn" onclick="demo();">
         </td>
     </tr>
 </table>

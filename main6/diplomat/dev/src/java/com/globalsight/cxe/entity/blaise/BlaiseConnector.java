@@ -1,18 +1,17 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
- *  http://www.apache.org/licenses/LICENSE-2.0
- *  
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *  
+ * Copyright 2009 Welocalize, Inc.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * <p>
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.globalsight.cxe.entity.blaise;
 
@@ -21,7 +20,7 @@ import com.globalsight.everest.persistence.PersistentObject;
 
 public class BlaiseConnector extends PersistentObject
 {
-	private static final long serialVersionUID = -7876757344723844737L;
+    private static final long serialVersionUID = -7876757344723844737L;
 
     private String name = null;
     private String description = null;
@@ -41,6 +40,17 @@ public class BlaiseConnector extends PersistentObject
     private boolean combined = true;
     private long lastMaxEntryId = -1L;
     private String loginUser = "";
+    private int qaCount = 10;
+
+    public int getQaCount()
+    {
+        return qaCount;
+    }
+
+    public void setQaCount(int qaCount)
+    {
+        this.qaCount = qaCount;
+    }
 
     public String getLoginUser()
     {
@@ -137,7 +147,7 @@ public class BlaiseConnector extends PersistentObject
         return name;
     }
 
-    public void setName(String name) 
+    public void setName(String name)
     {
         this.name = name;
     }
@@ -184,35 +194,35 @@ public class BlaiseConnector extends PersistentObject
 
     public String getClientCoreVersion()
     {
-		return clientCoreVersion;
-	}
+        return clientCoreVersion;
+    }
 
-	public void setClientCoreVersion(String clientCoreVersion)
-	{
-		this.clientCoreVersion = clientCoreVersion;
-	}
+    public void setClientCoreVersion(String clientCoreVersion)
+    {
+        this.clientCoreVersion = clientCoreVersion;
+    }
 
-	public int getClientCoreRevision()
-	{
-		return clientCoreRevision;
-	}
+    public int getClientCoreRevision()
+    {
+        return clientCoreRevision;
+    }
 
-	public void setClientCoreRevision(int clientCoreRevision)
-	{
-		this.clientCoreRevision = clientCoreRevision;
-	}
+    public void setClientCoreRevision(int clientCoreRevision)
+    {
+        this.clientCoreRevision = clientCoreRevision;
+    }
 
-	public String getWorkflowId()
-	{
-		return workflowId;
-	}
+    public String getWorkflowId()
+    {
+        return workflowId;
+    }
 
-	public void setWorkflowId(String workflowId)
-	{
-		this.workflowId = workflowId;
-	}
+    public void setWorkflowId(String workflowId)
+    {
+        this.workflowId = workflowId;
+    }
 
-	public long getCompanyId()
+    public long getCompanyId()
     {
         return companyId;
     }

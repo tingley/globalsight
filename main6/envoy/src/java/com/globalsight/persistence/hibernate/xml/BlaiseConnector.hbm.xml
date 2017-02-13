@@ -44,5 +44,7 @@
                   type="long" not-null="true" />
         <property name="loginUser" length="30" column="LOGIN_USER" type="string"
                   not-null="false" unique="false" />
+        <property name="qaCount" column="QA_COUNT" length="20"
+                  type="int" not-null="true" />
     </class>
 </hibernate-mapping>

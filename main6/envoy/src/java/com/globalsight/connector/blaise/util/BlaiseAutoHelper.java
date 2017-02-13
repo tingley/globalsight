@@ -3,16 +3,13 @@ package com.globalsight.connector.blaise.util;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
-import com.globalsight.cxe.entity.customAttribute.Attribute;
-import com.globalsight.cxe.entity.customAttribute.AttributeSet;
-import com.globalsight.cxe.entity.customAttribute.Condition;
+import com.globalsight.cxe.entity.customAttribute.*;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.util.JsonUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -25,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by Administrator on 2017/2/9.
+ * Blaise automatic job helper
  */
 public class BlaiseAutoHelper
 {
@@ -55,11 +52,15 @@ public class BlaiseAutoHelper
         running = false;
     }
 
+    /**
+     * Gets attributes
+     */
     public String getJobAttributes(long fpId)
     {
         try
         {
-            FileProfile fp = ServerProxy.getFileProfilePersistenceManager().getFileProfileById(fpId, false);
+            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                    .getFileProfileById(fpId, false);
             if (fp == null)
                 return "";
             L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(fp.getL10nProfileId());
@@ -69,33 +70,54 @@ public class BlaiseAutoHelper
             JSONObject object = new JSONObject();
             object.put("setName", attributeSet.getName());
             object.put("setId", attributeSet.getId());
-            if (attributes != null && attributes.size()> 0)
+            JSONArray array = new JSONArray();
+            if (attributes != null && attributes.size() > 0)
             {
-                JSONArray array = new JSONArray();
                 JSONObject o = null;
-                for (Attribute attribute : attributes) {
+                for (Attribute attribute : attributes)
+                {
+                    o = new JSONObject();
+                    o.put("attrId", attribute.getId());
                     o.put("required", attribute.isRequired());
                     o.put("name", attribute.getName());
                     o.put("displayName", attribute.getDisplayName());
                     o.put("type", attribute.getType());
-                    o.put("condition", attribute.getCondition());
-                    Set<AttributeSet> values = attribute.getAttributeSets();
-                    String tmp = "";
-                    if (values != null) {
-                        if ("choice list".equals(attribute.getType())) {
+                    Condition condition = attribute.getCondition();
+                    String tmpString = "";
+                    if (condition instanceof ListCondition)
+                    {
+                        ListCondition lc = (ListCondition) condition;
+                        Set<SelectOption> options = lc.getAllOptions();
+                        StringBuilder tmp = new StringBuilder();
+                        if (options != null)
+                        {
+                            for (SelectOption so : options)
+                            {
+                                tmp.append(so.getId()).append("$$").append(so.getValue()).append
+                                        ("@@");
+                            }
+                            tmpString = tmp.toString();
+                            if (StringUtil.isNotEmpty(tmpString))
+                                tmpString = tmpString.substring(0, tmpString.length() - 3);
                         }
+                        o.put("value", tmpString);
                     }
+                    array.add(o);
                 }
             }
-            String data =  JsonUtil.toJson(attributes);
-            logger.info("json data == " + data);
-            return data;
-        } catch (Exception e) {
+            object.put("attributes", array);
+            return object.toJSONString();
+        }
+        catch (Exception e)
+        {
             logger.error("Error found when invoking getJobAttributes().", e);
             return "";
         }
     }
 
+    /**
+     * Gets all file profiles which use xliff 1.2
+     */
     public ArrayList<FileProfileImpl> getAllXliff12FileProfile(long companyId, String userId)
             throws RemoteException, NamingException
     {

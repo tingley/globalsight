@@ -17,6 +17,7 @@
 package com.globalsight.connector.blaise;
 
 import com.cognitran.translation.client.TranslationPageCommand;
+import com.globalsight.connector.blaise.form.BlaiseConnectorAttribute;
 import com.globalsight.connector.blaise.form.BlaiseConnectorFilter;
 import com.globalsight.connector.blaise.form.CreateBlaiseJobForm;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
@@ -46,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -85,7 +87,56 @@ public class BlaiseMainHandler extends PageActionHandler
         connector.setAutomatic("true".equals(tmp));
         tmp = request.getParameter("combined");
         connector.setCombined("true".equals(tmp));
+        tmp = request.getParameter("qaCount");
+        connector.setQaCount(Integer.parseInt(tmp));
+        HttpSession session = request.getSession(false);
+        SessionManager sessionManager = (SessionManager) session.getAttribute(SESSION_MANAGER);
+        User user = (User) sessionManager.getAttribute(USER);
+        connector.setLoginUser(user.getUserId());
+
         HibernateUtil.saveOrUpdate(connector);
+
+        saveAttributes(connector.getId(), request);
+    }
+
+    private void saveAttributes(long connectorId, HttpServletRequest request)
+    {
+        List<BlaiseConnectorAttribute> attributes = new ArrayList<>();
+        BlaiseConnectorAttribute attribute;
+        Enumeration<String> names = request.getParameterNames();
+        while (names.hasMoreElements()) {
+            String param = names.nextElement();
+            String value;
+            if (param.startsWith("anyAttr")) {
+                value = request.getParameter(param);
+                param = param.substring("anyAttr".length());
+                attribute = new BlaiseConnectorAttribute();
+                attribute.setBlaiseJobType("A");
+                attribute.setBlaiseConnectorId(connectorId);
+                attribute.setAttributeId(Integer.parseInt(param));
+                attribute.setAttributeValue(value);
+                attributes.add(attribute);
+            } else if (param.startsWith("hduAttr")) {
+                value = request.getParameter(param);
+                param = param.substring("hudAttr".length());
+                attribute = new BlaiseConnectorAttribute();
+                attribute.setBlaiseJobType("H");
+                attribute.setBlaiseConnectorId(connectorId);
+                attribute.setAttributeId(Integer.parseInt(param));
+                attribute.setAttributeValue(value);
+                attributes.add(attribute);
+            } else if (param.startsWith("isheetAttr")) {
+                value = request.getParameter(param);
+                param = param.substring("isheetAttr".length());
+                attribute = new BlaiseConnectorAttribute();
+                attribute.setBlaiseJobType("I");
+                attribute.setBlaiseConnectorId(connectorId);
+                attribute.setAttributeId(Integer.parseInt(param));
+                attribute.setAttributeValue(value);
+                attributes.add(attribute);
+            }
+        }
+        BlaiseHelper.saveConnectorAttributes(attributes);
     }
 
     @ActionHandler(action = "remove", formClass = "")

@@ -21,6 +21,8 @@
     class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="connect" scope="request"
     class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="demo" scope="request"
+             class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -37,6 +39,7 @@
     String removeURL = remove.getPageURL() + "&action=remove";
     String filterURL = self.getPageURL() + "&action=filter";
     String connectURL = connect.getPageURL() + "&action=connect";
+    String demoURL = self.getPageURL() + "&action=demo";
 
     // Filters
     String nameFilter = (String) request.getAttribute("nameFilter");
@@ -77,6 +80,11 @@ function connect()
 function newBlaiseConnector()
 {
     window.location.href = "<%=newURL%>";
+}
+
+function demo()
+{
+    $("#blaiseForm").attr("action", "<%=demoURL%>").submit();
 }
 
 function removeBlaiseConnctor()

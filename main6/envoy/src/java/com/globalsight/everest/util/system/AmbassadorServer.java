@@ -16,18 +16,7 @@
  */
 package com.globalsight.everest.util.system;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.PrintStream;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.Statement;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Properties;
-
-import org.apache.log4j.Logger;
-
+import com.globalsight.connector.blaise.BlaiseTimerTask;
 import com.globalsight.connector.git.GitConnectorPushThread;
 import com.globalsight.cxe.adapter.filesystem.autoImport.AutomaticImportMonitor;
 import com.globalsight.cxe.engine.util.FileUtils;
@@ -44,6 +33,21 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.PrintStream;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Statement;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Used to be EnvoyWLServer. This is the main class that starts up all the RMI
@@ -287,6 +291,15 @@ public class AmbassadorServer
             AutoCompleteActivityThread actrunnable = new AutoCompleteActivityThread();
             Thread thread = new MultiCompanySupportedThread(actrunnable);
             thread.start();
+
+            // Sets up a timer task, it will be run per 60 minutes
+            ScheduledExecutorService service = Executors
+                    .newSingleThreadScheduledExecutor();
+            BlaiseTimerTask timerTask = new BlaiseTimerTask();
+            Calendar now = Calendar.getInstance();
+            //int delayTime = 60 - now.get(Calendar.MINUTE);
+            int delayTime = 0;
+            service.scheduleAtFixedRate(timerTask, delayTime, 5, TimeUnit.MINUTES);
         }
         catch (Exception e)
         {

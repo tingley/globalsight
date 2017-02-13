@@ -25,6 +25,7 @@
 	String saveURL = save.getPageURL() + "&action=save";
 	String cancelURL = cancel.getPageURL() + "&action=cancel";
 	String testURL = self.getPageURL() + "&action=test";
+	String getAttributesURL = self.getPageURL() + "&action=getAttributes";
 
 	// Labels
 	String helper = bundle.getString("helper_text_blaise_connector_edit");
@@ -366,21 +367,30 @@ function validName()
     {
         if ($("#defaultFileProfileId").val() == "")
             return;
-        $.ajax({
-            url: "blaiseAjax.jsp",
-            type: "POST",
-            async: "false",
-            data: {
-                action: "getAttributes",
-                fpId: $("#defaultFileProfileId").val()
-            },
-            dataType: "json",
-            success: function(data, textStatus, jqXHR) {
-                if (data != "") {
-                    alert("data == " + data);
+        $("#blaiseForm").ajaxSubmit({
+            type: 'post',
+            url: "<%=getAttributesURL%>",
+            dataType:'json',
+            timeout:100000000,
+            success: function(data){
+                alert("data == " + data);
+                /**
+                $("#idDiv").unmask("<%=bundle.getString("msg_blaise_wait_connect")%>");
+                if("" == data.error)
+                {
+                    $("#blaiseForm").attr("action", "<%=saveURL%>").submit();
                 }
+                else
+                {
+                    alert(data.error);
+                }
+                 */
+            },
+            error: function(XmlHttpRequest, textStatus, errorThrown){
+                //$("#idDiv").unmask("<%=bundle.getString("msg_blaise_wait_connect")%>");
+                alert("<%=errorConnect%>");
             }
-        })
+        });
     }
     function changeAttributeGroup()
     {

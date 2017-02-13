@@ -23,8 +23,11 @@ import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -36,6 +39,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,6 +80,33 @@ public class BlaiseBasicHandler extends PageActionHandler
         }
     }
 
+    @ActionHandler(action = "getAttributes", formClass = "com.globalsight.cxe.entity.blaise.BlaiseConnector")
+    public void getAttributes(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+        ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+        ServletOutputStream out = response.getOutputStream();
+
+        try
+        {
+            BlaiseConnector blac = (BlaiseConnector) form;
+            long fpId = blac.getDefaultFileProfileId();
+            String data = BlaiseAutoHelper.getInstance().getJobAttributes(fpId);
+            out.write(data.getBytes("UTF-8"));
+        }
+        catch (Exception e)
+        {
+            JSONObject json = new JSONObject();
+            json.put("error", "Error");
+            out.write(json.toString().getBytes("UTF-8"));
+        }
+        finally
+        {
+            out.close();
+            pageReturn();
+        }
+    }
+
     @Override
 	public void beforeAction(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException,
@@ -90,19 +121,18 @@ public class BlaiseBasicHandler extends PageActionHandler
 		}
 
 		long companyId = CompanyWrapper.getCurrentCompanyIdAsLong();
+        HttpSession session = request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         List<String> extensions = new ArrayList<>(1);
         extensions.add("xlf");
+        extensions.add("xliff");
 		try
         {
-            Collection collection = ServerProxy.getFileProfilePersistenceManager().getFileProfilesByExtension(extensions, companyId);
-            if (collection != null && collection.size() > 0)
-            {
-                ArrayList<FileProfileImpl> fps = new ArrayList<>(collection);
-                request.setAttribute("fileProfiles", fps);
-            }
-            List<AttributeSet> allAttributeSets = (List<AttributeSet>) AttributeManager
-                    .getAllAttributeSets();
-            request.setAttribute("allAttributeSets", allAttributeSets);
+            ArrayList<FileProfileImpl> fps = BlaiseAutoHelper.getInstance()
+                    .getAllXliff12FileProfile(companyId, user.getUserId());
+            request.setAttribute("fileProfiles", fps);
         } catch (Exception e)
         {
             logger.error("Error found when get basic information of company " + companyId);
@@ -130,24 +160,4 @@ public class BlaiseBasicHandler extends PageActionHandler
 	{
 
 	}
-
-    @ActionHandler(action = "getAttributes", formClass = "")
-    public void getAttributes(HttpServletRequest request,
-            HttpServletResponse response)
-    {
-        String action = request.getParameter("action");
-        if ("getAttributes".equals(action))
-        {
-            String fpId = request.getParameter("fpId");
-            String data = BlaiseAutoHelper.getInstance().getJobAttributes(fpId);
-            try
-            {
-                response.getWriter().print(data);
-            }
-            catch (Exception e)
-            {
-                logger.error("Error found. ", e);
-            }
-        }
-    }
 }

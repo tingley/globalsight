@@ -68,8 +68,8 @@ public class WorkflowCancelHelper
             + "AND tsk.WORKFLOW_ID = ?";
 
     private static final String SQL_DELETE_TASK_INFO_COMMENT = "DELETE c "
-            + "FROM comments c, task_info ti " + "WHERE c.comment_object_id = ti.task_id "
-            + "AND comment_object_type = 'T' " + "AND ti.workflow_id = ? ";
+            + "FROM TASK_COMMENTS c, task_info ti " + "WHERE c.comment_object_id = ti.task_id "
+            + "AND ti.workflow_id = ? ";
 
     private static final String SQL_DELETE_TASK_INFO = "DELETE FROM task_info WHERE workflow_id = ?";
 

@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.comment.JobComment;
+import com.globalsight.everest.comment.TaskComment;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -34,6 +36,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class AddCommentHandler extends PageHandler
 {
@@ -80,15 +83,28 @@ public class AddCommentHandler extends PageHandler
         String action = p_request.getParameter("action");
         if ("editcomment".equals(action))
         {
-            String commentId = p_request.getParameter("radioBtn"); 
-            
-            //GBS-1012: Added for edit job comment from Task/Activity
-            if(commentId==null)
+            String commentId = p_request.getParameter("radioBtn");
+
+            // GBS-1012: Added for edit job comment from Task/Activity
+            if (commentId == null)
             {
-            	commentId = p_request.getParameter("jobradioBtn");
+                commentId = p_request.getParameter("jobradioBtn");
             }
-            
-            Comment comment = TaskHelper.getComment(session, Long.parseLong(commentId));
+            Comment comment = null;
+            if ("job".equals(p_request.getParameter("commentType"+commentId)))
+            {
+                comment = HibernateUtil.get(JobComment.class, Long.parseLong(commentId));
+            } 
+            else if ("task".equals(p_request.getParameter("commentType"+commentId)))
+            {
+                comment = HibernateUtil.get(TaskComment.class, Long.parseLong(commentId));
+            }
+
+            if (comment == null)
+            {
+                comment = TaskHelper.getComment(session, Long.parseLong(commentId));
+            }
+
             p_request.setAttribute("commentId", commentId);
             sessionMgr.setAttribute("comment", comment);
             sessionMgr.setAttribute("taskComment", comment.getComment());

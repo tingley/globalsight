@@ -9,7 +9,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CalendarWorkingDay.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CalendarWorkingHour.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CodeSetImpl.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/CommentImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommunicationInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Company.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ScorecardCategory.hbm.xml" />
@@ -166,5 +165,8 @@
         <mapping resource="com/globalsight/persistence/hibernate/xml/LoginAttempt.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/JsonFilter.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/PerplexityService.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/JobComment.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/TaskComment.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowComment.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

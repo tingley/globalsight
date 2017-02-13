@@ -16,7 +16,30 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.naming.NamingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.comment.JobComment;
+import com.globalsight.everest.comment.TaskComment;
 import com.globalsight.everest.costing.CostingException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.foundation.User;
@@ -45,20 +68,8 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.SecurityUtil;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.edit.EditUtil;
-import jodd.util.StringUtil;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
-import javax.naming.NamingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import jodd.util.StringUtil;
 
 /**
  * TaskHelper is used for communicating with remote objects and performing task
@@ -516,45 +527,39 @@ public class TaskHelper
                 comment = task.getTaskComment(p_commentId);
             }
         }
-
-        // if still null then possibly from another task
+        
+        //Comment should not be null, but in case it occurs, read it again.
         if (comment == null)
-        {
-            try
-            {
-                comment = ServerProxy.getCommentManager().getCommentById(
-                        p_commentId);
-            }
-            catch (Exception e)
-            {
-                CATEGORY.debug(e);
-                throw new EnvoyServletException(GeneralException.EX_REMOTE, e);
-            }
-        }
+            comment = getComment(p_commentId);
+
         return comment;
     }
-
+    
     /**
-     * Update a task comment for a particular task.
+     * <p>
+     * For GBS-3780 jobs have comments from different companies. Splits the
+     * comments table into 3 tables (job comments, workflow comments, activity
+     * comments).
+     * <p>
+     * Comment's ID is the only one in job and task, so don't worry about
+     * getting wrong. However, for the performance considerations, it is not
+     * recommended to use this method. You can use
+     * <code>HibernateUtil.get(JobComment.class, id)</code> or
+     * <code>HibernateUtil.get(TaskComment.class, id)</code> to get comment by
+     * id if you know the comment type.
+     * 
+     * @deprecated
+     * @param id
+     * @return
      */
-    public static Comment updateComment(long p_commentId, String p_userId,
-            String p_comment) throws EnvoyServletException
+    public static Comment getComment(long id)
     {
-        try
-        {
-            return ServerProxy.getCommentManager().updateComment(p_commentId,
-                    p_userId, p_comment);
-        }
-        catch (GeneralException e)
-        {
-            CATEGORY.debug(e);
-            throw new EnvoyServletException(e);
-        }
-        catch (RemoteException e)
-        {
-            CATEGORY.debug(e);
-            throw new EnvoyServletException(GeneralException.EX_REMOTE, e);
-        }
+        Comment c = HibernateUtil.get(JobComment.class, id);
+        if (c != null)
+            return c;
+        
+        c = HibernateUtil.get(TaskComment.class, id);
+        return c;
     }
 
     /**

@@ -269,34 +269,46 @@ public class PtagPageGenerator
     }
     
     /**
-     * Make the source and target 'i' values change to the same value
+     * Makes the source and target 'i' values change to the same value
      * @param p_OSD Need to fix data
-     * @since GBS-4581 : 100% match ignores i value in bpt tag
+     * @since GBS-4581
      * */
 	private void fixAttributeIX(OfflineSegmentData p_OSD)
 	{
-		Element troot = getDom(
-				"<seg>" + p_OSD.getDisplayTargetText() + "</seg>")
-				.getRootElement();
 		Element sroot = getDom(
 				"<seg>" + p_OSD.getDisplaySourceText() + "</seg>")
 				.getRootElement();
+		Element troot = getDom(
+				"<seg>" + p_OSD.getDisplayTargetText() + "</seg>")
+				.getRootElement();
 
 		// First use the same "i" across source and target tuvs.
-        List bpts = sroot.selectNodes("//bpt");
-        for (int i = 0, max = bpts.size(); i < max; i++)
+        List sBpts = sroot.selectNodes("//bpt");
+        List tBpts = troot.selectNodes("//bpt");
+        List tEpts = troot.selectNodes("//ept");
+        for (int i = 0, max = sBpts.size(); i < max; i++)
         {
-            Element bpt = (Element) bpts.get(i);
-
-            String xAttr = bpt.attributeValue("x");
-            String iAttr = bpt.attributeValue("i");
+            Element sBpt = (Element) sBpts.get(i);
+            Element tBpt = (Element) tBpts.get(i);
+            Element tEpt = (Element) tEpts.get(i);
+            
+            String xAttr = sBpt.attributeValue("x");
+            String iAttr = sBpt.attributeValue("i");
 
             // Be prepared for data errors where "x" is missing.
             // Don't crash here because of it. Fix it elsewhere.
             if (xAttr != null && iAttr != null)
-            {
-                fixAttributeI(xAttr, iAttr, troot);
-            }
+			{
+            	//Fixes a single "i" attribute in all other TUVs based on the "x".
+				if (tBpt != null
+						&& tEpt != null
+						&& tBpt == (Element) troot
+								.selectSingleNode("//bpt[@x='" + xAttr + "']"))
+				{
+					tBpt.addAttribute("i", iAttr);
+					tEpt.addAttribute("i", iAttr);
+				}
+			}
         }
 
 		int firstIndex = 5;
@@ -309,29 +321,6 @@ public class PtagPageGenerator
 				tEndIndex));
 	}
 	
-    /**
-     * Fixes a single "i" attribute in all other TUVs based on the "x".
-     * @since GBS-4581 : 100% match ignores i value in bpt tag
-     */
-    private void fixAttributeI(String p_x, String p_i, Element p_root)
-	{
-		Element bpt = (Element) p_root.selectSingleNode("//bpt[@x='" + p_x
-				+ "']");
-
-		if (bpt != null)
-		{
-			String curI = bpt.attributeValue("i");
-			Element ept = (Element) p_root.selectSingleNode("//ept[@i='" + curI
-					+ "']");
-
-			bpt.addAttribute("i", p_i);
-			if (ept != null)
-			{
-				ept.addAttribute("i", p_i);
-			}
-		}
-	}
-    
 	private static Document getDom(String p_xml)
     {
         XmlParser parser = null;

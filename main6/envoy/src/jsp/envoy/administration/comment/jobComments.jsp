@@ -398,6 +398,7 @@ $(document).ready(function(){
 	          <amb:permission name="<%=Permission.JOB_COMMENTS_EDIT%>" >
 	                <input type="radio" name="radioBtn" value="<%=comment.getId()%>"
 	                    onclick="enableButtons('editBtn')">
+	                <input type="hidden" name="commentType<%=comment.getId()%>" value="job">
 	           </amb:permission>
 	            </amb:column>
 	            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="10%">

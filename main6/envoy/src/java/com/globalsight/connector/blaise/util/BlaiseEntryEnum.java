@@ -1,7 +1,7 @@
 package com.globalsight.connector.blaise.util;
 
 /**
- * @author David Yan 2017/2/7
+ * Enumeration for Blaise entry
  */
 public enum BlaiseEntryEnum
 {

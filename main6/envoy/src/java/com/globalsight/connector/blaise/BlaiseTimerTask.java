@@ -10,7 +10,7 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * Created by Administrator on 2017/2/9.
+ * Timer task class
  */
 public class BlaiseTimerTask implements Runnable
 {

@@ -219,7 +219,9 @@ public class CreateBlaiseJobThread  extends Thread
             String externalPageId = filePath.toString();
             descList.add(externalPageId);
 
-            String targetLocale = curEntry.getTargetLocale().getLanguage() + "_" + curEntry.getTargetLocale().getCountry();
+            String targetLocale =
+                    curEntry.getTargetLocale().getLanguage() + "_" + curEntry.getTargetLocale()
+                            .getCountry();
             targetLocale = BlaiseHelper.fixLocale(targetLocale);
             file2TargetLocale.put(externalPageId, targetLocale);
 
@@ -248,11 +250,7 @@ public class CreateBlaiseJobThread  extends Thread
     }
 
     /**
-     * Save job attributes of the job
-     * 
-     * @param jobAttributeList
-     * @param currentCompanyId
-     * @param job
+     * Saves job attributes of the job
      */
     private void saveAttributes(List<JobAttribute> jobAttributeList, String currentCompanyId,
             Job job)

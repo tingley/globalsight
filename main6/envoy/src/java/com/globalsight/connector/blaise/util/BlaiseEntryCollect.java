@@ -5,7 +5,7 @@ import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import java.util.ArrayList;
 
 /**
- * @author David Yan 2017/2/7
+ * Blaise entry collect
  */
 public class BlaiseEntryCollect
 {

@@ -310,6 +310,9 @@ public class BlaiseHelper
         return vo;
     }
 
+    /**
+     * Groups the inbox entries
+     */
     public void groupInboxEntries()
     {
         long lastMaxEntryId = blc.getLastMaxEntryId();
@@ -351,14 +354,16 @@ public class BlaiseHelper
             long tmpEntryId = -1L;
             int pageIndex = 0;
             String tmp;
-            while (fetchCount < count) {
+            while (fetchCount < count)
+            {
                 command = initTranslationPageCommand(pageIndex, blc.getQaCount(),
                         null,
                         sourceLocale.toString(), null, null, null, 0, false);
                 command.sortById();
                 command.setSortDesc(false);
                 entries = listInbox(command);
-                if (entries != null) {
+                if (entries != null)
+                {
                     for (TranslationInboxEntryVo vo : entries)
                     {
                         tmpEntryId = vo.getEntry().getId();

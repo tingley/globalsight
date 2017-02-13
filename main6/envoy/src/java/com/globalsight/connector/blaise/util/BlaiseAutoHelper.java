@@ -29,6 +29,7 @@ public class BlaiseAutoHelper
     private static Logger logger = Logger.getLogger(BlaiseAutoHelper.class);
     private static boolean running = false;
     private static BlaiseAutoHelper autoHelper = new BlaiseAutoHelper();
+    private String companyId = "";
 
     private BlaiseAutoHelper()
     {
@@ -39,6 +40,16 @@ public class BlaiseAutoHelper
         if (autoHelper == null)
             autoHelper = new BlaiseAutoHelper();
         return autoHelper;
+    }
+
+    public String getCompanyId()
+    {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId)
+    {
+        this.companyId = companyId;
     }
 
     public void runAutomatic(BlaiseConnector bc)

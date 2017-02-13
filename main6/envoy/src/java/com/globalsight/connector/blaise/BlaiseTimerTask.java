@@ -51,6 +51,7 @@ public class BlaiseTimerTask implements Runnable
                         if (connector.getPullHour() == currentHour)
                         {
                             //match the time condition
+                            BlaiseAutoHelper.getInstance().setCompanyId(String.valueOf(connector.getCompanyId()));
                             BlaiseAutoHelper.getInstance().runAutomatic(connector);
                         }
                     }

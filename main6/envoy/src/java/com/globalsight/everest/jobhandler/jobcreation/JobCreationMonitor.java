@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.jobhandler.jobcreation;
 
+import com.globalsight.connector.blaise.util.BlaiseAutoHelper;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
@@ -138,7 +139,7 @@ public class JobCreationMonitor
             job.setJobType(jobType);
             String companyIdString = CompanyThreadLocal.getInstance().getValue();
             if (StringUtil.isEmpty(companyIdString))
-                companyIdString = "1000";
+                companyIdString = BlaiseAutoHelper.getInstance().getCompanyId();
             long companyId = Long.parseLong(companyIdString);
             job.setCompanyId(companyId);
 

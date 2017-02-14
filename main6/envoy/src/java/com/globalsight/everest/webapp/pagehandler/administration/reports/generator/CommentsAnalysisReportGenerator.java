@@ -1615,11 +1615,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 // generally it should not be null for performance
                 if (previousTuv != null)
                 {
-                    previousSeg = previousTuv.getGxmlElement().getTextValue();
+                    previousSeg = previousTuv.getGxmlElement().getTextValueWithInternalTextMark();
                 }
                 else
                 {
-                    previousSeg = taskTuv.getTuv(p_jobId).getGxmlElement().getTextValue();
+                    previousSeg = taskTuv.getTuv(p_jobId).getGxmlElement()
+                            .getTextValueWithInternalTextMark();
                 }
                 if (!previousSeg.equals(targetSegmentString))
                 {
@@ -1635,11 +1636,13 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     // generally it should not be null for performance
                     if (previousTuv != null)
                     {
-                        previousSegment = previousTuv.getGxmlElement().getTextValue();
+                        previousSegment = previousTuv.getGxmlElement()
+                                .getTextValueWithInternalTextMark();
                     }
                     else
                     {
-                        previousSegment = taskTuv.getTuv(p_jobId).getGxmlElement().getTextValue();
+                        previousSegment = taskTuv.getTuv(p_jobId).getGxmlElement()
+                                .getTextValueWithInternalTextMark();
                     }
                     if (!previous.contains(previousSegment))
                     {

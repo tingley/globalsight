@@ -304,8 +304,6 @@ public class BlaiseHelper
             }
         }
         vo.setWordCount(wordCount);
-        //logger.info("Fetch word count of entry usd " + (System.currentTimeMillis() - runTime) +
-        // " ms");
 
         return vo;
     }
@@ -320,8 +318,6 @@ public class BlaiseHelper
         if (maxInboxEntryId <= lastMaxEntryId)
             return;
         String userId = blc.getLoginUser();
-        if (StringUtil.isEmpty(userId))
-            userId = "qaadmin";
         try
         {
             long fileProfileId = blc.getDefaultFileProfileId();

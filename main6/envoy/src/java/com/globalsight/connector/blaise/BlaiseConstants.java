@@ -1,10 +1,7 @@
 package com.globalsight.connector.blaise;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * @author David Yan 2017/1/24
+ * Constants for Blaise feature
  */
 public interface BlaiseConstants
 {

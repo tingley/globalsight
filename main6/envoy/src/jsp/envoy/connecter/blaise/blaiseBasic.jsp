@@ -271,8 +271,8 @@ function validName()
         <tr>
             <td class="standardText"><%= bundle.getString("lb_blaise_automatic")%>:</td>
             <td class="standardText">
-                <input type="radio" name="automatic" value="false" <%=isAutomatic ? "" : "checked"%>  onclick="showAutoOptions(false);"/>No&nbsp;&nbsp;
-                <input type="radio" name="automatic" value="true" <%=isAutomatic ? "checked" : ""%>  onclick="showAutoOptions(true);"/>Yes
+                <input type="radio" id="automatic" name="automatic" value="false" <%=isAutomatic ? "" : "checked"%>  onclick="showAutoOptions(false);"/>No&nbsp;&nbsp;
+                <input type="radio" id="automatic1" name="automatic" value="true" <%=isAutomatic ? "checked" : ""%>  onclick="showAutoOptions(true);"/>Yes
             </td>
         </tr>
         <tr class="autoOption">

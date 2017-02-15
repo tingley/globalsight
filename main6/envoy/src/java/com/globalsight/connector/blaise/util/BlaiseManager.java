@@ -88,6 +88,7 @@ public class BlaiseManager
                 connector.setCombined("Y".equals(rs.getString("IS_COMBINED")));
                 connector.setLastMaxEntryId(rs.getLong("LAST_MAX_ENTRY_ID"));
                 connector.setLoginUser(rs.getString("LOGIN_USER"));
+                connector.setCheckDuration(rs.getInt("CHECK_DURATION"));
 
                 connectors.add(connector);
             }

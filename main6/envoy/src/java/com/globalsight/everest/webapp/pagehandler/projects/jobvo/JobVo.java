@@ -15,8 +15,41 @@ public class JobVo {
 	private String estimatedTranslateCompletionDate;
 	private String style;
 	private boolean hasDetail = true;
+	private boolean isBlaiseJob = false;
+	private String blaiseUploadState;
+	private String blaiseCompleteState;
 	
 	private String textType;
+
+	public boolean isBlaiseJob()
+	{
+		return isBlaiseJob;
+	}
+
+	public void setBlaiseJob(boolean blaiseJob)
+	{
+		isBlaiseJob = blaiseJob;
+	}
+
+	public String getBlaiseUploadState()
+	{
+		return blaiseUploadState;
+	}
+
+	public void setBlaiseUploadState(String blaiseUploadState)
+	{
+		this.blaiseUploadState = blaiseUploadState;
+	}
+
+	public String getBlaiseCompleteState()
+	{
+		return blaiseCompleteState;
+	}
+
+	public void setBlaiseCompleteState(String blaiseCompleteState)
+	{
+		this.blaiseCompleteState = blaiseCompleteState;
+	}
 
 	public String getWordcount() {
 		return wordcount;

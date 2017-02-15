@@ -41,6 +41,17 @@ public class BlaiseConnector extends PersistentObject
     private long lastMaxEntryId = -1L;
     private String loginUser = "";
     private int qaCount = 10;
+    private int checkDuration = 1800;
+
+    public int getCheckDuration()
+    {
+        return checkDuration;
+    }
+
+    public void setCheckDuration(int checkDuration)
+    {
+        this.checkDuration = checkDuration;
+    }
 
     public int getQaCount()
     {

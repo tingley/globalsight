@@ -44,6 +44,8 @@
                   type="long" not-null="true" />
         <property name="loginUser" length="30" column="LOGIN_USER" type="string"
                   not-null="false" unique="false" />
+        <property name="checkDuration" column="CHECK_DURATION" length="20"
+                  type="int" not-null="true" />
         <property name="qaCount" column="QA_COUNT" length="20"
                   type="int" not-null="true" />
     </class>

@@ -50,6 +50,7 @@
 	long companyId = -1;
     boolean edit = false;
 	int qaCount = 10;
+	int checkDuration = 1800;
 	BlaiseConnector connector = (BlaiseConnector) request.getAttribute("blaise");
 	ArrayList<FileProfileImpl> fps = (ArrayList<FileProfileImpl>) request.getAttribute("fileProfiles");
     List<AttributeSet> allAttributeSets = (List<AttributeSet>) request.getAttribute("allAttributeSets");
@@ -76,6 +77,7 @@
         attributeGroupId = connector.getJobAttributeGroupId();
         wordCount = connector.getMinProcedureWords();
 		qaCount = connector.getQaCount();
+		checkDuration = connector.getCheckDuration();
 	}
 	else
 	{
@@ -376,6 +378,10 @@ function validName()
                     </tbody>
                 </table>
             </td>
+        </tr>
+        <tr class="standardText autoOption">
+            <td class="standardText"><%=bundle.getString("lb_blaise_check_duration")%></td>
+            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /><%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
         </tr>
 		<tr class="standardText autoOption">
 		  <td class="standardText">Entry count(QA)</td>

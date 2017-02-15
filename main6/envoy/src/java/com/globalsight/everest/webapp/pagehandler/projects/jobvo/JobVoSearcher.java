@@ -17,6 +17,9 @@
 package com.globalsight.everest.webapp.pagehandler.projects.jobvo;
 
 import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -31,6 +34,8 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.connector.blaise.BlaiseConstants;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
@@ -50,9 +55,11 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 public abstract class JobVoSearcher implements WebAppConstants
 {
@@ -907,6 +914,20 @@ public abstract class JobVoSearcher implements WebAppConstants
             result = HibernateUtil.searchWithSql(sql.toString(), map);
         }
 
+        if (result != null && result.size() > 0)
+        {
+            StringBuilder jobIds = new StringBuilder(128);
+            for (int i = 0, size = result.size(); i < size; i++)
+            {
+                Object[] obs = (Object[]) result.get(i);
+                jobIds.append(obs[0].toString()).append(",");
+            }
+            String jobIdsString = jobIds.toString();
+            if (jobIdsString.length() > 0)
+                jobIdsString = jobIdsString.substring(0, jobIdsString.length() - 1);
+            HashMap<Long, BlaiseConnectorJob> blaiseJobs = getBlaiseJobs(jobIdsString);
+        }
+
         List<JobVo> jobVos = new ArrayList<JobVo>();
         for (int i = 0; i < result.size(); i++)
         {
@@ -949,6 +970,66 @@ public abstract class JobVoSearcher implements WebAppConstants
         }
 
         return jobVos;
+    }
+
+    private HashMap<Long, BlaiseConnectorJob> getBlaiseJobs(String jobIdsString)
+    {
+        if (StringUtil.isEmpty(jobIdsString))
+            return new HashMap<>();
+
+        HashMap<Long, BlaiseConnectorJob> blaiseJobs = new HashMap<>();
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            Statement stmt = conn.createStatement();
+            StringBuilder sql = new StringBuilder(128);
+            sql.append("select job_id, blaise_entry_id, upload_xlf_state, complete_state");
+            sql.append(" from connector_blaise_job");
+            sql.append(" where job_id in (").append(jobIdsString).append(")");
+            sql.append(" order by job_id asc");
+            ResultSet rs = stmt.executeQuery(sql.toString());
+            long jobId = -1L, lastJobId = -1L;
+            boolean uploadSucceed = true, completeSucceed = true;
+            while (rs.next()) {
+                jobId = rs.getLong("job_id");
+                if (jobId != lastJobId) {
+                    if (lastJobId != -1) {
+                        // Gets a new job id data
+                        BlaiseConnectorJob job = new BlaiseConnectorJob();
+                        job.setJobId(lastJobId);
+                        job.setUploadXliffState(uploadSucceed ? "succeed" : "fail");
+                        job.setCompleteState(completeSucceed ? "succeed" : "fail");
+
+                        blaiseJobs.put(lastJobId, job);
+                        uploadSucceed = true;
+                        completeSucceed = true;
+                    }
+                    lastJobId = jobId;
+                }
+                if (BlaiseConnectorJob.FAIL.equals(rs.getString("upload_xlf_state")))
+                    uploadSucceed = false;
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                try
+                {
+                    DbUtil.returnConnection(conn);
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+
+        return blaiseJobs;
     }
 
     private void setDisplayLocale(JobVo job,

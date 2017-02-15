@@ -180,23 +180,25 @@ function confirmForm()
         blaiseForm.password.focus();
         return false;
     }
-	
-	var $tmp = $("#minProcedureWords").val();
-	if (!isAllDigits($tmp) || $tmp < 600)
-	{
-		alert("The minimum word count for procedure is incorrect value or less than 600.");
-		$("#minProcedureWords").focus();
-		return false;
-	}
-	
-	var $anySelect = $("#anyAttrs select").val();
-	var $hduSelect = $("#hduAttrs select").val();
-	var $isheetSelect = $("#isheetAttrs select").val();
-	if ($anySelect == $hduSelect || $hduSelect == $isheetSelect || $anySelect == $isheetSelect)
-	{
-		alert("Please set up different Falcon Product for each kind of automatic job.");
-		return false;
-	}
+
+    if ($("#automatic1").attr("checked") == "checked") {
+        var $tmp = $("#minProcedureWords").val();
+        if (!isAllDigits($tmp) || $tmp < 600)
+        {
+            alert("The minimum word count for procedure is incorrect value or less than 600.");
+            $("#minProcedureWords").focus();
+            return false;
+        }
+
+        var $anySelect = $("#anyAttrs select").val();
+        var $hduSelect = $("#hduAttrs select").val();
+        var $isheetSelect = $("#isheetAttrs select").val();
+        if ($anySelect == $hduSelect || $hduSelect == $isheetSelect || $anySelect == $isheetSelect)
+        {
+            alert("Please set up different Falcon Product for each kind of automatic job.");
+            return false;
+        }
+    }
 
     return true;
 }

@@ -406,73 +406,77 @@ function validName()
 			$(".allowNone").hide();
             return;
 		}
-		$(".allowNone").show();
+		
         $("#blaiseForm").ajaxSubmit({
             type: 'post',
             url: "<%=getAttributesURL%>",
             dataType:'json',
             timeout:100000000,
             success: function(data){
-                $("#attributeSetName").empty().append(data.setName);
-                var tdData = "";
-                var tdType = "";
-				$.each(data.attributes, function(i, item) {
-					tdData += "<tr>";
-					tdData += "<td class='standard'>" + item.displayName + "</td>";
-					tdType = item.type;
+				if ($.trim(data) != "")
+				{
+					$(".allowNone").show();
+					$("#attributeSetName").empty().append(data.setName);
+					var tdData = "";
+					var tdType = "";
+					$.each(data.attributes, function(i, item) {
+						tdData += "<tr class='allowNone autoOption'>";
+						tdData += "<td class='standard'>" + item.displayName + "</td>";
+						tdType = item.type;
 
-					if (tdType == "choiceList")
-						tdData += "<td class='standard'>Choice List</td>";
-					else if (tdType == "text")
-						tdData += "<td class='standard'>Text</td>";
-					
-					if (item.required)
-						tdData += "<td class='standard'>Required</td>";
-					else
-						tdData += "<td class='standard'>--</td>";
-					
-					tdData += "<td class='standard'>";
-					if (tdType == "choiceList") {
-						var tmp = item.value;
-						eles = tmp.split("@@");
-						tdData += "<select id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
-						for (var k=0;k<eles.length;k++) {
-							items = eles[k].split("$$");
-							tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
+						if (tdType == "choiceList")
+							tdData += "<td class='standard'>Choice List</td>";
+						else if (tdType == "text")
+							tdData += "<td class='standard'>Text</td>";
+						
+						if (item.required)
+							tdData += "<td class='standard'>Required</td>";
+						else
+							tdData += "<td class='standard'>--</td>";
+						
+						tdData += "<td class='standard'>";
+						if (tdType == "choiceList") {
+							var tmp = item.value;
+							eles = tmp.split("@@");
+							tdData += "<select id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
+							for (var k=0;k<eles.length;k++) {
+								items = eles[k].split("$$");
+								tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
+							}
+							tdData += "</select>";
+						} else if (tdType = "text") {
+							tdData += "<input type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 />";
 						}
-						tdData += "</select>";
-					} else if (tdType = "text") {
-						tdData += "<input type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 />";
+						tdData += "</td>";
+						tdData += "</tr>";
+					});
+					$("#anyAttrData").empty().append(tdData);
+					var tdData1 = tdData.replace(/anyAttr/g, 'hduAttr');
+					$("#hduAttrData").empty().append(tdData1);
+					tdData1 = tdData.replace(/anyAttr/g, 'isheetAttr');
+					$("#isheetAttrData").empty().append(tdData1);
+					<%
+					if (typeAttributes != null) {
+						BlaiseConnectorAttribute typeAttr;
+						for (int i=0,size=typeAttributes.size();i<size;i++) {
+							typeAttr = typeAttributes.get(i);
+							if (typeAttr.getBlaiseJobType().equals("A")) {
+								%>
+								$("#anyAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if (typeAttr.getBlaiseJobType().equals("H")) {
+								%>
+								$("#hduAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if (typeAttr.getBlaiseJobType().equals("I")) {							
+								%>
+								$("#isheetAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							}
+						}
 					}
-					tdData += "</td>";
-					tdData += "</tr>";
-				});
-                $("#anyAttrData").empty().append(tdData);
-				var tdData1 = tdData.replace(/anyAttr/g, 'hduAttr');
-				$("#hduAttrData").empty().append(tdData1);
-				tdData1 = tdData.replace(/anyAttr/g, 'isheetAttr');
-				$("#isheetAttrData").empty().append(tdData1);
-				<%
-				if (typeAttributes != null) {
-				    BlaiseConnectorAttribute typeAttr;
-				    for (int i=0,size=typeAttributes.size();i<size;i++) {
-				        typeAttr = typeAttributes.get(i);
-				        if (typeAttr.getBlaiseJobType().equals("A")) {
-							%>
-							$("#anyAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
-							<%
-				        } else if (typeAttr.getBlaiseJobType().equals("H")) {
-							%>
-							$("#hduAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
-							<%
-						} else if (typeAttr.getBlaiseJobType().equals("I")) {							
-							%>
-							$("#isheetAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
-							<%
-						}
-				    }
+					%>
 				}
-				%>
             },
             error: function(XmlHttpRequest, textStatus, errorThrown){
             }
@@ -495,6 +499,7 @@ function validName()
 			$(".autoOption").show();
 		else
 			$(".autoOption").hide();
+		$(".allowNone").hide();
 	}
 </script>
 </body>

@@ -80,47 +80,52 @@ public class BlaiseAutoHelper
             L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(fp.getL10nProfileId());
             Project project = lp.getProject();
             AttributeSet attributeSet = project.getAttributeSet();
-            List<Attribute> attributes = attributeSet.getAttributeAsList();
             JSONObject object = new JSONObject();
-            object.put("setName", attributeSet.getName());
-            object.put("setId", attributeSet.getId());
-            JSONArray array = new JSONArray();
-            if (attributes != null && attributes.size() > 0)
+            String data = "";
+            if (attributeSet != null)
             {
-                JSONObject o = null;
-                for (Attribute attribute : attributes)
+                List<Attribute> attributes = attributeSet.getAttributeAsList();
+                object.put("setName", attributeSet.getName());
+                object.put("setId", attributeSet.getId());
+                JSONArray array = new JSONArray();
+                if (attributes != null && attributes.size() > 0)
                 {
-                    o = new JSONObject();
-                    o.put("attrId", attribute.getId());
-                    o.put("required", attribute.isRequired());
-                    o.put("name", attribute.getName());
-                    o.put("displayName", attribute.getDisplayName());
-                    o.put("type", attribute.getType());
-                    Condition condition = attribute.getCondition();
-                    String tmpString = "";
-                    if (condition instanceof ListCondition)
+                    JSONObject o = null;
+                    for (Attribute attribute : attributes)
                     {
-                        ListCondition lc = (ListCondition) condition;
-                        Set<SelectOption> options = lc.getAllOptions();
-                        StringBuilder tmp = new StringBuilder();
-                        if (options != null)
+                        o = new JSONObject();
+                        o.put("attrId", attribute.getId());
+                        o.put("required", attribute.isRequired());
+                        o.put("name", attribute.getName());
+                        o.put("displayName", attribute.getDisplayName());
+                        o.put("type", attribute.getType());
+                        Condition condition = attribute.getCondition();
+                        String tmpString = "";
+                        if (condition instanceof ListCondition)
                         {
-                            for (SelectOption so : options)
+                            ListCondition lc = (ListCondition) condition;
+                            Set<SelectOption> options = lc.getAllOptions();
+                            StringBuilder tmp = new StringBuilder();
+                            if (options != null)
                             {
-                                tmp.append(so.getId()).append("$$").append(so.getValue()).append
-                                        ("@@");
+                                for (SelectOption so : options)
+                                {
+                                    tmp.append(so.getId()).append("$$").append(so.getValue()).append
+                                            ("@@");
+                                }
+                                tmpString = tmp.toString();
+                                if (StringUtil.isNotEmpty(tmpString))
+                                    tmpString = tmpString.substring(0, tmpString.length() - 3);
                             }
-                            tmpString = tmp.toString();
-                            if (StringUtil.isNotEmpty(tmpString))
-                                tmpString = tmpString.substring(0, tmpString.length() - 3);
+                            o.put("value", tmpString);
                         }
-                        o.put("value", tmpString);
+                        array.add(o);
                     }
-                    array.add(o);
                 }
+                object.put("attributes", array);
+                data = object.toJSONString();
             }
-            object.put("attributes", array);
-            return object.toJSONString();
+            return data;
         }
         catch (Exception e)
         {

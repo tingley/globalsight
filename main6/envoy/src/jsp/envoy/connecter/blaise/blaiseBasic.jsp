@@ -11,6 +11,7 @@
 <%@ page import="com.globalsight.cxe.entity.fileprofile.FileProfileImpl" %>
 <%@ page import="com.globalsight.cxe.entity.customAttribute.AttributeSet" %>
 <%@ page import="com.globalsight.connector.blaise.form.BlaiseConnectorAttribute" %>
+<%@ page import="com.globalsight.util.StringUtil" %>
 
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 
@@ -71,6 +72,8 @@
         clientCoreVersion = connector.getClientCoreVersion();
         isAutomatic = connector.isAutomatic();
         pullDays = connector.getPullDays();
+        if (StringUtil.isEmpty(pullDays))
+            pullDays = "";
         pullHour = connector.getPullHour();
         isCombined = connector.isCombined();
         fileProfileId = connector.getDefaultFileProfileId();

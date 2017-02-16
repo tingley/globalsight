@@ -16,23 +16,19 @@
  */
 package com.globalsight.connector.blaise.util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import org.apache.log4j.Logger;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
 
 public class BlaiseManager
 {
@@ -56,6 +52,65 @@ public class BlaiseManager
         }
 
         return HibernateUtil.search(hql, map);
+    }
+
+    /**
+     * Gets all  Blaise server connectors
+     */
+    public static List<?> getConnectors()
+    {
+        ArrayList<BlaiseConnector> connectors = new ArrayList<>();
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select * from connector_blaise where is_active='Y'");
+            BlaiseConnector connector;
+            while (rs.next())
+            {
+                connector = new BlaiseConnector();
+                connector.setId(rs.getInt("ID"));
+                connector.setName(rs.getString("Name"));
+                connector.setUrl(rs.getString("URL"));
+                connector.setUsername(rs.getString("User_Name"));
+                connector.setPassword(rs.getString("Password"));
+                connector.setClientCoreVersion(rs.getString("CLIENT_CORE_VERSION"));
+                connector.setClientCoreRevision(rs.getInt("CLIENT_CORE_REVISION"));
+                connector.setWorkflowId(rs.getString("WORKFLOW_ID"));
+                connector.setIsActive("Y".equalsIgnoreCase(rs.getString("IS_ACTIVE")));
+                connector.setCompanyId(rs.getLong("COMPANY_ID"));
+                connector.setAutomatic("Y".equalsIgnoreCase(rs.getString("IS_AUTOMATIC")));
+                connector.setPullDays(rs.getString("PULL_DAYS"));
+                connector.setPullHour(rs.getInt("PULL_HOUR"));
+                connector.setDefaultFileProfileId(rs.getLong("DEFAULT_FILE_PROFILE_ID"));
+                connector.setMinProcedureWords(rs.getInt("MIN_PROCEDURE_WORDS"));
+                connector.setCombined("Y".equals(rs.getString("IS_COMBINED")));
+                connector.setLastMaxEntryId(rs.getLong("LAST_MAX_ENTRY_ID"));
+                connector.setLoginUser(rs.getString("LOGIN_USER"));
+                connector.setCheckDuration(rs.getInt("CHECK_DURATION"));
+
+                connectors.add(connector);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error found when invoking getConnectors().", e);
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                try
+                {
+                    DbUtil.returnConnection(conn);
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+        return connectors;
     }
 
     public static BlaiseConnector getBlaiseConnectorById(long blaiseConnectorId)

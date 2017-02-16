@@ -713,30 +713,12 @@ public class LeverageUtil
                 nextHash = sourceTuv.getNextHash();
             }
 
-            //Checks the "First/Last" segment the nearest segments are exact match
-            //@since GBS-4607
-            boolean  isExactMatchLocalized = true;
-			if (index == 0 && p_sourceTuvs.size()>1)
+			if (preHash != -1 && nextHash != -1
+					&& preHash == lm.getPreviousHash()
+					&& nextHash == lm.getNextHash())
 			{
-				isExactMatchLocalized = isExactMatchLocalized(index+1, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_subId, p_jobId);
+				return true;
 			}
-			else if (index == p_sourceTuvs.size() - 1
-					&& p_sourceTuvs.size() > 1)
-			{
-				isExactMatchLocalized = isExactMatchLocalized(index-1, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_subId, p_jobId);
-			}
-			
-			if ((preHash != -1 && nextHash != -1
-					&& preHash != BaseTmTuv.FIRST_HASH
-					&& nextHash != BaseTmTuv.LAST_HASH
-					&& preHash == lm.getPreviousHash() && nextHash == lm
-					.getNextHash())
-					|| (isExactMatchLocalized && ((index == 0
-							&& preHash == BaseTmTuv.FIRST_HASH && nextHash != -1) || (index == p_sourceTuvs
-							.size() - 1 && preHash != -1 && nextHash == BaseTmTuv.LAST_HASH))))
-			{
-                return true;
-            }
         }
 
         return false;

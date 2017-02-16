@@ -136,11 +136,11 @@ public class WordExtractor extends AbstractExtractor
     public static Set<String> SPECIAL_NODES = new HashSet<String>();
     {
         // merge the b i u sub sup to other tags.
-//        SPECIAL_NODES.add("b");
-//        SPECIAL_NODES.add("i");
-//        SPECIAL_NODES.add("u");
-//        SPECIAL_NODES.add("sub");
-//        SPECIAL_NODES.add("sup");
+        SPECIAL_NODES.add("b");
+        SPECIAL_NODES.add("i");
+        SPECIAL_NODES.add("u");
+        SPECIAL_NODES.add("sub");
+        SPECIAL_NODES.add("sup");
 
         SPECIAL_NODES.add("commentContent");
         SPECIAL_NODES.add("comment");

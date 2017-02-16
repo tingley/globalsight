@@ -726,6 +726,7 @@
         <PageLink linkName="edit" destinationPageName="blaise2"></PageLink>
         <PageLink linkName="remove" destinationPageName="blaiseMain"></PageLink>
         <PageLink linkName="connect" destinationPageName="blaise3"></PageLink>
+        <PageLink linkName="demo" destinationPageName="blaiseMain"></PageLink>
       </WebPage>
       <WebPage pageName="blaise2" isDefault="false" jspName="/envoy/connecter/blaise/blaiseBasic.jsp" pageHandlerClassName="com.globalsight.connector.blaise.BlaiseBasicHandler">
         <PageLink linkName="self" destinationPageName="blaise2"></PageLink>

@@ -37,7 +37,7 @@ public class Plug_8_7_4 implements com.plug.Plug
         deleteFiles(ServerUtil.getPath() + JAR_XML_APIS);
         deleteFiles(ServerUtil.getPath() + JAR_XML_APIS_EXT);
 
-        // GBS-4595: delete blaise*.jar from build
+        // GBS-4595: delete old Blaise support API jar
         deleteFiles(ServerUtil.getPath() + JAR_BLAISE_APIS);
     }
 

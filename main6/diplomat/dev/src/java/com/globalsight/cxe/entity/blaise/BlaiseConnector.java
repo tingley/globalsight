@@ -1,18 +1,17 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
- *  http://www.apache.org/licenses/LICENSE-2.0
- *  
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *  
+ * Copyright 2009 Welocalize, Inc.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * <p>
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.globalsight.cxe.entity.blaise;
 
@@ -21,7 +20,7 @@ import com.globalsight.everest.persistence.PersistentObject;
 
 public class BlaiseConnector extends PersistentObject
 {
-	private static final long serialVersionUID = -7876757344723844737L;
+    private static final long serialVersionUID = -7876757344723844737L;
 
     private String name = null;
     private String description = null;
@@ -32,13 +31,134 @@ public class BlaiseConnector extends PersistentObject
     private int clientCoreRevision = 0;
     private String workflowId = "TRANSLATION";
     private long companyId;
+    private boolean automatic = false;
+    private String pullDays = "";
+    private int pullHour = 7;
+    private int minProcedureWords = 600;
+    private long defaultFileProfileId = -1L;
+    private long jobAttributeGroupId = -1L;
+    private boolean combined = true;
+    private long lastMaxEntryId = -1L;
+    private String loginUser = "";
+    private int qaCount = 10;
+    private int checkDuration = 1800;
 
-    public String getName() 
+    public int getCheckDuration()
+    {
+        return checkDuration;
+    }
+
+    public void setCheckDuration(int checkDuration)
+    {
+        this.checkDuration = checkDuration;
+    }
+
+    public int getQaCount()
+    {
+        return qaCount;
+    }
+
+    public void setQaCount(int qaCount)
+    {
+        this.qaCount = qaCount;
+    }
+
+    public String getLoginUser()
+    {
+        return loginUser;
+    }
+
+    public void setLoginUser(String loginUser)
+    {
+        this.loginUser = loginUser;
+    }
+
+    public long getLastMaxEntryId()
+    {
+        return lastMaxEntryId;
+    }
+
+    public void setLastMaxEntryId(long lastMaxEntryId)
+    {
+        this.lastMaxEntryId = lastMaxEntryId;
+    }
+
+    public String getPullDays()
+    {
+        return pullDays;
+    }
+
+    public void setPullDays(String pullDays)
+    {
+        this.pullDays = pullDays;
+    }
+
+    public int getMinProcedureWords()
+    {
+        return minProcedureWords;
+    }
+
+    public void setMinProcedureWords(int minProcedureWords)
+    {
+        this.minProcedureWords = minProcedureWords;
+    }
+
+    public long getDefaultFileProfileId()
+    {
+        return defaultFileProfileId;
+    }
+
+    public void setDefaultFileProfileId(long defaultFileProfileId)
+    {
+        this.defaultFileProfileId = defaultFileProfileId;
+    }
+
+    public long getJobAttributeGroupId()
+    {
+        return jobAttributeGroupId;
+    }
+
+    public void setJobAttributeGroupId(long jobAttributeGroupId)
+    {
+        this.jobAttributeGroupId = jobAttributeGroupId;
+    }
+
+    public boolean isCombined()
+    {
+        return combined;
+    }
+
+    public void setCombined(boolean isCombined)
+    {
+        this.combined = isCombined;
+    }
+
+    public boolean isAutomatic()
+    {
+        return automatic;
+    }
+
+    public void setAutomatic(boolean isAutomatic)
+    {
+        this.automatic = isAutomatic;
+    }
+
+    public int getPullHour()
+    {
+        return pullHour;
+    }
+
+    public void setPullHour(int pullHour)
+    {
+        this.pullHour = pullHour;
+    }
+
+    public String getName()
     {
         return name;
     }
 
-    public void setName(String name) 
+    public void setName(String name)
     {
         this.name = name;
     }
@@ -85,35 +205,35 @@ public class BlaiseConnector extends PersistentObject
 
     public String getClientCoreVersion()
     {
-		return clientCoreVersion;
-	}
+        return clientCoreVersion;
+    }
 
-	public void setClientCoreVersion(String clientCoreVersion)
-	{
-		this.clientCoreVersion = clientCoreVersion;
-	}
+    public void setClientCoreVersion(String clientCoreVersion)
+    {
+        this.clientCoreVersion = clientCoreVersion;
+    }
 
-	public int getClientCoreRevision()
-	{
-		return clientCoreRevision;
-	}
+    public int getClientCoreRevision()
+    {
+        return clientCoreRevision;
+    }
 
-	public void setClientCoreRevision(int clientCoreRevision)
-	{
-		this.clientCoreRevision = clientCoreRevision;
-	}
+    public void setClientCoreRevision(int clientCoreRevision)
+    {
+        this.clientCoreRevision = clientCoreRevision;
+    }
 
-	public String getWorkflowId()
-	{
-		return workflowId;
-	}
+    public String getWorkflowId()
+    {
+        return workflowId;
+    }
 
-	public void setWorkflowId(String workflowId)
-	{
-		this.workflowId = workflowId;
-	}
+    public void setWorkflowId(String workflowId)
+    {
+        this.workflowId = workflowId;
+    }
 
-	public long getCompanyId()
+    public long getCompanyId()
     {
         return companyId;
     }
@@ -123,7 +243,6 @@ public class BlaiseConnector extends PersistentObject
         this.companyId = companyId;
     }
 
-    // Utility
     public String getCompanyName()
     {
         return CompanyWrapper.getCompanyNameById(companyId);

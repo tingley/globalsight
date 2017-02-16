@@ -8,6 +8,10 @@
      com.globalsight.cxe.entity.blaise.BlaiseConnector,
 	 java.util.*"
 	session="true"%>
+<%@ page import="com.globalsight.cxe.entity.fileprofile.FileProfileImpl" %>
+<%@ page import="com.globalsight.cxe.entity.customAttribute.AttributeSet" %>
+<%@ page import="com.globalsight.connector.blaise.form.BlaiseConnectorAttribute" %>
+<%@ page import="com.globalsight.util.StringUtil" %>
 
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 
@@ -23,6 +27,7 @@
 	String saveURL = save.getPageURL() + "&action=save";
 	String cancelURL = cancel.getPageURL() + "&action=cancel";
 	String testURL = self.getPageURL() + "&action=test";
+	String getAttributesURL = self.getPageURL() + "&action=getAttributes";
 
 	// Labels
 	String helper = bundle.getString("helper_text_blaise_connector_edit");
@@ -35,10 +40,23 @@
 	String url = "";
 	String username = "";
 	String password = "";
+	boolean isAutomatic = false;
+	String pullDays = "";
+	int pullHour = 7;
+	long fileProfileId = -1L;
+	long attributeGroupId = -1L;
+	boolean isCombined = true;
+	int wordCount = 600;
 	String clientCoreVersion = "2.0";// default "2.0".
 	long companyId = -1;
     boolean edit = false;
+	int qaCount = 10;
+	int checkDuration = 1800;
 	BlaiseConnector connector = (BlaiseConnector) request.getAttribute("blaise");
+	ArrayList<FileProfileImpl> fps = (ArrayList<FileProfileImpl>) request.getAttribute("fileProfiles");
+    List<AttributeSet> allAttributeSets = (List<AttributeSet>) request.getAttribute("allAttributeSets");
+	List<BlaiseConnectorAttribute> typeAttributes = (List<BlaiseConnectorAttribute>) request.getAttribute("typeAttributes");
+	String attributeData = (String) request.getAttribute("attributeData");
 	if (connector != null)
 	{
 		edit = true;
@@ -52,6 +70,17 @@
         desc = connector.getDescription();
         desc = desc == null ? "" : desc;
         clientCoreVersion = connector.getClientCoreVersion();
+        isAutomatic = connector.isAutomatic();
+        pullDays = connector.getPullDays();
+        if (StringUtil.isEmpty(pullDays))
+            pullDays = "";
+        pullHour = connector.getPullHour();
+        isCombined = connector.isCombined();
+        fileProfileId = connector.getDefaultFileProfileId();
+        attributeGroupId = connector.getJobAttributeGroupId();
+        wordCount = connector.getMinProcedureWords();
+		qaCount = connector.getQaCount();
+		checkDuration = connector.getCheckDuration();
 	}
 	else
 	{
@@ -151,6 +180,48 @@ function confirmForm()
         blaiseForm.password.focus();
         return false;
     }
+	
+    if ($("#automatic1").attr("checked") == "checked") {
+		// Automatic setting is on
+        var $tmp = $("#minProcedureWords").val();
+        if (!isAllDigits($tmp) || $tmp < 600 || $tmp>1000000)
+        {
+            alert("<%=bundle.getString("msg_blaise_wrong_count")%>");
+            $("#minProcedureWords").focus();
+            return false;
+        }
+		
+		if ($("#defaultFileProfileId").val() == "")
+		{
+			alert("<%=bundle.getString("msg_blaise_set_file_profile")%>");
+			return false;
+		}
+
+        if ($.trim($("#attributeSetName").text()) != "")
+        {
+            var tmp = "", lastTmp = "", value = "";
+            $(".falconProduct").each(function() {
+				value = $(this).val();
+                if (tmp != "") 
+				{
+					if (value == tmp || value == lastTmp)
+					{
+						alert("<%=bundle.getString("msg_blaise_select_attributes")%>");
+						return false;
+					} else
+						lastTmp = value;
+				} else
+					tmp = value;
+            });
+        }
+
+        $tmp = $("#checkDuration").val();
+        if (!isAllDigits($tmp) || $tmp < 300 || $tmp > 1000000)
+        {
+            alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
+            return false;
+        }
+    }
 
     return true;
 }
@@ -194,12 +265,13 @@ function validName()
     <FORM name="blaiseForm" id="blaiseForm" method="post" action="">
     <input type="hidden" name="id" value="<%=id%>" />
 	<input type="hidden" name="clientCoreVersion" value="<%=clientCoreVersion%>" />
+	<input type="hidden" id="attributeData" name="attributeData" value="<%=attributeData%>" />
     <%if(edit) {%>
     <input type="hidden" name="companyId" value="<%=companyId%>" />
     <%} %>
     <table class="standardText">
     	<tr>
-    		<td width="120px"><%=bundle.getString("lb_name")%> <span class="asterisk">*</span>:</td>
+    		<td width="180px"><%=bundle.getString("lb_name")%> <span class="asterisk">*</span>:</td>
     		<td><input type="text" name="name" id="name" value="<%=name%>"  maxlength="40" size="30"></td>
     	</tr>
         <tr>
@@ -219,7 +291,131 @@ function validName()
             <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200" autocomplete="off"></td>
         </tr>
 
-    	<tr>
+        <tr>
+            <td class="standardText"><%= bundle.getString("lb_blaise_automatic")%>:</td>
+            <td class="standardText">
+                <input type="radio" id="automatic" name="automatic" value="false" <%=isAutomatic ? "" : "checked"%>  onclick="showAutoOptions(false);"/>No&nbsp;&nbsp;
+                <input type="radio" id="automatic1" name="automatic" value="true" <%=isAutomatic ? "checked" : ""%>  onclick="showAutoOptions(true);"/>Yes
+            </td>
+        </tr>
+        <tr class="autoOption">
+            <td width="180px" class="standardText"><%= bundle.getString("lb_blaise_pull_time")%>:</td>
+            <td class="standardText">
+                <ul style="display: inline-flex;list-style-type: none;margin-left: 0px;padding-left: 0px;">
+                    <li><input type="checkbox" name="monday" value="1" <%=pullDays.contains("1") ? "checked" : ""%>>Monday</li>
+                    <li><input type="checkbox" name="thursday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Thursday</li>
+                    <li><input type="checkbox" name="wednesday" value="3" <%=pullDays.contains("3") ? "checked" : ""%>>Wednesday</li>
+                    <li><input type="checkbox" name="tuesday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Tuesday</li>
+                    <li><input type="checkbox" name="friday" value="5" <%=pullDays.contains("5") ? "checked" : ""%>>Friday</li>
+                    <li><input type="checkbox" name="saturday" value="6" <%=pullDays.contains("6") ? "checked" : ""%>>Saturday</li>
+                    <li><input type="checkbox" name="sunday" value="7" <%=pullDays.contains("7") ? "checked" : ""%>>Sunday</li>
+                </ul>
+            </td>
+        </tr>
+        <tr class="autoOption">
+            <td>&nbsp;</td>
+            <td class="standardText">
+                <select id="pullHour" name="pullHour" class="standardText">
+                    <%
+                        for (int i=7;i<16;i++) {
+                    %>
+                    <option value="<%=i%>" <%=pullHour == i ? "selected" : ""%>><%=i%>:00</option>
+                    <% } %>
+                </select>
+            </td>
+        </tr>
+        <tr class="autoOption">
+            <td class="standardText"><%=bundle.getString("lb_blaise_combine_by_languages")%>:</td>
+            <td class="standardText"><input type="checkbox" id="combined" name="combined" value="true" <%=isCombined ? "checked" : ""%>/></td>
+        </tr>
+        <tr class="autoOption">
+            <td width="180px" class="standardText"><%= bundle.getString("lb_blaise_min_procedure_words")%>:</td>
+            <td class="standardText">
+                <input type="text" id="minProcedureWords" name="minProcedureWords" value="<%=wordCount%>" class="standardText" />
+            </td>
+        </tr>
+        <tr class="autoOption">
+            <td class="standardText"><%= bundle.getString("lb_default_file_profile")%>:</td>
+            <td class="standardText">
+                <select id="defaultFileProfileId" name="defaultFileProfileId" class="standardText" onchange="fileProfileChanged();">
+                    <option value=""><%=bundle.getString("lb_choose") %></option>
+                    <%
+                        if (fps != null && fps.size() > 0) {
+                            for (FileProfileImpl fp : fps) {
+                                if (fp.getId() == fileProfileId)
+                                    out.println("<option value=" + fp.getId() + " selected>" + fp.getName() + "</option>");
+                                else
+                                    out.println("<option value=" + fp.getId() + ">" + fp.getName() + "</option>");
+                            }
+                        }
+                    %>
+                </select>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption">
+            <td class="standardText"><%= bundle.getString("lb_attribute_group")%>:</td>
+            <td class="standardText"><div id="attributeSetName"></div></td>
+        </tr>
+        <tr class="allowNone autoOption" id="anyAttrs">
+			<td class="standardText">Any</td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="anyAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption" id="hduAttrs">
+			<td class="standardText">HDU Workbook</td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="hduAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption" id="isheetAttrs">
+			<td class="standardText">ISheet</td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="isheetAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="standardText autoOption">
+            <td class="standardText"><%=bundle.getString("lb_blaise_check_duration")%>:</td>
+            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /><%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
+        </tr>
+		<tr class="standardText autoOption">
+		  <td class="standardText">Entry count(QA)</td>
+		  <td><input type="text" id="qaCount" name="qaCount" size=10 value="<%=qaCount%>" /></td>
+		</tr>
+        <tr>
     		<td colspan="2" align="left">
                 <input type="button" name="return" value="<%=bundle.getString("lb_cancel")%>" onclick="cancel();"/>
     		    <input type="button" name="saveBtn" value="<%=bundle.getString("lb_save")%>" onclick="save();"/>
@@ -229,5 +425,128 @@ function validName()
     </FORM>
 </div>
 </div>
+<script>
+    function fileProfileChanged()
+    {
+        if ($("#defaultFileProfileId").val() == "") {
+			$("#attributeSetName").empty();
+			$("#jobAttributes").empty();
+			$(".allowNone").hide();
+            return;
+		}
+		
+        $("#blaiseForm").ajaxSubmit({
+            type: 'post',
+            url: "<%=getAttributesURL%>",
+            dataType:'json',
+            timeout:100000000,
+            success: function(data){
+				if ($.trim(data) != "")
+				{
+					$(".allowNone").show();
+					$("#attributeSetName").empty().append(data.setName);
+					var tdData = "";
+					var tdType = "";
+					$.each(data.attributes, function(i, item) {
+					    var isFalconProduct = false;
+						tdData += "<tr class='allowNone autoOption'>";
+						if (item.displayName == "Falcon Product")
+						    isFalconProduct = true;
+                        tdData += "<td class='standard'>" + item.displayName + "</td>";
+						tdType = item.type;
+
+						if (tdType == "choiceList")
+							tdData += "<td class='standard'>Choice List</td>";
+						else if (tdType == "text")
+							tdData += "<td class='standard'>Text</td>";
+						
+						if (item.required)
+							tdData += "<td class='standard'>Required</td>";
+						else
+							tdData += "<td class='standard'>--</td>";
+						
+						tdData += "<td class='standard'>";
+						if (tdType == "choiceList") {
+							var tmp = item.value;
+							eles = tmp.split("@@");
+							tdData += "<select ";
+							if (isFalconProduct)
+							    tdData += "class='falconProduct' ";
+							tdData += "id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
+							for (var k=0;k<eles.length;k++) {
+								items = eles[k].split("$$");
+								tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
+							}
+							tdData += "</select>";
+						} else if (tdType = "text") {
+							tdData += "<input type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 />";
+						}
+						tdData += "</td>";
+						tdData += "</tr>";
+					});
+					$("#anyAttrData").empty().append(tdData);
+					var tdData1 = tdData.replace(/anyAttr/g, 'hduAttr');
+					$("#hduAttrData").empty().append(tdData1);
+					tdData1 = tdData.replace(/anyAttr/g, 'isheetAttr');
+					$("#isheetAttrData").empty().append(tdData1);
+					<%
+					if (typeAttributes != null) {
+						BlaiseConnectorAttribute typeAttr;
+						for (int i=0,size=typeAttributes.size();i<size;i++) {
+							typeAttr = typeAttributes.get(i);
+							if (typeAttr.getBlaiseJobType().equals("A")) {
+								%>
+								$("#anyAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if (typeAttr.getBlaiseJobType().equals("H")) {
+								%>
+								$("#hduAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if (typeAttr.getBlaiseJobType().equals("I")) {							
+								%>
+								$("#isheetAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							}
+						}
+					}
+					%>
+				}
+            },
+            error: function(XmlHttpRequest, textStatus, errorThrown){
+            }
+        });
+    }
+	
+	$().ready(function() {
+		$(".allowNone").hide();
+		$(".autoOption").hide();
+		
+		showAutoOptions(<%=isAutomatic%>);
+		var $fpId = $("#defaultFileProfileId").val();
+		if ($fpId != "" && <%=isAutomatic%>) {
+			fileProfileChanged();
+		}
+	});
+	
+	function showAutoOptions(flag) {
+		if (flag) {
+			$(".autoOption").show();
+			var $fpId = $("#defaultFileProfileId").val();
+			<%
+				isAutomatic = true;
+			%>
+			if ($fpId != "" && <%=isAutomatic%>) {
+				fileProfileChanged();
+			}
+		}
+		else {
+			$(".autoOption").hide();
+			<%
+				isAutomatic = false;
+			%>
+		}
+		$(".allowNone").hide();
+	}
+</script>
 </body>
 </html>

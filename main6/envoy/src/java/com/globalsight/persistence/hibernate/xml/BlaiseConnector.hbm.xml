@@ -26,5 +26,27 @@
             not-null="true" unique="false" />
         <property name="companyId" column="COMPANY_ID" length="20"
             type="long" not-null="true" />
+        <property name="automatic" column="IS_AUTOMATIC" type="yes_no"
+                  not-null="true" unique="false" />
+        <property name="pullDays" length="20" column="PULL_DAYS" type="string"
+                  not-null="false" unique="false" />
+        <property name="pullHour" column="PULL_HOUR" length="20"
+                  type="int" not-null="true" />
+        <property name="defaultFileProfileId" column="DEFAULT_FILE_PROFILE_ID" length="20"
+                  type="long" not-null="true" />
+        <property name="minProcedureWords" column="MIN_PROCEDURE_WORDS" length="20"
+                  type="int" not-null="true" />
+        <property name="jobAttributeGroupId" column="JOB_ATTRIBUTE_GROUP_ID" length="20"
+                  type="long" not-null="true" />
+        <property name="combined" column="IS_COMBINED" type="yes_no"
+                  not-null="true" unique="false" />
+        <property name="lastMaxEntryId" column="LAST_MAX_ENTRY_ID" length="20"
+                  type="long" not-null="true" />
+        <property name="loginUser" length="30" column="LOGIN_USER" type="string"
+                  not-null="false" unique="false" />
+        <property name="checkDuration" column="CHECK_DURATION" length="20"
+                  type="int" not-null="true" />
+        <property name="qaCount" column="QA_COUNT" length="20"
+                  type="int" not-null="true" />
     </class>
 </hibernate-mapping>

@@ -165,14 +165,14 @@ function confirmForm(formSent) {
                 }
                 theRepeat = stripBlanks(theRepeat);
             }
+			// Make sure the repeated password matches the first
+			if (theRepeat != thePassword) {
+				alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
+				return false;
+			}
         } else {
             formSent.password.value = "";
             formSent.passwordConfirm.value = "";
-        }
-        // Make sure the repeated password matches the first
-        if (theRepeat != thePassword) {
-            alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
-            return false;
         }
     }
 
@@ -205,6 +205,9 @@ var pwdChanged = false;
 $(document).ready(function(){
     $("#password1").keyup(function() {
         passCheck = passwordChecking($(this).val());
+		pwdChanged = true;
+    });
+    $("#passwordConfirm").keyup(function() {
 		pwdChanged = true;
     });
 });

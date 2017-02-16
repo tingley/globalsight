@@ -184,7 +184,7 @@ function confirmForm()
     if ($("#automatic1").attr("checked") == "checked") {
 		// Automatic setting is on
         var $tmp = $("#minProcedureWords").val();
-        if (!isAllDigits($tmp) || $tmp < 600)
+        if (!isAllDigits($tmp) || $tmp < 600 || $tmp>1000000)
         {
             alert("<%=bundle.getString("msg_blaise_wrong_count")%>");
             $("#minProcedureWords").focus();
@@ -215,7 +215,8 @@ function confirmForm()
             });
         }
 
-        if (!isAllDigits($("#checkDuration").val()))
+        $tmp = $("#checkDuration").val();
+        if (!isAllDigits($tmp) || $tmp < 300 || $tmp > 1000000)
         {
             alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
             return false;
@@ -324,7 +325,7 @@ function validName()
             </td>
         </tr>
         <tr class="autoOption">
-            <td class="standardText">Combined by language:</td>
+            <td class="standardText"><%=bundle.getString("lb_blaise_combine_by_languages")%>:</td>
             <td class="standardText"><input type="checkbox" id="combined" name="combined" value="true" <%=isCombined ? "checked" : ""%>/></td>
         </tr>
         <tr class="autoOption">
@@ -352,7 +353,7 @@ function validName()
             </td>
         </tr>
         <tr class="allowNone autoOption">
-            <td class="standardText"><%= bundle.getString("lb_attribute_groups")%>:</td>
+            <td class="standardText"><%= bundle.getString("lb_attribute_group")%>:</td>
             <td class="standardText"><div id="attributeSetName"></div></td>
         </tr>
         <tr class="allowNone autoOption" id="anyAttrs">
@@ -407,7 +408,7 @@ function validName()
             </td>
         </tr>
         <tr class="standardText autoOption">
-            <td class="standardText"><%=bundle.getString("lb_blaise_check_duration")%></td>
+            <td class="standardText"><%=bundle.getString("lb_blaise_check_duration")%>:</td>
             <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /><%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
         </tr>
 		<tr class="standardText autoOption">

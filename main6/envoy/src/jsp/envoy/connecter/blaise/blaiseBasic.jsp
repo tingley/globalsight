@@ -180,22 +180,44 @@ function confirmForm()
         blaiseForm.password.focus();
         return false;
     }
-
+	
     if ($("#automatic1").attr("checked") == "checked") {
+		// Automatic setting is on
         var $tmp = $("#minProcedureWords").val();
         if (!isAllDigits($tmp) || $tmp < 600)
         {
-            alert("The minimum word count for procedure is incorrect value or less than 600.");
+            alert("<%=bundle.getString("msg_blaise_wrong_count")%>");
             $("#minProcedureWords").focus();
             return false;
         }
+		
+		if ($("#defaultFileProfileId").val() == "")
+		{
+			alert("<%=bundle.getString("msg_blaise_set_file_profile")%>");
+			return false;
+		}
 
-        var $anySelect = $("#anyAttrs select").val();
-        var $hduSelect = $("#hduAttrs select").val();
-        var $isheetSelect = $("#isheetAttrs select").val();
-        if ($anySelect == $hduSelect || $hduSelect == $isheetSelect || $anySelect == $isheetSelect)
+        if ($.trim($("#attributeSetName").text()) != "")
         {
-            alert("Please set up different Falcon Product for each kind of automatic job.");
+            var tmp = "", lastTmp = "", value = "";
+            $(".falconProduct").each(function() {
+				value = $(this).val();
+                if (tmp != "") 
+				{
+					if (value == tmp || value == lastTmp)
+					{
+						alert("<%=bundle.getString("msg_blaise_select_attributes")%>");
+						return false;
+					} else
+						lastTmp = value;
+				} else
+					tmp = value;
+            });
+        }
+
+        if (!isAllDigits($("#checkDuration").val()))
+        {
+            alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
             return false;
         }
     }
@@ -425,8 +447,11 @@ function validName()
 					var tdData = "";
 					var tdType = "";
 					$.each(data.attributes, function(i, item) {
+					    var isFalconProduct = false;
 						tdData += "<tr class='allowNone autoOption'>";
-						tdData += "<td class='standard'>" + item.displayName + "</td>";
+						if (item.displayName == "Falcon Product")
+						    isFalconProduct = true;
+                        tdData += "<td class='standard'>" + item.displayName + "</td>";
 						tdType = item.type;
 
 						if (tdType == "choiceList")
@@ -443,7 +468,10 @@ function validName()
 						if (tdType == "choiceList") {
 							var tmp = item.value;
 							eles = tmp.split("@@");
-							tdData += "<select id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
+							tdData += "<select ";
+							if (isFalconProduct)
+							    tdData += "class='falconProduct' ";
+							tdData += "id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
 							for (var k=0;k<eles.length;k++) {
 								items = eles[k].split("$$");
 								tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
@@ -494,16 +522,28 @@ function validName()
 		
 		showAutoOptions(<%=isAutomatic%>);
 		var $fpId = $("#defaultFileProfileId").val();
-		if ($fpId != "") {
+		if ($fpId != "" && <%=isAutomatic%>) {
 			fileProfileChanged();
 		}
 	});
 	
 	function showAutoOptions(flag) {
-		if (flag)
+		if (flag) {
 			$(".autoOption").show();
-		else
+			var $fpId = $("#defaultFileProfileId").val();
+			<%
+				isAutomatic = true;
+			%>
+			if ($fpId != "" && <%=isAutomatic%>) {
+				fileProfileChanged();
+			}
+		}
+		else {
 			$(".autoOption").hide();
+			<%
+				isAutomatic = false;
+			%>
+		}
 		$(".allowNone").hide();
 	}
 </script>

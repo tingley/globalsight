@@ -115,7 +115,7 @@ public class BlaiseAutoHelper
                                 }
                                 tmpString = tmp.toString();
                                 if (StringUtil.isNotEmpty(tmpString))
-                                    tmpString = tmpString.substring(0, tmpString.length() - 3);
+                                    tmpString = tmpString.substring(0, tmpString.length() - 2);
                             }
                             o.put("value", tmpString);
                         }

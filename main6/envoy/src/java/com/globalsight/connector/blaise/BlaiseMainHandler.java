@@ -71,7 +71,7 @@ public class BlaiseMainHandler extends PageActionHandler
         {
         	connector.setCompanyId(Long.parseLong(id));
         }
-        String[] days = new String[]{"monday", "thursday", "wednesday", "tuesday", "friday", "saturday", "sunday"};
+        String[] days = new String[]{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
         StringBand pullDays = new StringBand();
         String tmp = null;
         for (String day : days)
@@ -95,9 +95,20 @@ public class BlaiseMainHandler extends PageActionHandler
         User user = (User) sessionManager.getAttribute(USER);
         connector.setLoginUser(user.getUserId());
 
+        boolean isNew = connector.getId() == -1;
+
         HibernateUtil.saveOrUpdate(connector);
 
-        saveAttributes(connector.getId(), request);
+        if (connector.isAutomatic())
+        {
+            saveAttributes(connector.getId(), request);
+            if (isNew)
+            {
+                BlaiseAutoManager.startThread(connector);
+            } else
+                BlaiseAutoManager.resetThread(connector);
+        } else
+            BlaiseAutoManager.cancelThread(connector.getId());
     }
 
     private void saveAttributes(long connectorId, HttpServletRequest request)

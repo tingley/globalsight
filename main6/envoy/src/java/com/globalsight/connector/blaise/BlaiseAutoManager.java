@@ -74,7 +74,7 @@ public class BlaiseAutoManager
      */
     public static void cancelThread(long bcId)
     {
-        BlaiseTimerTask thread = threads.get(bcId);
+        BlaiseTimerTask thread = threads.get(Long.valueOf(bcId));
         if (thread != null)
         {
             thread.cancel();

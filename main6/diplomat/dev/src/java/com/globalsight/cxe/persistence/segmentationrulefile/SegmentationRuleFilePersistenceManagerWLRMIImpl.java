@@ -97,5 +97,8 @@ public class SegmentationRuleFilePersistenceManagerWLRMIImpl
 		return m_localReference.getTmpIdsBySegmentationRuleId(p_ruleid);
 	}
 	
-	
+    public Collection getAllSegmentationRuleFiles(long companyId)
+    {
+        return m_localReference.getAllSegmentationRuleFiles(companyId);
+    }	
 }

@@ -490,4 +490,41 @@ public class TermbaseList
 
         return result.toString();
     }
+    
+    public static ArrayList getNames(long companyId)
+    {
+        ArrayList result = null;
+
+        synchronized (s_termbases)
+        {
+            HashMap companyMap = null;
+
+            result = new ArrayList();
+
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+            {
+                for (Iterator iter = s_termbases.values().iterator(); iter
+                        .hasNext();)
+                {
+                    companyMap = (HashMap) iter.next();
+                    result.addAll(companyMap.keySet());
+                }
+            }
+            else
+            {
+                companyMap = (HashMap) s_termbases.get(companyId);
+                if (companyMap == null)
+                {
+                    companyMap = new HashMap();
+                    s_termbases.put(companyId, companyMap);
+                }
+                else
+                {
+                    result.addAll(companyMap.keySet());
+                }
+            }
+        }
+
+        return result;   
+    }
 }

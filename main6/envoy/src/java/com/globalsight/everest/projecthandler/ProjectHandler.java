@@ -31,6 +31,7 @@ import java.util.Vector;
 import org.dom4j.Document;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.foundation.LocalePair;
@@ -947,4 +948,12 @@ public interface ProjectHandler
     
     public void removeWorkflowStatePost(WorkflowStatePosts wfstaPosts);
     
+    public List<TranslationMemoryProfile> getAllTMProfilesByCompanyId(long companyId);
+    
+    public List<BasicL10nProfile> getAllL10nProfileByCompanyId(long companyId);
+    
+    public WorkflowTemplateInfo getWorkflowTemplateInfoByNameAndCompanyId(String name,
+            long companyId);
+    
+    public List<ProjectTM> getAllProjectTMs(long companyId);
 }

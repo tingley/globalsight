@@ -4033,5 +4033,99 @@ public class ProjectHandlerLocal implements ProjectHandler
                     ProjectHandlerException.MSG_FAILED_TO_REMOVE_WF_STATE_POST_PROFILE, args, pe);
         }
     }
+    
+    /**
+     * Gets All localization profiles by companyId.
+     */
+    public List<BasicL10nProfile> getAllL10nProfileByCompanyId(long companyId)
+    {
+        try
+        {
+            String hql = "FROM BasicL10nProfile LP where LP.isActive = 'Y' and LP.companyId="
+                    + companyId;
+            return (List<BasicL10nProfile>) HibernateUtil.search(hql);
+        }
+        catch (Exception pe)
+        {
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES, null, pe);
+        }
+    }
 
+    /**
+     * Gets All translation profiles by companyId.
+     */
+    @Override
+    public List<TranslationMemoryProfile> getAllTMProfilesByCompanyId(long companyId)
+    {
+        List<TranslationMemoryProfile> tmProfiles = new ArrayList<TranslationMemoryProfile>();
+
+        try
+        {
+            String hsql = "from TranslationMemoryProfile tmp where ";
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(companyId)))
+            {
+                hsql += " tmp.companyId =" + companyId;
+            }
+
+            tmProfiles = (List<TranslationMemoryProfile>) HibernateUtil.search(hsql);
+            return tmProfiles;
+        }
+        catch (Exception e)
+        {
+            c_category.error("Failed to query translation memory profiles by company id.", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Gets WorkflowTemplateInfo by Name and companyId.
+     */
+    public WorkflowTemplateInfo getWorkflowTemplateInfoByNameAndCompanyId(String name,
+            long companyId)
+    {
+        WorkflowTemplateInfo wftInfo = new WorkflowTemplateInfo();
+        try
+        {
+            String hsql = "from WorkflowTemplateInfo wf where wf.isActive = 'Y' and wf.name = :name";
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("name", name);
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(companyId)))
+            {
+                hsql += " and wf.companyId = :companyId";
+                map.put("companyId", companyId);
+            }
+            wftInfo = (WorkflowTemplateInfo) HibernateUtil.search(hsql, map).get(0);
+            return wftInfo;
+        }
+        catch (Exception e)
+        {
+            c_category.error("Failed to query workflow template by company id.", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Gets all projectTMs by companyId.
+     */
+    public List<ProjectTM> getAllProjectTMs(long companyId)
+    {
+        List<ProjectTM> tmProfiles = new ArrayList<ProjectTM>();
+
+        try
+        {
+            String hsql = "from ProjectTM tm where ";
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(companyId)))
+            {
+                hsql += " tm.companyId =" + companyId;
+            }
+
+            return (List<ProjectTM>) HibernateUtil.search(hsql);
+        }
+        catch (Exception e)
+        {
+            c_category.error("Failed to query translation memories by company id.", e);
+            return null;
+        }
+    }
 }

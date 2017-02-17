@@ -110,6 +110,15 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 permImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
+            if (fileInfo.containsKey(TM_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(TM_FILE_NAME);
+                TMImporter tmImporter = new TMImporter(sessionId, user.getUserId(), companyId,
+                        importToCompId);
+                tmImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
             if (fileInfo.containsKey(SEGMENT_RULE_FILE_NAME))
             {
                 i++;
@@ -117,6 +126,42 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 SegmentationRuleImporter srImporter = new SegmentationRuleImporter(sessionId,
                         companyId, importToCompId);
                 srImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(TM_PROFILE_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(TM_PROFILE_FILE_NAME);
+                TMProfileImporter srImporter = new TMProfileImporter(sessionId, companyId,
+                        importToCompId);
+                srImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(PROJECT_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(PROJECT_FILE_NAME);
+                ProjectImporter proImporter = new ProjectImporter(sessionId, companyId,
+                        importToCompId);
+                proImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(WORKFLOW_TEMPLATE_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(WORKFLOW_TEMPLATE_FILE_NAME);
+                WfTemplateImporter wfImporter = new WfTemplateImporter(sessionId, companyId,
+                        importToCompId);
+                wfImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(LOC_PROFILE_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(LOC_PROFILE_FILE_NAME);
+                LocProfileImporter wfImporter = new LocProfileImporter(sessionId, companyId,
+                        importToCompId);
+                wfImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
             if (fileInfo.containsKey(XML_RULE_FILE_NAME))
@@ -128,7 +173,15 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 srImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
-            
+            if (fileInfo.containsKey(FILE_PROFILE_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(FILE_PROFILE_FILE_NAME);
+                FileProfileImporter fpImporter = new FileProfileImporter(sessionId, companyId,
+                        importToCompId);
+                fpImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
         }
         catch (Exception e)
         {

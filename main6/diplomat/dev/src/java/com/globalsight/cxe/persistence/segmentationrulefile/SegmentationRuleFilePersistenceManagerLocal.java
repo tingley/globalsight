@@ -377,4 +377,29 @@ public class SegmentationRuleFilePersistenceManagerLocal implements
             throw new SegmentationRuleFileEntityException(e);
         }
     }
+    
+    /**
+     * * Get SegmentationRuleFile objects relate with special company in
+     * the datastore *
+     */
+    public Collection getAllSegmentationRuleFiles(long companyId)
+    {
+        try
+        {
+            String hql = "from SegmentationRuleFileImpl s where s.isActive = 'Y'";
+            HashMap<String, Long> map = null;
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+            {
+                hql += " and s.companyId = :companyId";
+                map = new HashMap<String, Long>();
+                map.put("companyId", companyId);
+            }
+
+            return HibernateUtil.search(hql, map);
+        }
+        catch (Exception e)
+        {
+            throw new SegmentationRuleFileEntityException(e);
+        }
+    }
 }

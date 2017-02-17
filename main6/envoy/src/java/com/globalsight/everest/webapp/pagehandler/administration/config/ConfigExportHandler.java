@@ -190,8 +190,14 @@ public class ConfigExportHandler extends PageHandler
             File filterPropertyFile = FilterExportHelper.createPropertyfile(userName, companyId);
             File activityFile = ActivityExportHelper.createPropertyfile(userName, companyId);
             File permissionFile = PermissionExportHelper.createPropertyfile(userName, companyId);
+            File tmPropertyFile = TMExportHelper.createPropertyfile(userName, companyId);
             File srxPropertyFile = SegmentationRuleExportHelper.createPropertyfile(userName, companyId);
+            File tmpPropertyFile = TMProfileExportHelper.createPropertyfile(userName, companyId);
+            File projectFile = ProjectExportHelper.createPropertyfile(userName, companyId);
+            File wfPropertyFile = WfTemplateExportHelper.createPropertyfile(userName, companyId);
+            File locPropertyFile = LocProfileExportHelper.createPropertyfile(userName, companyId);
             File xrPropertyFile = XmlRuleExportHelper.createPropertyfile(userName, companyId);
+            File fpPropertyFile = FileProfileExportHelper.createPropertyfile(userName, companyId);
 
             Element root = new Element("UserInfo");
             Document Doc = new Document(root);
@@ -251,17 +257,53 @@ public class ConfigExportHandler extends PageHandler
                             permissionFile = PermissionExportHelper.exportPermissions(
                                     permissionFile, idArr[1]);
                         }
+                        else if ("tm".equals(idArr[0]))
+                        {
+                            // gets tm property property file
+                            tmPropertyFile = TMExportHelper.propertiesInputTM(tmPropertyFile,
+                                    idArr[1]);
+                        }
                         else if ("srx".equals(idArr[0]))
                         {
                             // gets segmentation rule property file
                             srxPropertyFile = SegmentationRuleExportHelper.propertiesInputSR(
                                     srxPropertyFile, segRoot, segDoc, idArr[1]);
                         }
+                        else if ("tmp".equals(idArr[0]))
+                        {
+                            // gets tm profile property file
+                            tmpPropertyFile = TMProfileExportHelper.propertiesInputTMP(
+                                    tmpPropertyFile, idArr[1]);
+                        }
+                        else if ("pro".equals(idArr[0]))
+                        {
+                            // gets project property file
+                            projectFile = ProjectExportHelper.propertiesInputProject(projectFile,
+                                    idArr[1]);
+                        }
+                        else if ("wf".equals(idArr[0]))
+                        {
+                            // gets workflow property file
+                            wfPropertyFile = WfTemplateExportHelper.propertiesInputWfTemplate(
+                                    wfPropertyFile, idArr[1]);
+                        }
+                        else if ("lp".equals(idArr[0]))
+                        {
+                            // gets l10n profile property file
+                            locPropertyFile = LocProfileExportHelper.propertiesInputLP(
+                                    locPropertyFile, idArr[1]);
+                        }
                         else if ("xr".equals(idArr[0]))
                         {
                             // gets XML rule property file
                             xrPropertyFile = XmlRuleExportHelper.propertiesInputXR(xrPropertyFile,
                                     xmlRoot, xmlDoc, idArr[1]);
+                        }
+                        else if ("fp".endsWith(idArr[0]))
+                        {
+                            // gets file profile property file
+                            fpPropertyFile = FileProfileExportHelper.propertiesInputLP(
+                                    fpPropertyFile, idArr[1]);
                         }
                     }
                 }
@@ -290,13 +332,37 @@ public class ConfigExportHandler extends PageHandler
             {
                 entryFiles.add(permissionFile);
             }
+            if (tmPropertyFile.length() > 0)
+            {
+                entryFiles.add(tmPropertyFile);
+            }
             if (srxPropertyFile.length() > 0)
             {
                 entryFiles.add(srxPropertyFile);
             }
+            if (tmpPropertyFile.length() > 0)
+            {
+                entryFiles.add(tmpPropertyFile);
+            }
+            if (projectFile.length() > 0)
+            {
+                entryFiles.add(projectFile);
+            }
+            if (wfPropertyFile.length() > 0)
+            {
+                entryFiles.add(wfPropertyFile);
+            }
             if (xrPropertyFile.length() > 0)
             {
                 entryFiles.add(xrPropertyFile);
+            }
+            if (locPropertyFile.length() > 0)
+            {
+                entryFiles.add(locPropertyFile);
+            }
+            if (fpPropertyFile.length()>0)
+            {
+                entryFiles.add(fpPropertyFile);
             }
             downLoadFile = new File(ZIP_FILE_NAME);
             String configPath = getQAReportWorkflowPath(companyId);

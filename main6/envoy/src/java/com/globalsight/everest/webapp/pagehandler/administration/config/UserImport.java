@@ -147,6 +147,8 @@ public class UserImport implements ConfigConstants
         String userID = UserUtil.newUserId(userNewName);
         user.setUserId(userID);
         user.setUserName(userNewName);
+        user.setFirstName(userNewName);
+        user.setLastName(userNewName);
         initUserInfo(userNode, user);
         // default role node
         ArrayList<UserDefaultRole> defaultRolesList = initDefaultUserRoles(userNode, userID);
@@ -509,8 +511,6 @@ public class UserImport implements ConfigConstants
     {
         Element basicInfoNode = userNode.element("BasicInfo");
 
-        user.setFirstName(basicInfoNode.element("FirstName").getText());
-        user.setLastName(basicInfoNode.element("LastName").getText());
         user.setPassword(basicInfoNode.element("Password").getText());
         user.setTitle(basicInfoNode.element("Title").getText());
         user.setCompanyName(company.getName());

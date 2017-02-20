@@ -449,7 +449,7 @@ public class WorkflowTemplateInfo extends PersistentObject
      * @param p_sourceLocale
      *            - The locale to be set.
      */
-    void setSourceLocale(GlobalSightLocale p_sourceLocale)
+    public void setSourceLocale(GlobalSightLocale p_sourceLocale)
     {
         m_sourceLocale = p_sourceLocale;
     }
@@ -460,7 +460,7 @@ public class WorkflowTemplateInfo extends PersistentObject
      * @param p_targetLocale
      *            - The locale to be set.
      */
-    void setTargetLocale(GlobalSightLocale p_targetLocale)
+    public void setTargetLocale(GlobalSightLocale p_targetLocale)
     {
         m_targetLocale = p_targetLocale;
     }

@@ -160,4 +160,55 @@ public class AttributeManager
 
         return attributeActions;
     }
+    
+    /**
+     * Gets all attributeSets by companyId.
+     */
+    public static List<?> getAllAttributeSets(long companyId)
+    {
+        String hql = "from AttributeSet a where a.companyId = 1";
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+        {
+            hql += " or a.companyId = :companyId";
+            map.put("companyId", companyId);
+        }
+
+        return HibernateUtil.search(hql, map);
+    }
+    
+    /**
+     * Gets all attributeSets by companyId and name.
+     */
+    public static AttributeSet getAttributeSetByNameAndCompanyId(String name, long companyId)
+    {
+        String hql = "from AttributeSet a where a.name = :name and a.companyId = 1";
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+        {
+            hql += " or a.companyId = :companyId";
+            map.put("companyId", companyId);
+        }
+        map.put("name", name);
+
+        return (AttributeSet) HibernateUtil.getFirst(hql, map);
+    }
+
+    /**
+     * Gets all attributes by companyId.
+     */
+    public static List<?> getAllAttributes(long companyId)
+    {
+        String hql = "from Attribute a where a.companyId = 1";
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+        {
+            hql += " or a.companyId = :companyId";
+            map.put("companyId", companyId);
+        }
+
+        return HibernateUtil.search(hql, map);
+    }
 }

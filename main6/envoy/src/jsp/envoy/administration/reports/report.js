@@ -8,16 +8,16 @@
  * @param p_targetLocals	String(target local array string)
  * @returns {JobInfo}
  */
-function JobInfo(p_jobId, p_jobName, p_projectId, p_jobStatus, p_targetLocals) 
+function JobInfo(p_jobId, p_jobName, p_projectId, p_jobStatus, p_targetLocales) 
 {
 	this.jobId = p_jobId;
 	this.jobName = p_jobName;
 	this.projectId = p_projectId;
 	this.jobStatus = p_jobStatus;
-	this.targetLocals = p_targetLocals.split(",");
+	this.targetLocales = p_targetLocales;
 
-	this.addTargetLocal = function(p_targetLocal) {
-		this.targetLocals[this.targetLocals.length] = p_targetLocal;
+	this.addTargetLocale = function(p_targetLocale) {
+		this.targetLocales[this.targetLocales.length] = p_targetLocale;
 	};
 }
 
@@ -136,7 +136,7 @@ function isContainValidTargetLocale(jobIDArr, tlIDArr, jobInfos){
 	for(var i=0; i<jobIDArr.length; i++)
 	{
 		var index = getJobInfosIndex(jobInfos, jobIDArr[i]);
-		if(index==-1 || !containsArray(tlIDArr, jobInfos[index].targetLocals))
+		if(index==-1 || !containsArray(tlIDArr, jobInfos[index].targetLocales))
 		{
 			return true;
 		}

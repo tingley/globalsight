@@ -240,83 +240,97 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat) throws Exception
     {
-        // Till now, only support one target locale.
-        GlobalSightLocale trgLocale = p_targetLocales.get(0);
-
-        fluencyScore = "";
-        adequacyScore = "";
-        dqfComment = "";
-        scores = null;
-        scoreComment = "";
-        isDQFEnabled = false;
-        isScorecradEnabled = false;
-        needProtect = false;
-
-        DQF_START_ROW = 0;
-        SCORECARD_START_ROW = 0;
-        SEGMENT_HEADER_ROW = 6;
-        SEGMENT_START_ROW = 7;
-
-        // Create Sheet
-        Sheet sheet = p_workbook.createSheet(trgLocale.toString());
-        sheet.protectSheet("");
-
-        // Add Title
-        addTitle(p_workbook, sheet);
-
-        // Add hidden info "TER_taskID" for uploading.
-        addHidenInfoForUpload(p_workbook, sheet, p_job, trgLocale);
-
-        // Add Locale Pair Header
-        addLanguageHeader(p_workbook, sheet);
-
-        // Add DQF and Scorecard info
-        addDQFHeader(p_workbook, sheet);
-
-        // Add Segment Header
-        addSegmentHeader(p_workbook, sheet);
-
-        // Insert Data into Report
-        String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
-        String trgLang = trgLocale.getDisplayName(m_uiLocale);
-        writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
-
-        // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator",
-                getFailureCategoriesList(), SEGMENT_START_ROW, 26);
-
-        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
-                CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
-                SEGMENT_START_ROW, 27);
-
-        int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
-                SEGMENT_START_ROW);
-
-        ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
-                CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
-
-        if (DQF_START_ROW > 0)
+        boolean categoryFailureDropDownAdded = false;
+        List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
+        for (GlobalSightLocale trgLocale : p_targetLocales)
         {
-            ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW,
-                    lastRow - 1, SEVERITY_COLUMN, SEVERITY_COLUMN);
+            if (!jobTL.contains(trgLocale))
+                continue;
 
-            categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
-                    CategoryType.Fluency, true);
-            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
+            if (cancel)
+                return;
 
-            categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
-                    CategoryType.Adequacy, true);
-            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1,
-                    1);
-        }
-        if (SCORECARD_START_ROW > 0)
-        {
-            String[] data = new String[]
-            { "5", "4", "3", "2", "1" };
-            ExcelUtil.createValidatorList(sheet, data, SCORECARD_START_ROW + 1,
-                    SCORECARD_START_ROW + scorecardCategories.size(), 1);
+            fluencyScore = "";
+            adequacyScore = "";
+            dqfComment = "";
+            scores = null;
+            scoreComment = "";
+            isDQFEnabled = false;
+            isScorecradEnabled = false;
+            needProtect = false;
+
+            DQF_START_ROW = 0;
+            SCORECARD_START_ROW = 0;
+            SEGMENT_HEADER_ROW = 6;
+            SEGMENT_START_ROW = 7;
+
+            // Create Sheet
+            Sheet sheet = p_workbook.createSheet(trgLocale.toString());
+            sheet.protectSheet("");
+
+            // Add Title
+            addTitle(p_workbook, sheet);
+
+            // Add hidden info "TER_taskID" for uploading.
+            addHidenInfoForUpload(p_workbook, sheet, p_job, trgLocale);
+
+            // Add Locale Pair Header
+            addLanguageHeader(p_workbook, sheet);
+
+            // Add DQF and Scorecard info
+            addDQFHeader(p_workbook, sheet);
+
+            // Add Segment Header
+            addSegmentHeader(p_workbook, sheet);
+
+            // Insert Data into Report
+            String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
+            String trgLang = trgLocale.getDisplayName(m_uiLocale);
+            writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+
+            // Create Name Areas for drop down list.
+            List<String> categories = null;
+            String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
+            if (!categoryFailureDropDownAdded)
+            {
+                ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator",
+                        getFailureCategoriesList(), SEGMENT_START_ROW, 26);
+
+                categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
+                        CategoryType.Severity, true);
+                ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
+                        SEGMENT_START_ROW, 27);
+
+                categoryFailureDropDownAdded = true;
+            }
+
+            int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
+                    SEGMENT_START_ROW);
+
+            ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW,
+                    lastRow - 1, CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
+
+            if (DQF_START_ROW > 0)
+            {
+                ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW,
+                        lastRow - 1, SEVERITY_COLUMN, SEVERITY_COLUMN);
+
+                categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
+                        CategoryType.Fluency, true);
+                ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
+
+                categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
+                        CategoryType.Adequacy, true);
+                ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1,
+                        DQF_START_ROW + 1, 1);
+            }
+            if (SCORECARD_START_ROW > 0)
+            {
+                String[] data = new String[]
+                { "5", "4", "3", "2", "1" };
+                ExcelUtil.createValidatorList(sheet, data, SCORECARD_START_ROW + 1,
+                        SCORECARD_START_ROW + scorecardCategories.size(), 1);
+            }
         }
     }
 

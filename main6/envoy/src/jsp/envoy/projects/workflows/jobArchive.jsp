@@ -446,6 +446,7 @@ function searchJob(fromRequest)
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=archivedURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.WORD_COUNT%>" onclick="return addFilters(this)"><%=bundle.getString("lb_word_count")%></A><%=jobWordCountSortArrow%></TD>
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=archivedURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.DATE_CREATED%>" onclick="return addFilters(this)"><%=bundle.getString("lb_date_created")%></A><%=jobDateSortArrow%></TD>
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=archivedURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.EST_COMPLETION_DATE%>" onclick="return addFilters(this)"><%=bundle.getString("lb_estimated_job_completion_date")%></A><%=jobEstCompletionDateSortArrow%></TD>
+    <TD CLASS="headerCell" WIDTH="7%"><%=bundle.getString("lb_blaise_job_title")%></TD>
 </TR>
 <TR CLASS="tableHeadingFilter" VALIGN="BOTTOM">
     <TD CLASS="headerCell">&nbsp;</TD>
@@ -512,6 +513,7 @@ function searchJob(fromRequest)
     <TD CLASS="headerCell">&nbsp;</TD>
     <TD CLASS="headerCell">&nbsp;</TD>
     <TD CLASS="headerCell">&nbsp;</TD>
+    <TD CLASS="headerCell">&nbsp;</TD>
 </TR>
 </thead>
 <tbody>
@@ -540,6 +542,9 @@ function searchJob(fromRequest)
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.wordcount}</TD>
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.createDate}</TD>
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.plannedCompletionDate}</TD>
+        <TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >
+                ${jobVo.blaiseUploadState}/${jobVo.blaiseCompleteState}
+        </TD>
     </TR>
 </c:forEach>
 </tbody>

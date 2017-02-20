@@ -40,6 +40,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 /**
  * Imports property file activity type info.
@@ -177,6 +178,7 @@ public class ActivityImporter implements ConfigConstants
                 String oldDisName = act.getDisplayName();
                 if (!isAlreadyExisted(oldDisName))
                 {
+                    act.setName(act.getDisplayName() + "_" + act.getCompanyId());
                     HibernateUtil.save(act);
                     addMessage("<b>" + oldDisName + "</b> imported successfully.");
                     createRolesForActivity(act);
@@ -334,19 +336,47 @@ public class ActivityImporter implements ConfigConstants
             }
             else if (keyField.equalsIgnoreCase("AFTER_JOB_CREATION"))
             {
-                act.setAfterJobCreation(valueField);
+                if (StringUtil.isNotEmptyAndNull(valueField))
+                {
+                    act.setAfterJobCreation(valueField);
+                }
+                else
+                {
+                    act.setAfterJobCreation(null);
+                }
             }
             else if (keyField.equalsIgnoreCase("AFTER_JOB_DISPATCH"))
             {
-                act.setAfterJobDispatch(valueField);
+                if (StringUtil.isNotEmptyAndNull(valueField))
+                {
+                    act.setAfterJobDispatch(valueField);
+                }
+                else
+                {
+                    act.setAfterJobDispatch(null);
+                }
             }
             else if (keyField.equalsIgnoreCase("AFTER_ACTIVITY_START"))
             {
-                act.setAfterActivityStart(valueField);
+                if (StringUtil.isNotEmptyAndNull(valueField))
+                {
+                    act.setAfterActivityStart(valueField);
+                }
+                else
+                {
+                    act.setAfterActivityStart(null);
+                }
             }
             else if (keyField.equalsIgnoreCase("COMPLETE_SCHEDULE"))
             {
-                act.setCompleteSchedule(valueField);
+                if (StringUtil.isNotEmptyAndNull(valueField))
+                {
+                    act.setCompleteSchedule(valueField);
+                }
+                else
+                {
+                    act.setCompleteSchedule(null);
+                }
             }
             else if (keyField.equalsIgnoreCase("IS_ACTIVE"))
             {

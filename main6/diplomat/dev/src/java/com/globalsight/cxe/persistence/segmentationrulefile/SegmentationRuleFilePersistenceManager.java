@@ -110,5 +110,9 @@ public interface SegmentationRuleFilePersistenceManager
        public void deleteRelationshipWithTmp(String p_ruleid, String p_tmpid)
        throws SegmentationRuleFileEntityException, RemoteException;
 
+       /**
+        ** Get a list of all existing SegmentationRuleFile objects relate with company. 
+        **/
+       public Collection getAllSegmentationRuleFiles(long companyId);
 }
 

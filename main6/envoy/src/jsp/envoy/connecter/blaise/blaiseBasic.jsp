@@ -303,9 +303,9 @@ function validName()
             <td class="standardText">
                 <ul style="display: inline-flex;list-style-type: none;margin-left: 0px;padding-left: 0px;">
                     <li><input type="checkbox" name="monday" value="1" <%=pullDays.contains("1") ? "checked" : ""%>>Monday</li>
-                    <li><input type="checkbox" name="thursday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Thursday</li>
+                    <li><input type="checkbox" name="tuesday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Tuesday</li>
                     <li><input type="checkbox" name="wednesday" value="3" <%=pullDays.contains("3") ? "checked" : ""%>>Wednesday</li>
-                    <li><input type="checkbox" name="tuesday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Tuesday</li>
+                    <li><input type="checkbox" name="thursday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Thursday</li>
                     <li><input type="checkbox" name="friday" value="5" <%=pullDays.contains("5") ? "checked" : ""%>>Friday</li>
                     <li><input type="checkbox" name="saturday" value="6" <%=pullDays.contains("6") ? "checked" : ""%>>Saturday</li>
                     <li><input type="checkbox" name="sunday" value="7" <%=pullDays.contains("7") ? "checked" : ""%>>Sunday</li>

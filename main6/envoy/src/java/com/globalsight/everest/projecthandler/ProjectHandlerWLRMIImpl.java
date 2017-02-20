@@ -32,6 +32,7 @@ import java.util.Vector;
 import org.dom4j.Document;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.foundation.LocalePair;
@@ -778,5 +779,26 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
     public void removeWorkflowStatePost(WorkflowStatePosts wfstaPosts)
     {
         m_localReference.removeWorkflowStatePost(wfstaPosts);
+    }
+    
+    public List<BasicL10nProfile> getAllL10nProfileByCompanyId(long companyId)
+    {
+        return m_localReference.getAllL10nProfileByCompanyId(companyId);
+    }
+
+    @Override
+    public List<TranslationMemoryProfile> getAllTMProfilesByCompanyId(long companyId)
+    {
+        return m_localReference.getAllTMProfilesByCompanyId(companyId);
+    }
+    
+    public WorkflowTemplateInfo getWorkflowTemplateInfoByNameAndCompanyId(String name,
+            long companyId)
+    {
+        return m_localReference.getWorkflowTemplateInfoByNameAndCompanyId(name, companyId);
+    }
+    
+    public List<ProjectTM> getAllProjectTMs(long companyId){
+        return m_localReference.getAllProjectTMs(companyId);
     }
 }

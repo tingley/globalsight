@@ -309,8 +309,31 @@ public class MTProfileHandlerHelper
             }
             return lpnames.toString();
         }
-
-
     }
 
+    /**
+     * Gets all mtProfile by companyId.
+     * @param companyId
+     * @return
+     */
+    public static List<MachineTranslationProfile> getAllMTProfiles(long companyId)
+    {
+        List<MachineTranslationProfile> tmProfiles = new ArrayList<MachineTranslationProfile>();
+
+        try
+        {
+            String hsql = "from MachineTranslationProfile mt where ";
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(companyId)))
+            {
+                hsql += " mt.companyid =" + companyId;
+            }
+
+            return (List<MachineTranslationProfile>) HibernateUtil.search(hsql);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to query translation memories by company id.", e);
+            return null;
+        }
+    }
 }

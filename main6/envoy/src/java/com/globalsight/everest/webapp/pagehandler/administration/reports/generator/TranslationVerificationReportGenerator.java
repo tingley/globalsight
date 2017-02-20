@@ -231,34 +231,47 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
     private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat) throws Exception
     {
-        // Till now, only support one target locale.
-        GlobalSightLocale trgLocale = p_targetLocales.get(0);
+        boolean categoryFailureDropDownAdded = false;
+        List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
+        for (GlobalSightLocale trgLocale : p_targetLocales)
+        {
+            if (!jobTL.contains(trgLocale))
+                continue;
 
-        // Create Sheet
-        Sheet sheet = p_workbook.createSheet(trgLocale.toString());
-        sheet.protectSheet("");
+            if (cancel)
+                return;
 
-        // Add Title
-        addTitle(p_workbook, sheet);
+            // Create Sheet
+            Sheet sheet = p_workbook.createSheet(trgLocale.toString());
+            sheet.protectSheet("");
 
-        // Add hidden info "TVR_taskID" for uploading.
-        addHidenInfoForUpload(p_workbook, sheet, p_job, trgLocale);
+            // Add Title
+            addTitle(p_workbook, sheet);
 
-        // Add Locale Pair Header
-        addLanguageHeader(p_workbook, sheet);
+            // Add hidden info "TVR_taskID" for uploading.
+            addHidenInfoForUpload(p_workbook, sheet, p_job, trgLocale);
 
-        // Add Segment Header
-        addSegmentHeader(p_workbook, sheet);
+            // Add Locale Pair Header
+            addLanguageHeader(p_workbook, sheet);
 
-        // Create Name Areas for drop down list.
-        createCategoryFailureNameArea(p_workbook);
+            // Add Segment Header
+            addSegmentHeader(p_workbook, sheet);
 
-        // Insert Data into Report
-        String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
-        String trgLang = trgLocale.getDisplayName(m_uiLocale);
-        writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+            // Create Name Areas for drop down list.
+            if (!categoryFailureDropDownAdded)
+            {
+                createCategoryFailureNameArea(p_workbook);
+                categoryFailureDropDownAdded = true;
+            }
 
-        writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
+            // Insert Data into Report
+            String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
+            String trgLang = trgLocale.getDisplayName(m_uiLocale);
+            writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+
+            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
+                    SEGMENT_START_ROW);
+        }
     }
 
     /**

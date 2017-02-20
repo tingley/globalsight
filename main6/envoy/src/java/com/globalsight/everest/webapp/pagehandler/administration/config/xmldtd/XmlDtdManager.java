@@ -37,6 +37,7 @@ import com.globalsight.cxe.entity.xmldtd.XmlDtd;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.comment.CommentImpl;
+import com.globalsight.everest.comment.JobComment;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -90,8 +91,8 @@ public class XmlDtdManager
             {
                 commentString.append("<br>").append(path);
             }
-
-            CommentImpl comment = new CommentImpl();
+            
+            JobComment comment = new JobComment();
             comment.setCommentString(MessageFormat.format(
                     JOB_COMMENT_DTD_FAILED, operation, commentString.toString()));
 
@@ -468,5 +469,20 @@ public class XmlDtdManager
                 }
             }
         }
+    }
+    
+    public static List<XmlDtdImpl> getAllXmlDtdByCompanyId(long companyId)
+    {
+        String hql = "from XmlDtdImpl x";
+        HashMap<String, Long> map = null;
+
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+        {
+            hql += " where x.companyId = :companyId";
+            map = new HashMap<String, Long>();
+            map.put("companyId", companyId);
+        }
+
+        return (List<XmlDtdImpl>) HibernateUtil.search(hql, map);
     }
 }

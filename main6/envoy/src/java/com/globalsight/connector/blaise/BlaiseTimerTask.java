@@ -1,50 +1,56 @@
 package com.globalsight.connector.blaise;
 
 import com.globalsight.connector.blaise.util.BlaiseAutoHelper;
-import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.util.StringUtil;
 import org.apache.log4j.Logger;
 
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * Timer task class
  */
-public class BlaiseTimerTask implements Runnable
+public class BlaiseTimerTask extends Thread
 {
     private Logger logger = Logger.getLogger(BlaiseTimerTask.class);
+    private BlaiseConnector connector = null;
+    private boolean isCancel = false;
 
-    public BlaiseTimerTask()
+    public BlaiseTimerTask(BlaiseConnector connector)
     {
-        super();
+        this.connector = connector;
     }
 
-    public void start() throws Exception
+    public void cancel()
+    {
+        isCancel = true;
+        logger.info("Thread [" + this.getName() + "] is cancelled.");
+    }
+
+    @Override public void run()
     {
         try
         {
-            logger.info("************ In BlaiseTimerTask *****************");
-            List blaiseConnectors = BlaiseManager.getConnectors();
-            if (blaiseConnectors == null || blaiseConnectors.size() == 0)
+            if (connector == null || isCancel || !connector.isAutomatic())
                 return;
 
-            BlaiseConnector connector;
-            for (int i = 0, size = blaiseConnectors.size(); i < size; i++)
+            if (StringUtil.isNotEmpty(connector.getPullDays()))
             {
-                connector = (BlaiseConnector) blaiseConnectors.get(i);
-                if (connector.isAutomatic() && StringUtil.isNotEmpty(connector.getPullDays()))
+                int checkDuration = connector.getCheckDuration();
+                long checkTime = checkDuration * 1000;
+
+                while (true)
                 {
+                    if (isCancel)
+                        break;
+
+                    logger.info("Thread [" + getName() + "] is running check...");
                     //is an automatic connector
                     String pullDays = connector.getPullDays();
                     if (!pullDays.endsWith(","))
                         pullDays += ",";
                     Calendar calendar = Calendar.getInstance();
                     String currentDayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) - 1) + ",";
-                    logger.info("**** pullDays == " + pullDays + ", currentDaysOfWeek == "
-                            + currentDayOfWeek + ", hour == " + connector.getPullHour() + ", "
-                            + calendar.get(Calendar.HOUR_OF_DAY));
                     if (pullDays.indexOf(currentDayOfWeek) > -1)
                     {
                         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -56,6 +62,8 @@ public class BlaiseTimerTask implements Runnable
                             BlaiseAutoHelper.getInstance().runAutomatic(connector);
                         }
                     }
+
+                    sleep(checkTime);
                 }
             }
         }
@@ -63,19 +71,5 @@ public class BlaiseTimerTask implements Runnable
         {
             logger.error("Error found when runing BlaiseTimerTask. ", e);
         }
-
-    }
-
-    @Override public void run()
-    {
-        try
-        {
-            start();
-        }
-        catch (Exception e)
-        {
-            logger.error("Error found when runing BlaiseTimerTask. ", e);
-        }
-
     }
 }

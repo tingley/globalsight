@@ -16,25 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.jobvo;
 
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import com.globalsight.connector.blaise.BlaiseConstants;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -60,6 +41,14 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
 
 public abstract class JobVoSearcher implements WebAppConstants
 {
@@ -914,6 +903,7 @@ public abstract class JobVoSearcher implements WebAppConstants
             result = HibernateUtil.searchWithSql(sql.toString(), map);
         }
 
+        HashMap<Long, BlaiseConnectorJob> blaiseJobs = new HashMap<>();
         if (result != null && result.size() > 0)
         {
             StringBuilder jobIds = new StringBuilder(128);
@@ -925,9 +915,10 @@ public abstract class JobVoSearcher implements WebAppConstants
             String jobIdsString = jobIds.toString();
             if (jobIdsString.length() > 0)
                 jobIdsString = jobIdsString.substring(0, jobIdsString.length() - 1);
-            HashMap<Long, BlaiseConnectorJob> blaiseJobs = getBlaiseJobs(jobIdsString);
+            blaiseJobs = getBlaiseJobs(jobIdsString);
         }
 
+        BlaiseConnectorJob bcJob;
         List<JobVo> jobVos = new ArrayList<JobVo>();
         for (int i = 0; i < result.size(); i++)
         {
@@ -965,7 +956,21 @@ public abstract class JobVoSearcher implements WebAppConstants
             {
                 job.setGroupId(obs[7].toString());
             }
-            
+
+            if (blaiseJobs.containsKey(Long.valueOf(job.getId())))
+            {
+                // current job is a blaise job
+                job.setBlaiseJob(true);
+                bcJob = blaiseJobs.get(Long.valueOf(job.getId()));
+                job.setBlaiseUploadState(bcJob.getUploadXliffState());
+                job.setBlaiseCompleteState(bcJob.getCompleteState());
+            }
+            else
+            {
+                job.setBlaiseCompleteState("--");
+                job.setBlaiseUploadState("--");
+            }
+
             jobVos.add(job);
         }
 
@@ -991,10 +996,13 @@ public abstract class JobVoSearcher implements WebAppConstants
             ResultSet rs = stmt.executeQuery(sql.toString());
             long jobId = -1L, lastJobId = -1L;
             boolean uploadSucceed = true, completeSucceed = true;
+            String tmp;
             while (rs.next()) {
                 jobId = rs.getLong("job_id");
-                if (jobId != lastJobId) {
-                    if (lastJobId != -1) {
+                if (jobId != lastJobId)
+                {
+                    if (lastJobId != -1)
+                    {
                         // Gets a new job id data
                         BlaiseConnectorJob job = new BlaiseConnectorJob();
                         job.setJobId(lastJobId);
@@ -1005,15 +1013,32 @@ public abstract class JobVoSearcher implements WebAppConstants
                         uploadSucceed = true;
                         completeSucceed = true;
                     }
-                    lastJobId = jobId;
                 }
-                if (BlaiseConnectorJob.FAIL.equals(rs.getString("upload_xlf_state")))
-                    uploadSucceed = false;
+                lastJobId = jobId;
+                tmp = rs.getString("upload_xlf_state");
+                if (StringUtil.isNotEmpty(tmp) && uploadSucceed)
+                {
+                    uploadSucceed = BlaiseConnectorJob.SUCCEED.equals(tmp);
+                }
+                tmp = rs.getString("complete_state");
+                if (StringUtil.isNotEmpty(tmp) && completeSucceed)
+                {
+                    completeSucceed = BlaiseConnectorJob.SUCCEED.equals(tmp);
+                }
+            }
+            if (lastJobId != -1)
+            {
+                // Gets a new job id data
+                BlaiseConnectorJob job = new BlaiseConnectorJob();
+                job.setJobId(lastJobId);
+                job.setUploadXliffState(uploadSucceed ? "succeed" : "fail");
+                job.setCompleteState(completeSucceed ? "succeed" : "fail");
+
+                blaiseJobs.put(lastJobId, job);
             }
         }
         catch (Exception e)
         {
-
         }
         finally
         {

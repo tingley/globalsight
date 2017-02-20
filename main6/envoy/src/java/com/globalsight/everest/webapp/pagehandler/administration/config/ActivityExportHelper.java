@@ -53,7 +53,7 @@ public class ActivityExportHelper implements ConfigConstants
     }
 
     /**
-     * Get activity types info.
+     * Gets activity types info.
      */
     public static File exportActivities(File actPropertyFile, String p_activityName)
     {

@@ -1239,16 +1239,16 @@ public class DocumentUtil
                 return false;
         }
         
-        Node wp = n1.getParentNode();
-        List<Node> wpPrs = new ArrayList<Node>();
-        if (wp != null && "w:p".equals(wp.getNodeName()))
-        {
-            Node wpPr = util.getNode(wp, "w:pPr", false);
-            if (wpPr != null)
-            {
-                wpPrs = util.getChildNodes(util.getNode(wpPr, "w:rPr", false));
-            }
-        }
+//        Node wp = n1.getParentNode();
+//        List<Node> wpPrs = new ArrayList<Node>();
+//        if (wp != null && "w:p".equals(wp.getNodeName()))
+//        {
+//            Node wpPr = util.getNode(wp, "w:pPr", false);
+//            if (wpPr != null)
+//            {
+//                wpPrs = util.getChildNodes(util.getNode(wpPr, "w:rPr", false));
+//            }
+//        }
         
         Node wt1 = util.getNode(n1, "w:t", false);
         Node wt2 = util.getNode(n2, "w:t", false);
@@ -1308,14 +1308,14 @@ public class DocumentUtil
                 }
                 
                 // is exist in w:pPr.
-                for (Node att2 : wpPrs)
-                {
-                    if (isSameNode(att1, att2) == 0)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
+//                for (Node att2 : wpPrs)
+//                {
+//                    if (isSameNode(att1, att2) == 0)
+//                    {
+//                        found = true;
+//                        break;
+//                    }
+//                }
                 
                 if (found)
                     continue;
@@ -1333,15 +1333,15 @@ public class DocumentUtil
             }
             
             boolean found = false;
-            // is exist in w:pPr.
-            for (Node att3 : wpPrs)
-            {
-                if (isSameNode(att3, att2) == 0)
-                {
-                    found = true;
-                    break;
-                }
-            }
+//            // is exist in w:pPr.
+//            for (Node att3 : wpPrs)
+//            {
+//                if (isSameNode(att3, att2) == 0)
+//                {
+//                    found = true;
+//                    break;
+//                }
+//            }
             
             if (found)
                 continue;

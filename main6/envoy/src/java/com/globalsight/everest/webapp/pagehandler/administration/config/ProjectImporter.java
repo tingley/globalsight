@@ -50,7 +50,7 @@ import com.globalsight.util.StringUtil;
  */
 public class ProjectImporter implements ConfigConstants
 {
-    private static final Logger logger = Logger.getLogger(LocProfileImporter.class);
+    private static final Logger logger = Logger.getLogger(ProjectImporter.class);
     private String currentCompanyId;
     private String sessionId;
     private String importToCompId;

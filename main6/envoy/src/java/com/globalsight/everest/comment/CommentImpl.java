@@ -42,14 +42,18 @@ public class CommentImpl extends PersistentObject implements Comment,
 
     /**
      * Default constructor.
+     * Please use JobComment or TaskComment.
      */
+    @Deprecated
     public CommentImpl()
     {
     }
 
     /**
      * Construct a CommentImpl.
+     * Please use JobComment or TaskComment.
      */
+    @Deprecated
     public CommentImpl(Date p_createDate, String p_creatorId, String p_comment,
             WorkObject p_object)
     {

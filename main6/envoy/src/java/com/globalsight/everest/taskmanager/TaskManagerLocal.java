@@ -43,6 +43,7 @@ import com.globalsight.calendar.ReservedTime;
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentImpl;
+import com.globalsight.everest.comment.TaskComment;
 import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
@@ -1479,7 +1480,7 @@ public class TaskManagerLocal implements TaskManager
             try
             {
                 // rollback the above DB action for transaction consistence
-                Comment taskComment = new CommentImpl(new Date(), p_userId,
+                TaskComment taskComment = new TaskComment(new Date(), p_userId,
                         p_rejectComment, p_task);
                 p_task.removeTaskComment(taskComment);
                 TaskPersistenceAccessor.updateTask(p_task);
@@ -1527,7 +1528,7 @@ public class TaskManagerLocal implements TaskManager
         else
         {
             // Save reject comment to DB
-            Comment taskComment = new CommentImpl(new Date(), p_rejectorId,
+            TaskComment taskComment = new TaskComment(new Date(), p_rejectorId,
                     p_rejectComment, p_task);
             p_task.addTaskComment(taskComment);
             p_task.setAcceptor(null);
@@ -1610,7 +1611,7 @@ public class TaskManagerLocal implements TaskManager
             // only during a rejection of a task
             if (p_rejectComment != null)
             {
-                Comment taskComment = new CommentImpl(new Date(), p_userId,
+                TaskComment taskComment = new TaskComment(new Date(), p_userId,
                         p_rejectComment, task_temp);
                 task_temp.addTaskComment(taskComment);
             }

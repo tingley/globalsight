@@ -469,4 +469,19 @@ public class XmlDtdManager
             }
         }
     }
+    
+    public static List<XmlDtdImpl> getAllXmlDtdByCompanyId(long companyId)
+    {
+        String hql = "from XmlDtdImpl x";
+        HashMap<String, Long> map = null;
+
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+        {
+            hql += " where x.companyId = :companyId";
+            map = new HashMap<String, Long>();
+            map.put("companyId", companyId);
+        }
+
+        return (List<XmlDtdImpl>) HibernateUtil.search(hql, map);
+    }
 }

@@ -194,10 +194,10 @@ public class ConfigExportHandler extends PageHandler
             File srxPropertyFile = SegmentationRuleExportHelper.createPropertyfile(userName, companyId);
             File tmpPropertyFile = TMProfileExportHelper.createPropertyfile(userName, companyId);
             File projectFile = ProjectExportHelper.createPropertyfile(userName, companyId);
-//            File wfPropertyFile = WfTemplateExportHelper.createPropertyfile(userName, companyId);
-//            File locPropertyFile = LocProfileExportHelper.createPropertyfile(userName, companyId);
+            File wfPropertyFile = WfTemplateExportHelper.createPropertyfile(userName, companyId);
+            File locPropertyFile = LocProfileExportHelper.createPropertyfile(userName, companyId);
             File xrPropertyFile = XmlRuleExportHelper.createPropertyfile(userName, companyId);
-//            File fpPropertyFile = FileProfileExportHelper.createPropertyfile(userName, companyId);
+            File fpPropertyFile = FileProfileExportHelper.createPropertyfile(userName, companyId);
 
             Element root = new Element("UserInfo");
             Document Doc = new Document(root);
@@ -281,30 +281,30 @@ public class ConfigExportHandler extends PageHandler
                             projectFile = ProjectExportHelper.propertiesInputProject(projectFile,
                                     idArr[1]);
                         }
-//                        else if ("wf".equals(idArr[0]))
-//                        {
-//                            // gets workflow property file
-//                            wfPropertyFile = WfTemplateExportHelper.propertiesInputWfTemplate(
-//                                    wfPropertyFile, idArr[1]);
-//                        }
-//                        else if ("lp".equals(idArr[0]))
-//                        {
-//                            // gets l10n profile property file
-//                            locPropertyFile = LocProfileExportHelper.propertiesInputLP(
-//                                    locPropertyFile, idArr[1]);
-//                        }
+                        else if ("wf".equals(idArr[0]))
+                        {
+                            // gets workflow property file
+                            wfPropertyFile = WfTemplateExportHelper.propertiesInputWfTemplate(
+                                    wfPropertyFile, idArr[1]);
+                        }
+                        else if ("lp".equals(idArr[0]))
+                        {
+                            // gets l10n profile property file
+                            locPropertyFile = LocProfileExportHelper.propertiesInputLP(
+                                    locPropertyFile, idArr[1]);
+                        }
                         else if ("xr".equals(idArr[0]))
                         {
                             // gets XML rule property file
                             xrPropertyFile = XmlRuleExportHelper.propertiesInputXR(xrPropertyFile,
                                     xmlRoot, xmlDoc, idArr[1]);
                         }
-//                        else if ("fp".endsWith(idArr[0]))
-//                        {
-//                            // gets file profile property file
-//                            fpPropertyFile = FileProfileExportHelper.propertiesInputLP(
-//                                    fpPropertyFile, idArr[1]);
-//                        }
+                        else if ("fp".endsWith(idArr[0]))
+                        {
+                            // gets file profile property file
+                            fpPropertyFile = FileProfileExportHelper.propertiesInputLP(
+                                    fpPropertyFile, idArr[1]);
+                        }
                     }
                 }
             }
@@ -348,22 +348,22 @@ public class ConfigExportHandler extends PageHandler
             {
                 entryFiles.add(projectFile);
             }
-//            if (wfPropertyFile.length() > 0)
-//            {
-//                entryFiles.add(wfPropertyFile);
-//            }
+            if (wfPropertyFile.length() > 0)
+            {
+                entryFiles.add(wfPropertyFile);
+            }
             if (xrPropertyFile.length() > 0)
             {
                 entryFiles.add(xrPropertyFile);
             }
-//            if (locPropertyFile.length() > 0)
-//            {
-//                entryFiles.add(locPropertyFile);
-//            }
-//            if (fpPropertyFile.length()>0)
-//            {
-//                entryFiles.add(fpPropertyFile);
-//            }
+            if (locPropertyFile.length() > 0)
+            {
+                entryFiles.add(locPropertyFile);
+            }
+            if (fpPropertyFile.length()>0)
+            {
+                entryFiles.add(fpPropertyFile);
+            }
             downLoadFile = new File(ZIP_FILE_NAME);
             String configPath = getQAReportWorkflowPath(companyId);
             if (File.separator.equals("\\"))

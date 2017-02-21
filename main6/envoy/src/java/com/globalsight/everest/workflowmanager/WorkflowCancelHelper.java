@@ -40,6 +40,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.company.Company
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class WorkflowCancelHelper
 {
@@ -67,6 +68,10 @@ public class WorkflowCancelHelper
             + "FROM task_tuv tt, task_info tsk " + "WHERE tt.TASK_ID = tsk.TASK_ID "
             + "AND tsk.WORKFLOW_ID = ?";
 
+    private static final String SQL_SELECT_DELETE_TASK_INFO_COMMENT = "SELECT c.ID "
+            + "FROM TASK_COMMENTS c, task_info ti " + "WHERE c.comment_object_id = ti.task_id "
+            + "AND ti.workflow_id = ? ";
+    
     private static final String SQL_DELETE_TASK_INFO_COMMENT = "DELETE c "
             + "FROM TASK_COMMENTS c, task_info ti " + "WHERE c.comment_object_id = ti.task_id "
             + "AND ti.workflow_id = ? ";
@@ -200,8 +205,33 @@ public class WorkflowCancelHelper
     private static void deleteTaskInfoComment(Connection conn, long wfId) throws SQLException
     {
         logStart("COMMENTS");
+        List args = new ArrayList<>();
+        args.add(wfId);
+        List<Long> ids = DbUtil.queryForSingleColumn(conn, SQL_SELECT_DELETE_TASK_INFO_COMMENT, args);
+        for (Long id : ids)
+        {
+            removeCommentFile(Long.toString(id));
+        }
         execOnce(conn, SQL_DELETE_TASK_INFO_COMMENT, wfId);
         logEnd("COMMENTS");
+    }
+    
+    private static void removeCommentFile(String commentId)
+    {
+        try
+        {
+            if (StringUtil.isEmpty(commentId))
+                return;
+
+            String baseFSDir = AmbFileStoragePathUtils
+                    .getCommentReferenceDirPath();
+            File file = new File(baseFSDir, commentId);
+            if (file.exists() && file.isDirectory())
+                FileUtil.deleteFile(file);
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     private static void deleteTaskInfo(Connection conn, long wfId) throws SQLException

@@ -364,6 +364,26 @@ public class DbUtil
     }
     
     @SuppressWarnings("rawtypes")
+    public static List queryForSingleColumn(Connection conn, String sql, List<Object> args) throws SQLException 
+    {
+        List list = new ArrayList();
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        ResultSetMetaData rsmd = null;
+        st = conn.prepareStatement(sql);
+        putArgsToStatement(st, args);
+        rs = st.executeQuery();
+        rsmd = rs.getMetaData();
+        while (rs.next())
+        {
+            list.add(rs.getObject(1));
+        }
+
+        return list;
+    }
+    
+    
+    @SuppressWarnings("rawtypes")
     public static List<ArrayList> query(String sql, Object... args) throws Exception
     {
         Connection conn = getConnection();

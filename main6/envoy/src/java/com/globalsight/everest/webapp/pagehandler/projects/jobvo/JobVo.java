@@ -16,8 +16,8 @@ public class JobVo {
 	private String style;
 	private boolean hasDetail = true;
 	private boolean isBlaiseJob = false;
-	private String blaiseUploadState = "";
-	private String blaiseCompleteState = "";
+	private String blaiseUploadState = "N";
+	private String blaiseCompleteState = "A";
 	
 	private String textType;
 

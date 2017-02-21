@@ -996,8 +996,10 @@ public abstract class JobVoSearcher implements WebAppConstants
             ResultSet rs = stmt.executeQuery(sql.toString());
             long jobId = -1L, lastJobId = -1L;
             boolean uploadSucceed = true, completeSucceed = true;
+            String uploadState = "--", completeState = "--";
             String tmp;
-            while (rs.next()) {
+            while (rs.next())
+            {
                 jobId = rs.getLong("job_id");
                 if (jobId != lastJobId)
                 {
@@ -1006,8 +1008,8 @@ public abstract class JobVoSearcher implements WebAppConstants
                         // Gets a new job id data
                         BlaiseConnectorJob job = new BlaiseConnectorJob();
                         job.setJobId(lastJobId);
-                        job.setUploadXliffState(uploadSucceed ? "succeed" : "fail");
-                        job.setCompleteState(completeSucceed ? "succeed" : "fail");
+                        job.setUploadXliffState(uploadState);
+                        job.setCompleteState(completeState);
 
                         blaiseJobs.put(lastJobId, job);
                         uploadSucceed = true;
@@ -1019,6 +1021,7 @@ public abstract class JobVoSearcher implements WebAppConstants
                 if (StringUtil.isNotEmpty(tmp) && uploadSucceed)
                 {
                     uploadSucceed = BlaiseConnectorJob.SUCCEED.equals(tmp);
+                    uploadState = tmp;
                 }
                 else
                     uploadSucceed = false;
@@ -1026,6 +1029,7 @@ public abstract class JobVoSearcher implements WebAppConstants
                 if (StringUtil.isNotEmpty(tmp) && completeSucceed)
                 {
                     completeSucceed = BlaiseConnectorJob.SUCCEED.equals(tmp);
+                    completeState = tmp;
                 }
                 else
                     completeSucceed = false;
@@ -1035,8 +1039,8 @@ public abstract class JobVoSearcher implements WebAppConstants
                 // Gets a new job id data
                 BlaiseConnectorJob job = new BlaiseConnectorJob();
                 job.setJobId(lastJobId);
-                job.setUploadXliffState(uploadSucceed ? "succeed" : "fail");
-                job.setCompleteState(completeSucceed ? "succeed" : "fail");
+                job.setUploadXliffState(uploadState);
+                job.setCompleteState(completeState);
 
                 blaiseJobs.put(lastJobId, job);
             }

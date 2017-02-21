@@ -325,7 +325,7 @@ function validName()
             </td>
         </tr>
         <tr class="autoOption">
-            <td class="standardText"><%=bundle.getString("lb_blaise_combine_by_languages")%>:</td>
+            <td class="standardText"><%=bundle.getString("lb_blaise_combine_by_language")%>:</td>
             <td class="standardText"><input type="checkbox" id="combined" name="combined" value="true" <%=isCombined ? "checked" : ""%>/></td>
         </tr>
         <tr class="autoOption">

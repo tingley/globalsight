@@ -1020,11 +1020,15 @@ public abstract class JobVoSearcher implements WebAppConstants
                 {
                     uploadSucceed = BlaiseConnectorJob.SUCCEED.equals(tmp);
                 }
+                else
+                    uploadSucceed = false;
                 tmp = rs.getString("complete_state");
                 if (StringUtil.isNotEmpty(tmp) && completeSucceed)
                 {
                     completeSucceed = BlaiseConnectorJob.SUCCEED.equals(tmp);
                 }
+                else
+                    completeSucceed = false;
             }
             if (lastJobId != -1)
             {

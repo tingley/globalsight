@@ -50,7 +50,6 @@
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
-var alertInfo;
 var reportJobInfo;
 
 $(document).ready(function(){
@@ -115,7 +114,7 @@ function defautSelect(){
 	 $("#idTRJobNamesRadio").trigger("click");
      var ops=$("#jobNameList").children();
      if(ops.length==0){
-      return ('No job name(s) is(are) selected.');
+    	 return "<%=bundle.getString("msg_invalid_jobName")%>";
      }else{
       ops.attr("selected", true);
      }
@@ -175,29 +174,9 @@ function fnDoCancel() {
   });
 }
 
-function validateForm()
+function dataSelectAll()
 {
-    if(lisaQAForm.reportOnJobId.checked)
-    {
-        var jobIDArr =  lisaQAForm.jobIds.value.split(",");
-		if(!validateIDS(jobIDArr, null))
-        {
-           $("#jobNameList").attr("selected", true);
-           return ('<%=bundle.getString("lb_invalid_jobid")%>');
-        }
-    }
-    if(lisaQAForm.reportOnJobName.checked) {
-        var len = $("#jobNameList").find("option:selected").length;
-        if(len == 0) {
-            var ops = $("#jobNameList").children();
-            if(ops.length == 0) {
-                return ('<%=bundle.getString("msg_invalid_jobName")%>');
-            } else {
-                ops.attr("selected", true);
-            }
-	    }
-	}
-    var startVal=lisaQAForm.<%=creationStart%>.value;
+	var startVal=lisaQAForm.<%=creationStart%>.value;
 	if(startVal){
 		defautSelect();
 		  return ""; 
@@ -209,22 +188,20 @@ function validateForm()
 		defautSelect();
         return ""; 
 	}
-    return "";
+	  return "";
 }
 
 function doSubmit()
 {
-	var msg = validateForm();
-    if (msg != "")
-    {
-        alert(msg);
-        return;
-    }
+	var msg =  dataSelectAll();
+   	if (msg != "")
+   	{
+    	alert(msg);
+    	return;
+   	}
 	var jobIDArr = fnGetSelectedJobIds();
 	if(jobIDArr == null || jobIDArr.length == 0)
 	{
-		if(alertInfo != null)
-			alert(alertInfo); 
 		return;	
 	}
 	
@@ -296,21 +273,40 @@ function doSubmit()
 
 function fnGetSelectedJobIds()
 {
+	var jobInfos = new Array();
+	if (reportJobInfo == null)
+    {
+		var url ="${self.pageURL}&activityName=xlsReportCommentsAnalysis&action=getReportJobInfo";
+	    $.getJSON(url, function(data) {
+			reportJobInfo = data;
+	    });
+    }
+	$(reportJobInfo).each(function(i, item) {
+		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
+     });
+	
 	var jobIDArr = new Array();
 	if(lisaQAForm.reportOnJobId.checked)
 	{
 		var jobIDText = document.getElementById("jobIds").value;
-		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
-		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
-			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
+		jobIDArr = jobIDText.split(",");
+		if(!isNumeric(jobIDText)){
+			alert('<%=bundle.getString("msg_invalid_jobId")%>');
 			return;
 		}
-		jobIDArr = jobIDText.split(",");
-		if(!validateIDS(jobIDArr, null))
-        {
-			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
 			return;
-        }
+		}
+		
+		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+		{
+			alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			return;
+		}
 	}
 	else
 	{
@@ -323,9 +319,9 @@ function fnGetSelectedJobIds()
 			}
 		}
 		
-		if(!validateIDS(jobIDArr, null))
+		if(!validateIDS(jobIDArr, jobInfos))
 	    {
-			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
+			alert("<%=bundle.getString("msg_invalid_jobName")%>");
 			return;
 	    }
 	}
@@ -433,11 +429,6 @@ function doOnload()
 	// Set the jobIds as default check. 
 	setDisableTRWrapper("idTRJobNames");
 }
-
-function sortNumber(a,b) 
-{ 
-	return a - b 
-} 
 </script>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>

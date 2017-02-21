@@ -44,6 +44,10 @@ var reportJobInfo;
 function doSubmit()
 {
 	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		return;	
+	}
 
 	// Submit the Form, if possible(No report is generating.)
 	$.ajax({
@@ -122,17 +126,6 @@ function fnGetSelectedJobIds()
 	jobIDArr.sort(sortNumber);
 	
 	return jobIDArr;
-}
-
-function isNumeric(str){
-	if (str.startsWith("0"))
-		return false;
-	return /^(-|\+)?\d+(\.\d+)?$/.test(str);
-}
-
-function sortNumber(a,b) 
-{ 
-	return a - b 
 }
 
 function doOnload()

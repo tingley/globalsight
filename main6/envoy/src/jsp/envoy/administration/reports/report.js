@@ -171,3 +171,15 @@ function getSelValueArr(selElemID){
 	
 	return result;
 }
+
+function isNumeric(str)
+{
+	if (str.startsWith("0"))
+		return false;
+	return /^(-|\+)?\d+(\.\d+)?$/.test(str);
+}
+
+function sortNumber(a,b) 
+{
+	return a - b;
+}

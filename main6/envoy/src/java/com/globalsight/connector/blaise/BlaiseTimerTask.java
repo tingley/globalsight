@@ -37,7 +37,7 @@ public class BlaiseTimerTask extends Thread
             if (StringUtil.isNotEmpty(connector.getPullDays()))
             {
                 int checkDuration = connector.getCheckDuration();
-                long checkTime = checkDuration * 1000;
+                long checkTime = checkDuration * 60000;
 
                 while (true)
                 {

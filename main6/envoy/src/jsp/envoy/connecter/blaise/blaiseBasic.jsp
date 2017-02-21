@@ -216,7 +216,7 @@ function confirmForm()
         }
 
         $tmp = $("#checkDuration").val();
-        if (!isAllDigits($tmp) || $tmp < 300 || $tmp > 1000000)
+        if (!isAllDigits($tmp) || $tmp < 10 || $tmp > 59)
         {
             alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
             return false;

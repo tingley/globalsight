@@ -43,7 +43,7 @@ public class BlaiseAutoManager
                     logger.info("Check duration: " + connector.getCheckDuration());
                     BlaiseTimerTask timerTask = new BlaiseTimerTask(connector);
                     scheduledExecutorService
-                            .scheduleAtFixedRate(timerTask, 0, checkDuration, TimeUnit.SECONDS);
+                            .scheduleAtFixedRate(timerTask, 0, checkDuration, TimeUnit.MINUTES);
                     threads.put(connector.getId(), timerTask);
                     logger.info(
                             "**** Start thread for Blaise automatic. Thread [" + timerTask.getId()
@@ -63,7 +63,7 @@ public class BlaiseAutoManager
 
         BlaiseTimerTask timerTask = new BlaiseTimerTask(bc);
         scheduledExecutorService
-                .scheduleAtFixedRate(timerTask, 0, bc.getCheckDuration(), TimeUnit.SECONDS);
+                .scheduleAtFixedRate(timerTask, 0, bc.getCheckDuration(), TimeUnit.MINUTES);
         threads.put(bc.getId(), timerTask);
         logger.info("**** Start thread for Blaise automatic. Thread [" + timerTask.getId() + ", "
                 + timerTask.getName() + "]");

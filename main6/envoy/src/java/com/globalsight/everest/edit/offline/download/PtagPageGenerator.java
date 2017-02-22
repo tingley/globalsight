@@ -19,9 +19,11 @@
 package com.globalsight.everest.edit.offline.download;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -286,11 +288,11 @@ public class PtagPageGenerator
         List sBpts = sroot.selectNodes("//bpt");
         List tBpts = troot.selectNodes("//bpt");
         List tEpts = troot.selectNodes("//ept");
+        Map<Integer,String> eptIAttrVlues = new HashMap<Integer,String>();
         for (int i = 0, max = sBpts.size(); i < max; i++)
         {
             Element sBpt = (Element) sBpts.get(i);
             Element tBpt = (Element) tBpts.get(i);
-            Element tEpt = (Element) tEpts.get(i);
             
             String xAttr = sBpt.attributeValue("x");
             String iAttr = sBpt.attributeValue("i");
@@ -300,17 +302,30 @@ public class PtagPageGenerator
             if (xAttr != null && iAttr != null)
 			{
             	//Fixes a single "i" attribute in all other TUVs based on the "x".
-				if (tBpt != null
-						&& tEpt != null
-						&& tBpt == (Element) troot
-								.selectSingleNode("//bpt[@x='" + xAttr + "']"))
+				if (tBpt != null && xAttr.equals(tBpt.attributeValue("x")))
 				{
+					String curI = tBpt.attributeValue("i");
+					for (int j = 0; j < tEpts.size(); j++)
+					{
+						Element tEpt = (Element) tEpts.get(j);
+						String eptIAttr = tEpt.attributeValue("i");
+						if (eptIAttr.equals(curI))
+						{
+							eptIAttrVlues.put(j, iAttr);
+							break;
+						}
+					}
 					tBpt.addAttribute("i", iAttr);
-					tEpt.addAttribute("i", iAttr);
 				}
 			}
         }
-
+        //0002277: Incorrect id for ept in target local
+		for (int i = 0, max = sBpts.size(); i < max; i++)
+		{
+			Element tEpt = (Element) tEpts.get(i);
+			tEpt.addAttribute("i", eptIAttrVlues.get(i));
+		}
+        
 		int firstIndex = 5;
 		int sEndIndex = sroot.asXML().length() - 6;
 		int tEndIndex = troot.asXML().length() - 6;

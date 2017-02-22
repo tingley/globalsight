@@ -16,15 +16,14 @@
  */
 package com.globalsight.connector.blaise.vo;
 
-import java.util.*;
-
+import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.globalsight.connector.blaise.BlaiseConstants;
+import com.globalsight.connector.blaise.util.BlaiseHelper;
+import com.globalsight.connector.blaise.util.BlaiseManager;
 import jodd.util.StringBand;
 import org.apache.log4j.Logger;
 
-import com.cognitran.translation.client.workflow.TranslationInboxEntry;
-import com.globalsight.connector.blaise.util.BlaiseHelper;
-import com.globalsight.connector.blaise.util.BlaiseManager;
+import java.util.*;
 
 public class TranslationInboxEntryVo
 {
@@ -179,6 +178,12 @@ public class TranslationInboxEntryVo
                 + locale.getDisplayCountry() + ")";
 	}
 
+	public String getSourceLocaleAsString()
+	{
+		Locale locale = getSourceLocale();
+		return getLocaleCode(locale);
+	}
+
 	public Locale getTargetLocale()
 	{
 		return this.entry.getTargetLocale().toLocale();
@@ -189,6 +194,12 @@ public class TranslationInboxEntryVo
 	    Locale locale = getTargetLocale();
         return getLocaleCode(getTargetLocale()) + " (" + locale.getDisplayLanguage() + "_"
                 + locale.getDisplayCountry() + ")";
+	}
+
+	public String getTargetLocaleAsString()
+	{
+		Locale locale = getTargetLocale();
+		return getLocaleCode(locale);
 	}
 
 	private String getLocaleCode(Locale locale)

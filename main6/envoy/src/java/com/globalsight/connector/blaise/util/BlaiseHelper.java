@@ -407,7 +407,7 @@ public class BlaiseHelper
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setPriority("3");
                 blaiseForm.setBlaiseConnectorId(String.valueOf(blc.getId()));
-                blaiseForm.setCombineByLangs("on");
+                blaiseForm.setCombineByLangs(blc.isCombined() ? "on" : "");
                 blaiseForm.setUserName(user.getUserId());
                 int size = 0;
                 ArrayList<FileProfile> fps = null;
@@ -1143,7 +1143,7 @@ public class BlaiseHelper
             }
         }
 
-        String localeInfo = fixLocale(entry.getEntry().getTargetLocale().getLocaleCode());
+        String localeInfo = entry.getTargetLocaleAsString();
         fileName.append(BlaiseConstants.FILENAME_PREFIX).append(entry.getRelatedObjectId())
                 .append(BlaiseConstants.DASH).append(entry.getSourceRevision())
                 .append(BlaiseConstants.DASH).append(des)
@@ -1164,8 +1164,7 @@ public class BlaiseHelper
      */
     public static String getHarlyJobName(TranslationInboxEntryVo entry, String falconTargetValue)
     {
-        String targetLocale = entry.getEntry().getTargetLocale().getLocaleCode();
-        targetLocale = BlaiseHelper.fixLocale(targetLocale);
+        String targetLocale = entry.getTargetLocaleAsString();
         if (falconTargetValue != null && falconTargetValue.length() > 55)
         {
             falconTargetValue = falconTargetValue.substring(0, 55);
@@ -1184,7 +1183,9 @@ public class BlaiseHelper
 
     public static String getEntriesJobName(List<TranslationInboxEntryVo> entries)
     {
+        ArrayList<String> targetLocales = new ArrayList<>();
         List<Long> relatedObjectIds = new ArrayList<Long>();
+        String tmp;
         for (TranslationInboxEntryVo entry : entries)
         {
             long blaiseId = entry.getRelatedObjectId();
@@ -1192,6 +1193,9 @@ public class BlaiseHelper
                 continue;
 
             relatedObjectIds.add(blaiseId);
+            tmp = entry.getTargetLocaleAsString();
+            if (!targetLocales.contains(tmp))
+                targetLocales.add(tmp);
         }
         Collections.sort(relatedObjectIds);
         StringBuilder ids = new StringBuilder();
@@ -1207,9 +1211,12 @@ public class BlaiseHelper
         jobName.append("Blaise IDs (");
         jobName.append(ids.toString().trim()).append(")");
         jobName.append(BlaiseConstants.DASH);
-        jobName.append(fixLocale(entries.get(0).getEntry().getSourceLocale().getLocaleCode()));
-        jobName.append(BlaiseConstants.DASH);
-        jobName.append(fixLocale(entries.get(0).getEntry().getTargetLocale().getLocaleCode()));
+        jobName.append(entries.get(0).getSourceLocaleAsString());
+        if (targetLocales.size() == 1)
+        {
+            jobName.append(BlaiseConstants.DASH);
+            jobName.append(entries.get(0).getTargetLocaleAsString());
+        }
 
         return handleSpecialChars(jobName.toString());
     }

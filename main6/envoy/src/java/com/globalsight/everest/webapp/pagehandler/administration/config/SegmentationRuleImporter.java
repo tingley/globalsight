@@ -69,31 +69,31 @@ public class SegmentationRuleImporter implements ConfigConstants
         }
         catch (Exception e)
         {
-            logger.error("Failed to import Segmentation Rule.", e);
+            logger.error("Failed to import Segmentation Rules.", e);
             addToError(e.getMessage());
         }
     }
 
-    private String getSRNewName(String oldName, long companyId)
+    private String getSRNewName(String srName, long companyId)
     {
         String hql = "select sr.name from SegmentationRuleFileImpl "
-                + "  sr where sr.companyId=:companyid";
+                + "  sr where sr.companyId=:companyid and sr.isActive='Y'";
         Map map = new HashMap();
         map.put("companyid", companyId);
         List itList = HibernateUtil.search(hql, map);
 
-        if (itList.contains(oldName))
+        if (itList.contains(srName))
         {
             for (int num = 1;; num++)
             {
                 String returnStr = null;
-                if (oldName.contains("_import_"))
+                if (srName.contains("_import_"))
                 {
-                    returnStr = oldName.substring(0, oldName.lastIndexOf('_')) + "_" + num;
+                    returnStr = srName.substring(0, srName.lastIndexOf('_')) + "_" + num;
                 }
                 else
                 {
-                    returnStr = oldName + "_import_" + num;
+                    returnStr = srName + "_import_" + num;
                 }
                 if (!itList.contains(returnStr))
                 {
@@ -103,7 +103,7 @@ public class SegmentationRuleImporter implements ConfigConstants
         }
         else
         {
-            return oldName;
+            return srName;
         }
     }
 

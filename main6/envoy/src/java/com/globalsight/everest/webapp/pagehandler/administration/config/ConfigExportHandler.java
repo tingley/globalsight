@@ -299,10 +299,10 @@ public class ConfigExportHandler extends PageHandler
                             xrPropertyFile = XmlRuleExportHelper.propertiesInputXR(xrPropertyFile,
                                     xmlRoot, xmlDoc, idArr[1]);
                         }
-                        else if ("fp".endsWith(idArr[0]))
+                        else if ("fp".equals(idArr[0]))
                         {
                             // gets file profile property file
-                            fpPropertyFile = FileProfileExportHelper.propertiesInputLP(
+                            fpPropertyFile = FileProfileExportHelper.propertiesInputFP(
                                     fpPropertyFile, idArr[1]);
                         }
                     }

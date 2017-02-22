@@ -33,8 +33,8 @@
 <!-- This JSP is: /envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp-->
 <head>
 <title><%=bundle.getString("translations_web_form")%></title>
-<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
@@ -46,7 +46,7 @@ function doSubmit()
 	var jobIDArr = fnGetSelectedJobIds();
 	if(jobIDArr == null || jobIDArr.length == 0)
 	{
-		return;	
+		return;
 	}
 
 	// Submit the Form, if possible(No report is generating.)
@@ -69,16 +69,9 @@ function doSubmit()
 	});
 }
 
-function fnGetSelectedJobIds()
+function validateJobIds()
 {
 	var jobInfos = new Array();
-	if (reportJobInfo == null)
-    {
-		var url ="${self.pageURL}&activityName=xlsReportTranslationsEdit&action=getReportJobInfo";
-	    $.getJSON(url, function(data) {
-			reportJobInfo = data;
-	    });
-    }
 	$(reportJobInfo).each(function(i, item) {
 		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
      });
@@ -124,8 +117,16 @@ function fnGetSelectedJobIds()
 	    }
 	}
 	jobIDArr.sort(sortNumber);
-	
 	return jobIDArr;
+}
+
+function fnGetSelectedJobIds()
+{
+	if (reportJobInfo == null)
+    {
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportTranslationsEdit", "getReportJobInfo");
+    }
+	return validateJobIds();
 }
 
 function doOnload()

@@ -233,14 +233,16 @@ function doSubmit()
 
 function fnGetSelectedJobIds()
 {
-	var jobInfos = new Array();
 	if (reportJobInfo == null)
     {
-		var url ="${self.pageURL}&activityName=xlsReportScorecard&action=getReportJobInfo";
-	    $.getJSON(url, function(data) {
-			reportJobInfo = data;
-	    });
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportScorecard", "getReportJobInfo");
     }
+	return validateJobIds();
+}
+
+function validateJobIds()
+{
+	var jobInfos = new Array();
 	$(reportJobInfo).each(function(i, item) {
 		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
      });

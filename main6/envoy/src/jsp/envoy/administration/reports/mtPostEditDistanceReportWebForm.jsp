@@ -100,6 +100,15 @@ function submitForm()
 
 function fnGetSelectedJobIds()
 {
+	if (reportJobInfo == null)
+    {
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=MTPostEditDistanceReport", "getReportJobInfo");
+    }
+	return validateJobIds();
+}
+
+function validateJobIds()
+{
 	var jobInfos = new Array();
 	if (reportJobInfo == null)
     {

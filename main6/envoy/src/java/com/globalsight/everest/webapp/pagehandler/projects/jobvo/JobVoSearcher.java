@@ -965,11 +965,6 @@ public abstract class JobVoSearcher implements WebAppConstants
                 job.setBlaiseUploadState(bcJob.getUploadXliffState());
                 job.setBlaiseCompleteState(bcJob.getCompleteState());
             }
-            else
-            {
-                job.setBlaiseCompleteState("--");
-                job.setBlaiseUploadState("--");
-            }
 
             jobVos.add(job);
         }
@@ -1014,6 +1009,8 @@ public abstract class JobVoSearcher implements WebAppConstants
                         blaiseJobs.put(lastJobId, job);
                         uploadSucceed = true;
                         completeSucceed = true;
+                        uploadState = "--";
+                        completeState = "--";
                     }
                 }
                 lastJobId = jobId;

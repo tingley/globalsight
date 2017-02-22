@@ -290,7 +290,9 @@ is defined in header.jspIncl which must be included in the body.
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=allStatusURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.DATE_CREATED%>" onclick="return addFilters(this)"><%=bundle.getString("lb_date_created")%></A><%=jobDateSortArrow%></TD>
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=allStatusURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PLANNED_DATE%>" onclick="return addFilters(this)"><%=bundle.getString("lb_planned_completion_date")%></A><%=jobPlannedDateSortArrow%></TD>
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=allStatusURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_STATUS%>" onclick="return addFilters(this)"><%=bundle.getString("lb_job_status")%></A><%=jobStatusSortArrow%></TD>
+    <amb:permission name="<%=Permission.BLAISE_CONNECTOR%>" >
     <TD CLASS="headerCell" WIDTH="7%"><%=bundle.getString("lb_blaise_job_title")%></TD>
+    </amb:permission>
 </TR>
 <TR CLASS="tableHeadingFilter" VALIGN="BOTTOM">
     <TD CLASS="headerCell">&nbsp;</TD>
@@ -358,7 +360,9 @@ is defined in header.jspIncl which must be included in the body.
     <TD CLASS="headerCell">&nbsp;</TD>
     <TD CLASS="headerCell">&nbsp;</TD>
     <TD CLASS="headerCell">&nbsp;</TD>
-    <TD CLASS="headerCell">&nbsp;</TD>
+    <amb:permission name="<%=Permission.BLAISE_CONNECTOR%>" >
+        <TD CLASS="headerCell">&nbsp;</TD>
+    </amb:permission>
 </TR>
 </thead>
 <tbody>
@@ -388,9 +392,11 @@ is defined in header.jspIncl which must be included in the body.
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.createDate}</TD>
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.plannedCompletionDate}</TD>
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.displayStatues}</TD>
+        <amb:permission name="<%=Permission.BLAISE_CONNECTOR%>" >
         <TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >
                 ${jobVo.blaiseUploadState}/${jobVo.blaiseCompleteState}
         </TD>
+        </amb:permission>
     </TR>
 </c:forEach>
 </tbody>

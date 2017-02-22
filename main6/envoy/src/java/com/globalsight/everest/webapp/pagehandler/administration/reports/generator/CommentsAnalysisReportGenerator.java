@@ -1583,7 +1583,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             {
                 if (!tempTuv.getGxml().equals(targetTuv.getGxml()))
                 {
-                    result = tempTuv.getGxmlExcludeTopTags();
+                    result = tempTuv.getGxmlElement().getTextValueWithInternalTextMark();
                     break;
                 }
             }

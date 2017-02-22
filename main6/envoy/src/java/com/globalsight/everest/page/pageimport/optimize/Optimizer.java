@@ -850,16 +850,36 @@ public abstract class Optimizer
 
                     if (prifixSpace.length() > 0)
                     {
-                        RemovedPrefixTag tag = new RemovedPrefixTag();
-                        tag.setString(prifixSpace);
-                        tu.setPrefixTag(tag);
+                        RemovedPrefixTag tag2 = tu.getPrefixTag();
+                        if (tag2 == null)
+                        {
+                            tag2 = new RemovedPrefixTag();
+                            tag2.setTu(tu);
+                            tu.setPrefixTag(tag2);
+                        }
+
+                        String s2 = tag2.getString();
+                        if (s2 == null)
+                            s2 = "";
+
+                        tag2.setString(s2 + prifixSpace);
                     }
 
                     if (suffixSpace.length() > 0)
                     {
-                        RemovedSuffixTag tag = new RemovedSuffixTag();
-                        tag.setString(suffixSpace);
-                        tu.setSuffixTag(tag);
+                        RemovedSuffixTag tag2 = tu.getSuffixTag();
+                        if (tag2 == null)
+                        {
+                            tag2 = new RemovedSuffixTag();
+                            tag2.setTu(tu);
+                            tu.setSuffixTag(tag2);
+                        }
+
+                        String s2 = tag2.getString();
+                        if (s2 == null)
+                            s2 = "";
+
+                        tag2.setString(suffixSpace + s2);
                     }
 
                     gxml = segment + s + "</segment>";

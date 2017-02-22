@@ -16,47 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.naming.NamingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.DataValidationConstraint;
-import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import com.globalsight.everest.category.CategoryType;
-import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.comment.IssueHistory;
-import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.comment.IssueOptions;
+import com.globalsight.everest.comment.*;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
@@ -67,16 +28,11 @@ import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
-import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
-import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.persistence.tuv.*;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.tuv.TaskTuv;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvException;
-import com.globalsight.everest.tuv.TuvManager;
+import com.globalsight.everest.tuv.*;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -86,20 +42,27 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportH
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.everest.workflow.DQFData;
-import com.globalsight.everest.workflow.ScorecardScore;
-import com.globalsight.everest.workflow.ScorecardScoreHelper;
+import com.globalsight.everest.workflow.*;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
-import com.globalsight.util.ExcelUtil;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ReportStyle;
-import com.globalsight.util.SortUtil;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.gxml.GxmlElement;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import javax.naming.NamingException;
+import javax.servlet.http.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Comments Analysis Report Generator Include Comments Analysis Report in popup
@@ -831,6 +794,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
         long jobId = p_job.getId();
         boolean toShowSeverity = false;
+        long targetLocaleId = p_targetLocale.getId();
 
         TranslationMemoryProfile tmp = p_job.getL10nProfile().getTranslationMemoryProfile();
         Vector<String> excludItems = null;
@@ -890,7 +854,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 Map<Long, IssueImpl> issuesMap = CommentHelper.getIssuesMap(targetPage.getId());
 
                 // tuvId : Tuv
-                Map<Long, Tuv> allTuvMap = this.getAllTuvsMap(targetPage);
+                Map<Long, List<Tuv>> allTuvMap = this.getAllTuvsMap(targetPage);
 
                 Locale sourcePageLocale = sourcePage.getGlobalSightLocale().getLocale();
                 Locale targetPageLocale = targetPage.getGlobalSightLocale().getLocale();
@@ -1131,8 +1095,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     col++;
 
                     // Previous segment
-                    String previousSegments = getPreviousSegments(allTuvMap, targetTuv.getId(),
-                            targetSegmentString, jobId);
+                    //String previousSegments = getPreviousSegments(allTuvMap, targetTuv.getId(),
+                    //targetSegmentString, jobId);
+                    String previousSegments = getPreviousSegments(allTuvMap, targetTuv, targetLocaleId);
                     cell = ExcelUtil.getCell(currentRow, col);
                     setCellForInternalText(cell, previousSegments, rtlTargetLocale);
                     cell.setCellStyle(contentStyle);
@@ -1553,6 +1518,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         return false;
     }
 
+    /**
     private Map<Long, Tuv> getAllTuvsMap(TargetPage targetPage)
     {
         Map<Long, Tuv> result = new HashMap<Long, Tuv>();
@@ -1566,10 +1532,91 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
         catch (Exception e)
         {
-
         }
 
         return result;
+    }
+     */
+
+    private Map<Long, List<Tuv>> getAllTuvsMap(TargetPage targetPage) throws Exception
+    {
+        HashMap<Long, List<Tuv>> tempHashMap = new HashMap<Long, List<Tuv>>();
+        List<Tuv> allTargetTuvs = SegmentTuvUtil.getAllTargetTuvs(targetPage);
+        for(Tuv tuv: allTargetTuvs)
+        {
+            long tuId = tuv.getTuId();
+            if(tempHashMap.get(tuId) == null)
+            {
+                List<Tuv> tempTuvList = new ArrayList<Tuv>();
+                tempTuvList.add(tuv);
+                tempHashMap.put(tuId, tempTuvList);
+            }
+            else
+            {
+                tempHashMap.get(tuId).add(tuv);
+            }
+        }
+        return tempHashMap;
+    }
+
+    private String getPreviousSegments(Map<Long, List<Tuv>> allTargetTuvsMap, Tuv targetTuv,
+            long targetLocaleId)
+    {
+        String result = "";
+        long tuId = targetTuv.getTuId();
+        if (allTargetTuvsMap == null || allTargetTuvsMap.size() == 0
+                || allTargetTuvsMap.get(Long.valueOf(tuId)) == null)
+            return "";
+        List<Tuv> tmpTuvList = allTargetTuvsMap.get(Long.valueOf(tuId));
+        List<Tuv> tuvList = new ArrayList<>();
+        for (Tuv tuv : tmpTuvList)
+        {
+            if (tuv.getLocaleId() == targetLocaleId && tuv.getState().equals(TuvState.OUT_OF_DATE))
+            {
+                tuvList.add(tuv);
+            }
+        }
+        if (tuvList.size() > 0)
+        {
+            sortById(tuvList);
+            for (Tuv tempTuv : tuvList)
+            {
+                if (!tempTuv.getGxml().equals(targetTuv.getGxml()))
+                {
+                    result = tempTuv.getGxmlExcludeTopTags();
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private void sortById(List<Tuv> tempTuvList)
+    {
+        if(tempTuvList.size() > 1)
+        {
+            Collections.sort(tempTuvList, new Comparator<Tuv>()
+            {
+                public int compare(Tuv arg0, Tuv arg1)
+                {
+                    long id0 = arg0.getId();
+                    long id1 = arg1.getId();
+                    if (id1 > id0)
+                    {
+                        return 1;
+                    }
+                    else if (id1 == id0)
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+            });
+        }
     }
 
     @SuppressWarnings("unchecked")

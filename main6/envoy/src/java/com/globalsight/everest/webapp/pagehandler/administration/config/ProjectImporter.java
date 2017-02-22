@@ -395,14 +395,21 @@ public class ProjectImporter implements ConfigConstants
             if (StringUtil.isNotEmptyAndNull(origTermName))
             {
                 ArrayList<String> termNames = TermbaseList.getNames(companyId);
-                for (String termName : termNames)
+                if (termNames.size() > 0)
                 {
-                    if (termName.equals(origTermName)
-                            || termName.startsWith(origTermName + "_import_"))
+                    for (String termName : termNames)
                     {
-                        project.setTermbaseName(termName);
-                        break;
+                        if (termName.equals(origTermName)
+                                || termName.startsWith(origTermName + "_import_"))
+                        {
+                            project.setTermbaseName(termName);
+                            break;
+                        }
                     }
+                }
+                else
+                {
+                    project.setTermbase("");
                 }
             }
 
@@ -413,16 +420,23 @@ public class ProjectImporter implements ConfigConstants
             {
                 List<AttributeSet> attrSets = (List<AttributeSet>) AttributeManager
                         .getAllAttributeSets(companyId);
-                for (AttributeSet attrSet : attrSets)
+                if (attrSets.size() > 0)
                 {
-                    if (attrSet.getName().equals(attSet.getName())
-                            || attrSet.getName().startsWith(attSet.getName() + "_import_"))
+                    for (AttributeSet attrSet : attrSets)
                     {
-                        currentAttSet = AttributeManager.getAttributeSetByNameAndCompanyId(
-                                attrSet.getName(), companyId);
-                        project.setAttributeSet(currentAttSet);
-                        break;
+                        if (attrSet.getName().equals(attSet.getName())
+                                || attrSet.getName().startsWith(attSet.getName() + "_import_"))
+                        {
+                            currentAttSet = AttributeManager.getAttributeSetByNameAndCompanyId(
+                                    attrSet.getName(), companyId);
+                            project.setAttributeSet(currentAttSet);
+                            break;
+                        }
                     }
+                }
+                else
+                {
+                    project.setAttributeSet(null);
                 }
             }
 
@@ -481,7 +495,7 @@ public class ProjectImporter implements ConfigConstants
 
     private String getProjectNewName(String oldName, long companyId)
     {
-        String hql = "select p.name from ProjectImpl " + "  p where p.companyId=:companyId";
+        String hql = "select p.name from ProjectImpl p where p.companyId=:companyId";
         Map map = new HashMap();
         map.put("companyId", companyId);
         List itList = HibernateUtil.search(hql, map);

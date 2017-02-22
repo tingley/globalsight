@@ -19,9 +19,7 @@ import com.cognitran.blaise.translation.api.ClientFactory;
 import com.cognitran.blaise.translation.api.TranslationAgencyClient;
 import com.cognitran.client.IncompatibleVersionException;
 import com.cognitran.core.model.util.Collections;
-import com.cognitran.translation.client.PublicationTypeUsageDetails;
-import com.cognitran.translation.client.TranslationPageCommand;
-import com.cognitran.translation.client.TranslationStatisticsDetails;
+import com.cognitran.translation.client.*;
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.cognitran.workflow.client.InboxEntry;
 import com.globalsight.connector.blaise.BlaiseConstants;
@@ -34,26 +32,20 @@ import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.entity.customAttribute.*;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
-import com.globalsight.everest.foundation.BasicL10nProfile;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.foundation.*;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.BlaiseInboxEntryComparator;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.FileUtil;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.rmi.RemoteException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -317,7 +309,6 @@ public class BlaiseHelper
         long maxInboxEntryId = getMaxInboxEntryId();
         if (maxInboxEntryId <= lastMaxEntryId)
             return;
-        String userId = blc.getLoginUser();
         try
         {
             long fileProfileId = blc.getDefaultFileProfileId();
@@ -335,14 +326,14 @@ public class BlaiseHelper
             }
             else
                 return;
-            User user = ServerProxy.getUserManager().getUser(userId);
+            String userId = blc.getLoginUser();
             long companyId = blc.getCompanyId();
 
             List<TranslationInboxEntryVo> entries = null;
             List<TranslationInboxEntryVo> totalEntries = new ArrayList<>();
-            List<TranslationInboxEntryVo> hduEntries = null;
-            List<TranslationInboxEntryVo> inSheetEntries = null;
-            List<TranslationInboxEntryVo> otherEntries = null;
+            ArrayList<TranslationInboxEntryVo> hduEntries = null;
+            ArrayList<TranslationInboxEntryVo> inSheetEntries = null;
+            ArrayList<TranslationInboxEntryVo> otherEntries = null;
             TranslationPageCommand command = null;
             int count = blc.getQaCount();
             int fetchCount = 0;
@@ -407,66 +398,21 @@ public class BlaiseHelper
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setPriority("3");
                 blaiseForm.setBlaiseConnectorId(String.valueOf(blc.getId()));
-                blaiseForm.setCombineByLangs(blc.isCombined() ? "on" : "");
-                blaiseForm.setUserName(user.getUserId());
+                blaiseForm.setUserName(userId);
                 int size = 0;
                 ArrayList<FileProfile> fps = null;
+                String companyIdString = String.valueOf(companyId);
                 if (inSheetEntries != null && inSheetEntries.size() > 0)
                 {
-                    size = inSheetEntries.size();
-                    logger.info("inSheetEntries == " + size);
-                    fps = new ArrayList<>(size);
-                    for (int j = 0; j < size; j++)
-                    {
-                        fps.add(fp);
-                    }
-                    String attributeString = getJobAttributeString(blc.getId(), "I");
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
-                            l10Profile);
-                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-                            String.valueOf(companyId),
-                            blc, blaiseForm, inSheetEntries, fps, null,
-                            null, JobImpl.createUuid(), jobAttributes);
-                    Thread t = new MultiCompanySupportedThread(runnable);
-                    pool.execute(t);
+                    createJob(blaiseForm, "I", companyIdString, userId, fp, inSheetEntries, blc.isCombined());
                 }
                 if (otherEntries != null && otherEntries.size() > 0)
                 {
-                    size = otherEntries.size();
-                    logger.info("otherEntries == " + size);
-                    fps = new ArrayList<>(size);
-                    for (int j = 0; j < size; j++)
-                    {
-                        fps.add(fp);
-                    }
-                    String attributeString = getJobAttributeString(blc.getId(), "A");
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
-                            l10Profile);
-                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-                            String.valueOf(companyId),
-                            blc, blaiseForm, otherEntries, fps, null,
-                            null, JobImpl.createUuid(), jobAttributes);
-                    Thread t = new MultiCompanySupportedThread(runnable);
-                    pool.execute(t);
+                    createJob(blaiseForm, "I", companyIdString, userId, fp, otherEntries, blc.isCombined());
                 }
                 if (hduEntries != null && hduEntries.size() > 0)
                 {
-                    size = hduEntries.size();
-                    logger.info("hduEntries == " + size);
-                    fps = new ArrayList<>(size);
-                    for (int j = 0; j < size; j++)
-                    {
-                        fps.add(fp);
-                    }
-                    String attributeString = getJobAttributeString(blc.getId(), "H");
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
-                            l10Profile);
-                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-                            String.valueOf(companyId),
-                            blc, blaiseForm, hduEntries, fps, null,
-                            null, JobImpl.createUuid(), jobAttributes);
-                    Thread t = new MultiCompanySupportedThread(runnable);
-                    pool.execute(t);
+                    createJob(blaiseForm, "H", companyIdString, userId, fp, hduEntries, blc.isCombined());
                 }
             }
         }
@@ -474,6 +420,81 @@ public class BlaiseHelper
         {
             logger.error("Error found. ", e);
         }
+    }
+
+    private void createJob(CreateBlaiseJobForm blaiseJobForm, String type, String companyId,
+            String userId, FileProfile fp, ArrayList<TranslationInboxEntryVo> entries,
+            boolean isCombinedByLang) throws RemoteException
+    {
+        BasicL10nProfile l10Profile = HibernateUtil
+                .get(BasicL10nProfile.class, fp.getL10nProfileId());
+        User user = ServerProxy.getUserManager().getUser(userId);
+
+        ExecutorService pool = Executors.newFixedThreadPool(5);
+        int size = 0;
+        ArrayList<FileProfile> fps = null;
+        if (entries != null && entries.size() > 0)
+        {
+            String attributeString = getJobAttributeString(blc.getId(), type);
+            List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
+                    l10Profile);
+            if (isCombinedByLang)
+            {
+                blaiseJobForm.setCombineByLangs("on");
+                HashMap<String, ArrayList<TranslationInboxEntryVo>> localeGroup = groupEntriesByLang(entries);
+                Iterator<String> keys = localeGroup.keySet().iterator();
+                String targetLocale;
+                ArrayList<TranslationInboxEntryVo> localeEntries;
+                while (keys.hasNext())
+                {
+                    targetLocale = keys.next();
+                    localeEntries = localeGroup.get(targetLocale);
+                    size = localeEntries.size();
+                    fps = new ArrayList<>(size);
+                    for (int i = 0; i < size; i++)
+                        fps.add(fp);
+                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
+                            String.valueOf(companyId),
+                            blc, blaiseJobForm, localeEntries, fps, null,
+                            null, JobImpl.createUuid(), jobAttributes, targetLocale);
+                    Thread t = new MultiCompanySupportedThread(runnable);
+                    pool.execute(t);
+                }
+            } else {
+                size = entries.size();
+                fps = new ArrayList<>(size);
+                for (int i = 0; i < size; i++)
+                    fps.add(fp);
+                blaiseJobForm.setCombineByLangs("");
+                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
+                        String.valueOf(companyId),
+                        blc, blaiseJobForm, entries, fps, null,
+                        null, JobImpl.createUuid(), jobAttributes);
+                Thread t = new MultiCompanySupportedThread(runnable);
+                pool.execute(t);
+            }
+        }
+    }
+
+    private HashMap<String, ArrayList<TranslationInboxEntryVo>> groupEntriesByLang(
+            ArrayList<TranslationInboxEntryVo> entries)
+    {
+        HashMap<String, ArrayList<TranslationInboxEntryVo>> result = new HashMap<>();
+        if (entries != null && entries.size() > 0)
+        {
+            ArrayList<TranslationInboxEntryVo> entryList = new ArrayList<>();
+            String tmp;
+            for (TranslationInboxEntryVo entry : entries)
+            {
+                tmp = entry.getTargetLocaleAsString();
+                entryList = result.get(tmp);
+                if (entryList == null)
+                    entryList = new ArrayList<>();
+                entryList.add(entry);
+                result.put(tmp, entryList);
+            }
+        }
+        return result;
     }
 
     private String getJobAttributeString(long blcId, String blaiseJobType)

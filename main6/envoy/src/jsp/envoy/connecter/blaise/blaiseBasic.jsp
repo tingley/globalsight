@@ -216,7 +216,7 @@ function confirmForm()
         }
 
         $tmp = $("#checkDuration").val();
-        if (!isAllDigits($tmp) || $tmp < 10 || $tmp > 59)
+        if (!isAllDigits($tmp) || $tmp < 1 || $tmp > 59)
         {
             alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
             return false;
@@ -317,7 +317,7 @@ function validName()
             <td class="standardText">
                 <select id="pullHour" name="pullHour" class="standardText">
                     <%
-                        for (int i=7;i<16;i++) {
+                        for (int i=0;i<24;i++) {
                     %>
                     <option value="<%=i%>" <%=pullHour == i ? "selected" : ""%>><%=i%>:00</option>
                     <% } %>

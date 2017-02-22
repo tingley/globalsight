@@ -31,9 +31,7 @@ import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.webapp.pagehandler.administration.createJobs.SaveCommentThread;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.FileUtil;
-import com.globalsight.util.RuntimeCache;
+import com.globalsight.util.*;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 import jodd.util.StringBand;
 import org.apache.commons.lang.StringUtils;
@@ -58,6 +56,7 @@ public class CreateBlaiseJobThread extends Thread
     private List<TranslationInboxEntryVo> entries = new ArrayList<TranslationInboxEntryVo>();
     private List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
     private HashMap<String, String> file2TargetLocale = new HashMap<>();
+    private String targetLocale;
 
     public CreateBlaiseJobThread(User user, String currentCompanyId, BlaiseConnector conn,
             CreateBlaiseJobForm blaiseForm, List<TranslationInboxEntryVo> entries,
@@ -76,6 +75,16 @@ public class CreateBlaiseJobThread extends Thread
         this.jobAttribtues = jobAttribtues;
         this.entries = entries;
         this.fileProfiles = fileProfiles;
+    }
+
+    public CreateBlaiseJobThread(User user, String currentCompanyId, BlaiseConnector conn,
+            CreateBlaiseJobForm blaiseForm, List<TranslationInboxEntryVo> entries,
+            List<FileProfile> fileProfiles, File attachFile, String attachFileName, String uuid,
+            List<JobAttribute> jobAttribtues, String targetLocale)
+    {
+        this(user, currentCompanyId, conn, blaiseForm, entries, fileProfiles, attachFile,
+                attachFileName, uuid, jobAttribtues);
+        this.targetLocale = targetLocale;
     }
 
     private void createJob() throws Exception
@@ -111,7 +120,7 @@ public class CreateBlaiseJobThread extends Thread
 
             int count = 0;
 
-            String targetLocaleString = getTargetLocales();
+            String targetLocaleString = StringUtil.isEmpty(targetLocale) ? getTargetLocales() : targetLocale;
             for (Iterator<String> i = fileNames.iterator(); i.hasNext(); )
             {
                 String fileName = i.next();

@@ -204,7 +204,6 @@ function doSubmit()
 	{
 		return;	
 	}
-	
 	var dataoptions;
 	var startVal=lisaQAForm.<%=creationStart%>.value;
 	var endVal=lisaQAForm.<%=creationEnd%>.value;
@@ -292,18 +291,16 @@ function validateJobIds()
 	{
 		var jobIDText = document.getElementById("jobIds").value;
 		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
-		jobIDArr = jobIDText.split(",");
-		if(!isNumeric(jobIDText)){
-			alert('<%=bundle.getString("msg_invalid_jobId")%>');
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
 			return;
 		}
-		
+		jobIDArr = jobIDText.split(",");
 		if(!validateIDS(jobIDArr, jobInfos))
 		{
 			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
 			return;
 		}
-		
 		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
 		{
 			alert("<%=bundle.getString("lb_invalid_target_language")%>");

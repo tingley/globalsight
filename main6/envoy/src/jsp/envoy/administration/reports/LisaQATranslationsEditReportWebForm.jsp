@@ -82,11 +82,15 @@ function validateJobIds()
 		var jobIDText = document.getElementById("jobIds").value;
 		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
 		jobIDArr = jobIDText.split(",");
+		if(jobIDArr.length>1)
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid_one")%>');
+        	return;
+		}
 		if(!isNumeric(jobIDText)){
 			alert('<%=bundle.getString("msg_invalid_jobId")%>');
 			return;
 		}
-		
 		if(!validateIDS(jobIDArr, jobInfos))
 		{
 			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');

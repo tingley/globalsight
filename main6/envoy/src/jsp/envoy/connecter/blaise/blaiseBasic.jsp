@@ -452,20 +452,28 @@ function validName()
 						tdData += "<tr class='allowNone autoOption'>";
 						if (item.displayName == "Falcon Product")
 						    isFalconProduct = true;
-                        tdData += "<td class='standard'>" + item.displayName + "</td>";
+                        tdData += "<td class='standardText'>" + item.displayName + "</td>";
 						tdType = item.type;
 
 						if (tdType == "choiceList")
-							tdData += "<td class='standard'>Choice List</td>";
+							tdData += "<td class='standardText'>Choice List</td>";
 						else if (tdType == "text")
-							tdData += "<td class='standard'>Text</td>";
-						
+							tdData += "<td class='standardText'>Text</td>";
+						else if (tdType == "integer")
+						    tdData += "<td class='standardText'>Integer</td>";
+                        else if (tdType == "float")
+                            tdData += "<td class='standardText'>Float</td>";
+                        else if (tdType == "date")
+                            tdData += "<td class='standardText'>Date</td>";
+                        else if (tdType == "file")
+                            tdData += "<td class='standardText'>File</td>";
+
 						if (item.required)
-							tdData += "<td class='standard'>Required</td>";
+							tdData += "<td class='standardText'>Required</td>";
 						else
-							tdData += "<td class='standard'>--</td>";
+							tdData += "<td class='standardText'>--</td>";
 						
-						tdData += "<td class='standard'>";
+						tdData += "<td class='standardText'>";
 						if (tdType == "choiceList") {
 							var tmp = item.value;
 							eles = tmp.split("@@");
@@ -478,8 +486,8 @@ function validName()
 								tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
 							}
 							tdData += "</select>";
-						} else if (tdType = "text") {
-							tdData += "<input type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 />";
+						} else {
+							tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 />";
 						}
 						tdData += "</td>";
 						tdData += "</tr>";

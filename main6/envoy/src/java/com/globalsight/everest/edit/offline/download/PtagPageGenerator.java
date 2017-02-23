@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -292,7 +293,6 @@ public class PtagPageGenerator
         for (int i = 0, max = sBpts.size(); i < max; i++)
         {
             Element sBpt = (Element) sBpts.get(i);
-            Element tBpt = (Element) tBpts.get(i);
             
             String xAttr = sBpt.attributeValue("x");
             String iAttr = sBpt.attributeValue("i");
@@ -301,29 +301,35 @@ public class PtagPageGenerator
             // Don't crash here because of it. Fix it elsewhere.
             if (xAttr != null && iAttr != null)
 			{
-            	//Fixes a single "i" attribute in all other TUVs based on the "x".
-				if (tBpt != null && xAttr.equals(tBpt.attributeValue("x")))
+				for (int m = 0; m < tBpts.size(); m++)
 				{
-					String curI = tBpt.attributeValue("i");
-					for (int j = 0; j < tEpts.size(); j++)
+					Element tBpt = (Element) tBpts.get(m);
+					// Fixes a single "i" attribute in all other TUVs based on
+					// the "x".
+					if (tBpt != null && xAttr.equals(tBpt.attributeValue("x")))
 					{
-						Element tEpt = (Element) tEpts.get(j);
-						String eptIAttr = tEpt.attributeValue("i");
-						if (eptIAttr.equals(curI))
+						String curI = tBpt.attributeValue("i");
+						tBpt.addAttribute("i", iAttr);
+						for (int j = 0; j < tEpts.size(); j++)
 						{
-							eptIAttrVlues.put(j, iAttr);
-							break;
+							Element tEpt = (Element) tEpts.get(j);
+							String eptIAttr = tEpt.attributeValue("i");
+							if (eptIAttr.equals(curI))
+							{
+								eptIAttrVlues.put(j, iAttr);
+								break;
+							}
 						}
 					}
-					tBpt.addAttribute("i", iAttr);
 				}
 			}
         }
         //0002277: Incorrect id for ept in target local
-		for (int i = 0, max = sBpts.size(); i < max; i++)
+        Set<Integer> keySet = eptIAttrVlues.keySet();
+		for (Integer key : keySet)
 		{
-			Element tEpt = (Element) tEpts.get(i);
-			tEpt.addAttribute("i", eptIAttrVlues.get(i));
+			Element tEpt = (Element) tEpts.get(key);
+			tEpt.addAttribute("i", eptIAttrVlues.get(key));
 		}
         
 		int firstIndex = 5;

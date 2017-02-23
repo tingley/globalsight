@@ -98,13 +98,19 @@ function validateJobIds()
 		jobIDArr = jobIDText.split(",");
 		if(!validateIDS(jobIDArr, jobInfos))
 		{
-			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
+			if (canAlert)
+			{
+			    alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
+			}
 			return;
 		}
 		
 		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
 		{
-			alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			if (canAlert)
+			{
+			    alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			}
 			return;
 		}
 	}
@@ -250,9 +256,14 @@ function setDisableTRWrapper(trid)
     }
 }
 
+//The canAlert should be false if do cancel.
+var canAlert = true;
+
 // The function for canceling the report.
 function fnDoCancel() {
+  canAlert = false;
   var jobIDArr = fnGetSelectedJobIds();
+  canAlert = true;
   if(jobIDArr == null || jobIDArr.length == 0)
 	 window.close();	
 	

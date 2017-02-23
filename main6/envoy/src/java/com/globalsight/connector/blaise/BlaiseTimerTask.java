@@ -37,20 +37,21 @@ public class BlaiseTimerTask extends Thread
             if (StringUtil.isNotEmpty(connector.getPullDays()))
             {
                 int checkDuration = connector.getCheckDuration();
-                long checkTime = checkDuration * 1000;
+                long checkTime = checkDuration * 60000;
 
                 while (true)
                 {
                     if (isCancel)
                         break;
 
-                    logger.info("Thread [" + getName() + "] is running check...");
                     //is an automatic connector
                     String pullDays = connector.getPullDays();
                     if (!pullDays.endsWith(","))
                         pullDays += ",";
                     Calendar calendar = Calendar.getInstance();
                     String currentDayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) - 1) + ",";
+                    //logger.info("Thread [" + getName() + "] is running check..." + pullDays +
+                    // ", " + currentDayOfWeek);
                     if (pullDays.indexOf(currentDayOfWeek) > -1)
                     {
                         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);

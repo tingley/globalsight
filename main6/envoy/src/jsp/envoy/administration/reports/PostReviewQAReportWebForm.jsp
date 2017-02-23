@@ -42,47 +42,12 @@
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
 //All job info list.
 var reportJobInfo;
-var alertInfo;
-
-function validateForm()
-{
-    if(lisaQAForm.reportOnJobId.checked)
-    {
-        var jobIDArr =  lisaQAForm.jobIds.value.split(",");
-
-		if(!validateIDS(jobIDArr, null))
-        {
-        	$("#jobNameList").attr("selected", true);
-           return ('<%=bundle.getString("lb_invalid_jobid")%>');
-        }
-    }
-    if(lisaQAForm.reportOnJobName.checked) {
-        var len = $("#jobNameList").find("option:selected").length;
-        if(len == 0) {
-            var ops = $("#jobNameList").children();
-            if(ops.length == 0) {
-                return ('<%=bundle.getString("msg_invalid_jobName")%>');
-            } else {
-                ops.attr("selected", true);
-            }
-	    }
-	}
-    return "";
-}
 
 function doSubmit()
 {
-	var msg = validateForm();
-    if (msg != "")
-    {
-        alert(msg);
-        return;
-    }
 	var jobIDArr = fnGetSelectedJobIds();
 	if(jobIDArr == null || jobIDArr.length == 0)
 	{
-		if(alertInfo != null)
-			alert(alertInfo); 
 		return;	
 	}
 
@@ -108,22 +73,41 @@ function doSubmit()
 
 function fnGetSelectedJobIds()
 {
+	if (reportJobInfo == null)
+    {
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportPostReviewQA", "getReportJobInfo");
+    }
+	return validateJobIds();
+}
+
+function validateJobIds()
+{
+	var jobInfos = new Array();
+	$(reportJobInfo).each(function(i, item) {
+		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
+     });
+	
 	var jobIDArr = new Array();
 	if(lisaQAForm.reportOnJobId.checked)
 	{
 		var jobIDText = document.getElementById("jobIds").value;
-		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
-		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ",")
-		{
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
 			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
 			return;
 		}
 		jobIDArr = jobIDText.split(",");
-		if(!validateIDS(jobIDArr, null))
-        {
-			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+		if(!validateIDS(jobIDArr, jobInfos))
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
 			return;
-        }
+		}
+		
+		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+		{
+			alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			return;
+		}
 	}
 	else
 	{
@@ -136,20 +120,15 @@ function fnGetSelectedJobIds()
 			}
 		}
 		
-		if(!validateIDS(jobIDArr, null))
+		if(!validateIDS(jobIDArr, jobInfos))
 	    {
-			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
+			alert("<%=bundle.getString("msg_invalid_jobName")%>");
 			return;
 	    }
 	}
 	jobIDArr.sort(sortNumber);
 	
 	return jobIDArr;
-}
-
-function sortNumber(a,b) 
-{ 
-	return a - b 
 }
 
 function doOnload()

@@ -44,6 +44,7 @@ public class Office2Optimizer extends Optimizer
             gxml = mergeMultiTags(gxml);
             gxml = mergePh(gxml);
             gxml = removeAllPrefixAndSuffixTags(tuv, gxml, p_jobId);
+            gxml = removePrefixAndSuffixSpace(tuv, gxml, p_jobId);
         }
 
         tuv.setGxml(gxml);

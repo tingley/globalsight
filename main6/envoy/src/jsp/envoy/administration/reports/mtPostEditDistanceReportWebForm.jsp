@@ -43,37 +43,6 @@
 //All job info list.
 var reportJobInfo;
 
-function validateForm()
-{
-    if(searchForm.reportOnJobId.checked)
-    {
-        var jobIDArr =  searchForm.jobIds.value.split(",");
-//        var idInput=$("#jobNameList").find("option");
-//		var idArray=new Array();
-//		idInput.each(function(){
-//			idArray.push({"jobId":$(this).val()});
-//		});
-
-		if(!validateIDS(jobIDArr, null))
-        {
-        	$("#jobNameList").attr("selected", true);
-           return ('<%=bundle.getString("lb_invalid_jobid")%>');
-        }
-    }
-    if(searchForm.reportOnJobName.checked) {
-        var len = $("#jobNameList").find("option:selected").length;
-        if(len == 0) {
-            var ops = $("#jobNameList").children();
-            if(ops.length == 0) {
-                return ('<%=bundle.getString("msg_invalid_jobName")%>');
-            } else {
-                ops.attr("selected", true);
-            }
-	    }
-	}
-    return "";
-}
-
 // Check the status before close the page.
 function doClose()
 {
@@ -108,28 +77,92 @@ function doClose()
 
 function submitForm()
 {
-    var msg = validateForm();
-    if (msg != "")
+	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		return;	
+	}
+	
+	// Submit the Form, if possible(No report is generating.)
+    $.ajax({
+		type: 'POST',
+   		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+   		data: {'reportType'  : $("input[name='reportType']").val()},
+   		success: function(data) {
+   					if(data == null || data.status != "inProgress")
+   					{
+   						$("form[name='searchForm']").submit();
+   					}
+   	    		 },
+   		dataType: 'json'
+    });
+}
+
+function fnGetSelectedJobIds()
+{
+	if (reportJobInfo == null)
     {
-        alert(msg);
-        return;
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=MTPostEditDistanceReport", "getReportJobInfo");
     }
-    else
+	return validateJobIds();
+}
+
+function validateJobIds()
+{
+	var jobInfos = new Array();
+	if (reportJobInfo == null)
     {
-        // Submit the Form, if possible(No report is generating.)
-        $.ajax({
-			type: 'POST',
-	   		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
-	   		data: {'reportType'  : $("input[name='reportType']").val()},
-	   		success: function(data) {
-	   					if(data == null || data.status != "inProgress")
-	   					{
-	   						$("form[name='searchForm']").submit();
-	   					}
-	   	    		 },
-	   		dataType: 'json'
+		var url ="${self.pageURL}&activityName=MTPostEditDistanceReport&action=getReportJobInfo";
+	    $.getJSON(url, function(data) {
+			reportJobInfo = data;
 	    });
     }
+	$(reportJobInfo).each(function(i, item) {
+		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
+     });
+	
+	var jobIDArr = new Array();
+	if(searchForm.reportOnJobId.checked)
+	{
+		var jobIDText = document.getElementById("jobIds").value;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+			return;
+		}
+		jobIDArr = jobIDText.split(",");
+		if(!validateIDS(jobIDArr, jobInfos))
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
+			return;
+		}
+		
+		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+		{
+			alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			return;
+		}
+	}
+	else
+	{
+		var selObj = document.getElementById("jobNameList");
+		for (i=0; i<selObj.options.length; i++) 
+		{
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(selObj.options[i].value);
+			}
+		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alert("<%=bundle.getString("msg_invalid_jobName")%>");
+			return;
+	    }
+	}
+	jobIDArr.sort(sortNumber);
+	
+	return jobIDArr;
 }
 
 function filterJob()

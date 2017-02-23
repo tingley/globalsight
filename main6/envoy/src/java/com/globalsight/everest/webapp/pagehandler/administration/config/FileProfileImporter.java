@@ -488,15 +488,15 @@ public class FileProfileImporter implements ConfigConstants
             {
                 List<Filter> filters = FilterHelper.getFiltersByTableName(filterTableName,
                         companyId);
-                long currentFilterId = -1;
+                if (filters.size() == 0)
+                    fileProfile.setFilterId(-1);
                 for (Filter filter : filters)
                 {
                     String filterName = filter.getFilterName();
                     if (filterName.equals(origFilter.getFilterName())
                             || filterName.startsWith(origFilter.getFilterName() + "_import_"))
                     {
-                        currentFilterId = filter.getId();
-                        fileProfile.setFilterId(currentFilterId);
+                        fileProfile.setFilterId(filter.getId());
                         break;
                     }
                 }
@@ -512,6 +512,8 @@ public class FileProfileImporter implements ConfigConstants
             if (origQAFilter != null)
             {
                 List<Filter> qaFilterList = QAFilterManager.getAllQAFilters(companyId);
+                if (qaFilterList.size() == 0)
+                    fileProfile.setQaFilter(null);
                 for (Filter qaFilter : qaFilterList)
                 {
                     String filterName = qaFilter.getFilterName();
@@ -573,7 +575,7 @@ public class FileProfileImporter implements ConfigConstants
 
     private String getFileProfileNewName(String oldName, long companyId)
     {
-        String hql = "select fp.name from FileProfileImpl " + "  fp where fp.companyId=:companyId";
+        String hql = "select fp.name from FileProfileImpl fp where fp.companyId=:companyId";
         Map map = new HashMap();
         map.put("companyId", companyId);
         List itList = HibernateUtil.search(hql, map);

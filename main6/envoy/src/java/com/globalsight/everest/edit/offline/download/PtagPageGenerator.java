@@ -19,9 +19,12 @@
 package com.globalsight.everest.edit.offline.download;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -286,11 +289,10 @@ public class PtagPageGenerator
         List sBpts = sroot.selectNodes("//bpt");
         List tBpts = troot.selectNodes("//bpt");
         List tEpts = troot.selectNodes("//ept");
+        Map<Integer,String> eptIAttrVlues = new HashMap<Integer,String>();
         for (int i = 0, max = sBpts.size(); i < max; i++)
         {
             Element sBpt = (Element) sBpts.get(i);
-            Element tBpt = (Element) tBpts.get(i);
-            Element tEpt = (Element) tEpts.get(i);
             
             String xAttr = sBpt.attributeValue("x");
             String iAttr = sBpt.attributeValue("i");
@@ -299,18 +301,37 @@ public class PtagPageGenerator
             // Don't crash here because of it. Fix it elsewhere.
             if (xAttr != null && iAttr != null)
 			{
-            	//Fixes a single "i" attribute in all other TUVs based on the "x".
-				if (tBpt != null
-						&& tEpt != null
-						&& tBpt == (Element) troot
-								.selectSingleNode("//bpt[@x='" + xAttr + "']"))
+				for (int m = 0; m < tBpts.size(); m++)
 				{
-					tBpt.addAttribute("i", iAttr);
-					tEpt.addAttribute("i", iAttr);
+					Element tBpt = (Element) tBpts.get(m);
+					// Fixes a single "i" attribute in all other TUVs based on
+					// the "x".
+					if (tBpt != null && xAttr.equals(tBpt.attributeValue("x")))
+					{
+						String curI = tBpt.attributeValue("i");
+						tBpt.addAttribute("i", iAttr);
+						for (int j = 0; j < tEpts.size(); j++)
+						{
+							Element tEpt = (Element) tEpts.get(j);
+							String eptIAttr = tEpt.attributeValue("i");
+							if (eptIAttr.equals(curI))
+							{
+								eptIAttrVlues.put(j, iAttr);
+								break;
+							}
+						}
+					}
 				}
 			}
         }
-
+        //0002277: Incorrect id for ept in target local
+        Set<Integer> keySet = eptIAttrVlues.keySet();
+		for (Integer key : keySet)
+		{
+			Element tEpt = (Element) tEpts.get(key);
+			tEpt.addAttribute("i", eptIAttrVlues.get(key));
+		}
+        
 		int firstIndex = 5;
 		int sEndIndex = sroot.asXML().length() - 6;
 		int tEndIndex = troot.asXML().length() - 6;

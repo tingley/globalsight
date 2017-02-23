@@ -68,35 +68,64 @@ function isInteger(value)
     return (parseInt(value) == value);
 }
 
-function validateForm()
+function fnGetSelectedJobIds()
 {
-    if(searchForm.reportOnJobId.checked)
+	if (reportJobInfo == null)
     {
-        var jobIDArr =  searchForm.jobIds.value.split(",");
-//        var idInput=$("#jobNameList").find("option");
-//		var idArray=new Array();
-//		idInput.each(function(){
-//			idArray.push({"jobId":$(this).val()});
-//		})
-        if(!validateIDS(jobIDArr, null))
-        {
-        	$("#jobNameList").attr("selected", true);
-           return ('<%=bundle.getString("lb_invalid_jobid")%>');
-        }
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportFileList", "getReportJobInfo");
     }
-    if(searchForm.reportOnJobName.checked){
-	    var len=$("#jobNameList").find("option:selected").length;
-	    if(len==0){
-	    	var ops=$("#jobNameList").children();
-	    	if(ops.length==0){
-	    		return ('<%=bundle.getString("msg_invalid_jobName")%>');
-	    	}else{
-	    		ops.attr("selected", true);
-	    	}
-	    	
+	return validateJobIds();
+}
+
+function validateJobIds()
+{
+	var jobInfos = new Array();
+	$(reportJobInfo).each(function(i, item) {
+		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
+     });
+	
+	var jobIDArr = new Array();
+	if(searchForm.reportOnJobId.checked)
+	{
+		var jobIDText = document.getElementById("jobIds").value;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+			return;
+		}
+		jobIDArr = jobIDText.split(",");
+		if(!validateIDS(jobIDArr, jobInfos))
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
+			return;
+		}
+		
+		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+		{
+			alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			return;
+		}
+	}
+	else
+	{
+		var selObj = document.getElementById("jobNameList");
+		for (i=0; i<selObj.options.length; i++) 
+		{
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(selObj.options[i].value);
+			}
+		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alert("<%=bundle.getString("msg_invalid_jobName")%>");
+			return;
 	    }
 	}
-    return "";
+	jobIDArr.sort(sortNumber);
+	
+	return jobIDArr;
 }
 
 // Check the status before close the page.
@@ -134,14 +163,12 @@ function doClose()
 
 function submitForm()
 {
-   var msg = validateForm();
-   if (msg != "")
-   {
-    alert(msg);
-    return;
-   }
-   else
-   {
+	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		return;	
+	}
+	
 	// Submit the Form, if possible(No report is generating.)
 	$.ajax({
 			type: 'POST',
@@ -155,7 +182,6 @@ function submitForm()
 	   	    		 },
 	   		dataType: 'json'
 	});
-   }
 }
 
 function filterJob()

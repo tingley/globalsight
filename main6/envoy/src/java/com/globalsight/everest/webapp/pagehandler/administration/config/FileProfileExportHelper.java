@@ -56,7 +56,7 @@ public class FileProfileExportHelper implements ConfigConstants
     /**
      * Gets file profiles info.
      */
-    public static File propertiesInputLP(File fpPropertyFile, String profileId)
+    public static File propertiesInputFP(File fpPropertyFile, String profileId)
     {
         try
         {

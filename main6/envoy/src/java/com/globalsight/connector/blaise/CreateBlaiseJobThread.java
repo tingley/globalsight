@@ -31,10 +31,9 @@ import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.webapp.pagehandler.administration.createJobs.SaveCommentThread;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.FileUtil;
-import com.globalsight.util.RuntimeCache;
+import com.globalsight.util.*;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
+import jodd.util.StringBand;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -57,6 +56,7 @@ public class CreateBlaiseJobThread extends Thread
     private List<TranslationInboxEntryVo> entries = new ArrayList<TranslationInboxEntryVo>();
     private List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
     private HashMap<String, String> file2TargetLocale = new HashMap<>();
+    private String targetLocale;
 
     public CreateBlaiseJobThread(User user, String currentCompanyId, BlaiseConnector conn,
             CreateBlaiseJobForm blaiseForm, List<TranslationInboxEntryVo> entries,
@@ -77,6 +77,16 @@ public class CreateBlaiseJobThread extends Thread
         this.fileProfiles = fileProfiles;
     }
 
+    public CreateBlaiseJobThread(User user, String currentCompanyId, BlaiseConnector conn,
+            CreateBlaiseJobForm blaiseForm, List<TranslationInboxEntryVo> entries,
+            List<FileProfile> fileProfiles, File attachFile, String attachFileName, String uuid,
+            List<JobAttribute> jobAttribtues, String targetLocale)
+    {
+        this(user, currentCompanyId, conn, blaiseForm, entries, fileProfiles, attachFile,
+                attachFileName, uuid, jobAttribtues);
+        this.targetLocale = targetLocale;
+    }
+
     private void createJob() throws Exception
     {
         try
@@ -88,10 +98,6 @@ public class CreateBlaiseJobThread extends Thread
             long l10Id = fileProfiles.get(0).getL10nProfileId();
             BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class, l10Id);
             String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
-
-            Locale trgLocale = entries.get(0).getTargetLocale();
-            String targetLocale = trgLocale.getLanguage() + "_" + trgLocale.getCountry();
-            targetLocale = BlaiseHelper.fixLocale(targetLocale);
 
             Job job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(), l10Id,
                     priority, Job.IN_QUEUE, Job.JOB_TYPE_BLAISE);
@@ -113,6 +119,8 @@ public class CreateBlaiseJobThread extends Thread
             }
 
             int count = 0;
+
+            String targetLocaleString = StringUtil.isEmpty(targetLocale) ? getTargetLocales() : targetLocale;
             for (Iterator<String> i = fileNames.iterator(); i.hasNext(); )
             {
                 String fileName = i.next();
@@ -121,7 +129,6 @@ public class CreateBlaiseJobThread extends Thread
                 int exitValue = (int) tmp[1];
 
                 String key = jobName + fileName + ++count;
-                String targetLocaleString = file2TargetLocale.get(fileName);
                 CxeProxy.setTargetLocales(key, targetLocaleString);
                 CxeProxy.importFromFileSystem(fileName, String.valueOf(job.getId()), jobName,
                         fileProfileId, pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
@@ -177,6 +184,29 @@ public class CreateBlaiseJobThread extends Thread
         }
     }
 
+    public String getTargetLocales()
+    {
+        StringBand locales = new StringBand();
+        if (entries == null || entries.size() == 0)
+            return "";
+
+        ArrayList<String> localeList = new ArrayList<>(8);
+        String tmp;
+        for (TranslationInboxEntryVo entry : entries)
+        {
+            tmp = entry.getTargetLocaleAsString();
+            if (!localeList.contains(tmp))
+            {
+                locales.append(tmp).append(",");
+                localeList.add(tmp);
+            }
+        }
+        tmp = locales.toString();
+        if (tmp.length() > 0)
+            tmp = tmp.substring(0, tmp.length() - 1);
+        return tmp;
+    }
+
     private String decideJobName()
     {
         String jobName = null;
@@ -218,10 +248,7 @@ public class CreateBlaiseJobThread extends Thread
             String externalPageId = filePath.toString();
             descList.add(externalPageId);
 
-            String targetLocale =
-                    curEntry.getTargetLocale().getLanguage() + "_" + curEntry.getTargetLocale()
-                            .getCountry();
-            targetLocale = BlaiseHelper.fixLocale(targetLocale);
+            String targetLocale = curEntry.getTargetLocaleAsString();
             file2TargetLocale.put(externalPageId, targetLocale);
 
             File srcFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)

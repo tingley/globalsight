@@ -1056,7 +1056,6 @@ public class DocumentUtil
             n = root.getOwnerDocument().createElement("w:rPr");
             root.insertBefore(n, root.getFirstChild());
         }
-        
         Node a = att.cloneNode(true);
         n.appendChild(a);
     }
@@ -1266,7 +1265,7 @@ public class DocumentUtil
         List<Node> rprs22 = new ArrayList<Node>();
         
         List<Node> removeRprs = new ArrayList<Node>();
-        List<Node> addRprs = new ArrayList<Node>();
+//        List<Node> addRprs = new ArrayList<Node>();
         
         List<Node> list1 = util.getChildNodes(rPr1);
         List<Node> list2 = util.getChildNodes(rPr2);
@@ -1287,16 +1286,16 @@ public class DocumentUtil
                     found = true;
                     break;
                 }
-                else if (n == 1)
-                {
-                    Style s = m.get(att2.getNodeName());
-                    if (s != null)
-                    {
-                        addRprs.add(att1);
-                        found = true;
-                        break;
-                    }
-                }
+//                else if (n == 1)
+//                {
+//                    Style s = m.get(att2.getNodeName());
+//                    if (s != null)
+//                    {
+//                        addRprs.add(att1);
+//                        found = true;
+//                        break;
+//                    }
+//                }
             }
             
             if (!found)
@@ -1374,10 +1373,10 @@ public class DocumentUtil
             r.getParentNode().removeChild(r);
         }
         
-        for (Node r : addRprs)
-        {
-            addrPr(r, n2);
-        }
+//        for (Node r : addRprs)
+//        {
+//            addrPr(r, n2);
+//        }
         
         List<Style> styles = DocxStyleUtil.getAllStyles();
         

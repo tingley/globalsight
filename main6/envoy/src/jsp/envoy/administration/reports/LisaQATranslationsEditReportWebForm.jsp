@@ -33,8 +33,8 @@
 <!-- This JSP is: /envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp-->
 <head>
 <title><%=bundle.getString("translations_web_form")%></title>
-<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
@@ -44,6 +44,10 @@ var reportJobInfo;
 function doSubmit()
 {
 	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		return;
+	}
 
 	// Submit the Form, if possible(No report is generating.)
 	$.ajax({
@@ -65,16 +69,9 @@ function doSubmit()
 	});
 }
 
-function fnGetSelectedJobIds()
+function validateJobIds()
 {
 	var jobInfos = new Array();
-	if (reportJobInfo == null)
-    {
-		var url ="${self.pageURL}&activityName=xlsReportTranslationsEdit&action=getReportJobInfo";
-	    $.getJSON(url, function(data) {
-			reportJobInfo = data;
-	    });
-    }
 	$(reportJobInfo).each(function(i, item) {
 		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
      });
@@ -85,11 +82,15 @@ function fnGetSelectedJobIds()
 		var jobIDText = document.getElementById("jobIds").value;
 		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
 		jobIDArr = jobIDText.split(",");
+		if(jobIDArr.length>1)
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid_one")%>');
+        	return;
+		}
 		if(!isNumeric(jobIDText)){
 			alert('<%=bundle.getString("msg_invalid_jobId")%>');
 			return;
 		}
-		
 		if(!validateIDS(jobIDArr, jobInfos))
 		{
 			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
@@ -120,19 +121,16 @@ function fnGetSelectedJobIds()
 	    }
 	}
 	jobIDArr.sort(sortNumber);
-	
 	return jobIDArr;
 }
 
-function isNumeric(str){
-	if (str.startsWith("0"))
-		return false;
-	return /^(-|\+)?\d+(\.\d+)?$/.test(str);
-}
-
-function sortNumber(a,b) 
-{ 
-	return a - b 
+function fnGetSelectedJobIds()
+{
+	if (reportJobInfo == null)
+    {
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportTranslationsEdit", "getReportJobInfo");
+    }
+	return validateJobIds();
 }
 
 function doOnload()
@@ -147,7 +145,6 @@ function filterJob()
     {
         return;
     }
-
     // If job list is null, initialize it first.
     if (reportJobInfo == null)
     {
@@ -171,32 +168,10 @@ function filterJob2()
 {
 	lisaQAForm.jobNameList.options.length = 0;
 
-    //selected target locales
-    var currSelectValueTargetLocale = new Array();
-    for(i = 0; i < lisaQAForm.targetLocalesList.length; i++)
-    {
-        var op = lisaQAForm.targetLocalesList.options[i];
-        if(op.selected)
-        {
-            currSelectValueTargetLocale.push(op.value);
-        }
-    }
-
     $(reportJobInfo).each(function(i, item) {
-    	var isLocaleFlag = "false";
-        $.each(item.targetLocales, function(i, item) {
-            if (contains(currSelectValueTargetLocale, item)) {
-                isLocaleFlag = "true";
-                //break the target locales check for performance
-                return false;
-            }
-        });
-        if(isLocaleFlag == "true")
-        {
-            var varItem = new Option(item.jobName, item.jobId);
-            varItem.setAttribute("title", item.jobName);
-            lisaQAForm.jobNameList.options.add(varItem);
-        }
+    	var varItem = new Option(item.jobName, item.jobId);
+        varItem.setAttribute("title", item.jobName);
+        lisaQAForm.jobNameList.options.add(varItem);
      });
 
     if(lisaQAForm.jobNameList.options.length==0)
@@ -207,6 +182,24 @@ function filterJob2()
     {
     	lisaQAForm.submitButton.disabled=false;
     }
+}
+
+function filterTargetLocale()
+{
+	var jobID = lisaQAForm.jobNameList.value;
+	if(!isNumeric(jobID)){
+		alert('<%=bundle.getString("msg_invalid_jobName")%>');
+		return;
+	}
+	$("#targetLocalesList").find("option").remove();
+	var url ="${self.pageURL}&action=ajaxTERS";
+	$.getJSON(url,{jobId:jobID},function(data){
+		$(data).each(function(i, item){
+			var sel = document.getElementById("targetLocalesList");
+			var option = new Option(item.targetLocName, item.targetLocId);
+			sel.options.add(option); 
+		});
+	});
 }
 
 function setDisableTRWrapper(trid)
@@ -250,12 +243,12 @@ function setDisableTRWrapper(trid)
             <table cellspacing=0>
             <tr id="idTRJobIds">
                 <td><input type="radio" id="reportOnJobId" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%></td>
-                <td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
+                <td><input type="text" id="jobIds" name="jobIds" value=""></td>
             </tr>
             <tr id="idTRJobNames">
                 <td><input type="radio" id="reportOnJobName" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:</td>
                 <td>
-                <select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;" disabled>
+                <select id="jobNameList" name="jobNameList" style="width:300px;" onChange="filterTargetLocale()">
                 </select>
                 </td>
             </tr>
@@ -271,8 +264,7 @@ function setDisableTRWrapper(trid)
     <tr>
         <td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-            <select id="targetLocalesList" name="targetLocalesList" multiple="true" size=5 onChange="filterJob()">
-            <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+            <select id="targetLocalesList" name="targetLocalesList">
 <%
             SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
             Iterator iterLocale = targetLocales.iterator();
@@ -284,7 +276,7 @@ function setDisableTRWrapper(trid)
 <%
             }
 %>
-        </select>
+            </select>
         </td>
     </tr>
     <tr>

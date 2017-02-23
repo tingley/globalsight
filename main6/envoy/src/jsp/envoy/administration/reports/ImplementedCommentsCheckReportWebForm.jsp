@@ -48,7 +48,6 @@
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
-var alertInfo;
 var reportJobInfo;
 
 $(document).ready(function(){
@@ -120,7 +119,7 @@ function defautSelect()
      var ops=$("#jobNameList").children();
      if(ops.length==0)
      {
-      return ('No job name(s) is(are) selected.');
+      return "<%=bundle.getString("msg_invalid_jobName")%>";
      }
      else
      {
@@ -128,10 +127,15 @@ function defautSelect()
      }
 }
 
-//The function for canceling the report.
-function fnDoCancel()
-{
-	var jobIDArr = fnGetSelectedJobIds();
+//The canAlert should be false if do cancel.
+var canAlert = true;
+
+// The function for canceling the report.
+function fnDoCancel() {
+    canAlert = false;
+    var jobIDArr = fnGetSelectedJobIds();
+    canAlert = true;
+  
     if(jobIDArr == null || jobIDArr.length == 0)
 	  window.close();
 	 
@@ -162,29 +166,9 @@ function fnDoCancel()
 	});
 }
 
-function validateForm()
+function dataSelectAll()
 {
-    if(ImplementedChkForm.reportOnJobId.checked)
-    {
-        var jobIDArr =  ImplementedChkForm.jobIds.value.split(",");
-		if(!validateIDS(jobIDArr, null))
-        {
-           $("#jobNameList").attr("selected", true);
-           return ('<%=bundle.getString("lb_invalid_jobid")%>');
-        }
-    }
-    if(ImplementedChkForm.reportOnJobName.checked) {
-        var len = $("#jobNameList").find("option:selected").length;
-        if(len == 0) {
-            var ops = $("#jobNameList").children();
-            if(ops.length == 0) {
-                return ('<%=bundle.getString("msg_invalid_jobName")%>');
-            } else {
-                ops.attr("selected", true);
-            }
-	    }
-	}
-    var startVal=ImplementedChkForm.<%=creationStart%>.value;
+	var startVal=ImplementedChkForm.<%=creationStart%>.value;
 	if(startVal){
 		defautSelect();
 		  return ""; 
@@ -196,22 +180,20 @@ function validateForm()
 		defautSelect();
         return ""; 
 	}
-    return "";
+	  return "";
 }
 
 function doSubmit()
 {
-	var msg = validateForm();
-    if (msg != "")
-    {
-        alert(msg);
-        return;
-    }
+	var msg =  dataSelectAll();
+   	if (msg != "")
+   	{
+    	alert(msg);
+    	return;
+   	}
 	var jobIDArr = fnGetSelectedJobIds();
 	if(jobIDArr == null || jobIDArr.length == 0)
 	{
-		if(alertInfo != null)
-			alert(alertInfo); 
 		return;	
 	}
 	
@@ -257,22 +239,47 @@ function doSubmit()
 
 function fnGetSelectedJobIds()
 {
+	if (reportJobInfo == null)
+    {
+		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=implementedCommentsCheck", "getReportJobInfo");
+    }
+	return validateJobIds();
+}
+
+function validateJobIds()
+{
+	var jobInfos = new Array();
+	$(reportJobInfo).each(function(i, item) {
+		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
+     });
+	
 	var jobIDArr = new Array();
 	if(ImplementedChkForm.reportOnJobId.checked)
 	{
 		var jobIDText = document.getElementById("jobIds").value;
 		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
-		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ",")
-		{
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
 			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
 			return;
 		}
 		jobIDArr = jobIDText.split(",");
-		if(!validateIDS(jobIDArr, null))
-        {
-			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+		if(!validateIDS(jobIDArr, jobInfos))
+		{
+			if (canAlert)
+			{
+			    alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
+			}
 			return;
-        }
+		}
+		
+		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+		{
+			if (canAlert)
+			{
+			    alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			}
+			return;
+		}
 	}
 	else
 	{
@@ -285,9 +292,9 @@ function fnGetSelectedJobIds()
 			}
 		}
 		
-		if(!validateIDS(jobIDArr, null))
+		if(!validateIDS(jobIDArr, jobInfos))
 	    {
-			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
+			alert("<%=bundle.getString("msg_invalid_jobName")%>");
 			return;
 	    }
 	}
@@ -394,11 +401,6 @@ function doOnload()
 	// Set the jobIds as default check. 
 	setDisableTRWrapper("idTRJobNames");
 }
-
-function sortNumber(a,b) 
-{ 
-	return a - b 
-} 
 </script>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>

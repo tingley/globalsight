@@ -73,9 +73,23 @@ function fnGetSelectedJobIds()
 {
 	if (reportJobInfo == null)
     {
-		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportTranslationVerification", "getReportJobInfo");
+		$.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=xlsReportTranslationVerification&action=getReportJobInfo',
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    			return validateJobIds();
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
-	return validateJobIds();
+	else
+	{
+		return validateJobIds();
+	}
 }
 
 function validateJobIds()
@@ -154,11 +168,18 @@ function filterJob()
     	lisaQAForm.jobNameList.options.add(varItem);
     	lisaQAForm.submitButton.disabled = true;
 
-        var url ="${self.pageURL}&activityName=xlsReportTranslationVerification&action=getReportJobInfo";
-        $.getJSON(url, function(data) {
-			reportJobInfo = data;
-			filterJob2();
-	    });
+        $.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=xlsReportTranslationVerification&action=getReportJobInfo',
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    			filterJob2();
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
     else
     {

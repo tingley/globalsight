@@ -172,27 +172,6 @@ function getSelValueArr(selElemID){
 	return result;
 }
 
-var reportJobInfo;
-function getAjaxReportJobInfo(urlPrefix, method, data)
-{
-	$.ajax({
-		type : "POST",
-		url : urlPrefix + '&action=' + method,
-		async : false,
-		cache : false,
-		dataType : 'text',
-		data : data,
-		success : function(data) {
-			reportJobInfo = eval("(" + data + ")");
-		},
-		error : function(request, error, status) {
-			reportJobInfo = "";
-		}
-	});
-	
-	return reportJobInfo;
-}
-
 function isNumeric(str)
 {
 	if (str.startsWith("0"))

@@ -201,8 +201,7 @@ public class PtagPageGenerator
             // NOTE: The use of getPTagSourceString() below is correct!!
             convertor.tmx2Pseudo(p_OSD.getDisplayTargetText(), PTagData); 
             
-            if(params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
-               || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 )
+			if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF)
             {
 				fixAttributeIX(p_OSD);
             }

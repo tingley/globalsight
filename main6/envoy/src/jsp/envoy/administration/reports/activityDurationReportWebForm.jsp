@@ -46,9 +46,9 @@
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY" onLoad="doOnload()">
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
 var reportJobInfo;
@@ -195,7 +195,7 @@ function validateJobIds()
 	{
 		var jobIDText = document.getElementById("jobIds").value;
 		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
-		jif(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
 			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
 			return;
 		}
@@ -423,7 +423,7 @@ function doOnload()
     <tr>
         <td class="standardText"><%=bundle.getString("lb_target_locales")%>*:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select id="targetLocalsList" name="targetLocalesList" multiple="true" size=4 onchange="filterJob()">
+        <select id="targetLocalesList" name="targetLocalesList" multiple="true" size=4 onchange="filterJob()">
             <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
             SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));

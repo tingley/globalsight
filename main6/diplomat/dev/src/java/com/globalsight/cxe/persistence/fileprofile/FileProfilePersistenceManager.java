@@ -238,5 +238,6 @@ public interface FileProfilePersistenceManager
     //  END: KnownFormatTypes  ///////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
 
+    public FileExtensionImpl getFileExtensionByNameAndCompanyId(String name, long companyId);
 }
 

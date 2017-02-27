@@ -221,4 +221,10 @@ public class FileProfilePersistenceManagerWLRMIImpl
     //////////////////////////////////////////////////////////////////////////////
     //  END: KnownFormatTypes  ///////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
+    
+    
+    public FileExtensionImpl getFileExtensionByNameAndCompanyId(String name, long companyId)
+    {
+        return m_localReference.getFileExtensionByNameAndCompanyId(name, companyId);
+    }
 }

@@ -23,8 +23,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 
+import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
+import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 /**
@@ -79,11 +84,22 @@ public class FileProfileExportHelper implements ConfigConstants
                         .append(fileProfile.getKnownFormatTypeId()).append(NEW_LINE);
                 buffer.append("FileProfile.").append(fileProfile.getId()).append(".CODE_SET = ")
                         .append(fileProfile.getCodeSet()).append(NEW_LINE);
-                buffer.append("FileProfile.").append(fileProfile.getId()).append(".XML_DTD_ID = ")
-                        .append(fileProfile.getXmlDtdId()).append(NEW_LINE);
+                XmlDtdImpl xmlDtd = fileProfile.getXmlDtd();
+                if (xmlDtd == null)
+                {
+                    buffer.append("FileProfile.").append(fileProfile.getId())
+                            .append(".XML_DTD_NAME = ").append("")
+                            .append(NEW_LINE);
+                }
+                else
+                {
+                    buffer.append("FileProfile.").append(fileProfile.getId())
+                            .append(".XML_DTD_NAME = ").append(xmlDtd.getName()).append(NEW_LINE);
+                }
+                String locProfileName = HibernateUtil.get(BasicL10nProfile.class,
+                        fileProfile.getL10nProfileId()).getName();
                 buffer.append("FileProfile.").append(fileProfile.getId())
-                        .append(".L10N_PROFILE_ID = ").append(fileProfile.getL10nProfileId())
-                        .append(NEW_LINE);
+                        .append(".L10N_PROFILE_NAME = ").append(locProfileName).append(NEW_LINE);
                 buffer.append("FileProfile.").append(fileProfile.getId())
                         .append(".DEFAULT_EXPORT_STF = ").append(fileProfile.byDefaultExportStf())
                         .append(NEW_LINE);
@@ -92,14 +108,23 @@ public class FileProfileExportHelper implements ConfigConstants
                         .append(df.format(fileProfile.getTimestamp())).append(NEW_LINE);
                 buffer.append("FileProfile.").append(fileProfile.getId()).append(".IS_ACTIVE = ")
                         .append(fileProfile.getIsActive()).append(NEW_LINE);
-                buffer.append("FileProfile.").append(fileProfile.getId()).append(".FILTER_ID = ")
-                        .append(fileProfile.getFilterId()).append(NEW_LINE);
+                buffer.append("FileProfile.").append(fileProfile.getId()).append(".FILTER_NAME = ")
+                        .append(fileProfile.getFilterName()).append(NEW_LINE);
                 buffer.append("FileProfile.").append(fileProfile.getId())
                         .append(".FILTER_TABLE_NAME = ").append(fileProfile.getFilterTableName())
                         .append(NEW_LINE);
-                buffer.append("FileProfile.").append(fileProfile.getId())
-                        .append(".QA_FILTER_ID = ").append(fileProfile.getQaFilterId())
-                        .append(NEW_LINE);
+                QAFilter qaFilter = fileProfile.getQaFilter();
+                if (qaFilter == null)
+                {
+                    buffer.append("FileProfile.").append(fileProfile.getId())
+                            .append(".QA_FILTER_NAME = ").append("").append(NEW_LINE);
+                }
+                else
+                {
+                    buffer.append("FileProfile.").append(fileProfile.getId())
+                            .append(".QA_FILTER_NAME = ").append(qaFilter.getFilterName())
+                            .append(NEW_LINE);
+                }
                 buffer.append("FileProfile.").append(fileProfile.getId()).append(".COMPANYID = ")
                         .append(fileProfile.getCompanyId()).append(NEW_LINE);
                 buffer.append("FileProfile.").append(fileProfile.getId())
@@ -128,14 +153,15 @@ public class FileProfileExportHelper implements ConfigConstants
                 StringBuffer sb = new StringBuffer();
                 for (int i = 0; i < extensionIds.size(); i++)
                 {
-                    sb.append(extensionIds.elementAt(i));
+                    FileExtensionImpl extension = HibernateUtil.get(FileExtensionImpl.class, extensionIds.elementAt(i));
+                    sb.append(extension.getName());
                     if (i < extensionIds.size() - 1)
                     {
                         sb.append(",");
                     }
                 }
                 buffer.append("FileProfile.").append(fileProfile.getId())
-                        .append(".EXTENSION_ID = ").append(sb).append(NEW_LINE);
+                        .append(".EXTENSION_NAMES = ").append(sb).append(NEW_LINE);
                 buffer.append("##FileProfile.").append(fileProfile.getCompanyId()).append(".")
                         .append(fileProfile.getId()).append(".end").append(NEW_LINE)
                         .append(NEW_LINE);

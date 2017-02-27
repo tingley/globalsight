@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -53,8 +54,6 @@ import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -63,15 +62,24 @@ import com.globalsight.util.StringUtil;
 public class FileProfileImporter implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(FileProfileImporter.class);
-    private String currentCompanyId;
     private String sessionId;
-    private String importToCompId;
+    private long companyId;
+    private String filterName;
+    private String xmlDtdName;
+    private String qaFilterName;
+    private String extensionNames;
 
     public FileProfileImporter(String sessionId, String companyId, String importToCompId)
     {
         this.sessionId = sessionId;
-        this.currentCompanyId = companyId;
-        this.importToCompId = importToCompId;
+        if (importToCompId != null && !importToCompId.equals("-1"))
+        {
+            this.companyId = Long.parseLong(importToCompId);
+        }
+        else
+        {
+            this.companyId = Long.parseLong(companyId);
+        }
     }
 
     /**
@@ -193,14 +201,25 @@ public class FileProfileImporter implements ConfigConstants
                 {
                     fileProfile.setCodeSet(valueField);
                 }
-                else if ("XML_DTD_ID".equalsIgnoreCase(keyField))
+                else if ("XML_DTD_NAME".equalsIgnoreCase(keyField))
                 {
-                    fileProfile.setXmlDtd(HibernateUtil.get(XmlDtdImpl.class,
-                            Long.parseLong(valueField)));
+                    xmlDtdName = valueField;
                 }
-                else if ("L10N_PROFILE_ID".equalsIgnoreCase(keyField))
+                else if ("L10N_PROFILE_NAME".equalsIgnoreCase(keyField))
                 {
-                    fileProfile.setL10nProfileId(Long.parseLong(valueField));
+                    List<BasicL10nProfile> lpList = ServerProxy.getProjectHandler()
+                            .getAllL10nProfileByCompanyId(companyId);
+                    long locProfileId = -1;
+                    for (BasicL10nProfile lp : lpList)
+                    {
+                        String lpName = lp.getName();
+                        if (lpName.equals(valueField) || lpName.startsWith(valueField + "_import_"))
+                        {
+                            locProfileId = lp.getId();
+                            break;
+                        }
+                    }
+                    fileProfile.setL10nProfileId(locProfileId);
                 }
                 else if ("DEFAULT_EXPORT_STF".equalsIgnoreCase(keyField))
                 {
@@ -216,29 +235,21 @@ public class FileProfileImporter implements ConfigConstants
                 {
                     fileProfile.setIsActive(Boolean.parseBoolean(valueField));
                 }
-                else if ("FILTER_ID".equalsIgnoreCase(keyField))
+                else if ("FILTER_NAME".equalsIgnoreCase(keyField))
                 {
-                    fileProfile.setFilterId(Long.parseLong(valueField));
+                    filterName = valueField;
                 }
                 else if ("FILTER_TABLE_NAME".equalsIgnoreCase(keyField))
                 {
                     fileProfile.setFilterTableName(valueField);
                 }
-                else if ("QA_FILTER_ID".equalsIgnoreCase(keyField))
+                else if ("QA_FILTER_NAME".equalsIgnoreCase(keyField))
                 {
-                    fileProfile.setQaFilter(QAFilterManager.getQAFilterById(Long
-                            .parseLong(valueField)));
+                    qaFilterName = valueField;
                 }
                 else if ("COMPANYID".equalsIgnoreCase(keyField))
                 {
-                    if (importToCompId != null && !importToCompId.equals("-1"))
-                    {
-                        fileProfile.setCompanyId(Long.parseLong(importToCompId));
-                    }
-                    else
-                    {
-                        fileProfile.setCompanyId(Long.parseLong(currentCompanyId));
-                    }
+                    fileProfile.setCompanyId(companyId);
                 }
                 else if ("SCRIPT_ON_IMPORT".equalsIgnoreCase(keyField))
                 {
@@ -275,18 +286,9 @@ public class FileProfileImporter implements ConfigConstants
                 {
                     fileProfile.setEolEncoding(Integer.parseInt(valueField));
                 }
-                else if ("EXTENSION_ID".equalsIgnoreCase(keyField))
+                else if ("EXTENSION_NAMES".equalsIgnoreCase(keyField))
                 {
-                    Set<Long> extensionIds = new HashSet<Long>();
-                    if (StringUtil.isNotEmptyAndNull(valueField))
-                    {
-                        String[] extensIds = valueField.split(",");
-                        for (String extensId : extensIds)
-                        {
-                            extensionIds.add(Long.parseLong(extensId));
-                        }
-                    }
-                    fileProfile.setExtensionIds(extensionIds);
+                    extensionNames = valueField;
                 }
             }
         }
@@ -330,30 +332,13 @@ public class FileProfileImporter implements ConfigConstants
 
                 // checks localization file exist
                 long profileId = originalFileProfile.getL10nProfileId();
-                String locProfileName = ServerProxy.getProjectHandler().getL10nProfile(profileId)
-                        .getName();
-                List<BasicL10nProfile> lpList = ServerProxy.getProjectHandler()
-                        .getAllL10nProfileByCompanyId(companyId);
-                long locProfileId = -1;
-                for (BasicL10nProfile lp : lpList)
-                {
-                    String lpName = lp.getName();
-                    if (lpName.equals(locProfileName)
-                            || lpName.startsWith(locProfileName + "_import_"))
-                    {
-                        locProfileId = lp.getId();
-                        originalFileProfile.setL10nProfileId(locProfileId);
-                        break;
-                    }
-                }
-                if (locProfileId != -1)
+                if (profileId != -1)
                 {
                     String oldName = originalFileProfile.getName();
                     String newName = getFileProfileNewName(oldName, companyId);
                     FileProfileImpl newFileProfile = createNewFileProfile(newName,
                             originalFileProfile);
                     HibernateUtil.save(newFileProfile);
-                    updateXslPath(originalFileProfile, newFileProfile);
                     if (oldName.equals(newName))
                     {
                         addMessage("<b>" + newName + "</b> imported successfully.");
@@ -381,42 +366,6 @@ public class FileProfileImporter implements ConfigConstants
     }
 
     /**
-     * Updates xls file path.
-     */
-    private void updateXslPath(FileProfileImpl originalFileProfile, FileProfileImpl newFileProfile)
-    {
-        try
-        {
-            String docRoot = AmbFileStoragePathUtils.getXslDir().getPath();
-            String path = AmbFileStoragePathUtils.getXslDir(originalFileProfile.getId()).getPath();
-
-            String origXslRelativeParent = new StringBuffer("/")
-                    .append(originalFileProfile.getId()).append("/").toString();
-            String xslRelativeParent = new StringBuffer("/").append(newFileProfile.getId())
-                    .append("/").toString();
-
-            StringBuffer origXslPath = new StringBuffer(path).append(origXslRelativeParent);
-            File origXslParent = new File(origXslPath.toString());
-
-            if (origXslParent.exists())
-            {
-                File[] files = origXslParent.listFiles();
-                if (files.length > 0)
-                {
-                    StringBuffer xslPath = new StringBuffer(docRoot).append(xslRelativeParent)
-                            .append(files[0].getName());
-                    File xslParent = new File(xslPath.toString());
-                    FileUtil.copyFile(files[0], xslParent);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Creates a new file profile.
      */
     private FileProfileImpl createNewFileProfile(String newName, FileProfileImpl originalFileProfile)
@@ -438,7 +387,6 @@ public class FileProfileImporter implements ConfigConstants
     {
         try
         {
-            long companyId = originalFileProfile.getCompanyId();
             fileProfile.setName(newName);
             fileProfile.setDescription(originalFileProfile.getDescription());
             fileProfile.setKnownFormatTypeId(originalFileProfile.getKnownFormatTypeId());
@@ -455,7 +403,17 @@ public class FileProfileImporter implements ConfigConstants
             fileProfile.setXlfSourceAsUnTranslatedTarget(originalFileProfile
                     .getXlfSourceAsUnTranslatedTarget());
             fileProfile.setEolEncoding(originalFileProfile.getEolEncoding());
-            fileProfile.setExtensionIds(originalFileProfile.getExtensionIds());
+            Vector extensionIds = new Vector();
+            String[] extensionNameList = extensionNames.split(",");
+            for (String extensionName : extensionNameList)
+            {
+                FileExtensionImpl fileExtension = ServerProxy.getFileProfilePersistenceManager()
+                        .getFileExtensionByNameAndCompanyId(extensionName, companyId);
+                if(fileExtension!=null){
+                    extensionIds.add(fileExtension.getId());
+                }
+            }
+            fileProfile.setFileExtensionIds(extensionIds);
 
             // saves xmlDtd
             KnownFormatTypeImpl knownFormat = HibernateUtil.get(KnownFormatTypeImpl.class,
@@ -466,24 +424,23 @@ public class FileProfileImporter implements ConfigConstants
             }
             else
             {
-                XmlDtdImpl origxmlDtdImpl = originalFileProfile.getXmlDtd();
                 List<XmlDtdImpl> xmlDtdList = XmlDtdManager.getAllXmlDtdByCompanyId(companyId);
-                for (XmlDtdImpl xmlDtd : xmlDtdList)
+                XmlDtdImpl xmlDtd = null;
+                for (XmlDtdImpl dtd : xmlDtdList)
                 {
-                    String dtdName = xmlDtd.getName();
-                    if (dtdName.equals(origxmlDtdImpl.getName())
-                            || dtdName.startsWith(origxmlDtdImpl.getName() + "_import_"))
+                    String dtdName = dtd.getName();
+                    if (dtdName.equals(xmlDtdName) || dtdName.startsWith(xmlDtdName + "_import_"))
                     {
-                        fileProfile.setXmlDtd(xmlDtd);
+                        xmlDtd = dtd;
                         break;
                     }
                 }
+                fileProfile.setXmlDtd(xmlDtd);
             }
 
             // saves filter
-            long filterId = originalFileProfile.getFilterId();
             String filterTableName = originalFileProfile.getFilterTableName();
-            Filter origFilter = FilterHelper.getFilter(filterTableName, filterId);
+            Filter origFilter = FilterHelper.getFilter(filterTableName, filterName, companyId);
             if (origFilter != null)
             {
                 List<Filter> filters = FilterHelper.getFiltersByTableName(filterTableName,
@@ -507,9 +464,7 @@ public class FileProfileImporter implements ConfigConstants
             }
 
             // saves qa filter
-            long qaFilterId = originalFileProfile.getFilterId();
-            QAFilter origQAFilter = QAFilterManager.getQAFilterById(qaFilterId);
-            if (origQAFilter != null)
+            if (StringUtil.isNotEmptyAndNull(qaFilterName))
             {
                 List<Filter> qaFilterList = QAFilterManager.getAllQAFilters(companyId);
                 if (qaFilterList.size() == 0)
@@ -517,13 +472,17 @@ public class FileProfileImporter implements ConfigConstants
                 for (Filter qaFilter : qaFilterList)
                 {
                     String filterName = qaFilter.getFilterName();
-                    if (filterName.equals(origQAFilter.getFilterName())
-                            || filterName.startsWith(origQAFilter.getFilterName() + "_import_"))
+                    if (filterName.equals(qaFilterName)
+                            || filterName.startsWith(qaFilterName + "_import_"))
                     {
                         fileProfile.setQaFilter((QAFilter) qaFilter);
                         break;
                     }
                 }
+            }
+            else
+            {
+                fileProfile.setQaFilter(null);
             }
         }
         catch (Exception e)

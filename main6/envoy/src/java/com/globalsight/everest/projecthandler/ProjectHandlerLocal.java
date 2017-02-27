@@ -4108,7 +4108,7 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * Gets all projectTMs by companyId.
      */
-    public List<ProjectTM> getAllProjectTMs(long companyId)
+    public List<ProjectTM> getAllProjectTMsByCompanyId(long companyId)
     {
         List<ProjectTM> tmProfiles = new ArrayList<ProjectTM>();
 
@@ -4124,7 +4124,25 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category.error("Failed to query translation memories by company id.", e);
+            c_category.error("Failed to query tms by company id.", e);
+            return null;
+        }
+    }
+    
+    public List<WorkflowStatePosts> getWfStatePostProfileByCompanyId(long companyId)
+    {
+        List<WorkflowStatePosts> tmProfiles = new ArrayList<WorkflowStatePosts>();
+
+        try
+        {
+            Map map = new HashMap();
+            String hsql = "from WorkflowStatePosts wfsp where wfsp.companyId=:companyId";
+            map.put("companyId", companyId);
+            return (List<WorkflowStatePosts>) HibernateUtil.search(hsql, map);
+        }
+        catch (Exception e)
+        {
+            c_category.error("Failed to query workflow state post profiles by company id.", e);
             return null;
         }
     }

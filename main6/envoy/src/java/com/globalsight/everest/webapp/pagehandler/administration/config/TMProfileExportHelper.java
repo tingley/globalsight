@@ -25,9 +25,12 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
+import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 /**
@@ -74,9 +77,10 @@ public class TMProfileExportHelper implements ConfigConstants
                     .append(tmProfile.getName()).append(NEW_LINE);
             buffer.append("TranslationMemoryProfile.").append(tmProfile.getId())
                     .append(".DESCRIPTION=").append(tmProfile.getDescription()).append(NEW_LINE);
+            String tmName = HibernateUtil.get(ProjectTM.class, tmProfile.getProjectTmIdForSave())
+                    .getName();
             buffer.append("TranslationMemoryProfile.").append(tmProfile.getId())
-                    .append(".PROJECT_TM_ID_FOR_SAVE=").append(tmProfile.getProjectTmIdForSave())
-                    .append(NEW_LINE);
+                    .append(".PROJECT_TM_NAME_FOR_SAVE=").append(tmName).append(NEW_LINE);
             buffer.append("TranslationMemoryProfile.").append(tmProfile.getId())
                     .append(".IS_UNLOC_SEG_SAVED_TO_PROJ_TM=")
                     .append(tmProfile.isSaveUnLocSegToProjectTM()).append(NEW_LINE);
@@ -218,43 +222,51 @@ public class TMProfileExportHelper implements ConfigConstants
                     .append(tmProfile.getTuAttNotMatchPenalty()).append(NEW_LINE);
             buffer.append("TranslationMemoryProfile.").append(tmProfile.getId())
                     .append(".COMPANY_ID=").append(tmProfile.getCompanyId()).append(NEW_LINE);
-            // exports segmentation rule id
-            String segmentationRuleId = ServerProxy.getSegmentationRuleFilePersistenceManager()
-                    .getSegmentationRuleFileIdByTmpid(p_tmProfileId);
+            // exports segmentation rule
+            SegmentationRuleFile segmentationRule = ServerProxy.getSegmentationRuleFilePersistenceManager()
+                    .getSegmentationRuleFileByTmpid(p_tmProfileId);
             buffer.append("TranslationMemoryProfile.").append(tmProfile.getId())
-                    .append(".SEGMENTATION_RULE_ID=").append(segmentationRuleId).append(NEW_LINE);
+                    .append(".SEGMENTATION_RULE_NAME=").append(segmentationRule.getName()).append(NEW_LINE);
             // exports leverage project tm
-            Vector<LeverageProjectTM> levTMList = tmProfile.getProjectTMsToLeverageFrom();
+            Vector<LeverageProjectTM> levProTMList = tmProfile.getProjectTMsToLeverageFrom();
             StringBuffer sb = new StringBuffer();
-            if (levTMList != null && levTMList.size() > 0)
+            if (levProTMList != null && levProTMList.size() > 0)
             {
-                for (LeverageProjectTM levTM : levTMList)
+                for (LeverageProjectTM levTM : levProTMList)
                 {
-                    sb.append(levTM.getId()).append(",");
+                    ProjectTM projectTM = HibernateUtil
+                            .get(ProjectTM.class, levTM.getProjectTmId());
+                    sb.append(projectTM.getName()).append(",");
                 }
                 if (sb.length() > 1)
                     sb.deleteCharAt(sb.length() - 1);
             }
             buffer.append("TranslationMemoryProfile.").append(tmProfile.getId())
-                    .append(".LEVERAGE_PROJECT_TM_IDS=").append(sb).append(NEW_LINE);
-            // exports TMPAttribute
-            Set<TMPAttribute> tmpAttrList = tmProfile.getAttributes();
-            StringBuffer tmpAttrIds = new StringBuffer();
-            if (tmpAttrList != null && tmpAttrList.size() > 0)
-            {
-                for (TMPAttribute tmpAttr : tmpAttrList)
-                {
-                    tmpAttrIds.append(tmpAttr.getId()).append(",");
-                }
-                if (tmpAttrIds.length() > 1)
-                    tmpAttrIds.deleteCharAt(tmpAttrIds.length() - 1);
-            }
-            buffer.append("TranslationMemoryProfile.").append(tmProfile.getId())
-                    .append(".TMP_IDS=").append(tmpAttrIds).append(NEW_LINE);
+                    .append(".LEVERAGE_PROJECT_TM_NAMES=").append(sb).append(NEW_LINE);
             buffer.append("##TranslationMemoryProfile.").append(tmProfile.getCompanyId())
                     .append(".").append(tmProfile.getId()).append(".end").append(NEW_LINE)
                     .append(NEW_LINE);
             writeToFile(tmpPropertyFile, buffer.toString().getBytes());
+            
+            String companyId = String.valueOf(tmProfile.getCompanyId());
+            // exports leverage project tm
+            Vector<LeverageProjectTM> levTMList = tmProfile.getProjectTMsToLeverageFrom();
+            if (levTMList != null && levTMList.size() > 0)
+            {
+                for (LeverageProjectTM levTM : levTMList)
+                {
+                    propertiesInputLevProjectTM(tmpPropertyFile, levTM, companyId);
+                }
+            }
+            // exports TMPAttribute
+            Set<TMPAttribute> tmpAttrList = tmProfile.getAttributes();
+            if (tmpAttrList != null && tmpAttrList.size() > 0)
+            {
+                for (TMPAttribute tmpAttribute : tmpAttrList)
+                {
+                    propertiesInputTMPAttribute(tmpPropertyFile, tmpAttribute, companyId);
+                }
+            }
         }
         catch (Exception e)
         {
@@ -262,6 +274,59 @@ public class TMProfileExportHelper implements ConfigConstants
         }
 
         return tmpPropertyFile;
+    }
+
+    private static void propertiesInputTMPAttribute(File tmpPropertyFile,
+            TMPAttribute tmpAttribute, String companyId)
+    {
+        if (tmpAttribute == null)
+            return;
+
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("##TMPAttribute.").append(companyId).append(".").append(tmpAttribute.getId())
+                .append(".begin").append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".ID=")
+                .append(tmpAttribute.getId()).append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".TMP_ID=")
+                .append(tmpAttribute.getTmprofile().getId()).append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".ATT_NAME=")
+                .append(tmpAttribute.getAttributeName()).append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".OPERATOR=")
+                .append(tmpAttribute.getOperator()).append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".VALUE_TYPE=")
+                .append(tmpAttribute.getValueType()).append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".VALUE_DATA=")
+                .append(tmpAttribute.getValueData()).append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".AND_OR=")
+                .append(tmpAttribute.getAndOr()).append(NEW_LINE);
+        buffer.append("TMPAttribute.").append(tmpAttribute.getId()).append(".PRIORITY_ORDER=")
+                .append(tmpAttribute.getOrder()).append(NEW_LINE);
+        buffer.append("##TMPAttribute.").append(companyId).append(".").append(tmpAttribute.getId())
+                .append(".end").append(NEW_LINE).append(NEW_LINE);
+        writeToFile(tmpPropertyFile, buffer.toString().getBytes());
+    }
+
+    private static void propertiesInputLevProjectTM(File tmpPropertyFile, LeverageProjectTM levTM,
+            String companyId)
+    {
+        if (levTM == null)
+            return;
+
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("##LeverageProjectTM.").append(companyId).append(".").append(levTM.getId())
+                .append(".begin").append(NEW_LINE);
+        buffer.append("LeverageProjectTM.").append(levTM.getId()).append(".ID=")
+                .append(levTM.getId()).append(NEW_LINE);
+        buffer.append("LeverageProjectTM.").append(levTM.getId()).append(".TM_PROFILE_ID=")
+                .append(levTM.getTMProfile().getId()).append(NEW_LINE);
+        ProjectTM projectTM = HibernateUtil.get(ProjectTM.class, levTM.getProjectTmId());
+        buffer.append("LeverageProjectTM.").append(levTM.getId()).append(".PROJECT_TM_NAME=")
+                .append(projectTM.getName()).append(NEW_LINE);
+        buffer.append("LeverageProjectTM.").append(levTM.getId()).append(".PROJECT_TM_INDEX=")
+                .append(levTM.getProjectTmIndex()).append(NEW_LINE);
+        buffer.append("##LeverageProjectTM.").append(companyId).append(".").append(levTM.getId())
+                .append(".end").append(NEW_LINE).append(NEW_LINE);
+        writeToFile(tmpPropertyFile, buffer.toString().getBytes());
     }
 
     private static void writeToFile(File tmpPropertyFile, byte[] bytes)

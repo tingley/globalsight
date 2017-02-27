@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.Attribute;
+import com.globalsight.cxe.entity.customAttribute.TMAttribute;
 import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
@@ -33,15 +33,26 @@ import com.globalsight.util.StringUtil;
 public class TMProfileImporter implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(TMProfileImporter.class);
-    private String currentCompanyId;
+    private Map<Long, TranslationMemoryProfile> tmpMap = new HashMap<Long, TranslationMemoryProfile>();
+    private Map<Long, Long> tmpaMap = new HashMap<Long, Long>();
+    private Map<Long, Long> levTMMap = new HashMap<Long, Long>();
     private String sessionId;
-    private String importToCompId;
+    private String companyId;
+    private String segRuleName;
+
+     private String levProjectTMNames;
 
     public TMProfileImporter(String sessionId, String currentCompanyId, String importToCompId)
     {
         this.sessionId = sessionId;
-        this.currentCompanyId = currentCompanyId;
-        this.importToCompId = importToCompId;
+        if (importToCompId != null && !importToCompId.equals("-1"))
+        {
+            this.companyId = importToCompId;
+        }
+        else
+        {
+            this.companyId = currentCompanyId;
+        }
     }
 
     public void analysisAndImport(File uploadedFile)
@@ -101,16 +112,14 @@ public class TMProfileImporter implements ConfigConstants
 
         Map<String, List> dataMap = new HashMap<String, List>();
         List<TranslationMemoryProfile> tmProfileList = new ArrayList<TranslationMemoryProfile>();
+        List<TMPAttribute> tmpAttrList = new ArrayList<TMPAttribute>();
+        List<LeverageProjectTM> levProjectTMList = new ArrayList<LeverageProjectTM>();
         Set<String> keySet = map.keySet();
         Iterator it = keySet.iterator();
         while (it.hasNext())
         {
             String key = (String) it.next();
             String[] keyArr = key.split("\\.");
-            if ("LeverageProjectTM".equalsIgnoreCase(keyArr[0]))
-            {
-
-            }
             Map<String, String> valueMap = map.get(key);
             if (!valueMap.isEmpty())
             {
@@ -119,11 +128,25 @@ public class TMProfileImporter implements ConfigConstants
                     TranslationMemoryProfile tmProfile = putDataIntoTMP(valueMap);
                     tmProfileList.add(tmProfile);
                 }
+                if ("TMPAttribute".equalsIgnoreCase(keyArr[0]))
+                {
+                    TMPAttribute tmpAttribute = putDataIntoTMPA(valueMap);
+                    tmpAttrList.add(tmpAttribute);
+                }
+                if ("LeverageProjectTM".equalsIgnoreCase(keyArr[0]))
+                {
+                    LeverageProjectTM levProjectTM = putDataIntoLevTM(valueMap);
+                    levProjectTMList.add(levProjectTM);
+                }
             }
         }
 
         if (tmProfileList.size() > 0)
             dataMap.put("TranslationMemoryProfile", tmProfileList);
+        if (tmpAttrList.size() > 0)
+            dataMap.put("TMPAttribute", tmpAttrList);
+        if (levProjectTMList.size() > 0)
+            dataMap.put("LeverageProjectTM", levProjectTMList);
 
         // Storing data
         storeDataToDatabase(dataMap);
@@ -140,7 +163,14 @@ public class TMProfileImporter implements ConfigConstants
             {
                 storeTMPData(dataMap);
             }
-
+            if (dataMap.containsKey("LeverageProjectTM"))
+            {
+                storeLevProTMData(dataMap);
+            }
+            if (dataMap.containsKey("TMPAttribute"))
+            {
+                storeTMPAData(dataMap);
+            }
             addMessage("<b> Done importing Translation Memory Profiles.</b>");
         }
         catch (Exception e)
@@ -158,80 +188,59 @@ public class TMProfileImporter implements ConfigConstants
             for (int i = 0; i < tmProfileList.size(); i++)
             {
                 TranslationMemoryProfile tmp = tmProfileList.get(i);
-                List<ProjectTM> tmList = ServerProxy.getProjectHandler().getAllProjectTMs(
-                        tmp.getCompanyId());
 
                 // checks project tm for save
                 long projectTmId = tmp.getProjectTmIdForSave();
-                ProjectTM projectTM = HibernateUtil.get(ProjectTM.class, projectTmId);
-                long projectTmIdForSave = -1;
-                for (ProjectTM tm : tmList)
-                {
-                    if (tm.getName().equals(projectTM.getName())
-                            || tm.getName().startsWith(projectTM.getName() + "_import"))
-                    {
-                        projectTmIdForSave = tm.getId();
-                        break;
-                    }
-                }
-                tmp.setProjectTmIdForSave(projectTmIdForSave);
 
                 // checks segmentation rule
                 long ruleId = -1;
-                SegmentationRuleFile segRule = ServerProxy
-                        .getSegmentationRuleFilePersistenceManager()
-                        .getSegmentationRuleFileByTmpid(tmp.getIdAsLong().toString());
                 Collection<SegmentationRuleFile> ruleList = ServerProxy
                         .getSegmentationRuleFilePersistenceManager().getAllSegmentationRuleFiles(
-                                tmp.getCompanyId());
+                                Long.parseLong(companyId));
                 for (SegmentationRuleFile rule : ruleList)
                 {
-                    if (rule.getName().equals(segRule.getName())
-                            || rule.getName().startsWith(segRule.getName() + "_import"))
+                    if (rule.getName().equals(segRuleName)
+                            || rule.getName().startsWith(segRuleName + "_import"))
                     {
                         ruleId = rule.getIdAsLong();
                         break;
                     }
                 }
                 // checks reference tms
-                Set<LeverageProjectTM> projectTMsToLeverageFromSet = new HashSet<LeverageProjectTM>();
-                Vector<LeverageProjectTM> leverageProjectTMList = tmp.getProjectTMsToLeverageFrom();
-                for (LeverageProjectTM leverageProjectTM : leverageProjectTMList)
+                String[] leverageProjectTMNames = levProjectTMNames.split(",");
+                List<ProjectTM> tmList = ServerProxy.getProjectHandler().getAllProjectTMsByCompanyId(
+                        Long.parseLong(companyId));
+                String leverageProTMName = null;
+                for (String leverageProjectTMName : leverageProjectTMNames)
                 {
-                    ProjectTM proTM = HibernateUtil.get(ProjectTM.class,
-                            leverageProjectTM.getProjectTmId());
                     for (ProjectTM tm : tmList)
                     {
-                        if (tm.getName().equals(proTM.getName())
-                                || tm.getName().startsWith(proTM.getName() + "_import"))
+                        if (tm.getName().equals(leverageProjectTMName)
+                                || tm.getName().startsWith(leverageProjectTMName + "_import"))
                         {
-                            LeverageProjectTM levTM = new LeverageProjectTM();
-                            levTM.setTMProfile(tmp);
-                            levTM.setProjectTmId(tm.getId());
-                            levTM.setProjectTmIndex(leverageProjectTM.getProjectTmIndex());
-                            projectTMsToLeverageFromSet.add(levTM);
+                            leverageProTMName = tm.getName();
                             break;
                         }
                     }
                 }
-                tmp.setProjectTMsToLeverageFromSet(projectTMsToLeverageFromSet);
-
-                if (projectTmIdForSave == -1 || projectTMsToLeverageFromSet.size() == 0
+                if (projectTmId == -1 || StringUtil.isEmptyAndNull(leverageProTMName)
                         || ruleId == -1)
                 {
-                    String msg = "Upload Translation Memory Profile data failed !";
+                    String msg = "Upload Translation Memory Profile data failed ! Some required info donot exist.";
                     logger.warn(msg);
                     addToError(msg);
                 }
                 else
                 {
+                    long oldId = tmp.getId();
                     String oldName = tmp.getName();
                     String newName = getMTPNewName(oldName, tmp.getCompanyId());
-                    tmp = createNewTmp(newName, tmp);
-                    HibernateUtil.save(tmp);
+                    TranslationMemoryProfile tmProfile = createNewTmp(newName, tmp);
+                    HibernateUtil.save(tmProfile);
+                    tmpMap.put(oldId, tmProfile);
                     ServerProxy.getSegmentationRuleFilePersistenceManager()
                             .createRelationshipWithTmp(String.valueOf(ruleId),
-                                    tmp.getIdAsLong().toString());
+                                    tmProfile.getIdAsLong().toString());
                     if (oldName.equals(newName))
                     {
                         addMessage("<b>" + newName + "</b> imported successfully.");
@@ -251,6 +260,113 @@ public class TMProfileImporter implements ConfigConstants
             logger.warn(msg);
             addToError(msg);
         }
+    }
+
+    private void storeTMPAData(Map<String, List> dataMap)
+    {
+        List<TMPAttribute> tmpaList = dataMap.get("TMPAttribute");
+        try
+        {
+            for (int i = 0; i < tmpaList.size(); i++)
+            {
+                TMPAttribute tmpa = tmpaList.get(i);
+                long id = tmpa.getId();
+                if (tmpaMap.containsKey(id))
+                {
+                    long value = tmpaMap.get(id);
+                    if (tmpMap.containsKey(value))
+                    {
+                        TranslationMemoryProfile tmp = tmpMap.get(value);
+                        tmpa.setTmprofile(tmp);
+                        TMPAttribute tmpAttr = createNewTMPAttr(tmpa);
+                        if (StringUtil.isNotEmptyAndNull(tmpAttr.getAttributeName()))
+                        {
+                            HibernateUtil.save(tmpAttr);
+                        }
+                    }
+                }
+
+            }
+        }
+        catch (Exception e)
+        {
+            String msg = "Upload Translation Memory Profile Attribute data failed !";
+            logger.warn(msg);
+            addToError(msg);
+        }
+    }
+
+    private TMPAttribute createNewTMPAttr(TMPAttribute tmpa)
+    {
+        TMPAttribute tmpAttr = new TMPAttribute();
+        Set<TMAttribute> attributes = new HashSet<TMAttribute>();
+        List<Attribute> attributeList = (List<Attribute>) AttributeManager.getAllAttributes(Long
+                .parseLong(companyId));
+        String attrName = null;
+        for (Attribute attribute : attributeList)
+        {
+            String attributeName = attribute.getName();
+            if (attributeName.equals(tmpa.getAttributeName())
+                    || attributeName.startsWith(tmpa.getAttributeName() + "_import_"))
+            {
+                attrName = attributeName;
+                break;
+            }
+        }
+        tmpAttr.setAttributeName(attrName);
+        tmpAttr.setOperator(tmpa.getOperator());
+        tmpAttr.setValueType(tmpa.getValueType());
+        tmpAttr.setValueData(tmpa.getValueData());
+        tmpAttr.setAndOr(tmpa.getAndOr());
+        tmpAttr.setOrder(tmpa.getOrder());
+        tmpAttr.setTmprofile(tmpa.getTmprofile());
+        return tmpAttr;
+    }
+
+    private void storeLevProTMData(Map<String, List> dataMap)
+    {
+        List<LeverageProjectTM> levProTMList = dataMap.get("LeverageProjectTM");
+        try
+        {
+            for (int i = 0; i < levProTMList.size(); i++)
+            {
+                LeverageProjectTM levProTM = levProTMList.get(i);
+                long id = levProTM.getId();
+                if (levTMMap.containsKey(id))
+                {
+                    long value = levTMMap.get(id);
+                    if (tmpMap.containsKey(value))
+                    {
+                        TranslationMemoryProfile tmp = tmpMap.get(value);
+                        levProTM.setTMProfile(tmp);
+                        LeverageProjectTM leverageProTM = createNewLevProTM(levProTM);
+                        HibernateUtil.save(leverageProTM);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            String msg = "Upload Translation Memory Profile Leverage ProjectTM data failed !";
+            logger.warn(msg);
+            addToError(msg);
+        }
+    }
+
+    private LeverageProjectTM createNewLevProTM(LeverageProjectTM levProTM)
+    {
+        LeverageProjectTM levProjectTM = new LeverageProjectTM();
+        try
+        {
+            levProjectTM.setTMProfile(levProTM.getTMProfile());
+            levProjectTM.setProjectTmId(levProTM.getProjectTmId());
+            levProjectTM.setProjectTmIndex(levProTM.getProjectTmIndex());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return levProjectTM;
     }
 
     private TranslationMemoryProfile createNewTmp(String newName, TranslationMemoryProfile tmProfile)
@@ -321,35 +437,6 @@ public class TMProfileImporter implements ConfigConstants
             }
             tmp.setProjectTMsToLeverageFromSet(projectTMsToLeverageFromSet);
 
-            // saves tmAttribute
-            Set<TMPAttribute> attributes = new HashSet<TMPAttribute>();
-            Set<TMPAttribute> tmpAttributeList = tmProfile.getAttributes();
-
-            for (TMPAttribute tmpAttribute : tmpAttributeList)
-            {
-                List<Attribute> attributeList = (List<Attribute>) AttributeManager
-                        .getAllAttributes(tmProfile.getCompanyId());
-                for (Attribute attribute : attributeList)
-                {
-                    String attributeName = attribute.getName();
-                    if (attributeName.equalsIgnoreCase(tmpAttribute.getAttributeName())
-                            || attributeName.startsWith(tmpAttribute.getAttributeName()
-                                    + "_import_"))
-                    {
-                        TMPAttribute tmpa = new TMPAttribute();
-                        tmpa.setAttributeName(attributeName);
-                        tmpa.setOperator(tmpAttribute.getOperator());
-                        tmpa.setValueType(tmpAttribute.getValueType());
-                        tmpa.setValueData(tmpAttribute.getValueData());
-                        tmpa.setAndOr(tmpAttribute.getAndOr());
-                        tmpa.setOrder(tmpAttribute.getOrder());
-                        tmpa.setTmprofile(tmp);
-                        attributes.add(tmpa);
-                    }
-                }
-            }
-            tmp.setAttributes(attributes);
-
             // saves reference TM
             String refTms = tmProfile.getRefTMsToLeverageFrom();
             String msRefToLeverageFrom = "";
@@ -359,7 +446,7 @@ public class TMProfileImporter implements ConfigConstants
                 for (String refTM : refTMs)
                 {
                     ProjectTM projectTM = HibernateUtil.get(ProjectTM.class, Long.parseLong(refTM));
-                    List<ProjectTM> tmList = ServerProxy.getProjectHandler().getAllProjectTMs(
+                    List<ProjectTM> tmList = ServerProxy.getProjectHandler().getAllProjectTMsByCompanyId(
                             tmProfile.getCompanyId());
                     for (ProjectTM tm : tmList)
                     {
@@ -423,8 +510,6 @@ public class TMProfileImporter implements ConfigConstants
         {
             String keyField = null;
             String valueField = null;
-            String tmpId = null;
-            String ruleId = null;
             Set<String> valueKey = valueMap.keySet();
             Iterator itor = valueKey.iterator();
             while (itor.hasNext())
@@ -443,9 +528,21 @@ public class TMProfileImporter implements ConfigConstants
                 {
                     tmProfile.setDescription(valueField);
                 }
-                else if ("PROJECT_TM_ID_FOR_SAVE".equalsIgnoreCase(keyField))
+                else if ("PROJECT_TM_NAME_FOR_SAVE".equalsIgnoreCase(keyField))
                 {
-                    tmProfile.setProjectTmIdForSave(Long.parseLong(valueField));
+                    List<ProjectTM> tmList = (List<ProjectTM>) ServerProxy.getProjectHandler()
+                            .getAllProjectTMsByCompanyId(Long.parseLong(companyId));
+                    long projectTmIdForSave = -1;
+                    for (ProjectTM tm : tmList)
+                    {
+                        if (tm.getName().equals(valueField)
+                                || tm.getName().startsWith(valueField + "_import"))
+                        {
+                            projectTmIdForSave = tm.getId();
+                            break;
+                        }
+                    }
+                    tmProfile.setProjectTmIdForSave(projectTmIdForSave);
                 }
                 else if ("IS_UNLOC_SEG_SAVED_TO_PROJ_TM".equalsIgnoreCase(keyField))
                 {
@@ -643,44 +740,15 @@ public class TMProfileImporter implements ConfigConstants
                 }
                 else if ("COMPANY_ID".equalsIgnoreCase(keyField))
                 {
-                    if (importToCompId != null && !importToCompId.equals("-1"))
-                    {
-                        tmProfile.setCompanyId(Long.parseLong(importToCompId));
-                    }
-                    else
-                    {
-                        tmProfile.setCompanyId(Long.parseLong(currentCompanyId));
-                    }
+                    tmProfile.setCompanyId(Long.parseLong(companyId));
                 }
-                else if ("LEVERAGE_PROJECT_TM_IDS".equalsIgnoreCase(keyField))
+                else if ("SEGMENTATION_RULE_NAME".equalsIgnoreCase(keyField))
                 {
-                    String[] levProjectTMIds = valueField.split(",");
-                    Vector<LeverageProjectTM> projectTMsToLeverageFrom = new Vector<LeverageProjectTM>();
-                    if (levProjectTMIds.length > 0)
-                    {
-                        for (String levProjectTMId : levProjectTMIds)
-                        {
-                            LeverageProjectTM levProjectTM = HibernateUtil.get(
-                                    LeverageProjectTM.class, Long.parseLong(levProjectTMId));
-                            projectTMsToLeverageFrom.add(levProjectTM);
-                        }
-                    }
-                    tmProfile.setAllLeverageProjectTMs(projectTMsToLeverageFrom);
+                    segRuleName = valueField;
                 }
-                else if ("TMP_IDS".equalsIgnoreCase(keyField))
+                else if ("LEVERAGE_PROJECT_TM_NAMES".equalsIgnoreCase(keyField))
                 {
-                    Set<TMPAttribute> attributes = new HashSet<TMPAttribute>();
-                    if (StringUtil.isNotEmptyAndNull(valueField))
-                    {
-                        String[] attributeIds = valueField.split(",");
-                        for (String attributeId : attributeIds)
-                        {
-                            TMPAttribute tmpAttr = HibernateUtil.get(TMPAttribute.class,
-                                    Long.parseLong(attributeId));
-                            attributes.add(tmpAttr);
-                        }
-                    }
-                    tmProfile.setAttributes(attributes);
+                    levProjectTMNames = valueField;
                 }
             }
         }
@@ -689,6 +757,107 @@ public class TMProfileImporter implements ConfigConstants
             e.printStackTrace();
         }
         return tmProfile;
+    }
+
+    private TMPAttribute putDataIntoTMPA(Map<String, String> valueMap)
+    {
+        TMPAttribute tmpa = new TMPAttribute();
+        String keyField = null;
+        String valueField = null;
+        Long tmpId = null;
+        Set<String> valueKey = valueMap.keySet();
+        Iterator itor = valueKey.iterator();
+        while (itor.hasNext())
+        {
+            keyField = (String) itor.next();
+            valueField = valueMap.get(keyField);
+            if ("ID".equalsIgnoreCase(keyField))
+            {
+                tmpa.setId(Long.parseLong(valueField));
+            }
+            else if ("TMP_ID".equalsIgnoreCase(keyField))
+            {
+                tmpId = Long.parseLong(valueField);
+            }
+            else if ("ATT_NAME".equalsIgnoreCase(keyField))
+            {
+                tmpa.setAttributeName(valueField);
+            }
+            else if ("OPERATOR".equalsIgnoreCase(keyField))
+            {
+                tmpa.setOperator(valueField);
+            }
+            else if ("VALUE_TYPE".equalsIgnoreCase(keyField))
+            {
+                tmpa.setValueType(valueField);
+            }
+            else if ("VALUE_DATA".equalsIgnoreCase(keyField))
+            {
+                tmpa.setValueData(valueField);
+            }
+            else if ("AND_OR".equalsIgnoreCase(keyField))
+            {
+                tmpa.setAndOr(valueField);
+            }
+            else if ("PRIORITY_ORDER".equalsIgnoreCase(keyField))
+            {
+                tmpa.setOrder(Integer.parseInt(valueField));
+            }
+        }
+        tmpaMap.put(tmpa.getId(), tmpId);
+        return tmpa;
+    }
+
+    private LeverageProjectTM putDataIntoLevTM(Map<String, String> valueMap)
+    {
+        LeverageProjectTM levProjectTM = new LeverageProjectTM();
+        try
+        {
+            String keyField = null;
+            String valueField = null;
+            Long tmpId = null;
+            Set<String> valueKey = valueMap.keySet();
+            Iterator itor = valueKey.iterator();
+            while (itor.hasNext())
+            {
+                keyField = (String) itor.next();
+                valueField = valueMap.get(keyField);
+                if ("ID".equalsIgnoreCase(keyField))
+                {
+                    levProjectTM.setId(Long.parseLong(valueField));
+                }
+                else if ("TM_PROFILE_ID".equalsIgnoreCase(keyField))
+                {
+                    tmpId = Long.parseLong(valueField);
+                }
+                else if ("PROJECT_TM_NAME".equalsIgnoreCase(keyField))
+                {
+                    List<ProjectTM> tmList = (List<ProjectTM>) ServerProxy.getProjectHandler()
+                            .getAllProjectTMsByCompanyId(Long.parseLong(companyId));
+                    long projectTmId = -1;
+                    for (ProjectTM tm : tmList)
+                    {
+                        if (tm.getName().equals(valueField)
+                                || tm.getName().startsWith(valueField + "_import"))
+                        {
+                            projectTmId = tm.getId();
+                            break;
+                        }
+                    }
+                    levProjectTM.setProjectTmId(projectTmId);
+                }
+                else if ("PROJECT_TM_NAME".equalsIgnoreCase(keyField))
+                {
+                    levProjectTM.setProjectTmIndex(Integer.parseInt(valueField));
+                }
+            }
+            levTMMap.put(levProjectTM.getId(), tmpId);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return levProjectTM;
     }
 
     private void addToError(String msg)

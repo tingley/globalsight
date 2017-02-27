@@ -102,7 +102,18 @@ function fnGetSelectedJobIds()
 {
 	if (reportJobInfo == null)
     {
-		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=MTPostEditDistanceReport", "getReportJobInfo");
+		$.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=MTPostEditDistanceReport&action=getReportJobInfo',
+    		async : false,
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
 	return validateJobIds();
 }
@@ -110,13 +121,6 @@ function fnGetSelectedJobIds()
 function validateJobIds()
 {
 	var jobInfos = new Array();
-	if (reportJobInfo == null)
-    {
-		var url ="${self.pageURL}&activityName=MTPostEditDistanceReport&action=getReportJobInfo";
-	    $.getJSON(url, function(data) {
-			reportJobInfo = data;
-	    });
-    }
 	$(reportJobInfo).each(function(i, item) {
 		jobInfos[i] = new JobInfo(item.jobId, item.jobName, item.projectId, item.jobState, item.targetLocales);
      });
@@ -179,11 +183,18 @@ function filterJob()
         searchForm.jobNameList.options.add(varItem);
         searchForm.submitButton.disabled = true;
 
-        var url ="${self.pageURL}&activityName=MTPostEditDistanceReport&action=getReportJobInfo";
-        $.getJSON(url, function(data) {
-			reportJobInfo = data;
-			filterJob2();
-	    });
+        $.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=MTPostEditDistanceReport&action=getReportJobInfo',
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    			filterJob2();
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
     else
     {

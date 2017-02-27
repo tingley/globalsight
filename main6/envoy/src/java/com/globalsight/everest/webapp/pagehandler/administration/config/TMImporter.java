@@ -61,16 +61,23 @@ import com.globalsight.util.StringUtil;
 public class TMImporter implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(TMImporter.class);
-    private String currentCompanyId;
+    private Map<Long, ProjectTM> tmMap = new HashMap<Long, ProjectTM>();
+    private Map<Long, Long> tmaMap = new HashMap<Long, Long>();
     private String sessionId;
-    private String importToCompId;
     private String userId;
+    private String companyId;
 
     public TMImporter(String sessionId, String userId, String companyId, String importToCompId)
     {
         this.sessionId = sessionId;
-        this.currentCompanyId = companyId;
-        this.importToCompId = importToCompId;
+        if (importToCompId != null && !importToCompId.equals("-1"))
+        {
+            this.companyId = importToCompId;
+        }
+        else
+        {
+            this.companyId = companyId;
+        }
         this.userId = userId;
     }
 
@@ -134,6 +141,7 @@ public class TMImporter implements ConfigConstants
 
         Map<String, List> dataMap = new HashMap<String, List>();
         List<ProjectTM> projectTMList = new ArrayList<ProjectTM>();
+        List<TMAttribute> tmAttrList = new ArrayList<TMAttribute>();
         Set<String> keySet = map.keySet();
         Iterator it = keySet.iterator();
         while (it.hasNext())
@@ -148,14 +156,55 @@ public class TMImporter implements ConfigConstants
                     ProjectTM projectTM = putDataIntoProjectTM(valueMap);
                     projectTMList.add(projectTM);
                 }
+                
+                if (keyArr[0].equalsIgnoreCase("TMAttribute"))
+                {
+                    TMAttribute tmAttribute = putDataIntoTMA(valueMap);
+                    tmAttrList.add(tmAttribute);
+                }
             }
         }
 
         if (projectTMList.size() > 0)
             dataMap.put("TranslationMemory", projectTMList);
+        if(tmAttrList.size()>0)
+            dataMap.put("TMAttribute", tmAttrList);
 
         // Storing data
         storeDataToDatabase(dataMap);
+    }
+
+    private TMAttribute putDataIntoTMA(Map<String, String> valueMap)
+    {
+        TMAttribute tma = new TMAttribute();
+        Long tmId = null;
+        String key = null;
+        String value = null;
+        Set<String> valueKey = valueMap.keySet();
+        Iterator itor = valueKey.iterator();
+        while (itor.hasNext())
+        {
+            key = (String) itor.next();
+            value = valueMap.get(key);
+            if ("ID".equalsIgnoreCase(key))
+            {
+                tma.setId(Long.parseLong(value));
+            }
+            else if ("TM_ID".equalsIgnoreCase(key))
+            {
+                tmId = Long.parseLong(value);
+            }
+            else if ("ATT_NAME".equalsIgnoreCase(key))
+            {
+                tma.setAttributename(value);
+            }
+            else if ("SET_TYPE".equalsIgnoreCase(key))
+            {
+                tma.setSettype(value);
+            }
+        }
+        tmaMap.put(tma.getId(), tmId);
+        return tma;
     }
 
     private void storeDataToDatabase(Map<String, List> dataMap)
@@ -167,6 +216,10 @@ public class TMImporter implements ConfigConstants
             if (dataMap.containsKey("TranslationMemory"))
             {
                 storeProjectTMData(dataMap);
+            }
+            if (dataMap.containsKey("TMAttribute"))
+            {
+                storeTMAttribute(dataMap);
             }
             addMessage("<b> Done importing Translation Memorys.</b>");
         }
@@ -186,10 +239,12 @@ public class TMImporter implements ConfigConstants
             for (int i = 0; i < projectTMList.size(); i++)
             {
                 ProjectTM projectTM = projectTMList.get(i);
+                long oldId = projectTM.getId();
                 String oldName = projectTM.getName();
                 String newName = getTMNewName(oldName, projectTM.getCompanyId());
-                projectTM = createNewProjectTM(newName, projectTM);
-                HibernateUtil.save(projectTM);
+                ProjectTM proTM = createNewProjectTM(newName, projectTM);
+                tmMap.put(oldId, proTM);
+                HibernateUtil.save(proTM);
                 if (oldName.equals(newName))
                 {
                     addMessage("<b>" + newName + "</b> imported successfully.");
@@ -208,43 +263,86 @@ public class TMImporter implements ConfigConstants
             addToError(msg);
         }
     }
+    @SuppressWarnings("unchecked")
+    private void storeTMAttribute(Map<String, List> dataMap)
+    {
+        List<TMAttribute> tmAttrList = dataMap.get("TMAttribute");
+        try
+        {
+            for (int i = 0; i < tmAttrList.size(); i++)
+            {
+                TMAttribute tmAttr = tmAttrList.get(i);
+                long id = tmAttr.getId();
+                if (tmaMap.containsKey(id))
+                {
+                    long value = tmaMap.get(id);
+                    if (tmMap.containsKey(value))
+                    {
+                        ProjectTM tm = tmMap.get(value);
+                        tmAttr.setTm(tm);
+                    }
+                }
+                TMAttribute tmAttribute = createNewTMAttribute(tmAttr);
+                if (StringUtil.isNotEmptyAndNull(tmAttribute.getAttributename()))
+                {
+                    HibernateUtil.save(tmAttribute);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            String msg = "Upload Translation Memory Attribute data failed !";
+            logger.warn(msg);
+            addToError(msg);
+        }
+    }
+
+    private TMAttribute createNewTMAttribute(TMAttribute tmAttr)
+    {
+        TMAttribute tma = new TMAttribute();
+        Set<TMAttribute> attributes = new HashSet<TMAttribute>();
+        List<Attribute> attributeList = (List<Attribute>) AttributeManager.getAllAttributes(Long
+                .parseLong(companyId));
+        String attrName = null;
+        for (Attribute attribute : attributeList)
+        {
+            String attributeName = attribute.getName();
+            if (attributeName.equals(tmAttr.getAttributename())
+                    || attributeName.startsWith(tmAttr.getAttributename() + "_import_"))
+            {
+                attrName = attributeName;
+                break;
+            }
+        }
+        tma.setAttributename(attrName);
+        tma.setSettype(tmAttr.getSettype());
+        tma.setTm(tmAttr.getTm());
+        return tma;
+    }
 
     private ProjectTM createNewProjectTM(String newName, ProjectTM projectTM)
     {
+        ProjectTM proTM = new ProjectTM();
         try
         {
-            projectTM.setName(newName);
-            projectTM.setCreationUser(userId);
-            projectTM.setCreationDate(new Date());
-
-            // saves tmAttribute
-            Set<TMAttribute> attributes = new HashSet<TMAttribute>();
-            List<TMAttribute> tmAttributeList = projectTM.getAllTMAttributes();
-
-            for (TMAttribute tmAttribute : tmAttributeList)
-            {
-                List<Attribute> attributeList = (List<Attribute>) AttributeManager
-                        .getAllAttributes(projectTM.getCompanyId());
-                for (Attribute attribute : attributeList)
-                {
-                    String attributeName = attribute.getName();
-                    if (attributeName.equals(tmAttribute.getAttributename())
-                            || attributeName
-                                    .startsWith(tmAttribute.getAttributename() + "_import_"))
-                    {
-                        TMAttribute tma = new TMAttribute();
-                        tma.setAttributename(attributeName);
-                        tma.setSettype(tmAttribute.getSettype());
-                        tma.setTm(projectTM);
-                        attributes.add(tma);
-                        break;
-                    }
-                }
-            }
-            projectTM.setAttributes(attributes);
+            proTM.setName(newName);
+            proTM.setDomain(projectTM.getDomain());
+            proTM.setOrganization(projectTM.getOrganization());
+            proTM.setDescription(projectTM.getDescription());
+            proTM.setIndexTarget(projectTM.isIndexTarget());
+            proTM.setCreationDate(new Date());
+            proTM.setCreationUser(userId);
+            proTM.setCompanyId(projectTM.getCompanyId());
+            proTM.setIsRemoteTm(projectTM.getIsRemoteTm());
+            proTM.setRemoteTmProfileId(projectTM.getRemoteTmProfileId());
+            proTM.setRemoteTmProfileName(projectTM.getRemoteTmProfileName());
+            proTM.setConvertRate(projectTM.getConvertRate());
+            proTM.setLastTUId(-1);
+            proTM.setStatus(projectTM.getStatus());
+            proTM.setConvertedTM3Id(-1);
 
             // saves tm3 info
-            Company company = ServerProxy.getJobHandler().getCompanyById(projectTM.getCompanyId());
+            Company company = ServerProxy.getJobHandler().getCompanyById(Long.parseLong(companyId));
             if (company.getTmVersion().equals(TmVersion.TM3))
             {
                 // We need to create the tm3 storage. Use the shared TM pool for
@@ -252,14 +350,14 @@ public class TMImporter implements ConfigConstants
                 TM3Manager mgr = DefaultManager.create();
                 TM3Tm<GSTuvData> tm3tm = mgr.createMultilingualSharedTm(new GSDataFactory(),
                         SegmentTmAttribute.inlineAttributes(), company.getId());
-                projectTM.setTm3Id(tm3tm.getId());
+                proTM.setTm3Id(tm3tm.getId());
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-        return projectTM;
+        return proTM;
     }
 
     private ProjectTM putDataIntoProjectTM(Map<String, String> valueMap) throws ParseException
@@ -275,7 +373,11 @@ public class TMImporter implements ConfigConstants
         {
             keyField = (String) itor.next();
             valueField = valueMap.get(keyField);
-            if ("NAME".equalsIgnoreCase(keyField))
+            if ("ID".equalsIgnoreCase(keyField))
+            {
+                projectTM.setId(Long.parseLong(valueField));
+            }
+            else if ("NAME".equalsIgnoreCase(keyField))
             {
                 projectTM.setName(valueField);
             }
@@ -310,14 +412,7 @@ public class TMImporter implements ConfigConstants
             }
             else if ("COMPANY_ID".equalsIgnoreCase(keyField))
             {
-                if (importToCompId != null && !importToCompId.equals("-1"))
-                {
-                    projectTM.setCompanyId(Long.parseLong(importToCompId));
-                }
-                else
-                {
-                    projectTM.setCompanyId(Long.parseLong(currentCompanyId));
-                }
+                projectTM.setCompanyId(Long.parseLong(companyId));
             }
             else if ("IS_REMOTE_TM".equalsIgnoreCase(keyField))
             {
@@ -346,21 +441,6 @@ public class TMImporter implements ConfigConstants
             else if ("CONVERTED_TM3_ID".equalsIgnoreCase(keyField))
             {
                 projectTM.setConvertedTM3Id(Long.parseLong(valueField));
-            }
-            else if ("PROJECT_TM_ATTRIBUTE_IDS".equalsIgnoreCase(keyField))
-            {
-                Set<TMAttribute> attributes = new HashSet<TMAttribute>();
-                if (StringUtil.isNotEmptyAndNull(valueField))
-                {
-                    String[] attributeIds = valueField.split(",");
-                    for (String attributeId : attributeIds)
-                    {
-                        TMAttribute tmAttr = HibernateUtil.get(TMAttribute.class,
-                                Long.parseLong(attributeId));
-                        attributes.add(tmAttr);
-                    }
-                }
-                projectTM.setAttributes(attributes);
             }
         }
         return projectTM;

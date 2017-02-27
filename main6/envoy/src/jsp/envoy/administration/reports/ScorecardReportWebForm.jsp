@@ -240,7 +240,18 @@ function fnGetSelectedJobIds()
 {
 	if (reportJobInfo == null)
     {
-		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportScorecard", "getReportJobInfo");
+		$.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=xlsReportScorecard&action=getReportJobInfo',
+    		async : false,
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
 	return validateJobIds();
 }
@@ -316,11 +327,18 @@ function filterJob()
     	scorecardReportForm.jobNameList.options.add(varItem);
     	scorecardReportForm.submitButton.disabled = true;
 
-        var url ="${self.pageURL}&activityName=xlsReportScorecard&action=getReportJobInfo";
-        $.getJSON(url, function(data) {
-			reportJobInfo = data;
-			filterJob2();
-	    });
+        $.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=xlsReportScorecard&action=getReportJobInfo',
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    			filterJob2();
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
     else
     {

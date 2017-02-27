@@ -798,7 +798,12 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getWorkflowTemplateInfoByNameAndCompanyId(name, companyId);
     }
     
-    public List<ProjectTM> getAllProjectTMs(long companyId){
-        return m_localReference.getAllProjectTMs(companyId);
+    public List<ProjectTM> getAllProjectTMsByCompanyId(long companyId){
+        return m_localReference.getAllProjectTMsByCompanyId(companyId);
+    }
+    
+    public List<WorkflowStatePosts> getWfStatePostProfileByCompanyId(long companyId)
+    {
+        return m_localReference.getWfStatePostProfileByCompanyId(companyId);
     }
 }

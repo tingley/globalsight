@@ -955,5 +955,7 @@ public interface ProjectHandler
     public WorkflowTemplateInfo getWorkflowTemplateInfoByNameAndCompanyId(String name,
             long companyId);
     
-    public List<ProjectTM> getAllProjectTMs(long companyId);
+    public List<ProjectTM> getAllProjectTMsByCompanyId(long companyId);
+    
+    public List<WorkflowStatePosts> getWfStatePostProfileByCompanyId(long companyId);
 }

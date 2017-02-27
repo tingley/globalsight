@@ -74,7 +74,18 @@ function fnGetSelectedJobIds()
 {
 	if (reportJobInfo == null)
     {
-		reportJobInfo = getAjaxReportJobInfo("${self.pageURL}&activityName=xlsReportCharacterCount", "getReportJobInfo");
+		$.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=xlsReportCharacterCount&action=getReportJobInfo',
+    		async : false,
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
 	return validateJobIds();
 }
@@ -156,11 +167,18 @@ function filterJob()
     	CharacterCountForm.jobNameList.options.add(varItem);
     	CharacterCountForm.submitButton.disabled = true;
 
-        var url ="${self.pageURL}&activityName=xlsReportCharacterCount&action=getReportJobInfo";
-        $.getJSON(url, function(data) {
-			reportJobInfo = data;
-			filterJob2();
-	    });
+        $.ajax({
+    		type : "POST",
+    		url : '${self.pageURL}&activityName=xlsReportCharacterCount&action=getReportJobInfo',
+    		dataType : 'text',
+    		success : function(data) {
+    			reportJobInfo = eval("(" + data + ")");
+    			filterJob2();
+    		},
+    		error : function(request, error, status) {
+    			reportJobInfo = "";
+    		}
+    	});
     }
     else
     {

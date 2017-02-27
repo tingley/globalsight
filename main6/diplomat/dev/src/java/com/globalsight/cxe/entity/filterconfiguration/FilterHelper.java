@@ -1038,4 +1038,20 @@ public class FilterHelper
     {
         SortUtil.sort(list, new StringComparator(Locale.getDefault()));
     }
+    
+    public static Filter getFilter(String filterTableName, String filterName, long companyId)
+            throws Exception
+    {
+        Filter filter = MapOfTableNameAndSpecialFilter
+                .getFilterInstance(filterTableName);
+        if (filter == null)
+        {
+            return null;
+        }
+        Map map = new HashMap();
+        String hql = "select * from " + filter + " where filterName =:filterName and companyId =:companyId";
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return (Filter) HibernateUtil.search(hql, map);
+    }   
 }

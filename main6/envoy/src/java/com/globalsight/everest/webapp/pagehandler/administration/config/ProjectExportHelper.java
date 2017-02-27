@@ -87,11 +87,11 @@ public class ProjectExportHelper implements ConfigConstants
                 buffer.append("Project.").append(project.getId()).append(".PMCOST = ")
                         .append(project.getPMCost()).append(NEW_LINE);
                 AttributeSet attrSet = project.getAttributeSet();
-                long attrSetId = -1;;
+                String attrSetName = null;
                 if (attrSet != null)
-                    attrSetId = attrSet.getId();
-                buffer.append("Project.").append(project.getId()).append(".ATTRIBUTE_SET_ID = ")
-                        .append(attrSetId).append(NEW_LINE);
+                    attrSetName = attrSet.getName();
+                buffer.append("Project.").append(project.getId()).append(".ATTRIBUTE_SET_NAME = ")
+                        .append(attrSetName).append(NEW_LINE);
                 buffer.append("Project.").append(project.getId()).append(".POREQUIRED = ")
                         .append(project.getPoRequired()).append(NEW_LINE);
                 buffer.append("Project.").append(project.getId()).append(".AUTO_ACCEPT_TRANS = ")

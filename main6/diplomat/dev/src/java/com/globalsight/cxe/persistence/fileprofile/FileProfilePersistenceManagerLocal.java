@@ -1039,4 +1039,24 @@ public class FileProfilePersistenceManagerLocal implements
             return false;
         }
     }
+    
+    public FileExtensionImpl getFileExtensionByNameAndCompanyId(String name, long companyId)
+    {
+        try
+        {
+            String hql = "from FileExtensionImpl f where f.isActive='Y' ";
+
+            HashMap map = null;
+            hql += " and f.companyId = :companyId and f.name = :name";
+            map = new HashMap();
+            map.put("companyId", companyId);
+            map.put("name", name);
+
+            return (FileExtensionImpl) HibernateUtil.search(hql, map).get(0);
+        }
+        catch (Exception e)
+        {
+            throw new FileProfileEntityException(e);
+        }
+    }
 }

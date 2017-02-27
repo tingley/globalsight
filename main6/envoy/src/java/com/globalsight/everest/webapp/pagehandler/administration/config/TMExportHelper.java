@@ -101,29 +101,52 @@ public class TMExportHelper implements ConfigConstants
                     .append(tm.getStatus()).append(NEW_LINE);
             buffer.append("TranslationMemory.").append(tm.getId()).append(".CONVERTED_TM3_ID=")
                     .append(tm.getConvertedTM3Id()).append(NEW_LINE);
-            // exports TMAttribute
-            List<TMAttribute> tmAttrList = tm.getAllTMAttributes();
-            StringBuffer tmAttrIds = new StringBuffer();
-            if (tmAttrList != null && tmAttrList.size() > 0)
-            {
-                for (TMAttribute tmAttr : tmAttrList)
-                {
-                    tmAttrIds.append(tmAttr.getId()).append(",");
-                }
-                if (tmAttrIds.length() > 1)
-                    tmAttrIds.deleteCharAt(tmAttrIds.length() - 1);
-            }
-            buffer.append("TranslationMemory.").append(tm.getId())
-                    .append(".PROJECT_TM_ATTRIBUTE_IDS=").append(tmAttrIds).append(NEW_LINE);
             buffer.append("##TranslationMemory.").append(tm.getCompanyId()).append(".")
                     .append(tm.getId()).append(".end").append(NEW_LINE).append(NEW_LINE);
             writeToFile(tmPropertyFile, buffer.toString().getBytes());
+            
+            // exports TMAttribute
+            List<TMAttribute> tmAttrList = tm.getAllTMAttributes();
+            if (tmAttrList != null && tmAttrList.size() > 0)
+            {
+                for (TMAttribute tmAttributeInfo : tmAttrList)
+                {
+                    propertiesInputTMAInfo(tmPropertyFile, tmAttributeInfo, tm.getCompanyId());
+                }
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
         return tmPropertyFile;
+    }
+
+    /**
+     * Exports projectTM attribute info.
+     */
+    private static void propertiesInputTMAInfo(File tmPropertyFile, TMAttribute tmaInfo,
+            long companyId)
+    {
+        if (tmaInfo == null)
+            return;
+
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("##TMAttribute.").append(companyId).append(".")
+                .append(tmaInfo.getId()).append(".begin").append(NEW_LINE);
+        buffer.append("TMAttribute.").append(tmaInfo.getId()).append(".ID=")
+                .append(tmaInfo.getId()).append(NEW_LINE);
+        buffer.append("TMAttribute.").append(tmaInfo.getId())
+                .append(".TM_ID=").append(tmaInfo.getTm().getId()).append(NEW_LINE);
+        buffer.append("TMAttribute.").append(tmaInfo.getId())
+                .append(".ATT_NAME=").append(tmaInfo.getAttributename())
+                .append(NEW_LINE);
+        buffer.append("TMAttribute.").append(tmaInfo.getId())
+                .append(".SET_TYPE=").append(tmaInfo.getSettype())
+                .append(NEW_LINE);
+        buffer.append("##TMAttribute.").append(companyId).append(".")
+                .append(tmaInfo.getId()).append(".end").append(NEW_LINE).append(NEW_LINE);
+        writeToFile(tmPropertyFile, buffer.toString().getBytes());
     }
 
     private static void writeToFile(File tmPropertyFile, byte[] bytes)

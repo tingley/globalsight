@@ -26,6 +26,8 @@ import java.util.Set;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 /**
@@ -81,7 +83,7 @@ public class LocProfileExportHelper implements ConfigConstants
                         .append(".SOURCE_LOCALE_ID = ")
                         .append(locProfile.getSourceLocale().getId()).append(NEW_LINE);
                 buffer.append("LocalizationProfile.").append(locProfile.getId())
-                        .append(".PROJECT_ID = ").append(locProfile.getProjectId())
+                        .append(".PROJECT_NAME = ").append(locProfile.getProject().getName())
                         .append(NEW_LINE);
                 buffer.append("LocalizationProfile.").append(locProfile.getId())
                         .append(".IS_AUTO_DISPATCH = ").append(locProfile.isAutoDispatch())
@@ -139,25 +141,31 @@ public class LocProfileExportHelper implements ConfigConstants
                         .append(".JOB_EXCLUDE_TU_TYPES = ")
                         .append(locProfile.getTranslationMemoryProfile()
                                 .getJobExcludeTuTypesAsString()).append(NEW_LINE);
+                String wfStatePostName = null;
+                if (locProfile.getWfStatePostId() != -1)
+                {
+                    wfStatePostName = HibernateUtil.get(WorkflowStatePosts.class,
+                            locProfile.getWfStatePostId()).getName();
+                }
                 buffer.append("LocalizationProfile.").append(locProfile.getId())
-                        .append(".WF_STATE_POST_ID = ").append(locProfile.getWfStatePostId())
+                        .append(".WF_STATE_POST_NAME = ").append(wfStatePostName)
                         .append(NEW_LINE);
                 buffer.append("LocalizationProfile.").append(locProfile.getId())
                         .append(".IS_ACTIVE = ").append(locProfile.getIsActive()).append(NEW_LINE);
                 buffer.append("LocalizationProfile.").append(locProfile.getId())
                         .append(".COMPANYID = ").append(locProfile.getCompanyId()).append(NEW_LINE);
                 buffer.append("LocalizationProfile.").append(locProfile.getId())
-                        .append(".TM_PROFILE_ID = ")
-                        .append(locProfile.getTranslationMemoryProfile().getId()).append(NEW_LINE);
+                        .append(".TM_PROFILE_NAME = ")
+                        .append(locProfile.getTranslationMemoryProfile().getName()).append(NEW_LINE);
                 Set<WorkflowTemplateInfo> wftiList = locProfile.getWorkflowTemplates();
                 StringBuffer sb = new StringBuffer();
                 for (WorkflowTemplateInfo wfti : wftiList)
                 {
-                    sb.append(wfti.getId()).append(",");
+                    sb.append(wfti.getName()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 buffer.append("LocalizationProfile.").append(locProfile.getId())
-                        .append(".WORKFLOW_TEMPLATE_IDS = ").append(sb).append(NEW_LINE);
+                        .append(".WORKFLOW_TEMPLATE_NAMES = ").append(sb).append(NEW_LINE);
                 buffer.append("##LocalizationProfile.").append(locProfile.getCompanyId())
                         .append(".").append(locProfile.getId()).append(".end").append(NEW_LINE)
                         .append(NEW_LINE);

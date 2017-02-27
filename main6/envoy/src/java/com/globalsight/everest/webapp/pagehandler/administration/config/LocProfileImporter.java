@@ -35,7 +35,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
@@ -48,6 +47,7 @@ import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
+import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -57,15 +57,20 @@ import com.globalsight.util.GlobalSightLocale;
 public class LocProfileImporter implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(LocProfileImporter.class);
-    private String currentCompanyId;
     private String sessionId;
-    private String importToCompId;
+    private long companyId;
 
     public LocProfileImporter(String sessionId, String companyId, String importToCompId)
     {
         this.sessionId = sessionId;
-        this.currentCompanyId = companyId;
-        this.importToCompId = importToCompId;
+        if (importToCompId != null && !importToCompId.equals("-1"))
+        {
+            this.companyId = Long.parseLong(importToCompId);
+        }
+        else
+        {
+            this.companyId = Long.parseLong(companyId);
+        }
     }
 
     /**
@@ -186,12 +191,22 @@ public class LocProfileImporter implements ConfigConstants
                             Long.parseLong(valueField));
                     l10nProfile.setSourceLocale(sourceLocale);
                 }
-                else if ("PROJECT_ID".equalsIgnoreCase(keyField))
+                else if ("PROJECT_NAME".equalsIgnoreCase(keyField))
                 {
-                    Project project = ServerProxy.getProjectHandler().getProjectById(
-                            Long.parseLong(valueField));
+                    List<Project> projects = ServerProxy.getProjectHandler()
+                            .getProjectsByCompanyId(companyId);
+                    Project project = null;
+                    for (Project pro : projects)
+                    {
+                        String projectName = pro.getName();
+                        if (projectName.equalsIgnoreCase(valueField)
+                                || projectName.startsWith(valueField + "_import_"))
+                        {
+                            project = pro;
+                            break;
+                        }
+                    }
                     l10nProfile.setProject(project);
-                    l10nProfile.setProjectId(Long.parseLong(valueField));
                 }
                 else if ("IS_AUTO_DISPATCH".equalsIgnoreCase(keyField))
                 {
@@ -213,18 +228,10 @@ public class LocProfileImporter implements ConfigConstants
                 }
                 else if ("COMPANYID".equalsIgnoreCase(keyField))
                 {
-                    if (importToCompId != null && !importToCompId.equals("-1"))
-                    {
-                        l10nProfile.setCompanyId(Long.parseLong(importToCompId));
-                    }
-                    else
-                    {
-                        l10nProfile.setCompanyId(Long.parseLong(currentCompanyId));
-                    }
+                    l10nProfile.setCompanyId(companyId);
                 }
                 else if ("IS_SCRIPT_RUN_AT_JOB_CREATION".equalsIgnoreCase(keyField))
                 {
-
                     l10nProfile.setRunScriptAtJobCreation(Boolean.parseBoolean(valueField));
                 }
                 else if ("JOB_CREATION_SCRIPT_NAME".equalsIgnoreCase(keyField))
@@ -243,29 +250,53 @@ public class LocProfileImporter implements ConfigConstants
                 {
                     l10nProfile.setTMEditType(Integer.parseInt(valueField));
                 }
-                else if ("WF_STATE_POST_ID".equalsIgnoreCase(keyField))
+                else if ("WF_STATE_POST_NAME".equalsIgnoreCase(keyField))
                 {
-                    l10nProfile.setWfStatePostId(Long.parseLong(valueField));
+                    long wfStatePostId = -1;
+                    List<WorkflowStatePosts> wfStatePosts = ServerProxy.getProjectHandler()
+                            .getWfStatePostProfileByCompanyId(companyId);
+                    for (WorkflowStatePosts workflowStatePost : wfStatePosts)
+                    {
+                        if (workflowStatePost.getName().equalsIgnoreCase(valueField)
+                                || workflowStatePost.getName().startsWith(valueField + "_import_"))
+                        {
+                            wfStatePostId = workflowStatePost.getId();
+                            break;
+                        }
+                    }
+                    l10nProfile.setWfStatePostId(wfStatePostId);
                 }
-                else if ("WORKFLOW_TEMPLATE_IDS".equals(keyField))
+                else if ("WORKFLOW_TEMPLATE_NAMES".equals(keyField))
                 {
                     Set<WorkflowTemplateInfo> wftiSet = new HashSet<WorkflowTemplateInfo>();
-                    String[] workflowTemplateIds = valueField.split(",");
-                    for (String workflowTemplateId : workflowTemplateIds)
+                    String[] workflowTemplateNames = valueField.split(",");
+                    for (String workflowTemplateName : workflowTemplateNames)
                     {
-                        WorkflowTemplateInfo wfti = HibernateUtil.get(WorkflowTemplateInfo.class,
-                                Long.parseLong(workflowTemplateId));
-                        wftiSet.add(wfti);
+                        WorkflowTemplateInfo wftInfo = ServerProxy.getProjectHandler()
+                                .getWorkflowTemplateInfoByNameAndCompanyId(workflowTemplateName,
+                                        companyId);
+                        if (wftInfo != null)
+                            wftiSet.add(wftInfo);
+
                     }
                     l10nProfile.setWorkflowTemplates(wftiSet);
                 }
-                else if ("TM_PROFILE_ID".equalsIgnoreCase(keyField))
+                else if ("TM_PROFILE_NAME".equalsIgnoreCase(keyField))
                 {
-                    Set<TranslationMemoryProfile> tmProfiles = new HashSet<TranslationMemoryProfile>();
-                    TranslationMemoryProfile tmProfile = HibernateUtil.get(
-                            TranslationMemoryProfile.class, Long.parseLong(valueField));
-                    tmProfiles.add(tmProfile);
-                    l10nProfile.setTmProfiles(tmProfiles);
+                    List<TranslationMemoryProfile> tmProfiles = ServerProxy.getProjectHandler()
+                            .getAllTMProfilesByCompanyId(companyId);
+                    Set<TranslationMemoryProfile> tmpSet = new HashSet<TranslationMemoryProfile>();
+                    for (TranslationMemoryProfile tmp : tmProfiles)
+                    {
+                        String tmpName = tmp.getName();
+                        if (tmpName.equalsIgnoreCase(valueField)
+                                || tmpName.startsWith(valueField + "_import_"))
+                        {
+                            tmpSet.add(tmp);
+                            break;
+                        }
+                    }
+                    l10nProfile.setTmProfiles(tmpSet);
                 }
             }
         }
@@ -307,56 +338,17 @@ public class LocProfileImporter implements ConfigConstants
             for (int i = 0; i < l10nProfileList.size(); i++)
             {
                 l10nProfile = l10nProfileList.get(i);
-                long companyId = l10nProfile.getCompanyId();
 
                 // checks project exist
-                Project origProject = l10nProfile.getProject();
-                List<Project> projects = ServerProxy.getProjectHandler().getProjectsByCompanyId(
-                        companyId);
-                Project project = null;
-                for (Project pro : projects)
-                {
-                    String projectName = pro.getName();
-                    if (projectName.equalsIgnoreCase(origProject.getName())
-                            || projectName.startsWith(origProject.getName() + "_import_"))
-                    {
-                        project = pro;
-                        l10nProfile.setProject(pro);
-                        break;
-                    }
-                }
+                Project project = l10nProfile.getProject();
 
                 // checks tm profile exist
-                String tmProfileName = l10nProfile.getTranslationMemoryProfile().getName();
-                List<TranslationMemoryProfile> tmProfiles = ServerProxy.getProjectHandler()
-                        .getAllTMProfilesByCompanyId(companyId);
-                Set<TranslationMemoryProfile> tmpSet = new HashSet<TranslationMemoryProfile>();
-                for (TranslationMemoryProfile tmp : tmProfiles)
-                {
-                    String tmpName = tmp.getName();
-                    if (tmpName.equalsIgnoreCase(tmProfileName)
-                            || tmpName.startsWith(tmProfileName + "_import_"))
-                    {
-                        tmpSet.add(tmp);
-                        break;
-                    }
-                }
-                l10nProfile.setTmProfiles(tmpSet);
+                Set<TranslationMemoryProfile> tmpSet = l10nProfile.getTmProfiles();
 
                 // checks workflow template exist
                 Set<WorkflowTemplateInfo> wftiSet = l10nProfile.getWorkflowTemplates();
-                Vector<WorkflowTemplateInfo> workflowTemplateInfos = new Vector<WorkflowTemplateInfo>();
-                for (WorkflowTemplateInfo wfti : wftiSet)
-                {
-                    WorkflowTemplateInfo wftInfo = ServerProxy.getProjectHandler()
-                            .getWorkflowTemplateInfoByNameAndCompanyId(wfti.getName(), companyId);
-
-                    if (wftInfo != null)
-                        workflowTemplateInfos.add(wftInfo);
-                }
-                l10nProfile.setWorkflowTemplateInfos(workflowTemplateInfos);
-
-                if (project == null || tmpSet.size() == 0 || workflowTemplateInfos.size() == 0)
+         
+                if (project == null || tmpSet.size() == 0 || wftiSet.size() == 0)
                 {
                     String msg = "Upload Localization Profile data failed ! Some require infos don't exist.";
                     logger.warn(msg);
@@ -436,7 +428,7 @@ public class LocProfileImporter implements ConfigConstants
 
     private String getL10NNewName(String oldName, long companyId)
     {
-        String hql = "select lp.name from BasicL10nProfile " + "  lp where lp.companyId=:companyId";
+        String hql = "select lp.name from BasicL10nProfile lp where lp.companyId=:companyId";
         Map map = new HashMap();
         map.put("companyId", companyId);
         List itList = HibernateUtil.search(hql, map);

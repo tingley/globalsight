@@ -77,20 +77,17 @@ function fnGetSelectedJobIds()
 		$.ajax({
     		type : "POST",
     		url : '${self.pageURL}&activityName=xlsReportCharacterCount&action=getReportJobInfo',
+    		async : false,
     		dataType : 'text',
     		success : function(data) {
     			reportJobInfo = eval("(" + data + ")");
-    			return validateJobIds();
     		},
     		error : function(request, error, status) {
     			reportJobInfo = "";
     		}
     	});
     }
-	else
-	{
-		return validateJobIds();
-	}
+	return validateJobIds();
 }
 
 function validateJobIds()

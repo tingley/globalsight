@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.cognitran.core.model.util.Collections;
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -279,16 +280,22 @@ class OrderedMatchSegments
             GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale.next();
             List<LeveragedTuv> leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
             Map<Long, LeveragedTuv> uniqueLeveragedTuvMap = new HashMap<Long, LeveragedTuv>();
+			List<Long> tuvIdList = new ArrayList<Long>();
             for (LeveragedTuv tuv : leveragedTuvList)
             {
                 if (!uniqueLeveragedTuvMap.containsKey(tuv.getId()))
                 {
                     uniqueLeveragedTuvMap.put(tuv.getId(), tuv);
+                    tuvIdList.add(tuv.getId());
                 }
             }
             // refresh the list with duplicates removed
             leveragedTuvList.clear();
-            leveragedTuvList.addAll(uniqueLeveragedTuvMap.values());
+			Collections.sort(tuvIdList);
+			for (Long tuvId : tuvIdList)
+			{
+				leveragedTuvList.add(uniqueLeveragedTuvMap.get(tuvId));
+			}
         }
     }
 
@@ -312,18 +319,19 @@ class OrderedMatchSegments
     }
 
     // apply leverage options for multiple translations
+	@SuppressWarnings({ "rawtypes", "unchecked" })
     private void applyMultiTransOption(LeverageOptions p_leverageOptions, long p_jobId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
         {
             GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale.next();
-            List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
-            List leveragedTuvList1 = new ArrayList<LeveragedTuv>();
+            List<LeveragedTuv> leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
+            List<LeveragedTuv> leveragedTuvList1 = new ArrayList<LeveragedTuv>();
             leveragedTuvList1.addAll(leveragedTuvList);
             for (int i = 0; i < leveragedTuvList1.size(); i++)
             {
-                LeveragedTuv leveragedTuv = (LeveragedTuv) leveragedTuvList1.get(i);
+                LeveragedTuv leveragedTuv = leveragedTuvList1.get(i);
                 MatchState tuvState = leveragedTuv.getMatchState();
                 if (MatchState.FUZZY_MATCH_OLD.equals(tuvState))
                 {

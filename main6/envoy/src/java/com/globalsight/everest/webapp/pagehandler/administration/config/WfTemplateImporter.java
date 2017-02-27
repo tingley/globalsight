@@ -385,7 +385,7 @@ public class WfTemplateImporter implements ConfigConstants
                     }
                     else
                     {
-                        addMessage(" Workflow name <b>" + oldName + "</b> already exists. <b>");
+                        addMessage(" Workflow name <b>" + oldName + "</b> already exists.");
                     }
                 }
             }

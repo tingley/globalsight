@@ -127,14 +127,23 @@ public class ConfigImportHandler extends PageHandler implements ConfigConstants
                 session.removeAttribute("importToCompId");
                 session.removeAttribute("uploading_filter");
                 Map<String, File> fileInfo = new HashMap<String, File>();
+                int i = 0;
                 for (File file : uploadFiles)
                 {
                     String fileName = file.getName();
-                    fileName = fileName.substring(0, fileName.indexOf("_") + 1);
-                    fileInfo.put(fileName, file);
+                    if ("WorkflowTemplateXml".equalsIgnoreCase(file.getParentFile().getName()))
+                    {
+                        fileInfo.put(fileName.substring(0, fileName.lastIndexOf(".")), file);
+                        i++;
+                    }
+                    else
+                    {
+                        fileName = fileName.substring(0, fileName.indexOf("_") + 1);
+                        fileInfo.put(fileName, file);
+                    }
                 }
                 ConfigImporter imp = new ConfigImporter(sessionId, fileInfo, user, companyId,
-                        importToCompId);
+                        importToCompId,i);
                 imp.start();
             }
             else

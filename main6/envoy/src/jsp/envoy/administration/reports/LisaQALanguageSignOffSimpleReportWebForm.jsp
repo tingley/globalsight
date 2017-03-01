@@ -165,7 +165,10 @@ function validateJobIds()
 		{
 			if (canAlert)
 			{
-			    alert("<%=bundle.getString("lb_invalid_target_language")%>");
+				if (canAlert)
+				{
+			        alert("<%=bundle.getString("lb_invalid_target_language")%>");
+				}
 			}
 			return;
 		}

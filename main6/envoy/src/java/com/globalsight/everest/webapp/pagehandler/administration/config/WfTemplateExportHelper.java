@@ -24,9 +24,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import jodd.io.FileUtil;
+
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
+import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -79,7 +82,7 @@ public class WfTemplateExportHelper implements ConfigConstants
                 buffer.append("WorkflowTemplateInfo.").append(wfti.getId())
                         .append(".DESCRIPTION = ").append(wfti.getDescription()).append(NEW_LINE);
                 buffer.append("WorkflowTemplateInfo.").append(wfti.getId())
-                        .append(".PROJECT_ID = ").append(wfti.getProject().getId())
+                        .append(".PROJECT_NAME = ").append(wfti.getProject().getName())
                         .append(NEW_LINE);
                 buffer.append("WorkflowTemplateInfo.").append(wfti.getId())
                         .append(".SOURCE_LOCALE_ID = ").append(wfti.getSourceLocale().getId())
@@ -146,6 +149,7 @@ public class WfTemplateExportHelper implements ConfigConstants
                         .getWorkflowTemplateById(wfti.getWorkflowTemplateId());
                 wfti.setWorkflowTemplate(workflowTemplate);
                 writeToFile(wfPropertyFile, buffer.toString().getBytes());
+      
             }
         }
         catch (Exception e)
@@ -179,5 +183,35 @@ public class WfTemplateExportHelper implements ConfigConstants
 
             }
         }
+    }
+
+    public static File exportXml(String wfId)
+    {
+        File distFile = null;
+        try
+        {
+            WorkflowTemplateInfo wfti = HibernateUtil.get(WorkflowTemplateInfo.class,
+                    Long.parseLong(wfId));
+            String templateName = wfti.getName();
+            String templateFileName = AmbFileStoragePathUtils.getWorkflowTemplateXmlDir()
+                    .getAbsolutePath()
+                    + File.separator
+                    + templateName
+                    + WorkflowConstants.SUFFIX_XML;
+            File file = new File(templateFileName);
+            StringBuffer filePath = new StringBuffer();
+            filePath.append(AmbFileStoragePathUtils.getFileStorageDirPath(wfti.getCompanyId()))
+                    .append(File.separator).append("GlobalSight").append(File.separator)
+                    .append("config").append(File.separator).append("export")
+                    .append(File.separator).append("WorkflowTemplateXml").append(File.separator)
+                    .append(templateName + WorkflowConstants.SUFFIX_XML);
+            distFile = new File(filePath.toString());
+            FileUtil.copy(file, distFile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return distFile;
     }
 }

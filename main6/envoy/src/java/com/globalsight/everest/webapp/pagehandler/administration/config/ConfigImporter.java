@@ -34,16 +34,18 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
     private String importToCompId;
     private User user;
     private Map<String, File> uploadFiles;
+    private int wfXmlSize;
 
     private static final Logger logger = Logger.getLogger(ConfigImporter.class);
     public ConfigImporter(String sessionId, Map<String, File> fileInfo, User user,
-            String companyId, String importToCompId)
+            String companyId, String importToCompId, int wfxmlFileSize)
     {
         this.sessionId = sessionId;
         this.uploadFiles = fileInfo;
         this.companyId = companyId;
         this.user = user;
         this.importToCompId = importToCompId;
+        this.wfXmlSize = wfxmlFileSize;
     }
 
     public void run()
@@ -55,7 +57,7 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
     {
         try
         {
-            int size = fileInfo.keySet().size();
+            int size = fileInfo.keySet().size() - wfXmlSize;
             int i = 0;
             if (fileInfo.containsKey(LOCALEPAIR_FILE_NAME))
             {

@@ -198,6 +198,7 @@ public class ConfigExportHandler extends PageHandler
             File locPropertyFile = LocProfileExportHelper.createPropertyfile(userName, companyId);
             File xrPropertyFile = XmlRuleExportHelper.createPropertyfile(userName, companyId);
             File fpPropertyFile = FileProfileExportHelper.createPropertyfile(userName, companyId);
+            List<File> xmlFileList = new ArrayList<File>();
 
             Element root = new Element("UserInfo");
             Document Doc = new Document(root);
@@ -286,6 +287,7 @@ public class ConfigExportHandler extends PageHandler
                             // gets workflow property file
                             wfPropertyFile = WfTemplateExportHelper.propertiesInputWfTemplate(
                                     wfPropertyFile, idArr[1]);
+                            xmlFileList.add(WfTemplateExportHelper.exportXml(idArr[1]));
                         }
                         else if ("lp".equals(idArr[0]))
                         {
@@ -351,6 +353,10 @@ public class ConfigExportHandler extends PageHandler
             if (wfPropertyFile.length() > 0)
             {
                 entryFiles.add(wfPropertyFile);
+                for (File file : xmlFileList)
+                {
+                    entryFiles.add(file);
+                }
             }
             if (xrPropertyFile.length() > 0)
             {

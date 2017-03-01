@@ -1052,7 +1052,7 @@ public class FileProfilePersistenceManagerLocal implements
             map.put("companyId", companyId);
             map.put("name", name);
 
-            return (FileExtensionImpl) HibernateUtil.search(hql, map).get(0);
+            return (FileExtensionImpl) HibernateUtil.getFirst(hql, map);
         }
         catch (Exception e)
         {

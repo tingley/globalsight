@@ -345,7 +345,7 @@ public class WfTemplateImporter implements ConfigConstants
                 Project project = origWorkflowTemplateInfo.getProject();
                 if (project == null || lp == null)
                 {
-                    String msg = "Upload Workflow data failed !";
+                    String msg = "Failed uploading Workflow data! Missing some required information.";
                     logger.warn(msg);
                     addToError(msg);
                 }

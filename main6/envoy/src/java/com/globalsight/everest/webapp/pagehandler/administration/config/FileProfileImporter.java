@@ -351,7 +351,7 @@ public class FileProfileImporter implements ConfigConstants
                 }
                 else
                 {
-                    String msg = "Upload File Profile data failed ! Localization Profile is not exist.";
+                    String msg = "Failed uploading File Profile data! Missing some required information.";
                     logger.warn(msg);
                     addToError(msg);
                 }

@@ -83,8 +83,8 @@ public class FileProfileUtil
                             // System.getProperty("os.name");
                             // but would rather not call this everytime we are
                             // calling script on import
-                            cmd = "bash " + scriptOnImport + " '" + filePath + "' '"
-                                    + scriptedFolderNamePrefix + "'";
+                            cmd = "bash " + scriptOnImport + " " + filePath + " "
+                                    + scriptedFolderNamePrefix;
                         }
                         else
                         {

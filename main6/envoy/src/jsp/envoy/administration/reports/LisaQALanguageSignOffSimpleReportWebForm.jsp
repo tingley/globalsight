@@ -165,10 +165,9 @@ function validateJobIds()
 		{
 			if (canAlert)
 			{
-				if (canAlert)
-				{
-			        alert("<%=bundle.getString("lb_invalid_target_language")%>");
-				}
+				
+			    alert("<%=bundle.getString("lb_invalid_target_language")%>");
+				
 			}
 			return;
 		}
@@ -186,7 +185,10 @@ function validateJobIds()
 		
 		if(!validateIDS(jobIDArr, jobInfos))
 	    {
-			alert("<%=bundle.getString("msg_invalid_jobName")%>");
+			if (canAlert)
+			{
+			    alert("<%=bundle.getString("msg_invalid_jobName")%>");
+			}
 			return;
 	    }
 	}

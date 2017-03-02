@@ -125,7 +125,7 @@ public class BlaiseMainHandler extends PageActionHandler
             //user set different time zone with server time zone
             int cz = 0;
 
-            int iHours = hours < 0 ? tmpPullHour - hours : tmpPullHour + hours;
+            int iHours = tmpPullHour - hours;
             if (iHours < 0)
             {
                 cz = -1;

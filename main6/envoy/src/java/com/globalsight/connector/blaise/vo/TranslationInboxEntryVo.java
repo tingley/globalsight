@@ -113,7 +113,7 @@ public class TranslationInboxEntryVo
 			{
 				if (BlaiseConstants.USAGE_TYPE_HDU.equals(usage))
 					isUsageOfHDU = true;
-				else if (BlaiseConstants.USAGE_TYPE_EDM.equals(usage))
+				else if (BlaiseConstants.USAGE_TYPE_ISHEET.equals(usage))
 					isUsageOfIsSheet = true;
 				else
 				    isOtherUsages = true;

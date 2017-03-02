@@ -29,6 +29,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import jodd.util.StringBand;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
@@ -138,6 +139,7 @@ public class BlaiseBasicHandler extends PageActionHandler
         }
 
         String names = "";
+        StringBand urls = new StringBand(256);
         for (Object o : BlaiseManager.getAllConnectors())
         {
             BlaiseConnector mtc = (BlaiseConnector) o;
@@ -146,8 +148,11 @@ public class BlaiseBasicHandler extends PageActionHandler
                 continue;
             }
             names += "," + mtc.getName() + ",";
+            if (mtc.isAutomatic())
+                urls.append("$@$").append(mtc.getUrl()).append("$@$");
         }
         request.setAttribute("names", names);
+        request.setAttribute("urls", urls.toString());
 
         List<BlaiseConnectorAttribute> typeAttributes = null;
         String attributeData = "";

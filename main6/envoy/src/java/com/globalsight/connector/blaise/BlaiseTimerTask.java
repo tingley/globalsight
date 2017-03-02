@@ -49,12 +49,15 @@ public class BlaiseTimerTask extends Thread
                     if (!pullDays.endsWith(","))
                         pullDays += ",";
                     Calendar calendar = Calendar.getInstance();
-                    String currentDayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) - 1) + ",";
-                    //logger.info("Thread [" + getName() + "] is running check..." + pullDays +
-                    // ", " + currentDayOfWeek);
+                    String currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) + ",";
+                    logger.debug("Thread [" + getName() + "] is running check..." + pullDays + ", "
+                            + currentDayOfWeek);
                     if (pullDays.indexOf(currentDayOfWeek) > -1)
                     {
                         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+                        logger.debug(
+                                "Current hour == " + currentHour + ", defined hour == " + connector
+                                        .getPullHour());
                         if (connector.getPullHour() == currentHour)
                         {
                             //match the time condition

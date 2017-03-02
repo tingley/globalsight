@@ -30,7 +30,11 @@
                   not-null="true" unique="false" />
         <property name="pullDays" length="20" column="PULL_DAYS" type="string"
                   not-null="false" unique="false" />
+        <property name="userPullDays" length="20" column="USER_PULL_DAYS" type="string"
+                  not-null="false" unique="false" />
         <property name="pullHour" column="PULL_HOUR" length="20"
+                  type="int" not-null="true" />
+        <property name="userPullHour" column="USER_PULL_HOUR" length="20"
                   type="int" not-null="true" />
         <property name="defaultFileProfileId" column="DEFAULT_FILE_PROFILE_ID" length="20"
                   type="long" not-null="true" />

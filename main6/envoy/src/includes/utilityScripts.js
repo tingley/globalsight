@@ -273,7 +273,7 @@ function validEmail(s) {
 
 function setCookie(name, value, expiresDays) {
     var today = new Date();
-    if (!isAllDigits(expiresDays))
+    if (!isInteger(expiresDays))
         expiresDays = 1;
     var expires = new Date(today.getTime() + (expiresDays * 86400000));
     var cookieString = name + "=" + value + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
@@ -287,4 +287,13 @@ function isPositiveNumber(value){
 		return false;
 	
 	 return value>0;
+}
+
+function isInteger(value) {
+	var pattern = /^-?[1-9]\d*|0$/;
+	return pattern.test(value);
+}
+
+function isFloat(value) {
+	return /^-?([1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0)$/.test(value);
 }

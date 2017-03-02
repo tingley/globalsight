@@ -117,8 +117,17 @@ public class BlaiseAutoHelper
                                 if (StringUtil.isNotEmpty(tmpString))
                                     tmpString = tmpString.substring(0, tmpString.length() - 2);
                             }
-                            o.put("value", tmpString);
+                        } else if (condition instanceof IntCondition) {
+                            IntCondition ic = (IntCondition) condition;
+                            tmpString = ic.getMin().intValue() + "," + ic.getMax().intValue();
+                        } else if (condition instanceof FloatCondition) {
+                            FloatCondition fc = (FloatCondition) condition;
+                            tmpString = fc.getMin().floatValue() + "," + fc.getMax().floatValue();
+                        } else if (condition instanceof TextCondition){
+                            TextCondition tc = (TextCondition) condition;
+                            tmpString = String.valueOf(tc.getLength().intValue());
                         }
+                        o.put("value", tmpString);
                         array.add(o);
                     }
                 }

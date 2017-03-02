@@ -49,7 +49,6 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityService;
-import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTemplate;
@@ -64,16 +63,21 @@ import com.globalsight.util.StringUtil;
 public class WfTemplateImporter implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(WfTemplateImporter.class);
-    private String currentCompanyId;
     private String sessionId;
-    private String importToCompId;
-    private String orignalCompanyId;
+    private long companyId;
+    private String path;
 
     public WfTemplateImporter(String sessionId, String currentCompanyId, String importToCompId)
     {
         this.sessionId = sessionId;
-        this.currentCompanyId = currentCompanyId;
-        this.importToCompId = importToCompId;
+        if (importToCompId != null && !importToCompId.equals("-1"))
+        {
+            this.companyId = Long.parseLong(importToCompId);
+        }
+        else
+        {
+            this.companyId = Long.parseLong(currentCompanyId);
+        }
     }
 
     /**
@@ -82,6 +86,7 @@ public class WfTemplateImporter implements ConfigConstants
     public void analysisAndImport(File uploadedFile)
     {
         Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
+        path = uploadedFile.getParentFile().getParentFile().getPath();
 
         try
         {
@@ -181,10 +186,20 @@ public class WfTemplateImporter implements ConfigConstants
                 {
                     wftInfo.setDescription(valueField);
                 }
-                else if ("PROJECT_ID".equalsIgnoreCase(keyField))
+                else if ("PROJECT_NAME".equalsIgnoreCase(keyField))
                 {
-                    Project project = ServerProxy.getProjectHandler().getProjectById(
-                            Long.parseLong(valueField));
+                    List<Project> projectList = ServerProxy.getProjectHandler()
+                            .getProjectsByCompanyId(companyId);
+                    Project project = null;
+                    for (Project pro : projectList)
+                    {
+                        if (pro.getName().equals(valueField)
+                                || pro.getName().startsWith(valueField + "_import_"))
+                        {
+                            project = pro;
+                            break;
+                        }
+                    }
                     wftInfo.setProject(project);
                 }
                 else if ("SOURCE_LOCALE_ID".equalsIgnoreCase(keyField))
@@ -203,12 +218,6 @@ public class WfTemplateImporter implements ConfigConstants
                 {
                     wftInfo.setCodeSet(valueField);
                 }
-                else if ("IFLOW_TEMPLATE_ID".equalsIgnoreCase(keyField))
-                {
-                    WorkflowTemplate workflowTemplate = WorkflowTemplateHandlerHelper
-                            .getWorkflowTemplateById(Long.parseLong(valueField));
-                    wftInfo.setWorkflowTemplate(workflowTemplate);
-                }
                 else if ("IS_ACTIVE".equalsIgnoreCase(keyField))
                 {
                     wftInfo.setIsActive(Boolean.parseBoolean(valueField));
@@ -223,15 +232,7 @@ public class WfTemplateImporter implements ConfigConstants
                 }
                 else if ("COMPANYID".equalsIgnoreCase(keyField))
                 {
-                    orignalCompanyId = valueField;
-                    if (importToCompId != null && !importToCompId.equals("-1"))
-                    {
-                        wftInfo.setCompanyId(Long.parseLong(importToCompId));
-                    }
-                    else
-                    {
-                        wftInfo.setCompanyId(Long.parseLong(currentCompanyId));
-                    }
+                    wftInfo.setCompanyId(companyId);
                 }
                 else if ("SCORECARD_SHOWTYPE".equalsIgnoreCase(keyField))
                 {
@@ -340,25 +341,11 @@ public class WfTemplateImporter implements ConfigConstants
                                 origWorkflowTemplateInfo.getSourceLocale().toString(),
                                 origWorkflowTemplateInfo.getTargetLocale().toString(),
                                 origWorkflowTemplateInfo.getCompanyId());
-
                 // checks project exist
-                Project origProject = origWorkflowTemplateInfo.getProject();
-                List<Project> projectList = ServerProxy.getProjectHandler().getProjectsByCompanyId(
-                        origWorkflowTemplateInfo.getCompanyId());
-                Project project = null;
-                for (Project pro : projectList)
-                {
-                    if (pro.getName().equals(origProject.getName())
-                            || pro.getName().startsWith("_import_"))
-                    {
-                        project = pro;
-                        origWorkflowTemplateInfo.setProject(pro);
-                        break;
-                    }
-                }
+                Project project = origWorkflowTemplateInfo.getProject();
                 if (project == null || lp == null)
                 {
-                    String msg = "Upload Workflow data failed !";
+                    String msg = "Failed uploading Workflow data! Missing some required information.";
                     logger.warn(msg);
                     addToError(msg);
                 }
@@ -368,9 +355,8 @@ public class WfTemplateImporter implements ConfigConstants
                     if (!isAlreadyExisted(oldName))
                     {
                         WorkflowTemplate workflowTemplate = new WorkflowTemplate();
-                        String fileName = AmbFileStoragePathUtils.getWorkflowTemplateXmlDir(
-                                orignalCompanyId).getPath()
-                                + File.separator + oldName + WorkflowConstants.SUFFIX_XML;;
+                        String fileName = path + File.separator + "WorkflowTemplateXml"
+                                + File.separator + oldName + WorkflowConstants.SUFFIX_XML;
                         SAXReader reader = new SAXReader();
                         Document doc = reader.read(new File(fileName));
                         workflowTemplate.setName(oldName);
@@ -457,7 +443,7 @@ public class WfTemplateImporter implements ConfigConstants
         {
             long companyId = workflowTemplateInfo.getCompanyId();
 
-            //saves leverage locales
+            // saves leverage locales
             Set<LeverageLocales> lls = new HashSet<LeverageLocales>();
             Set<LeverageLocales> origLls = workflowTemplateInfo.getLeveragingLocalesSet();
             for (Iterator it = origLls.iterator(); it.hasNext();)
@@ -468,7 +454,7 @@ public class WfTemplateImporter implements ConfigConstants
             }
             workflowTemplateInfo.setLeveragingLocalesSet(lls);
 
-            //saves workflow_managers
+            // saves workflow_managers
             List<String> wfmIds = workflowTemplateInfo.getWorkflowManagerIds();
             ArrayList<String> wfmanagerIds = new ArrayList<String>();
             ArrayList<String> userIds = new ArrayList<String>();
@@ -502,7 +488,7 @@ public class WfTemplateImporter implements ConfigConstants
     {
         String hql = "from WorkflowTemplateInfo wf where wf.companyId=:companyid and wf.isActive = 'Y'";
         Map map = new HashMap();
-        map.put("companyid", Long.parseLong(currentCompanyId));
+        map.put("companyid", companyId);
         List itList = HibernateUtil.search(hql, map);
         ArrayList names = new ArrayList();
         if (itList != null)

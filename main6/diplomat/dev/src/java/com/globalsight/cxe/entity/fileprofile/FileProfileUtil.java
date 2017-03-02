@@ -73,8 +73,24 @@ public class FileProfileUtil
                     // Call the script on import to convert the file
                     try
                     {
-                        String cmd = "cmd.exe /c " + scriptOnImport + " \"" + filePath + "\" \""
-                                + scriptedFolderNamePrefix + "\"";
+                        String cmd = null;
+                        if (scriptOnImport.endsWith(".sh"))
+                        {
+                            // GBS-4719
+                            // if ending is ".sh" presume linux system. Quick
+                            // and dirty fix.
+                            // better fix is to find out the system using
+                            // System.getProperty("os.name");
+                            // but would rather not call this everytime we are
+                            // calling script on import
+                            cmd = "bash " + scriptOnImport + " " + filePath + " "
+                                    + scriptedFolderNamePrefix;
+                        }
+                        else
+                        {
+                            cmd = "cmd.exe /c " + scriptOnImport + " \"" + filePath + "\" \""
+                                    + scriptedFolderNamePrefix + "\"";
+                        }
                         // If the script is Lexmark tool, another parameter
                         // -encoding is passed.
                         if ("lexmarktool.bat".equalsIgnoreCase(new File(scriptOnImport).getName()))
@@ -252,7 +268,7 @@ public class FileProfileUtil
             fp = (FileProfileImpl) HibernateUtil.getFirst(hql);
             if (fp != null)
             {
-                return fp.getId();                
+                return fp.getId();
             }
         }
 

@@ -4095,7 +4095,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 hsql += " and wf.companyId = :companyId";
                 map.put("companyId", companyId);
             }
-            wftInfo = (WorkflowTemplateInfo) HibernateUtil.search(hsql, map).get(0);
+            wftInfo = (WorkflowTemplateInfo) HibernateUtil.getFirst(hsql, map);
             return wftInfo;
         }
         catch (Exception e)

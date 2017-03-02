@@ -73,8 +73,7 @@ public class SelectFileHandler extends PageHandler
 {
     // static variables
 
-    private static final Logger CATEGORY = Logger
-            .getLogger(SelectFileHandler.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(SelectFileHandler.class.getName());
 
     // values stored in the session to pass info between pages
     // or use in the jsp
@@ -103,15 +102,14 @@ public class SelectFileHandler extends PageHandler
      * @param p_context
      *            the Servlet context.
      */
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            RemoteException, EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, RemoteException, EnvoyServletException
     {
         addSuggestJobNameAttribute(p_request);
 
-        SessionManager sessionMgr = (SessionManager) p_request
-                .getSession(false).getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) p_request.getSession(false)
+                .getAttribute(SESSION_MANAGER);
         // Clicking on the folder sends the parameter via the request
         // object. Get it and put on the session.
         HttpSession session = p_request.getSession(true);
@@ -136,10 +134,8 @@ public class SelectFileHandler extends PageHandler
                 else if (IMPORT.equals(action))
                 {
                     // gather the data for importing and perform the import
-                    p_request.setAttribute("nextPageFlag",
-                            p_request.getParameter("nextPageFlag"));
-                    p_request.setAttribute("jobType",
-                            (String) sessionMgr.getAttribute("jobType"));
+                    p_request.setAttribute("nextPageFlag", p_request.getParameter("nextPageFlag"));
+                    p_request.setAttribute("jobType", (String) sessionMgr.getAttribute("jobType"));
                     p_request.setAttribute("RSS_CHANNEL_ID",
                             (String) sessionMgr.getAttribute("RSS_CHANNEL_ID"));
                     checkForFileImportData(p_request);
@@ -155,8 +151,7 @@ public class SelectFileHandler extends PageHandler
                 }
                 catch (Exception e)
                 {
-                    CATEGORY.error("Failed to decode folderSelected: "
-                            + folderSelected, e);
+                    CATEGORY.error("Failed to decode folderSelected: " + folderSelected, e);
                 }
             }
 
@@ -174,18 +169,15 @@ public class SelectFileHandler extends PageHandler
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-                    re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-                    ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
         }
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
     public static String getRelativePath(File p_parent, File p_absolute)
@@ -207,8 +199,8 @@ public class SelectFileHandler extends PageHandler
         return getCXEBaseDir().getPath() + File.separator + p_absolute;
     }
 
-    public static Vector getFileExtensionsByFileProfile(
-            FileProfile p_fileProfile) throws EnvoyServletException
+    public static Vector getFileExtensionsByFileProfile(FileProfile p_fileProfile)
+            throws EnvoyServletException
     {
         try
         {
@@ -226,17 +218,15 @@ public class SelectFileHandler extends PageHandler
         return AmbFileStoragePathUtils.getCxeDocDir();
     }
 
-    private void recurseFileStructures(File p_baseFile,
-            FileProfile p_fileProfile, SessionManager p_sessionMgr)
-            throws EnvoyServletException
+    private void recurseFileStructures(File p_baseFile, FileProfile p_fileProfile,
+            SessionManager p_sessionMgr) throws EnvoyServletException
     {
         // we don't filter by file profiles anymore - so just replace by empty
         // Vector.
         // will leave this call here in case there is some sort of filtering
         // that is needed
         // in the near future
-        File[] directoryContent = p_baseFile.listFiles(new ImportFileFilter(
-                new Vector()));
+        File[] directoryContent = p_baseFile.listFiles(new ImportFileFilter(new Vector()));
 
         if (directoryContent != null)
         {
@@ -251,8 +241,7 @@ public class SelectFileHandler extends PageHandler
                 else
                 {
                     getFileList(p_sessionMgr)
-                            .add(getRelativePath(
-                                    AmbFileStoragePathUtils.getCxeDocDir(), doc));
+                            .add(getRelativePath(AmbFileStoragePathUtils.getCxeDocDir(), doc));
                 }
             }
         }
@@ -260,9 +249,8 @@ public class SelectFileHandler extends PageHandler
 
     // obtain the file list and add or remove the files selected from the
     // selected list.
-    private void prepareFileList(HttpServletRequest p_request,
-            SessionManager p_sessionMgr, FileProfile p_fileProfile)
-            throws EnvoyServletException
+    private void prepareFileList(HttpServletRequest p_request, SessionManager p_sessionMgr,
+            FileProfile p_fileProfile) throws EnvoyServletException
     {
         HashSet fileList = getFileList(p_sessionMgr);
         String fileAction = (String) p_request.getParameter("fileAction");
@@ -284,15 +272,12 @@ public class SelectFileHandler extends PageHandler
                     }
                     catch (Exception e)
                     {
-                        CATEGORY.error(
-                                "Failed to decode fileName: " + files[i], e);
+                        CATEGORY.error("Failed to decode fileName: " + files[i], e);
                     }
-                    File addFile = new File(
-                            AmbFileStoragePathUtils.getCxeDocDir(), file);
+                    File addFile = new File(AmbFileStoragePathUtils.getCxeDocDir(), file);
                     if (addFile.isDirectory())
                     {
-                        recurseFileStructures(addFile, p_fileProfile,
-                                p_sessionMgr);
+                        recurseFileStructures(addFile, p_fileProfile, p_sessionMgr);
                     }
                     else
                     {
@@ -311,8 +296,7 @@ public class SelectFileHandler extends PageHandler
                     }
                     catch (Exception e)
                     {
-                        CATEGORY.error(
-                                "Failed to decode fileName: " + files[i], e);
+                        CATEGORY.error("Failed to decode fileName: " + files[i], e);
                     }
                     fileList.remove(file);
                 }
@@ -344,8 +328,7 @@ public class SelectFileHandler extends PageHandler
         try
         {
             SystemConfiguration config = SystemConfiguration.getInstance();
-            String s = config
-                    .getStringParameter(SystemConfigParamNames.IMPORT_SUGGEST_JOB_NAME);
+            String s = config.getStringParameter(SystemConfigParamNames.IMPORT_SUGGEST_JOB_NAME);
             if ("false".equalsIgnoreCase(s))
             {
                 suggestJobName = Boolean.FALSE;
@@ -369,14 +352,12 @@ public class SelectFileHandler extends PageHandler
             throws IOException, EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         String jobType = (String) sessionMgr.getAttribute("jobType");
 
         // Allow use to select target locales while creating jobs
-        String[] targetLocaleIds = p_request
-                .getParameterValues("targetLocales");
+        String[] targetLocaleIds = p_request.getParameterValues("targetLocales");
         ArrayList targetLocalesList = new ArrayList();
         if (targetLocaleIds != null && targetLocaleIds.length > 0)
         {
@@ -403,8 +384,7 @@ public class SelectFileHandler extends PageHandler
         Set fileNames = fileList.keySet();
         Iterator iterator = fileNames.iterator();
         // 2. job name
-        String jobName = EditUtil.utf8ToUnicode(
-                p_request.getParameter(JOB_NAME)).trim();
+        String jobName = EditUtil.utf8ToUnicode(p_request.getParameter(JOB_NAME)).trim();
         // priority
         BasicL10nProfile blp = null;
         String priority = null;
@@ -423,32 +403,29 @@ public class SelectFileHandler extends PageHandler
             {
                 blp = HibernateUtil.get(BasicL10nProfile.class, l10nProfileId);
                 priority = String.valueOf(blp.getPriority());
-                job = JobCreationMonitor
-                        .initializeJob(jobName, uuid, user.getUserId(),
-                                l10nProfileId, priority, Job.IN_QUEUE);
+                job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(),
+                        l10nProfileId, priority, Job.IN_QUEUE);
             }
 
             fileName = fileName.replace('\\', File.separatorChar);
             sourceLocaleName = blp.getSourceLocale().getLocaleCode();
 
-            oldFolderName = fileName
-                    .substring(fileName.indexOf(File.separator) + 1);
-            oldFolderName = oldFolderName.substring(0,
-                    oldFolderName.indexOf(File.separator));
+            oldFolderName = fileName.substring(fileName.indexOf(File.separator) + 1);
+            oldFolderName = oldFolderName.substring(0, oldFolderName.indexOf(File.separator));
 
-            fileName = copyAndDeleteTmpFiles(sourceLocaleName, fileName,
-                    oldFolderName, String.valueOf(job.getId()));
+            fileName = copyAndDeleteTmpFiles(sourceLocaleName, fileName, oldFolderName,
+                    String.valueOf(job.getId()));
             mappedFiles.put(fileName, fp);
         }
-        if (jobType != null && "cvsJob".equalsIgnoreCase(jobType)) {
-            //To remove old source folder which is used job name as path
+        if (jobType != null && "cvsJob".equalsIgnoreCase(jobType))
+        {
+            // To remove old source folder which is used job name as path
             File baseDocDir = AmbFileStoragePathUtils.getCxeDocDir();
             File tmpDir = new File(baseDocDir, sourceLocaleName + File.separator + oldFolderName);
             if (tmpDir.exists() && tmpDir.isDirectory())
                 FileUtil.deleteFile(tmpDir);
         }
-        sessionMgr.setAttribute(MapFileProfileToFileHandler.MAPPINGS,
-                mappedFiles);
+        sessionMgr.setAttribute(MapFileProfileToFileHandler.MAPPINGS, mappedFiles);
 
         // for GBS-2137, initialize the job with "IN_QUEUE" state
         Map<String, JobAttribute> jobAttributes = (Map<String, JobAttribute>) sessionMgr
@@ -461,15 +438,14 @@ public class SelectFileHandler extends PageHandler
         }
 
         // 3. send off to be imported
-        sendToCxe(mappedFiles, jobName, job.getId(), targetLocalesList,
-                jobType, priority);
+        sendToCxe(mappedFiles, jobName, job.getId(), targetLocalesList, jobType, priority);
 
         // 4. set job attributes
         if (jobAttributes != null)
         {
             String companyId = CompanyThreadLocal.getInstance().getValue();
-            AddJobAttributeThread thread = new AddJobAttributeThread(
-                    ((JobImpl) job).getUuid(), companyId);
+            AddJobAttributeThread thread = new AddJobAttributeThread(((JobImpl) job).getUuid(),
+                    companyId);
             List<JobAttribute> jobAtts = new ArrayList<JobAttribute>();
             jobAtts.addAll(jobAttributes.values());
             thread.setJobAttributes(jobAtts);
@@ -480,21 +456,19 @@ public class SelectFileHandler extends PageHandler
         sessionMgr.clear();
     }
 
-    private String copyAndDeleteTmpFiles(String sourceLocaleName,
-            String fileName, String oldName, String jobName)
+    private String copyAndDeleteTmpFiles(String sourceLocaleName, String fileName, String oldName,
+            String jobName)
     {
         try
         {
-            String destinationLocation = fileName
-                    .replaceFirst(oldName, jobName);
+            String destinationLocation = fileName.replaceFirst(oldName, jobName);
 
             File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
             File sourceFile = new File(saveDir + File.separator + fileName);
-            File descFile = new File(saveDir + File.separator
-                    + destinationLocation);
+            File descFile = new File(saveDir + File.separator + destinationLocation);
 
             FileUtil.copyFile(sourceFile, descFile);
-            
+
             return destinationLocation;
         }
         catch (Exception e)
@@ -508,9 +482,9 @@ public class SelectFileHandler extends PageHandler
      * Creates a batch for the given set of files and tells CXE to import them
      * in manual mode.
      */
-    private static void sendToCxe(Hashtable p_mappedFiles, String p_jobName,
-            long p_jobId, List p_targetLocalesList, String p_jobType,
-            String p_priority) throws EnvoyServletException
+    private static void sendToCxe(Hashtable p_mappedFiles, String p_jobName, long p_jobId,
+            List p_targetLocalesList, String p_jobType, String p_priority)
+            throws EnvoyServletException
     {
         try
         {
@@ -531,121 +505,128 @@ public class SelectFileHandler extends PageHandler
                 // job.
                 String scriptOnImport = fp.getScriptOnImport();
                 int exitValue = 0;
-                
+
                 if (scriptOnImport != null && scriptOnImport.length() > 0)
-                {                 
-                	String oldScriptedDir = fileName.substring(0,
-                            fileName.lastIndexOf("."));
+                {
+                    String oldScriptedDir = fileName.substring(0, fileName.lastIndexOf("."));
                     String oldScriptedFolderPath = AmbFileStoragePathUtils
-    		                .getCxeDocDirPath(fp.getCompanyId())
-    		                + File.separator
-    		                + oldScriptedDir;
+                            .getCxeDocDirPath(fp.getCompanyId()) + File.separator + oldScriptedDir;
                     File oldScriptedFolder = new File(oldScriptedFolderPath);
-                	
-                    String scriptedFolderNamePrefix= FileSystemUtil.
-                    		getScriptedFolderNamePrefixByJob(p_jobId);
-                    String name = fileName.substring(fileName
-                    		.lastIndexOf(File.separator) + 1,fileName.lastIndexOf("."));
+
+                    String scriptedFolderNamePrefix = FileSystemUtil
+                            .getScriptedFolderNamePrefixByJob(p_jobId);
+                    String name = fileName.substring(fileName.lastIndexOf(File.separator) + 1,
+                            fileName.lastIndexOf("."));
                     String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-                    
-                    String scriptedDir = fileName.substring(0,fileName.lastIndexOf(File.separator))
-    		        		+ File.separator + scriptedFolderNamePrefix + "_" 
-    		        		+ name + "_" + extension;
-    		        String scriptedFolderPath = AmbFileStoragePathUtils
-    		                .getCxeDocDirPath(fp.getCompanyId())
-    		                + File.separator
-    		                + scriptedDir;
-    		        File scriptedFolder = new File(scriptedFolderPath); 
+
+                    String scriptedDir = fileName.substring(0, fileName.lastIndexOf(File.separator))
+                            + File.separator + scriptedFolderNamePrefix + "_" + name + "_"
+                            + extension;
+                    String scriptedFolderPath = AmbFileStoragePathUtils
+                            .getCxeDocDirPath(fp.getCompanyId()) + File.separator + scriptedDir;
+                    File scriptedFolder = new File(scriptedFolderPath);
                     if (!scriptedFolder.exists())
                     {
-		                File file = new File(fileName);
-		                String filePath = AmbFileStoragePathUtils
-		                        .getCxeDocDirPath()
-		                        + File.separator
-		                        + file.getParent();
-		                // Call the script on import to convert the file
-		                try
-		                {
-		                	String cmd = "cmd.exe /c " + scriptOnImport + " \""
-		                    	+ filePath + "\" \"" + scriptedFolderNamePrefix + "\"";
-		                    // If the script is Lexmark tool, another parameter
-		                    // -encoding is passed.
-		                    if ("lexmarktool.bat".equalsIgnoreCase(new File(
-		                            scriptOnImport).getName()))
-		                    {
-		                        cmd += " \"-encoding " + fp.getCodeSet() + "\"";
-		                    }
-		                    ProcessRunner pr = new ProcessRunner(cmd);
-		                    Thread t = new Thread(pr);
-		                    t.start();
-		                    try
-		                    {
-		                        t.join();
-		                    }
-		                    catch (InterruptedException ie)
-		                    {
-		                    }
-		                    CATEGORY.info("Script on Import " + scriptOnImport
-		                            + " is called to handle " + filePath);
-		                }
-		                catch (Exception e)
-		                {
-		                    // Set exitValue to 1 if the file was not scripted
-		                    // correctly.
-		                    exitValue = 1;
-		                    CATEGORY.error("The script on import was not executed successfully.");
-		                }
-                    }                   
+                        File file = new File(fileName);
+                        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath()
+                                + File.separator + file.getParent();
+                        // Call the script on import to convert the file
+                        try
+                        {
+                            String cmd = null;
+                            if (scriptOnImport.endsWith(".sh"))
+                            {
+                                // GBS-4719
+                                // if ending is ".sh" presume linux system.
+                                // Quick
+                                // and dirty fix.
+                                // better fix is to find out the system using
+                                // System.getProperty("os.name");
+                                // but would rather not call this everytime we
+                                // are
+                                // calling script on import
+                                cmd = "bash " + scriptOnImport + " " + filePath + " "
+                                        + scriptedFolderNamePrefix;
+                            }
+                            else
+                            {
+                                cmd = "cmd.exe /c " + scriptOnImport + " \"" + filePath + "\" \""
+                                        + scriptedFolderNamePrefix + "\"";
+                            }
+                            // If the script is Lexmark tool, another parameter
+                            // -encoding is passed.
+                            if ("lexmarktool.bat"
+                                    .equalsIgnoreCase(new File(scriptOnImport).getName()))
+                            {
+                                cmd += " \"-encoding " + fp.getCodeSet() + "\"";
+                            }
+                            ProcessRunner pr = new ProcessRunner(cmd);
+                            Thread t = new Thread(pr);
+                            t.start();
+                            try
+                            {
+                                t.join();
+                            }
+                            catch (InterruptedException ie)
+                            {
+                            }
+                            CATEGORY.info("Script on Import " + scriptOnImport
+                                    + " is called to handle " + filePath);
+                        }
+                        catch (Exception e)
+                        {
+                            // Set exitValue to 1 if the file was not scripted
+                            // correctly.
+                            exitValue = 1;
+                            CATEGORY.error("The script on import was not executed successfully.");
+                        }
+                    }
                     // Iterator the files converted by the script and import
                     // each one of them.
                     if (scriptedFolder.exists() || oldScriptedFolder.exists())
                     {
-                    	
+
                         String scriptedFiles[];
-                        if(scriptedFolder.exists())
+                        if (scriptedFolder.exists())
                         {
-                        	scriptedFiles = scriptedFolder.list();
+                            scriptedFiles = scriptedFolder.list();
                         }
                         else
                         {
-                        	scriptedFiles = oldScriptedFolder.list();
-						}
+                            scriptedFiles = oldScriptedFolder.list();
+                        }
                         if (scriptedFiles != null && scriptedFiles.length > 0)
                         {
                             for (int j = 0; j < scriptedFiles.length; j++)
                             {
                                 String scriptedFileName = scriptedFiles[j];
-                                String oldName = fileName.substring(fileName
-                            			.lastIndexOf(File.separator) + 1);
-	                            if(!oldName.equals(scriptedFileName))
-	                            {
-	                            	continue;
-	                            }
-                            	String fileProfileId = Long
-                            			.toString(fp.getId());
-                            	String key_fileName;
-                            	if (scriptedFolder.exists())
-                            	{
-                            		key_fileName = scriptedDir
-                            			+ File.separator + scriptedFileName;
-                            	}
-                            	else 
-                            	{
-                            		key_fileName = oldScriptedDir
-                        				+ File.separator + scriptedFileName;
-								}
-                            	files2FpId.put(key_fileName, fileProfileId);
-                            	files2ExitValue.put(key_fileName, new Integer(
-                            			exitValue));
-                                
+                                String oldName = fileName
+                                        .substring(fileName.lastIndexOf(File.separator) + 1);
+                                if (!oldName.equals(scriptedFileName))
+                                {
+                                    continue;
+                                }
+                                String fileProfileId = Long.toString(fp.getId());
+                                String key_fileName;
+                                if (scriptedFolder.exists())
+                                {
+                                    key_fileName = scriptedDir + File.separator + scriptedFileName;
+                                }
+                                else
+                                {
+                                    key_fileName = oldScriptedDir + File.separator
+                                            + scriptedFileName;
+                                }
+                                files2FpId.put(key_fileName, fileProfileId);
+                                files2ExitValue.put(key_fileName, new Integer(exitValue));
+
                             }
                         }
                         else
                         // there are no scripted files in the folder
                         {
                             files2FpId.put(fileName, Long.toString(fp.getId()));
-                            files2ExitValue.put(fileName,
-                                    new Integer(exitValue));
+                            files2ExitValue.put(fileName, new Integer(exitValue));
                         }
                     }
                     else
@@ -665,8 +646,8 @@ public class SelectFileHandler extends PageHandler
             }
             if (!files2FpId.isEmpty())
             {
-                sendToCxe2(files2FpId, files2ExitValue, p_jobName, p_jobId,
-                        p_targetLocalesList, p_jobType, p_priority);
+                sendToCxe2(files2FpId, files2ExitValue, p_jobName, p_jobId, p_targetLocalesList,
+                        p_jobType, p_priority);
             }
         }
         catch (Exception e)
@@ -682,13 +663,12 @@ public class SelectFileHandler extends PageHandler
     /**
      * Sends all the files including the scripted ones to Cxe for importing.
      */
-    private static void sendToCxe2(Hashtable p_files2FpId,
-            Hashtable p_files2ExitValue, String p_jobName, long p_jobId,
-            List p_targetLocalesList, String p_jobType, String p_priority)
-            throws Exception
+    private static void sendToCxe2(Hashtable p_files2FpId, Hashtable p_files2ExitValue,
+            String p_jobName, long p_jobId, List p_targetLocalesList, String p_jobType,
+            String p_priority) throws Exception
     {
-        CATEGORY.info("---Sending to CXE the following for job " + p_jobName
-                + " : " + p_files2FpId.toString() + "---");
+        CATEGORY.info("---Sending to CXE the following for job " + p_jobName + " : "
+                + p_files2FpId.toString() + "---");
 
         String batchId = p_jobName + Long.toString(new Date().getTime());
         Set fileNames = p_files2FpId.keySet();
@@ -725,11 +705,9 @@ public class SelectFileHandler extends PageHandler
                 isAutoImport = true;
             }
 
-            CxeProxy.importFromFileSystem(fileName, String.valueOf(p_jobId),
-                    batchId, fileProfileId, pageCount, new Integer(count),
-                    Integer.valueOf(1), Integer.valueOf(1), isAutoImport,
-                    Boolean.FALSE, CxeProxy.IMPORT_TYPE_L10N, exitValue,
-                    p_priority);
+            CxeProxy.importFromFileSystem(fileName, String.valueOf(p_jobId), batchId, fileProfileId,
+                    pageCount, new Integer(count), Integer.valueOf(1), Integer.valueOf(1),
+                    isAutoImport, Boolean.FALSE, CxeProxy.IMPORT_TYPE_L10N, exitValue, p_priority);
         }
     }
 }

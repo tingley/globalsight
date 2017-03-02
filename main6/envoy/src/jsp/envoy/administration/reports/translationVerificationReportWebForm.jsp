@@ -202,6 +202,7 @@ function filterJob2()
     {
     	lisaQAForm.submitButton.disabled=false;
     }
+    filterTargetLocale();
 }
 
 function filterTargetLocale()

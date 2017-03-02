@@ -350,7 +350,7 @@ public class LocProfileImporter implements ConfigConstants
          
                 if (project == null || tmpSet.size() == 0 || wftiSet.size() == 0)
                 {
-                    String msg = "Upload Localization Profile data failed ! Some require infos don't exist.";
+                    String msg = "Failed uploading Localization Profile data! Missing some required information.";
                     logger.warn(msg);
                     addToError(msg);
                 }

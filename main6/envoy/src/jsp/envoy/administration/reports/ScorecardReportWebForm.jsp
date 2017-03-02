@@ -304,7 +304,10 @@ function validateJobIds()
 		
 		if(!validateIDS(jobIDArr, jobInfos))
 	    {
-			alert("<%=bundle.getString("msg_invalid_jobName")%>");
+			if (canAlert)
+			{
+			    alert("<%=bundle.getString("msg_invalid_jobName")%>");
+			}
 			return;
 	    }
 	}

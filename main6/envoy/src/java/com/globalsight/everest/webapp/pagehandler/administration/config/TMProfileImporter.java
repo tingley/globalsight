@@ -226,7 +226,7 @@ public class TMProfileImporter implements ConfigConstants
                 if (projectTmId == -1 || StringUtil.isEmptyAndNull(leverageProTMName)
                         || ruleId == -1)
                 {
-                    String msg = "Upload Translation Memory Profile data failed ! Some required info donot exist.";
+                    String msg = "Failed uploading Translation Memory Profile data! Missing some required information.";
                     logger.warn(msg);
                     addToError(msg);
                 }

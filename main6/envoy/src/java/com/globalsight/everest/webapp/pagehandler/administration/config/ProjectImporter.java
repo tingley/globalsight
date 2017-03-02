@@ -356,7 +356,7 @@ public class ProjectImporter implements ConfigConstants
                 }
                 else
                 {
-                    String msg = "Upload Project data failed ! Project Manager is not exist.";
+                    String msg = "Failed uploading Project data! Missing some required information..";
                     logger.warn(msg);
                     addToError(msg);
                 }

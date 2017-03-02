@@ -418,8 +418,25 @@ public class Exporter
                         // "PostProcessed" parameter may be used as flag to tell
                         // it should invoke post processor.
                         String trgLocale = "targetLocale:" + wf.getTargetLocale().toString();
-                        String cmd = "cmd.exe /c " + scriptOnExport + " \"" + targetFolder
-                                + "\" \"PostProcessed\" \"" + trgLocale + "\" -r";
+
+                        // GBS-4719
+                        // if ending is ".sh" presume linux system. Quick and
+                        // dirty fix.
+                        // better fix is to find out the system using
+                        // System.getProperty("os.name");
+                        // but would rather not call this everytime we are
+                        // calling script on export
+                        String cmd = null;
+                        if (scriptOnExport.endsWith(".sh"))
+                        {
+                            cmd = "bash " + scriptOnExport + " " + targetFolder
+                                    + " 'PostProcessed' '" + trgLocale + "' -r";
+                        }
+                        else
+                        {
+                            cmd = "cmd.exe /c " + scriptOnExport + " \"" + targetFolder
+                                    + "\" \"PostProcessed\" \"" + trgLocale + "\" -r";
+                        }
                         ProcessRunner pr = new ProcessRunner(cmd);
                         Thread t = new Thread(pr);
                         t.start();
@@ -641,12 +658,13 @@ public class Exporter
         try
         {
             long jobId = wf.getJob().getJobId();
-            List<BlaiseConnectorJob> blaiseJobEntries =
-                    BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+            List<BlaiseConnectorJob> blaiseJobEntries = BlaiseManager
+                    .getBlaiseConnectorJobByJobId(jobId);
             BlaiseConnectorJob bcj = findExpectedEntry(finalFileName, blaiseJobEntries);
             if (bcj != null)
             {
-                BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(bcj.getBlaiseConnectorId());
+                BlaiseConnector blc = BlaiseManager
+                        .getBlaiseConnectorById(bcj.getBlaiseConnectorId());
                 if (blc != null)
                 {
                     finalFileName = finalFileName.replace("/", "\\");
@@ -663,8 +681,8 @@ public class Exporter
     }
 
     /**
-     * Find corresponding BlaiseConnectorJob object by jobId and Blaise entry ID for
-     * current file.
+     * Find corresponding BlaiseConnectorJob object by jobId and Blaise entry ID
+     * for current file.
      */
     private BlaiseConnectorJob findExpectedEntry(String finalFileName,
             List<BlaiseConnectorJob> blaiseJobEntries)

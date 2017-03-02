@@ -1604,7 +1604,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     long id1 = arg1.getId();
                     if (id1 > id0)
                     {
-                        return 1;
+                        return -1;
                     }
                     else if (id1 == id0)
                     {
@@ -1612,7 +1612,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     }
                     else
                     {
-                        return -1;
+                        return 1;
                     }
                 }
             });

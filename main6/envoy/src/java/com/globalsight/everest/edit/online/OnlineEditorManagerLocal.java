@@ -16,59 +16,16 @@
  */
 package com.globalsight.everest.edit.online;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.naming.NamingException;
-
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.globalsight.cxe.adapter.adobe.InddTuMapping;
 import com.globalsight.cxe.adapter.adobe.InddTuMappingHelper;
-import com.globalsight.everest.comment.CommentManager;
-import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.comment.IssueHistory;
-import com.globalsight.everest.edit.CommentHelper;
-import com.globalsight.everest.edit.EditHelper;
-import com.globalsight.everest.edit.ImageHelper;
-import com.globalsight.everest.edit.SegmentProtectionManager;
-import com.globalsight.everest.edit.SegmentRepetitions;
+import com.globalsight.everest.comment.*;
+import com.globalsight.everest.edit.*;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMap;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMapPersistenceManager;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
-import com.globalsight.everest.page.ExtractedFile;
-import com.globalsight.everest.page.ExtractedSourceFile;
-import com.globalsight.everest.page.Page;
-import com.globalsight.everest.page.PageManager;
-import com.globalsight.everest.page.PageState;
-import com.globalsight.everest.page.PageTemplate;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.page.TemplatePart;
+import com.globalsight.everest.page.*;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageupdate.GxmlPreviewer;
 import com.globalsight.everest.page.pageupdate.PageUpdateApi;
@@ -77,53 +34,35 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tuv.TaskTuv;
-import com.globalsight.everest.tuv.Tu;
-import com.globalsight.everest.tuv.TuImpl;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.everest.tuv.TuvManager;
-import com.globalsight.everest.tuv.TuvMerger;
-import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.tuv.*;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
-import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
-import com.globalsight.ling.common.RegEx;
-import com.globalsight.ling.common.RegExException;
-import com.globalsight.ling.common.RegExMatchInterface;
-import com.globalsight.ling.common.Text;
+import com.globalsight.everest.webapp.pagehandler.edit.online.*;
+import com.globalsight.ling.common.*;
 import com.globalsight.ling.docproc.IFormatNames;
-import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
-import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
-import com.globalsight.ling.inprogresstm.InProgressTmManager;
+import com.globalsight.ling.inprogresstm.*;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageMatchType;
-import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.leverage.Leverager;
-import com.globalsight.ling.tw.PseudoConstants;
-import com.globalsight.ling.tw.PseudoData;
-import com.globalsight.ling.tw.TagNode;
-import com.globalsight.ling.tw.TmxPseudo;
+import com.globalsight.ling.tm2.leverage.*;
+import com.globalsight.ling.tw.*;
 import com.globalsight.terminology.Hitlist.Hit;
-import com.globalsight.terminology.termleverager.TermLeverageManager;
-import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
-import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.FileUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.StringUtil;
+import com.globalsight.terminology.termleverager.*;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.zip.ZipIt;
-
+import org.apache.log4j.Logger;
+import org.json.*;
 import sun.misc.BASE64Encoder;
+
+import javax.naming.NamingException;
+import java.io.*;
+import java.rmi.RemoteException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * OnlineEditorManagerLocal implements the OnlineEditorManager server interface
@@ -6272,7 +6211,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     long id1 = arg1.getId();  
                     if (id1 > id0) 
                     {  
-                        return 1;  
+                        return -1;
                     } 
                     else if (id1 == id0) 
                     {  
@@ -6280,7 +6219,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     }
                     else
                     {
-                        return -1;  
+                        return 1;
                     }  
                 }  
             });

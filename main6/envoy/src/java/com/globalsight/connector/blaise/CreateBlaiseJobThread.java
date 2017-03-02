@@ -213,7 +213,10 @@ public class CreateBlaiseJobThread extends Thread
         String falconTargetValue = BlaiseHelper.findFalconTargetValue(jobAttribtues);
         if (falconTargetValue != null)
         {
-            jobName = BlaiseHelper.getHarlyJobName(entries.get(0), falconTargetValue);
+            if (entries.size() == 1)
+                jobName = BlaiseHelper.getHarlyJobName(entries.get(0), falconTargetValue);
+            else
+                jobName = BlaiseHelper.getHarlyJobName(entries, falconTargetValue);
         }
         else if (entries.size() == 1)
         {

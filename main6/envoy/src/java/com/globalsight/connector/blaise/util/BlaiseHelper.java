@@ -462,16 +462,29 @@ public class BlaiseHelper
                 }
             } else {
                 size = entries.size();
-                fps = new ArrayList<>(size);
-                for (int i = 0; i < size; i++)
-                    fps.add(fp);
+//                fps = new ArrayList<>(size);
+//                for (int i = 0; i < size; i++)
+//                    fps.add(fp);
+//                blaiseJobForm.setCombineByLangs("");
+//                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
+//                        String.valueOf(companyId),
+//                        blc, blaiseJobForm, entries, fps, null,
+//                        null, JobImpl.createUuid(), jobAttributes);
+                fps = new ArrayList<>(1);
+                fps.add(fp);
                 blaiseJobForm.setCombineByLangs("");
-                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-                        String.valueOf(companyId),
-                        blc, blaiseJobForm, entries, fps, null,
-                        null, JobImpl.createUuid(), jobAttributes);
-                Thread t = new MultiCompanySupportedThread(runnable);
-                pool.execute(t);
+                String companyIdString = String.valueOf(companyId);
+                List<TranslationInboxEntryVo> jobEntries = null;
+                for (TranslationInboxEntryVo entry : entries)
+                {
+                    jobEntries = new ArrayList<>(1);
+                    jobEntries.add(entry);
+                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
+                            companyIdString, blc, blaiseJobForm, jobEntries, fps, null,
+                            null, JobImpl.createUuid(), jobAttributes);
+                    Thread t = new MultiCompanySupportedThread(runnable);
+                    pool.execute(t);
+                }
             }
         }
     }

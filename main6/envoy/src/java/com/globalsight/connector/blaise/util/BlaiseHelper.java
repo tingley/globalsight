@@ -479,9 +479,10 @@ public class BlaiseHelper
                 {
                     jobEntries = new ArrayList<>(1);
                     jobEntries.add(entry);
+                    jobAttributes = getJobAttributes(attributeString, l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             companyIdString, blc, blaiseJobForm, jobEntries, fps, null,
-                            null, JobImpl.createUuid(), jobAttributes);
+                            null, JobImpl.createUuid(), jobAttributes, entry.getTargetLocaleAsString());
                     Thread t = new MultiCompanySupportedThread(runnable);
                     pool.execute(t);
                 }

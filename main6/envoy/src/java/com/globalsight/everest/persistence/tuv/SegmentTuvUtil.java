@@ -17,39 +17,16 @@
 
 package com.globalsight.everest.persistence.tuv;
 
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.online.SegmentFilter;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
-import com.globalsight.everest.page.PageManager;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.*;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.tuv.TuTuvAttributeImpl;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.everest.tuv.TuvPerplexity;
+import com.globalsight.everest.tuv.*;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
@@ -61,6 +38,12 @@ import com.globalsight.ling.tm3.core.Fingerprint;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+
+import java.math.BigInteger;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 
 /**
  * Helper for "translation_unit_variant_[companyId]" storage.
@@ -257,7 +240,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @param companyId
      * @throws Exception
      */
-    public static void saveTuvs(Connection p_connection,
+    public static synchronized void saveTuvs(Connection p_connection,
             Collection<Tuv> p_tuvs, long p_jobId) throws Exception
     {
         PreparedStatement ps = null;

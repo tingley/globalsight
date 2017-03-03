@@ -17,16 +17,7 @@
 
 package com.globalsight.webservices.attribute;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-
-import com.globalsight.cxe.entity.customAttribute.Attribute;
-import com.globalsight.cxe.entity.customAttribute.JobAttribute;
+import com.globalsight.cxe.entity.customAttribute.*;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -35,6 +26,10 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.attribut
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.webservices.WebServicesLog;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.util.*;
 
 public class AddJobAttributeThread extends Thread
 {

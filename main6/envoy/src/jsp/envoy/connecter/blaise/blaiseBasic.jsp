@@ -248,46 +248,50 @@ function confirmForm()
 			if (!result) return false;
 			
 			$("input[name*=Attr][data-rule*=integer]").each(function(){
-				if ($(this).val() == "" || !isInteger($(this).val())) {
-					alert("Please input correct integer value into fields first.");
-					$(this).focus();
-					result = false;
-					return false;
-				}
-				var tmp1 = $(this).attr("data-range");
-				if (tmp1 == "" || tmp1.indexOf(",") == -1)
-					return false;
-				else {
-					var tmpArray = tmp1.split(",");
-					if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
-						alert("The range of input integer value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
-						$(this).focus();
-						result = false;
-						return false;
-					}
-				}
+			    if ($(this).val() != "") {
+                    if (!isInteger($(this).val())) {
+                        alert("Please input correct integer value into fields first.");
+                        $(this).focus();
+                        result = false;
+                        return false;
+                    }
+                    var tmp1 = $(this).attr("data-range");
+                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
+                        return false;
+                    else {
+                        var tmpArray = tmp1.split(",");
+                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+                            alert("The range of input integer value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+                            $(this).focus();
+                            result = false;
+                            return false;
+                        }
+                    }
+                }
 			});
 			if (!result) return false;
 			
 			$("input[name*=Attr][data-rule*=range]").each(function(){
-				if ($(this).val() == "" || !isFloat($(this).val()) || !isInteger($(this).val())) {
-					alert("Please input correct float value into fields first.");
-					$(this).focus();
-					result = false;
-					return false;
-				}
-				var tmp1 = $(this).attr("data-range");
-				if (tmp1 == "" || tmp1.indexOf(",") == -1)
-					return false;
-				else {
-					var tmpArray = tmp1.split(",");
-					if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
-						alert("The range of input float value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
-						$(this).focus();
-						result = false;
-						return false;
-					}
-				}
+			    if ($(this).val() != "") {
+                    if (!isFloat($(this).val()) || !isInteger($(this).val())) {
+                        alert("Please input correct float value into fields first.");
+                        $(this).focus();
+                        result = false;
+                        return false;
+                    }
+                    var tmp1 = $(this).attr("data-range");
+                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
+                        return false;
+                    else {
+                        var tmpArray = tmp1.split(",");
+                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+                            alert("The range of input float value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+                            $(this).focus();
+                            result = false;
+                            return false;
+                        }
+                    }
+                }
 			});
 			
 			if (!result) return false;
@@ -376,31 +380,6 @@ function validName()
                 <input type="radio" id="automatic1" name="automatic" value="true" <%=isAutomatic ? "checked" : ""%>  onclick="showAutoOptions(true);"/>Yes
             </td>
         </tr>
-		<%
-            PermissionSet permissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
-            if (permissions != null && permissions.getPermissionFor(Permission.USER_CAL_VIEW)) {
-                SessionManager sessionManager = (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
-                User currentUser = (User) sessionManager.getAttribute(WebAppConstants.USER);
-                UserFluxCalendar userFluxCalendar = CalendarHelper.getUserCalendarByOwner(currentUser.getUserId());
-                if (userFluxCalendar != null) {
-                    Calendar systemCalendar = Calendar.getInstance();
-                    Calendar userCalendar = Calendar.getInstance(userFluxCalendar.getTimeZone());
-                    if (systemCalendar.getTimeZone().getRawOffset() != userCalendar.getTimeZone().getRawOffset()) {
-                        long times = userCalendar.getTimeInMillis() - systemCalendar.getTimeInMillis();
-                        //user set a different time zone from system time zone
-                        out.print("<tr class='autoOption'><td class='standardText'>System time: </td><td>");
-                        out.print(systemCalendar.getTime());
-                        out.print("</td></tr><tr class='autoOption'><td class='standardText'>User time: </td><td>");
-                        Calendar cal = Calendar.getInstance();
-                        cal.set(userCalendar.get(Calendar.YEAR), userCalendar.get(Calendar.MONTH), userCalendar.get(Calendar.DATE),
-                                userCalendar.get(Calendar.HOUR_OF_DAY), userCalendar.get(Calendar.MINUTE), userCalendar.get(Calendar.SECOND));
-                        out.print(cal.getTime());
-                        out.print("</td></tr>");
-                    }
-                }
-            }
-        %>
-
         <tr class="autoOption">
             <td width="180px" class="standardText"><%= bundle.getString("lb_blaise_pull_time")%>:</td>
             <td class="standardText">

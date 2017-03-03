@@ -119,13 +119,20 @@ public class BlaiseAutoHelper
                             }
                         } else if (condition instanceof IntCondition) {
                             IntCondition ic = (IntCondition) condition;
-                            tmpString = ic.getMin().intValue() + "," + ic.getMax().intValue();
+                            int min, max;
+                            min = ic.getMin() != null ? ic.getMin().intValue() : 0;
+                            max = ic.getMax() != null ? ic.getMax().intValue() : 9999999;
+                            tmpString = min + "," + max;
                         } else if (condition instanceof FloatCondition) {
                             FloatCondition fc = (FloatCondition) condition;
-                            tmpString = fc.getMin().floatValue() + "," + fc.getMax().floatValue();
+                            float min, max;
+                            min = fc.getMin() != null ? fc.getMin().floatValue() : 0.0f;
+                            max = fc.getMax() != null ? fc.getMax().floatValue() : 999999999f;
+                            tmpString = min + "," + max;
                         } else if (condition instanceof TextCondition){
                             TextCondition tc = (TextCondition) condition;
-                            tmpString = String.valueOf(tc.getLength().intValue());
+                            int len = tc.getLength() != null ? tc.getLength().intValue() : 1000;
+                            tmpString = String.valueOf(len);
                         }
                         o.put("value", tmpString);
                         array.add(o);

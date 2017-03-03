@@ -545,8 +545,8 @@ public class SelectFileHandler extends PageHandler
                                 // but would rather not call this everytime we
                                 // are
                                 // calling script on import
-                                cmd = "bash " + scriptOnImport + " " + filePath + " "
-                                        + scriptedFolderNamePrefix;
+                                cmd = "bash " + scriptOnImport + " '" + filePath + "' '"
+                                        + scriptedFolderNamePrefix + "'";
                             }
                             else
                             {

@@ -429,8 +429,8 @@ public class Exporter
                         String cmd = null;
                         if (scriptOnExport.endsWith(".sh"))
                         {
-                            cmd = "bash " + scriptOnExport + " " + targetFolder
-                                    + " 'PostProcessed' '" + trgLocale + "' -r";
+                            cmd = "bash " + scriptOnExport + " '" + targetFolder
+                                    + "' 'PostProcessed' '" + trgLocale + "' -r";
                         }
                         else
                         {

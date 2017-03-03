@@ -477,7 +477,7 @@ public class RSSSelectFileHandler extends PageHandler
                                 // System.getProperty("os.name");
                                 // but would rather not call this everytime we
                                 // are calling script on import
-                                cmd = "bash " + scriptOnImport + " " + filePath;
+                                cmd = "bash " + scriptOnImport + " '" + filePath + "'";
                             }
                             else
                             {

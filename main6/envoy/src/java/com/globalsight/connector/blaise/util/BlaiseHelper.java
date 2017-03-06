@@ -408,7 +408,7 @@ public class BlaiseHelper
                 }
                 if (otherEntries != null && otherEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "I", companyIdString, userId, fp, otherEntries, blc.isCombined());
+                    createJob(blaiseForm, "A", companyIdString, userId, fp, otherEntries, blc.isCombined());
                 }
                 if (hduEntries != null && hduEntries.size() > 0)
                 {

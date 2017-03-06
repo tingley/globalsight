@@ -115,7 +115,8 @@ function defautSelect()
 	}
 	if(jobIdsval)
 		return;
-	 $("#idTRJobNamesRadio").trigger("click");
+	 $("#reportOnJobName").trigger("click");
+	 loadJobNames();
      var ops=$("#jobNameList").children();
      if(ops.length==0)
      {
@@ -125,6 +126,27 @@ function defautSelect()
      {
       ops.attr("selected", true);
      }
+}
+
+function loadJobNames()
+{
+	var ops=$("#jobNameList").children();
+    if(ops.length==0)
+    {
+    	$.ajax({
+     		type : "POST",
+     		url : '${self.pageURL}&activityName=implementedCommentsCheck&action=getReportJobInfo',
+     		async : false,
+     		dataType : 'text',
+     		success : function(data) {
+     			reportJobInfo = eval("(" + data + ")");
+     			filterJob2();
+     		},
+     		error : function(request, error, status) {
+     			reportJobInfo = "";
+     		}
+     	});
+    }
 }
 
 //The canAlert should be false if do cancel.

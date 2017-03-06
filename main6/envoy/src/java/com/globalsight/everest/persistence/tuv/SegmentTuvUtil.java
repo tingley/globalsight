@@ -22,11 +22,16 @@ import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.online.SegmentFilter;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
-import com.globalsight.everest.page.*;
+import com.globalsight.everest.page.PageManager;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.tuv.*;
+import com.globalsight.everest.tuv.TuTuvAttributeImpl;
+import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.tuv.TuvPerplexity;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
@@ -85,7 +90,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + "source_page_leverage_group splg " 
             + "WHERE tuv.tu_id = tu.id "
             + "AND tu.leverage_group_id = splg.lg_id "
-            + "AND tuv.locale_id = ? " 
+            + "AND tuv.locale_id = ? "
             + "AND splg.sp_id = ? "
             + "ORDER BY tuv.order_num asc";
 
@@ -240,7 +245,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @param companyId
      * @throws Exception
      */
-    public static synchronized void saveTuvs(Connection p_connection,
+    public static void saveTuvs(Connection p_connection,
             Collection<Tuv> p_tuvs, long p_jobId) throws Exception
     {
         PreparedStatement ps = null;

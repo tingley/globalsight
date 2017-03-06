@@ -99,8 +99,6 @@ public abstract class BasicReportHandler
     protected String reportKey = "BasicReport";
 
     private boolean useInContext = false;
-    // For GBS-4495 perplexity score on MT
-    private boolean usePerplexity = false;
 
     // for pagination
     public static final int PAGE_CONTENT_HEIGTH_PX = 700;
@@ -124,8 +122,6 @@ public abstract class BasicReportHandler
 
         theUsername = DEFAULT_USERNAME;
         loadCommonBundle();
-        // For GBS-4495 perplexity score on MT
-        setUsePerplexity(CompanyWrapper.isUsePerplexity());
     }
 
     public void invokeHandler(HttpServletRequest req, HttpServletResponse res,
@@ -758,11 +754,6 @@ public abstract class BasicReportHandler
 
     public boolean isUsePerplexity()
     {
-        return usePerplexity;
-    }
-
-    public void setUsePerplexity(boolean usePerplexity)
-    {
-        this.usePerplexity = usePerplexity;
+        return CompanyWrapper.isUsePerplexity();
     }
 }

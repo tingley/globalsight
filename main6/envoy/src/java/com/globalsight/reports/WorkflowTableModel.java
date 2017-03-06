@@ -77,14 +77,7 @@ public class WorkflowTableModel extends AbstractTableModel
     public static final int COST = 16;
     public static final int REVENUE = 17;
     
-
     public String[] COLUMN_NAMES =
-    { "TRGLOCALE", "WFSTATE", "CURACTIVITY", "ACCEPTER", "SEGMENT_TM_WC",
-            "IN_CONTEXT_WC", "CONTEXT_WC", "FUZZY_LOW_WC", "FUZZY_MED_WC",
-            "FUZZY_MED_HI_WC", "FUZZY_HI_WC", "NO_MATCH", "REP_WC",
-            "PER_COMPLETE", "DURATION", "COST", "REVENUE" };
-    
-    public String[] COLUMN_NAMES_2 =
     { "TRGLOCALE", "WFSTATE", "CURACTIVITY", "ACCEPTER", "SEGMENT_TM_WC",
             "IN_CONTEXT_WC","PERPLEXITY", "CONTEXT_WC", "FUZZY_LOW_WC", "FUZZY_MED_WC",
             "FUZZY_MED_HI_WC", "FUZZY_HI_WC", "NO_MATCH", "REP_WC",
@@ -543,10 +536,6 @@ public class WorkflowTableModel extends AbstractTableModel
 
     public String[] getColumnNames()
     {
-        // For GBS-4495 perplexity score on MT
-        if (usePerplexity)
-            return COLUMN_NAMES_2;
-                    
         return COLUMN_NAMES;
     }
 

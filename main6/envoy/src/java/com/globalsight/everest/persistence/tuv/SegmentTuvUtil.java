@@ -17,29 +17,12 @@
 
 package com.globalsight.everest.persistence.tuv;
 
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.online.SegmentFilter;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -61,6 +44,12 @@ import com.globalsight.ling.tm3.core.Fingerprint;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+
+import java.math.BigInteger;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 
 /**
  * Helper for "translation_unit_variant_[companyId]" storage.
@@ -102,7 +91,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + "source_page_leverage_group splg " 
             + "WHERE tuv.tu_id = tu.id "
             + "AND tu.leverage_group_id = splg.lg_id "
-            + "AND tuv.locale_id = ? " 
+            + "AND tuv.locale_id = ? "
             + "AND splg.sp_id = ? "
             + "ORDER BY tuv.order_num asc";
 
@@ -264,6 +253,21 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
         try
         {
+            Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
+            if (job != null && Job.JOB_TYPE_BLAISE.equals(job.getJobType()))
+            {
+                try
+                {
+                    //For Blaise job, call method which is synchronized.
+                    saveTuvsForBlaiseJob(p_connection, p_tuvs, p_jobId);
+                }
+                catch (Exception be)
+                {
+                    logger.error("Error when save TUVs " + be.getMessage(), be);
+                }
+                return;
+            }
+
             // Update the TUV sequence first despite below succeeding or failure.
             SegmentTuTuvIndexUtil.updateTuvSequence(p_connection);
 
@@ -372,7 +376,126 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         
         saveTuvPerplexity(p_connection, p_tuvs);
     }
-    
+
+    /**
+     * Saves TUVs into DB (For Blaise Job Only).
+     */
+    public static synchronized void saveTuvsForBlaiseJob(Connection p_connection,
+            Collection<Tuv> p_tuvs, long p_jobId) throws Exception
+    {
+        PreparedStatement ps = null;
+
+        try
+        {
+            // Update the TUV sequence first despite below succeeding or failure.
+            SegmentTuTuvIndexUtil.updateTuvSequence(p_connection);
+
+            String sql = SAVE_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
+                    BigTableUtil.getTuvTableJobDataInByJobId(p_jobId));
+            ps = p_connection.prepareStatement(sql);
+
+            Set<Long> tuIds = new HashSet<Long>();
+            int batchUpdate = 0;
+            List<TuTuvAttributeImpl> sidAttibutes = new ArrayList<TuTuvAttributeImpl>();
+            for (Iterator<Tuv> it = p_tuvs.iterator(); it.hasNext();)
+            {
+                TuvImpl tuv = (TuvImpl) it.next();
+                tuIds.add(tuv.getTuId());
+
+                ps.setLong(1, tuv.getId());
+                ps.setLong(2, tuv.getOrder());
+                ps.setLong(3, tuv.getLocaleId());
+                ps.setLong(4, tuv.getTu(p_jobId).getId());
+                ps.setString(5, tuv.getIsIndexed() ? "Y" : "N");
+
+                ps.setString(6, tuv.getSegmentClob());
+                ps.setString(7, tuv.getSegmentString());
+                ps.setInt(8, tuv.getWordCount());
+                ps.setLong(9, tuv.getExactMatchKey());
+                ps.setString(10, tuv.getState().getName());
+
+                ps.setString(11, tuv.getMergeState());
+                ps.setTimestamp(12, new java.sql.Timestamp(tuv.getTimestamp()
+                        .getTime()));
+                ps.setTimestamp(13, new java.sql.Timestamp(tuv
+                        .getLastModified().getTime()));
+                ps.setString(14, tuv.getLastModifiedUser());
+                ps.setTimestamp(15, new java.sql.Timestamp(tuv.getCreatedDate()
+                        .getTime()));
+
+                ps.setString(16, tuv.getCreatedUser());
+                ps.setString(17, tuv.getUpdatedProject());
+                // Since 8.6.1, always save SID into "value_text" column
+                // of "translation_tu_tuv_attr_x" table, regardless its length.
+                ps.setString(18, null);
+                if (StringUtil.isNotEmpty(tuv.getSid()))
+                {
+                    // Also save it in original table if not too long.
+                    if (tuv.getSid().length() < 254) {
+                        ps.setString(18, tuv.getSid());
+                    }
+
+                    TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
+                            tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
+                            TuTuvAttributeImpl.SID);
+                    sidAttr.setTextValue(tuv.getSid());
+                    sidAttibutes.add(sidAttr);
+                }
+                ps.setString(19, tuv.getSrcComment());
+                ps.setLong(20, tuv.getRepetitionOfId());
+                ps.setString(21, tuv.isRepeated() ? "Y" : "N");
+
+                ps.addBatch();
+                batchUpdate++;
+                if (batchUpdate > DbUtil.BATCH_INSERT_UNIT)
+                {
+                    ps.executeBatch();
+                    batchUpdate = 0;
+                }
+            }
+
+            // execute the rest of the added batch
+            if (batchUpdate > 0)
+            {
+                ps.executeBatch();
+            }
+
+            // Cache the TUVs for large pages when create jobs.
+            if (tuIds.size() > 800)
+            {
+                for (Iterator<Tuv> it = p_tuvs.iterator(); it.hasNext();)
+                {
+                    TuvImpl tuv = (TuvImpl) it.next();
+                    setTuvIntoCache(tuv);
+                }
+            }
+            p_connection.commit();
+
+            // Save SID into "translation_tu_tuv_xx" table.
+            if (sidAttibutes.size() > 0)
+            {
+                SegmentTuTuvAttributeUtil.saveTuTuvAttributes(p_connection,
+                        sidAttibutes, p_jobId);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when save TUVs " + e.getMessage(), e);
+            for (Iterator<Tuv> it = p_tuvs.iterator(); it.hasNext();)
+            {
+                TuvImpl tuv = (TuvImpl) it.next();
+                removeTuvFromCache(tuv.getId());
+            }
+            throw e;
+        }
+        finally
+        {
+            DbUtil.silentClose(ps);
+        }
+
+        saveTuvPerplexity(p_connection, p_tuvs);
+    }
+
     private static void saveTuvPerplexity(Connection p_connection, Collection<Tuv> p_tuvs)
     {
         PreparedStatement ps = null;

@@ -3,7 +3,6 @@
     errorPage="/envoy/common/activityError.jsp"
 	import="com.globalsight.everest.webapp.pagehandler.PageHandler,
      com.globalsight.util.edit.EditUtil,
-     com.globalsight.util.GlobalSightLocale,
      com.globalsight.everest.webapp.WebAppConstants,
      com.globalsight.cxe.entity.blaise.BlaiseConnector,
 	 java.util.*"
@@ -12,6 +11,13 @@
 <%@ page import="com.globalsight.cxe.entity.customAttribute.AttributeSet" %>
 <%@ page import="com.globalsight.connector.blaise.form.BlaiseConnectorAttribute" %>
 <%@ page import="com.globalsight.util.StringUtil" %>
+<%@ page import="com.globalsight.everest.permission.*" %>
+<%@ page import="com.globalsight.everest.foundation.User" %>
+<%@ page
+        import="com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper" %>
+<%@ page import="com.globalsight.calendar.UserFluxCalendar" %>
+<%@ page import="com.globalsight.everest.servlet.util.SessionManager" %>
+<%@ page import="java.util.Calendar" %>
 
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 
@@ -71,10 +77,10 @@
         desc = desc == null ? "" : desc;
         clientCoreVersion = connector.getClientCoreVersion();
         isAutomatic = connector.isAutomatic();
-        pullDays = connector.getPullDays();
+        pullDays = connector.getUserPullDays();
         if (StringUtil.isEmpty(pullDays))
             pullDays = "";
-        pullHour = connector.getPullHour();
+        pullHour = connector.getUserPullHour();
         isCombined = connector.isCombined();
         fileProfileId = connector.getDefaultFileProfileId();
         attributeGroupId = connector.getJobAttributeGroupId();
@@ -98,6 +104,11 @@
 <SCRIPT language="JavaScript1.2" SRC="/globalsight/includes/jquery.form.js"></SCRIPT>
 <SCRIPT language="JavaScript1.2" SRC="/globalsight/includes/jquery.loadmask.min.js"></SCRIPT>
 <link href="/globalsight/includes/css/jquery.loadmask.css" rel="stylesheet" type="text/css" />
+<!--
+    <script type="text/javascript" src="/globalsight/jquery/jquery.validator.min.js"></script>
+    <script type="text/javascript" src="/globalsight/jquery/local/en.js"></script>
+    <link href="/globalsight/jquery/jquery.validator.css" rel="stylesheet" type="text/css" />
+	-->
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <%@ include file="/envoy/common/warning.jspIncl"%>
 <script>
@@ -112,10 +123,10 @@ function cancel()
 
 function save()
 {
-    if (confirmForm())
-    {
-        testConnect();
-    }
+	if (confirmForm())
+	{
+		testConnect();
+	}
 }
 
 function testConnect()
@@ -183,8 +194,18 @@ function confirmForm()
 	
     if ($("#automatic1").attr("checked") == "checked") {
 		// Automatic setting is on
+        var existUrls = "<c:out value='${urls}' />";
+        var urlName = "$@$" + $("#url").val().trim() + "$@$";
+        existUrls = existUrls.toLowerCase();
+        if (existUrls.indexOf(urlName) != -1)
+        {
+            alert('<%=bundle.getString("msg_blaise_duplicate_automatic_connector")%>');
+            blaiseForm.url.focus();
+            return false;
+        }
+		
         var $tmp = $("#minProcedureWords").val();
-        if (!isAllDigits($tmp) || $tmp < 600 || $tmp>1000000)
+        if (!isInteger($tmp) || $tmp < 600 || $tmp>1000000)
         {
             alert("<%=bundle.getString("msg_blaise_wrong_count")%>");
             $("#minProcedureWords").focus();
@@ -200,6 +221,7 @@ function confirmForm()
         if ($.trim($("#attributeSetName").text()) != "")
         {
             var tmp = "", lastTmp = "", value = "";
+			var result = true;
             $(".falconProduct").each(function() {
 				value = $(this).val();
                 if (tmp != "") 
@@ -207,16 +229,76 @@ function confirmForm()
 					if (value == tmp || value == lastTmp)
 					{
 						alert("<%=bundle.getString("msg_blaise_select_attributes")%>");
+						result = false;
 						return false;
 					} else
 						lastTmp = value;
 				} else
 					tmp = value;
             });
+			
+			$("input[name*=Attr][data-rule*=required]").each(function(){
+				if ($(this).val() == "") {
+					alert("Please input data into required fields first.");
+					$(this).focus();
+					result = false;
+					return false;
+				}
+			});
+			if (!result) return false;
+			
+			$("input[name*=Attr][data-rule*=integer]").each(function(){
+			    if ($(this).val() != "") {
+                    if (!isInteger($(this).val())) {
+                        alert("Please input correct integer value into fields first.");
+                        $(this).focus();
+                        result = false;
+                        return false;
+                    }
+                    var tmp1 = $(this).attr("data-range");
+                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
+                        return false;
+                    else {
+                        var tmpArray = tmp1.split(",");
+                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+                            alert("The range of input integer value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+                            $(this).focus();
+                            result = false;
+                            return false;
+                        }
+                    }
+                }
+			});
+			if (!result) return false;
+			
+			$("input[name*=Attr][data-rule*=range]").each(function(){
+			    if ($(this).val() != "") {
+                    if (!isFloat($(this).val()) || !isInteger($(this).val())) {
+                        alert("Please input correct float value into fields first.");
+                        $(this).focus();
+                        result = false;
+                        return false;
+                    }
+                    var tmp1 = $(this).attr("data-range");
+                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
+                        return false;
+                    else {
+                        var tmpArray = tmp1.split(",");
+                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+                            alert("The range of input float value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+                            $(this).focus();
+                            result = false;
+                            return false;
+                        }
+                    }
+                }
+			});
+			
+			if (!result) return false;
         }
 
         $tmp = $("#checkDuration").val();
-        if (!isAllDigits($tmp) || $tmp < 1 || $tmp > 59)
+        if (!isInteger($tmp) || $tmp < 1 || $tmp > 59)
         {
             alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
             return false;
@@ -284,7 +366,7 @@ function validName()
         </tr>
         <tr>
             <td><%=bundle.getString("lb_user_name")%><span class="asterisk">*</span>:</td>
-            <td><input type="text" name="username" id="username" style="width: 360px;" value="<%=username%>" maxLength="200" autocomplete="off"></td>
+            <td><input type="text" name="username" id="username" style="width: 360px;" value="<%=username%>" maxLength="200" autocomplete="off" data-rule="required"></td>
         </tr>
         <tr>
             <td><%=bundle.getString("lb_password")%><span class="asterisk">*</span>:</td>
@@ -302,13 +384,13 @@ function validName()
             <td width="180px" class="standardText"><%= bundle.getString("lb_blaise_pull_time")%>:</td>
             <td class="standardText">
                 <ul style="display: inline-flex;list-style-type: none;margin-left: 0px;padding-left: 0px;">
-                    <li><input type="checkbox" name="monday" value="1" <%=pullDays.contains("1") ? "checked" : ""%>>Monday</li>
-                    <li><input type="checkbox" name="tuesday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Tuesday</li>
-                    <li><input type="checkbox" name="wednesday" value="3" <%=pullDays.contains("3") ? "checked" : ""%>>Wednesday</li>
-                    <li><input type="checkbox" name="thursday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Thursday</li>
-                    <li><input type="checkbox" name="friday" value="5" <%=pullDays.contains("5") ? "checked" : ""%>>Friday</li>
-                    <li><input type="checkbox" name="saturday" value="6" <%=pullDays.contains("6") ? "checked" : ""%>>Saturday</li>
-                    <li><input type="checkbox" name="sunday" value="7" <%=pullDays.contains("7") ? "checked" : ""%>>Sunday</li>
+                    <li><input type="checkbox" name="monday" value="2" <%=pullDays.contains("2") ? "checked" : ""%>>Monday</li>
+                    <li><input type="checkbox" name="tuesday" value="3" <%=pullDays.contains("3") ? "checked" : ""%>>Tuesday</li>
+                    <li><input type="checkbox" name="wednesday" value="4" <%=pullDays.contains("4") ? "checked" : ""%>>Wednesday</li>
+                    <li><input type="checkbox" name="thursday" value="5" <%=pullDays.contains("5") ? "checked" : ""%>>Thursday</li>
+                    <li><input type="checkbox" name="friday" value="6" <%=pullDays.contains("6") ? "checked" : ""%>>Friday</li>
+                    <li><input type="checkbox" name="saturday" value="7" <%=pullDays.contains("7") ? "checked" : ""%>>Saturday</li>
+                    <li><input type="checkbox" name="sunday" value="1" <%=pullDays.contains("1") ? "checked" : ""%>>Sunday</li>
                 </ul>
             </td>
         </tr>
@@ -363,8 +445,8 @@ function validName()
                     <thead>
                     <tr class="tableHeadingBasicTM">
                         <td><%= bundle.getString("lb_attributename")%></td>
-                        <td><%= bundle.getString("lb_type")%></td>
                         <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
                         <td><%= bundle.getString("lb_value")%></td>
                     </tr>
                     </thead>
@@ -380,8 +462,8 @@ function validName()
                     <thead>
                     <tr class="tableHeadingBasicTM">
                         <td><%= bundle.getString("lb_attributename")%></td>
-                        <td><%= bundle.getString("lb_type")%></td>
                         <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
                         <td><%= bundle.getString("lb_value")%></td>
                     </tr>
                     </thead>
@@ -397,8 +479,8 @@ function validName()
                     <thead>
                     <tr class="tableHeadingBasicTM">
                         <td><%= bundle.getString("lb_attributename")%></td>
-                        <td><%= bundle.getString("lb_type")%></td>
                         <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
                         <td><%= bundle.getString("lb_value")%></td>
                     </tr>
                     </thead>
@@ -455,24 +537,79 @@ function validName()
                         tdData += "<td class='standardText'>" + item.displayName + "</td>";
 						tdType = item.type;
 
-						if (tdType == "choiceList")
-							tdData += "<td class='standardText'>Choice List</td>";
-						else if (tdType == "text")
-							tdData += "<td class='standardText'>Text</td>";
-						else if (tdType == "integer")
-						    tdData += "<td class='standardText'>Integer</td>";
-                        else if (tdType == "float")
+                        if (item.required)
+                            tdData += "<td class='standardText'>Required</td>";
+                        else
+                            tdData += "<td class='standardText'>--</td>";
+
+                        var tmp = item.value;
+						if (tdType == "choiceList") {
+                            tdData += "<td class='standardText'>Choice List</td>";
+                            tdData += "<td class='standardText'>";
+                            eles = tmp.split("@@");
+                            tdData += "<select ";
+                            if (isFalconProduct)
+                                tdData += "class='falconProduct' ";
+                            if (item.required)
+                                tdData += "data-rule=required ";
+                            tdData += "id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
+                            for (var k=0;k<eles.length;k++) {
+                                items = eles[k].split("$$");
+                                tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
+                            }
+                            tdData += "</select></td>";
+                        }
+						else if (tdType == "text") {
+                            tdData += "<td class='standardText'>Text</td>";
+                            tdData += "<td class='standardText'>";
+                            tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 ";
+                            if ($.trim(tmp) != "")
+                                tdData += " maxlength=" + tmp;
+							if (item.required)
+								tdData += " data-rule=required";
+                            tdData += " /></td>";
+                        }
+						else if (tdType == "integer") {
+                            tdData += "<td class='standardText'>Integer</td>";
+                            tdData += "<td class='standardText'>";
+                            tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 data-rule=integer";
+                            if (item.required)
+                                tdData += ";required";
+                            if ($.trim(tmp) != "") {
+                                var tmpArray = tmp.split(",");
+                                var min = 0, max = 9999999;
+                                if (tmpArray.length == 2) {
+                                    min = tmpArray[0] == "" ? min : tmpArray[0];
+                                    max = tmpArray[1] == "" ? max : tmpArray[1];
+									tdData += " data-range=" + min + "," + max;
+                                }
+                            }
+                            tdData += " /></td>";
+                        }
+                        else if (tdType == "float") {
                             tdData += "<td class='standardText'>Float</td>";
+                            tdData += "<td class='standardText'>";
+                            tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 data-rule=range";
+							
+                            if (item.required)
+                                tdData += ";required";
+                            if ($.trim(tmp) != "") {
+                                var tmpArray = tmp.split(",");
+                                var min = 0, max = 9999999;
+                                if (tmpArray.length == 2) {
+                                    min = tmpArray[0] == "" ? min : tmpArray[0];
+                                    max = tmpArray[1] == "" ? max : tmpArray[1];
+									tdData += " data-range=" + min + "," + max; 
+                                }
+                            }
+                            tdData += " /></td>";
+                        }
+                        /**
                         else if (tdType == "date")
                             tdData += "<td class='standardText'>Date</td>";
                         else if (tdType == "file")
                             tdData += "<td class='standardText'>File</td>";
 
-						if (item.required)
-							tdData += "<td class='standardText'>Required</td>";
-						else
-							tdData += "<td class='standardText'>--</td>";
-						
 						tdData += "<td class='standardText'>";
 						if (tdType == "choiceList") {
 							var tmp = item.value;
@@ -490,6 +627,7 @@ function validName()
 							tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 />";
 						}
 						tdData += "</td>";
+                         */
 						tdData += "</tr>";
 					});
 					$("#anyAttrData").empty().append(tdData);

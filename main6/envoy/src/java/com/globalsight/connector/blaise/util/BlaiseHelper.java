@@ -408,7 +408,7 @@ public class BlaiseHelper
                 }
                 if (otherEntries != null && otherEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "I", companyIdString, userId, fp, otherEntries, blc.isCombined());
+                    createJob(blaiseForm, "A", companyIdString, userId, fp, otherEntries, blc.isCombined());
                 }
                 if (hduEntries != null && hduEntries.size() > 0)
                 {
@@ -462,16 +462,30 @@ public class BlaiseHelper
                 }
             } else {
                 size = entries.size();
-                fps = new ArrayList<>(size);
-                for (int i = 0; i < size; i++)
-                    fps.add(fp);
+//                fps = new ArrayList<>(size);
+//                for (int i = 0; i < size; i++)
+//                    fps.add(fp);
+//                blaiseJobForm.setCombineByLangs("");
+//                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
+//                        String.valueOf(companyId),
+//                        blc, blaiseJobForm, entries, fps, null,
+//                        null, JobImpl.createUuid(), jobAttributes);
+                fps = new ArrayList<>(1);
+                fps.add(fp);
                 blaiseJobForm.setCombineByLangs("");
-                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-                        String.valueOf(companyId),
-                        blc, blaiseJobForm, entries, fps, null,
-                        null, JobImpl.createUuid(), jobAttributes);
-                Thread t = new MultiCompanySupportedThread(runnable);
-                pool.execute(t);
+                String companyIdString = String.valueOf(companyId);
+                List<TranslationInboxEntryVo> jobEntries = null;
+                for (TranslationInboxEntryVo entry : entries)
+                {
+                    jobEntries = new ArrayList<>(1);
+                    jobEntries.add(entry);
+                    jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
+                            companyIdString, blc, blaiseJobForm, jobEntries, fps, null,
+                            null, JobImpl.createUuid(), jobAttributes, entry.getTargetLocaleAsString());
+                    Thread t = new MultiCompanySupportedThread(runnable);
+                    pool.execute(t);
+                }
             }
         }
     }
@@ -1191,6 +1205,17 @@ public class BlaiseHelper
             falconTargetValue = falconTargetValue.substring(0, 55);
         }
         String jobName = BlaiseConstants.HARLEY + "_" + falconTargetValue + "_" + targetLocale;
+
+        return handleSpecialChars(jobName);
+    }
+
+    public static String getHarlyJobName(List<TranslationInboxEntryVo> entries, String falconTargetValue)
+    {
+        if (falconTargetValue != null && falconTargetValue.length() > 55)
+        {
+            falconTargetValue = falconTargetValue.substring(0, 55);
+        }
+        String jobName = BlaiseConstants.HARLEY + "_" + falconTargetValue + "_" + entries.get(0).getSourceLocaleAsString();
 
         return handleSpecialChars(jobName);
     }

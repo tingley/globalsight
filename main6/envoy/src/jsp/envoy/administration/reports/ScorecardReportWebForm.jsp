@@ -112,13 +112,35 @@ function defautSelect(){
 		jobIdsval=$("#jobNameList").val();
 	}
 	if(jobIdsval)return;
-	 $("#idTRJobNamesRadio").trigger("click");
+	 $("#reportOnJobName").trigger("click");
+	 loadJobNames();
      var ops=$("#jobNameList").children();
      if(ops.length==0){
-      return ('No job name(s) is(are) selected.');
+    	 return "<%=bundle.getString("msg_invalid_jobName")%>";
      }else{
       ops.attr("selected", true);
      }
+}
+
+function loadJobNames()
+{
+	var ops=$("#jobNameList").children();
+    if(ops.length==0)
+    {
+    	$.ajax({
+     		type : "POST",
+     		url : '${self.pageURL}&activityName=xlsReportScorecard&action=getReportJobInfo',
+     		async : false,
+     		dataType : 'text',
+     		success : function(data) {
+     			reportJobInfo = eval("(" + data + ")");
+     			filterJob2();
+     		},
+     		error : function(request, error, status) {
+     			reportJobInfo = "";
+     		}
+     	});
+    }
 }
 
 function dataSelectAll(){

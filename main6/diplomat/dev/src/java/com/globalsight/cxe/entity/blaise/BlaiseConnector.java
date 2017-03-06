@@ -33,7 +33,9 @@ public class BlaiseConnector extends PersistentObject
     private long companyId;
     private boolean automatic = false;
     private String pullDays = "";
+    private String userPullDays = "";
     private int pullHour = 7;
+    private int userPullHour = 7;
     private int minProcedureWords = 600;
     private long defaultFileProfileId = -1L;
     private long jobAttributeGroupId = -1L;
@@ -41,7 +43,27 @@ public class BlaiseConnector extends PersistentObject
     private long lastMaxEntryId = -1L;
     private String loginUser = "";
     private int qaCount = 10;
-    private int checkDuration = 1800;
+    private int checkDuration = 60;
+
+    public String getUserPullDays()
+    {
+        return userPullDays;
+    }
+
+    public void setUserPullDays(String userPullDays)
+    {
+        this.userPullDays = userPullDays;
+    }
+
+    public int getUserPullHour()
+    {
+        return userPullHour;
+    }
+
+    public void setUserPullHour(int userPullHour)
+    {
+        this.userPullHour = userPullHour;
+    }
 
     public int getCheckDuration()
     {

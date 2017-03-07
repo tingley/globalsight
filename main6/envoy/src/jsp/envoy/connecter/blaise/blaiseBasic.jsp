@@ -273,7 +273,7 @@ function confirmForm()
 			
 			$("input[name*=Attr][data-rule*=range]").each(function(){
 			    if ($(this).val() != "") {
-                    if (!isFloat($(this).val()) || !isInteger($(this).val())) {
+                    if (!isInteger($(this).val()) || !isFloat($(this).val())) {
                         alert("Please input correct float value into fields first.");
                         $(this).focus();
                         result = false;

@@ -436,8 +436,7 @@ public class BlaiseHelper
         if (entries != null && entries.size() > 0)
         {
             String attributeString = getJobAttributeString(blc.getId(), type);
-            List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
-                    l10Profile);
+
             if (isCombinedByLang)
             {
                 blaiseJobForm.setCombineByLangs("on");
@@ -453,6 +452,7 @@ public class BlaiseHelper
                     fps = new ArrayList<>(size);
                     for (int i = 0; i < size; i++)
                         fps.add(fp);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             String.valueOf(companyId),
                             blc, blaiseJobForm, localeEntries, fps, null,
@@ -461,15 +461,6 @@ public class BlaiseHelper
                     pool.execute(t);
                 }
             } else {
-                size = entries.size();
-//                fps = new ArrayList<>(size);
-//                for (int i = 0; i < size; i++)
-//                    fps.add(fp);
-//                blaiseJobForm.setCombineByLangs("");
-//                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-//                        String.valueOf(companyId),
-//                        blc, blaiseJobForm, entries, fps, null,
-//                        null, JobImpl.createUuid(), jobAttributes);
                 fps = new ArrayList<>(1);
                 fps.add(fp);
                 blaiseJobForm.setCombineByLangs("");
@@ -479,7 +470,7 @@ public class BlaiseHelper
                 {
                     jobEntries = new ArrayList<>(1);
                     jobEntries.add(entry);
-                    jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             companyIdString, blc, blaiseJobForm, jobEntries, fps, null,
                             null, JobImpl.createUuid(), jobAttributes, entry.getTargetLocaleAsString());

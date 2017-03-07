@@ -249,23 +249,24 @@ function confirmForm()
 			
 			$("input[name*=Attr][data-rule*=integer]").each(function(){
 			    if ($(this).val() != "") {
-                    if (!isInteger($(this).val())) {
+                    if (isAllDigits($(this).val())) {
+						var tmp1 = $(this).attr("data-range");
+						if (tmp1 == "" || tmp1.indexOf(",") == -1)
+							return false;
+						else {
+							var tmpArray = tmp1.split(",");
+							if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+								alert("The range of input integer value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+								$(this).focus();
+								result = false;
+								return false;
+							}
+						} 
+					} else {
                         alert("Please input correct integer value into fields first.");
                         $(this).focus();
                         result = false;
                         return false;
-                    }
-                    var tmp1 = $(this).attr("data-range");
-                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
-                        return false;
-                    else {
-                        var tmpArray = tmp1.split(",");
-                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
-                            alert("The range of input integer value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
-                            $(this).focus();
-                            result = false;
-                            return false;
-                        }
                     }
                 }
 			});
@@ -273,25 +274,26 @@ function confirmForm()
 			
 			$("input[name*=Attr][data-rule*=range]").each(function(){
 			    if ($(this).val() != "") {
-                    if (!isInteger($(this).val()) || !isFloat($(this).val())) {
-                        alert("Please input correct float value into fields first.");
-                        $(this).focus();
-                        result = false;
-                        return false;
-                    }
-                    var tmp1 = $(this).attr("data-range");
-                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
-                        return false;
-                    else {
-                        var tmpArray = tmp1.split(",");
-                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
-                            alert("The range of input float value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
-                            $(this).focus();
-                            result = false;
-                            return false;
-                        }
-                    }
-                }
+                    if (isInteger($(this).val()) || isFloat($(this).val())) {
+						var tmp1 = $(this).attr("data-range");
+						if (tmp1 == "" || tmp1.indexOf(",") == -1)
+							return false;
+						else {
+							var tmpArray = tmp1.split(",");
+							if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+								alert("The range of input float value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+								$(this).focus();
+								result = false;
+								return false;
+							}
+						}
+					} else {
+						alert("Please input correct float value into fields first.");
+							$(this).focus();
+							result = false;
+							return false;
+					}
+				}
 			});
 			
 			if (!result) return false;

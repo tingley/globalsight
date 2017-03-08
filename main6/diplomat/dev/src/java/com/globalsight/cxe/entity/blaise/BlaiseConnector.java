@@ -43,7 +43,7 @@ public class BlaiseConnector extends PersistentObject
     private long lastMaxEntryId = -1L;
     private String loginUser = "";
     private int qaCount = 10;
-    private int checkDuration = 59;
+    private int checkDuration = 60;
     private String userCalendar = "";
 
     public String getUserCalendar()

@@ -406,15 +406,18 @@ public class BlaiseHelper
                 String companyIdString = String.valueOf(companyId);
                 if (inSheetEntries != null && inSheetEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "I", companyIdString, userId, fp, inSheetEntries, blc.isCombined());
+                    createJob(blaiseForm, "I", companyIdString, userId, fp, inSheetEntries,
+                            blc.isCombined());
                 }
                 if (otherEntries != null && otherEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "A", companyIdString, userId, fp, otherEntries, blc.isCombined());
+                    createJob(blaiseForm, "A", companyIdString, userId, fp, otherEntries,
+                            blc.isCombined());
                 }
                 if (hduEntries != null && hduEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "H", companyIdString, userId, fp, hduEntries, blc.isCombined());
+                    createJob(blaiseForm, "H", companyIdString, userId, fp, hduEntries,
+                            blc.isCombined());
                 }
             }
         }

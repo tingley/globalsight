@@ -5,6 +5,7 @@ import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.util.StringUtil;
 import org.apache.log4j.Logger;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -41,9 +42,20 @@ public class BlaiseAutoManager
                     logger.info("Schedule: " + connector.getPullDays() + " -- " + connector
                             .getPullHour());
                     logger.info("Check duration: " + connector.getCheckDuration());
+                    // Gets the first delay time schedule to right clock
+                    Calendar now = Calendar.getInstance();
+                    int hour = now.get(Calendar.HOUR_OF_DAY);
+                    int minute = 0;
+                    if (hour == connector.getPullHour())
+                    {
+                        BlaiseTimerTask timerTask = new BlaiseTimerTask(connector);
+                        scheduledExecutorService.schedule(timerTask, 0, TimeUnit.MINUTES);
+                    }
+                    minute = 60 - now.get(Calendar.MINUTE);
+                    logger.info("The first automatic creation check will be run after " + minute + " min.");
                     BlaiseTimerTask timerTask = new BlaiseTimerTask(connector);
                     scheduledExecutorService
-                            .scheduleAtFixedRate(timerTask, 0, checkDuration, TimeUnit.MINUTES);
+                            .scheduleAtFixedRate(timerTask, minute, checkDuration, TimeUnit.MINUTES);
                     threads.put(connector.getId(), timerTask);
                     logger.info(
                             "**** Start thread for Blaise automatic. Thread [" + timerTask.getId()
@@ -61,9 +73,19 @@ public class BlaiseAutoManager
         if (bc == null || !bc.isAutomatic())
             return;
 
+        Calendar now = Calendar.getInstance();
+        int hour = now.get(Calendar.HOUR_OF_DAY);
+        int minute = 0;
+        if (hour == bc.getPullHour())
+        {
+            BlaiseTimerTask timerTask = new BlaiseTimerTask(bc);
+            scheduledExecutorService.schedule(timerTask, 0, TimeUnit.MINUTES);
+        }
+        minute = 60 - now.get(Calendar.MINUTE);
+        logger.info("The first automatic creation check will be run after " + minute + " min.");
         BlaiseTimerTask timerTask = new BlaiseTimerTask(bc);
         scheduledExecutorService
-                .scheduleAtFixedRate(timerTask, 0, bc.getCheckDuration(), TimeUnit.MINUTES);
+                .scheduleAtFixedRate(timerTask, minute, bc.getCheckDuration(), TimeUnit.MINUTES);
         threads.put(bc.getId(), timerTask);
         logger.info("**** Start thread for Blaise automatic. Thread [" + timerTask.getId() + ", "
                 + timerTask.getName() + "]");

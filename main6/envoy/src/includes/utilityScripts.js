@@ -290,8 +290,8 @@ function isPositiveNumber(value){
 }
 
 function isInteger(value) {
-	var pattern = /^-?[1-9]\d*|0$/;
-	return pattern.test(value);
+	var pattern = /^[1-9]\d*$/;
+	return pattern.test(value) || value == 0;
 }
 
 function isFloat(value) {

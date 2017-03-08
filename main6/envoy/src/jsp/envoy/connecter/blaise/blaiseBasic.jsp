@@ -49,7 +49,6 @@
 	long companyId = -1;
     boolean edit = false;
 	int qaCount = 10;
-	int checkDuration = 60;
 	String userCalendar = "";
 	Calendar sysCal = Calendar.getInstance();
 	userCalendar = sysCal.getTimeZone().getID();
@@ -80,7 +79,6 @@
         fileProfileId = connector.getDefaultFileProfileId();
         wordCount = connector.getMinProcedureWords();
 		qaCount = connector.getQaCount();
-		checkDuration = connector.getCheckDuration();
 		userName = connector.getLoginUser();
 		String tmpUserCalendar = connector.getUserCalendar();
 		if (StringUtil.isNotEmpty(tmpUserCalendar))
@@ -291,13 +289,6 @@ function confirmForm()
 			
 			if (!result) return false;
         }
-
-        $tmp = $("#checkDuration").val();
-        if (!isInteger($tmp) || $tmp < 1 || $tmp > 59)
-        {
-            alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
-            return false;
-        }
     }
 
     return true;
@@ -504,10 +495,6 @@ function validName()
                 </table>
             </td>
         </tr>
-        <tr class="standardText autoOption">
-            <td class="standardText"><%=bundle.getString("lb_blaise_check_duration")%>:</td>
-            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /><%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
-        </tr>
 		<tr class="standardText autoOption">
 		  <td class="standardText">Entry count(QA)</td>
 		  <td><input type="text" id="qaCount" name="qaCount" size=10 value="<%=qaCount%>" /></td>
@@ -519,6 +506,7 @@ function validName()
     		</td>
     	</tr>
     </table>
+        <input type="hidden" id="checkDuration" name="checkDuration" value="60" />
     </FORM>
 </div>
 </div>

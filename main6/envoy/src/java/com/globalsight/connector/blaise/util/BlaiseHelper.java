@@ -341,6 +341,7 @@ public class BlaiseHelper
             long tmpEntryId = -1L;
             int pageIndex = 0;
             String tmp;
+            logger.info("****** ==== Start to fetch entries for company [" + companyId + "]");
             while (fetchCount < count)
             {
                 command = initTranslationPageCommand(pageIndex, blc.getQaCount(),
@@ -391,6 +392,7 @@ public class BlaiseHelper
                                 + "]");
                     }
                 }
+                logger.info("****** ==== End to fetch entries for company [" + companyId + "]");
 
                 BasicL10nProfile l10Profile = HibernateUtil
                         .get(BasicL10nProfile.class, fp.getL10nProfileId());

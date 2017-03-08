@@ -11,13 +11,6 @@
 <%@ page import="com.globalsight.cxe.entity.customAttribute.AttributeSet" %>
 <%@ page import="com.globalsight.connector.blaise.form.BlaiseConnectorAttribute" %>
 <%@ page import="com.globalsight.util.StringUtil" %>
-<%@ page import="com.globalsight.everest.permission.*" %>
-<%@ page import="com.globalsight.everest.foundation.User" %>
-<%@ page
-        import="com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper" %>
-<%@ page import="com.globalsight.calendar.UserFluxCalendar" %>
-<%@ page import="com.globalsight.everest.servlet.util.SessionManager" %>
-<%@ page import="java.util.Calendar" %>
 
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 
@@ -50,14 +43,13 @@
 	String pullDays = "";
 	int pullHour = 7;
 	long fileProfileId = -1L;
-	long attributeGroupId = -1L;
 	boolean isCombined = true;
 	int wordCount = 600;
 	String clientCoreVersion = "2.0";// default "2.0".
 	long companyId = -1;
     boolean edit = false;
 	int qaCount = 10;
-	int checkDuration = 1800;
+	int checkDuration = 59;
 	BlaiseConnector connector = (BlaiseConnector) request.getAttribute("blaise");
 	ArrayList<FileProfileImpl> fps = (ArrayList<FileProfileImpl>) request.getAttribute("fileProfiles");
     List<AttributeSet> allAttributeSets = (List<AttributeSet>) request.getAttribute("allAttributeSets");
@@ -83,7 +75,6 @@
         pullHour = connector.getUserPullHour();
         isCombined = connector.isCombined();
         fileProfileId = connector.getDefaultFileProfileId();
-        attributeGroupId = connector.getJobAttributeGroupId();
         wordCount = connector.getMinProcedureWords();
 		qaCount = connector.getQaCount();
 		checkDuration = connector.getCheckDuration();

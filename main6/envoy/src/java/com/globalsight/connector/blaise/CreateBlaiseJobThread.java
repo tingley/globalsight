@@ -100,7 +100,7 @@ public class CreateBlaiseJobThread extends Thread
             String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
 
             Job job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(), l10Id,
-                    priority, Job.IN_QUEUE, Job.JOB_TYPE_BLAISE);
+                    priority, Job.IN_QUEUE, Job.JOB_TYPE_BLAISE, currentCompanyId);
 
             // Initialize files and file profiles information
             List<String> descList = new ArrayList<String>();

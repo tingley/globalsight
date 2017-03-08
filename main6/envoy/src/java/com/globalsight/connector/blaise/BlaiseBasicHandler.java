@@ -29,6 +29,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.tasks.AutoCompleteActivityThread;
 import jodd.util.StringBand;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -89,7 +90,8 @@ public class BlaiseBasicHandler extends PageActionHandler
         {
             BlaiseConnector blac = (BlaiseConnector) form;
             long fpId = blac.getDefaultFileProfileId();
-            String data = BlaiseAutoHelper.getInstance().getJobAttributes(fpId);
+            BlaiseAutoHelper autoHelper = new BlaiseAutoHelper();
+            String data = autoHelper.getJobAttributes(fpId);
             out.write(data.getBytes("UTF-8"));
         }
         catch (Exception e)
@@ -129,7 +131,8 @@ public class BlaiseBasicHandler extends PageActionHandler
         extensions.add("xliff");
         try
         {
-            ArrayList<FileProfileImpl> fps = BlaiseAutoHelper.getInstance()
+            BlaiseAutoHelper autoHelper = new BlaiseAutoHelper();
+            ArrayList<FileProfileImpl> fps = autoHelper
                     .getAllXliff12FileProfile(companyId, user.getUserId());
             request.setAttribute("fileProfiles", fps);
         }
@@ -160,7 +163,8 @@ public class BlaiseBasicHandler extends PageActionHandler
         {
             BlaiseHelper helper = new BlaiseHelper(connector);
             typeAttributes = helper.getConnectorAttributes(connector.getId());
-            attributeData = BlaiseAutoHelper.getInstance().getJobAttributes(connector
+            BlaiseAutoHelper autoHelper = new BlaiseAutoHelper();
+            attributeData = autoHelper.getJobAttributes(connector
                     .getDefaultFileProfileId());
         }
         request.setAttribute("typeAttributes", typeAttributes);

@@ -138,8 +138,6 @@ public class JobCreationMonitor
             job.setTimestamp(ts);
             job.setJobType(jobType);
             String companyIdString = CompanyThreadLocal.getInstance().getValue();
-            if (StringUtil.isEmpty(companyIdString))
-                companyIdString = BlaiseAutoHelper.getInstance().getCompanyId();
             long companyId = Long.parseLong(companyIdString);
             job.setCompanyId(companyId);
 
@@ -214,6 +212,122 @@ public class JobCreationMonitor
             if (!DbUtil.isTableExisted(lmExtArchiveTable))
             {
             	BigTableUtil.createLMExtTable(lmExtArchiveTable);
+            }
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Error initializing new job: " + jobName, e);
+            throw new JobCreationException(
+                    JobCreationException.MSG_FAILED_TO_INITIALIZE_NEW_JOB,
+                    null, e);
+        }
+
+        return job;
+    }
+
+    /**
+     * Initializes a new job when a file is uploaded.
+     * This is used for Blaise Connector automatic job creation.
+     */
+    public static Job initializeJob(String jobName, String uuid, String userId,
+            long l10nProfileId, String priority, String state, String jobType,
+            String companyIdString)
+            throws JobCreationException
+    {
+        JobImpl job = null;
+        try
+        {
+            job = new JobImpl();
+            job.setJobName(EditUtil.removeCRLF(jobName));
+            job.setCreateUserId(userId);
+            job.setL10nProfileId(l10nProfileId);
+            job.setSourceLocale(ServerProxy.getProjectHandler()
+                    .getL10nProfile(l10nProfileId).getSourceLocale());
+            job.setPriority(Integer.parseInt(priority));
+            job.setState(state);
+            if (uuid == null)
+            {
+                uuid = jobName;
+            }
+            job.setUuid(uuid);
+            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            job.setCreateDate(ts);
+            job.setTimestamp(ts);
+            job.setJobType(jobType);
+            long companyId = Long.parseLong(companyIdString);
+            job.setCompanyId(companyId);
+
+            HibernateUtil.save(job);
+
+            long jobId = job.getId();
+            String tuTable = BigTableUtil.decideTuWorkingTableForJobCreation(
+                    companyId, jobId);
+            String tuArchiveTable = BigTableUtil
+                    .decideTuArchiveTableForJobCreation(companyId);
+            String tuvTable = BigTableUtil.decideTuvWorkingTableForJobCreation(
+                    companyId, jobId);
+            String tuvArchiveTable = BigTableUtil
+                    .decideTuvArchiveTableForJobCreation(companyId);
+            String lmTable = BigTableUtil.decideLMWorkingTableForJobCreation(
+                    companyId, jobId);
+            String lmArchiveTable = BigTableUtil
+                    .decideLMArchiveTableForJobCreation(companyId);
+            String tuTuvAttrTable = "translation_tu_tuv_attr_" + companyId;
+            String lmExtTable = BigTableUtil
+                    .decideLMExtWorkingTableForJobCreation(companyId, jobId);
+            String lmExtArchiveTable = BigTableUtil
+                    .decideLMExtArchiveTableForJobCreation(companyId);
+            job.setTuTable(tuTable);
+            job.setTuArchiveTable(tuArchiveTable);
+            job.setTuvTable(tuvTable);
+            job.setTuvArchiveTable(tuvArchiveTable);
+            job.setLmTable(lmTable);
+            job.setLmArchiveTable(lmArchiveTable);
+            job.setLmExtTable(lmExtTable);
+            job.setLmExtArchiveTable(lmExtArchiveTable);
+            HibernateUtil.saveOrUpdate(job);
+            L10nProfile l10nProfile = job.getL10nProfile();
+            long wfStatePostId = l10nProfile.getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(job, "NULL", state).start();
+            }
+
+            if (!DbUtil.isTableExisted(tuTable))
+            {
+                BigTableUtil.createTuTable(tuTable);
+            }
+            if (!DbUtil.isTableExisted(tuArchiveTable))
+            {
+                BigTableUtil.createTuTable(tuArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(tuvTable))
+            {
+                BigTableUtil.createTuvTable(tuvTable);
+            }
+            if (!DbUtil.isTableExisted(tuvArchiveTable))
+            {
+                BigTableUtil.createTuvTable(tuvArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(lmTable))
+            {
+                BigTableUtil.createLMTable(lmTable);
+            }
+            if (!DbUtil.isTableExisted(lmArchiveTable))
+            {
+                BigTableUtil.createLMTable(lmArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(tuTuvAttrTable))
+            {
+                BigTableUtil.createTuTuvAttrTable(tuTuvAttrTable);
+            }
+            if (!DbUtil.isTableExisted(lmExtTable))
+            {
+                BigTableUtil.createLMExtTable(lmExtTable);
+            }
+            if (!DbUtil.isTableExisted(lmExtArchiveTable))
+            {
+                BigTableUtil.createLMExtTable(lmExtArchiveTable);
             }
         }
         catch (Exception e)

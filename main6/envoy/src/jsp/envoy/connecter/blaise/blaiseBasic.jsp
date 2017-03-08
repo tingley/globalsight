@@ -49,14 +49,13 @@
 	long companyId = -1;
     boolean edit = false;
 	int qaCount = 10;
-	int checkDuration = 59;
+	int checkDuration = 60;
 	String userCalendar = "";
 	Calendar sysCal = Calendar.getInstance();
 	userCalendar = sysCal.getTimeZone().getID();
 	String userName = (String) request.getAttribute("currentUsername");
 	BlaiseConnector connector = (BlaiseConnector) request.getAttribute("blaise");
 	ArrayList<FileProfileImpl> fps = (ArrayList<FileProfileImpl>) request.getAttribute("fileProfiles");
-    List<AttributeSet> allAttributeSets = (List<AttributeSet>) request.getAttribute("allAttributeSets");
 	List<BlaiseConnectorAttribute> typeAttributes = (List<BlaiseConnectorAttribute>) request.getAttribute("typeAttributes");
 	String attributeData = (String) request.getAttribute("attributeData");
 	if (connector != null)
@@ -103,11 +102,6 @@
 <SCRIPT language="JavaScript1.2" SRC="/globalsight/includes/jquery.form.js"></SCRIPT>
 <SCRIPT language="JavaScript1.2" SRC="/globalsight/includes/jquery.loadmask.min.js"></SCRIPT>
 <link href="/globalsight/includes/css/jquery.loadmask.css" rel="stylesheet" type="text/css" />
-<!--
-    <script type="text/javascript" src="/globalsight/jquery/jquery.validator.min.js"></script>
-    <script type="text/javascript" src="/globalsight/jquery/local/en.js"></script>
-    <link href="/globalsight/jquery/jquery.validator.css" rel="stylesheet" type="text/css" />
-	-->
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <%@ include file="/envoy/common/warning.jspIncl"%>
 <script>

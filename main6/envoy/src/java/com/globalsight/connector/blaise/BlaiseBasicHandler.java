@@ -30,7 +30,6 @@ import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
-import com.globalsight.everest.webapp.pagehandler.tasks.AutoCompleteActivityThread;
 import jodd.util.StringBand;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;

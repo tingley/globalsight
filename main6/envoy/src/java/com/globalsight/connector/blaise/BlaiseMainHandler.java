@@ -17,7 +17,6 @@
 package com.globalsight.connector.blaise;
 
 import com.cognitran.translation.client.TranslationPageCommand;
-import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.connector.blaise.form.*;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
@@ -29,15 +28,12 @@ import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.permission.Permission;
-import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.BlaiseConnectorComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
@@ -76,7 +72,6 @@ public class BlaiseMainHandler extends PageActionHandler
         String tmp = request.getParameter("userTimeZone");
         connector.setUserCalendar(tmp);
 
-        PermissionSet permissionSet = (PermissionSet) session.getAttribute(PERMISSIONS);
         int hours = 0;
         Calendar systemCalendar = Calendar.getInstance();
         Calendar userCalendar = Calendar.getInstance(TimeZone.getTimeZone(tmp));
@@ -162,9 +157,11 @@ public class BlaiseMainHandler extends PageActionHandler
             if (isNew)
             {
                 BlaiseAutoManager.startThread(connector);
-            } else
+            }
+            else
                 BlaiseAutoManager.resetThread(connector);
-        } else
+        }
+        else
             BlaiseAutoManager.cancelThread(connector.getId());
     }
 
@@ -173,7 +170,8 @@ public class BlaiseMainHandler extends PageActionHandler
         List<BlaiseConnectorAttribute> attributes = new ArrayList<>();
         BlaiseConnectorAttribute attribute;
         Enumeration<String> names = request.getParameterNames();
-        while (names.hasMoreElements()) {
+        while (names.hasMoreElements())
+        {
             String param = names.nextElement();
             String value;
             attribute = new BlaiseConnectorAttribute();
@@ -182,13 +180,18 @@ public class BlaiseMainHandler extends PageActionHandler
             if (!param.startsWith("anyAttr") && !param.startsWith("hduAttr")
                     && !param.startsWith("isheetAttr"))
                 continue;
-            if (param.startsWith("anyAttr")) {
+            if (param.startsWith("anyAttr"))
+            {
                 param = param.substring("anyAttr".length());
                 attribute.setBlaiseJobType("A");
-            } else if (param.startsWith("hduAttr")) {
+            }
+            else if (param.startsWith("hduAttr"))
+            {
                 param = param.substring("hudAttr".length());
                 attribute.setBlaiseJobType("H");
-            } else if (param.startsWith("isheetAttr")) {
+            }
+            else if (param.startsWith("isheetAttr"))
+            {
                 param = param.substring("isheetAttr".length());
                 attribute.setBlaiseJobType("I");
             }
@@ -244,8 +247,10 @@ public class BlaiseMainHandler extends PageActionHandler
             ArrayList<TranslationInboxEntryVo> hduEntries = new ArrayList<>();
             ArrayList<TranslationInboxEntryVo> edmEntries = new ArrayList<>();
             ArrayList<TranslationInboxEntryVo> otherEntries = new ArrayList<>();
-            if (entries != null) {
-                for (TranslationInboxEntryVo entry : entries) {
+            if (entries != null)
+            {
+                for (TranslationInboxEntryVo entry : entries)
+                {
                     if (entry.isUsageOfHDU())
                         hduEntries.add(entry);
                     else if (entry.isUsageOfIsSheet())
@@ -256,13 +261,14 @@ public class BlaiseMainHandler extends PageActionHandler
                 }
                 ExecutorService pool = Executors.newFixedThreadPool(10);
                 HttpSession session = request.getSession(false);
-                SessionManager sessionMgr =  (SessionManager) session
+                SessionManager sessionMgr = (SessionManager) session
                         .getAttribute(WebAppConstants.SESSION_MANAGER);
                 User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
                 String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
                 List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
-                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, blc.getDefaultFileProfileId());
-                for (int i=0;i<entries.size();i++)
+                FileProfile fp = HibernateUtil
+                        .get(FileProfileImpl.class, blc.getDefaultFileProfileId());
+                for (int i = 0; i < entries.size(); i++)
                     fileProfiles.add(fp);
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setBlaiseConnectorId(String.valueOf(cId));

@@ -408,6 +408,18 @@ function Refresh()
     o_form.submit();
 }
 
+function Refresh(tuId,tuvId,subId)
+{
+    var o_form = document.RefreshForm;
+    document.body.style.cursor = "wait";
+    sendCurrentSegment(o_form, o_currentSegment);
+    o_form.curTuId.value  = tuId;
+    o_form.curTuvId.value = tuvId;
+    o_form.curSubId.value = subId;
+    main.localData=null;
+    o_form.submit();
+}
+
 function sendCurrentSegment(o_form, o_currentSegment)
 {
     if (o_currentSegment)
@@ -1222,7 +1234,7 @@ function doLoad()
     try
     {
         HighlightSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
-        
+
         var updatePopupEditorFlag = "<%=state.getNeedUpdatePopUpEditor()%>";
         if (updatePopupEditorFlag != null && updatePopupEditorFlag != "null"
             && g_lastTuId != null && g_lastTuId != "0"
@@ -1244,7 +1256,6 @@ function doLoad()
     {
         window.top.CloseThis();
     }
-
     // Update file/page navigation arrows on me_menu.jsp
     // But seems the codes are not quite reliable.
     // parent.parent.parent.menu.updateFileNavigationArrow();

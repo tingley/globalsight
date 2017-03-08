@@ -72,36 +72,31 @@ public class BlaiseMainHandler extends PageActionHandler
         HttpSession session = request.getSession(false);
         SessionManager sessionManager = (SessionManager) session.getAttribute(SESSION_MANAGER);
         User user = (User) sessionManager.getAttribute(USER);
+
+        String tmp = request.getParameter("userTimeZone");
+        connector.setUserCalendar(tmp);
+
         PermissionSet permissionSet = (PermissionSet) session.getAttribute(PERMISSIONS);
         int hours = 0;
-        if (permissionSet.getPermissionFor(Permission.USER_CAL_VIEW))
+        Calendar systemCalendar = Calendar.getInstance();
+        Calendar userCalendar = Calendar.getInstance(TimeZone.getTimeZone(tmp));
+        if (systemCalendar.getTimeZone().getRawOffset() != userCalendar.getTimeZone()
+                .getRawOffset())
         {
-            UserFluxCalendar userFluxCalendar = CalendarHelper
-                    .getUserCalendarByOwner(user.getUserId());
-            if (userFluxCalendar != null)
-            {
-                Calendar systemCalendar = Calendar.getInstance();
-                Calendar userCalendar = Calendar.getInstance(userFluxCalendar.getTimeZone());
-                if (systemCalendar.getTimeZone().getRawOffset() != userCalendar.getTimeZone()
-                        .getRawOffset())
-                {
-                    //user set a different time zone from system time zone
-                    Calendar cal = Calendar.getInstance();
-                    cal.set(userCalendar.get(Calendar.YEAR), userCalendar.get(Calendar.MONTH),
-                            userCalendar.get(Calendar.DATE),
-                            userCalendar.get(Calendar.HOUR_OF_DAY),
-                            userCalendar.get(Calendar.MINUTE), userCalendar.get(Calendar.SECOND));
-                    long times = cal.getTimeInMillis() - systemCalendar.getTimeInMillis();
-                    hours = (int) times / 3600000;
-                }
-            }
+            //user set a different time zone from system time zone
+            Calendar cal = Calendar.getInstance();
+            cal.set(userCalendar.get(Calendar.YEAR), userCalendar.get(Calendar.MONTH),
+                    userCalendar.get(Calendar.DATE),
+                    userCalendar.get(Calendar.HOUR_OF_DAY),
+                    userCalendar.get(Calendar.MINUTE), userCalendar.get(Calendar.SECOND));
+            long times = cal.getTimeInMillis() - systemCalendar.getTimeInMillis();
+            hours = (int) times / 3600000;
         }
 
         String[] days = new String[] { "monday", "tuesday", "wednesday", "thursday", "friday",
                 "saturday", "sunday" };
         StringBand pullDays = new StringBand();
         ArrayList<Integer> pullDaysList = new ArrayList<>();
-        String tmp = null;
         for (String day : days)
         {
             tmp = request.getParameter(day);
@@ -131,7 +126,7 @@ public class BlaiseMainHandler extends PageActionHandler
                 cz = -1;
                 iHours = 24 + iHours;
             }
-            else if (iHours > 24)
+            else if (iHours >= 24)
             {
                 cz = 1;
                 iHours = iHours - 24;

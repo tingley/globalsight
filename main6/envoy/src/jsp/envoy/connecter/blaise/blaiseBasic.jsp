@@ -50,6 +50,10 @@
     boolean edit = false;
 	int qaCount = 10;
 	int checkDuration = 59;
+	String userCalendar = "";
+	Calendar sysCal = Calendar.getInstance();
+	userCalendar = sysCal.getTimeZone().getID();
+	String userName = (String) request.getAttribute("currentUsername");
 	BlaiseConnector connector = (BlaiseConnector) request.getAttribute("blaise");
 	ArrayList<FileProfileImpl> fps = (ArrayList<FileProfileImpl>) request.getAttribute("fileProfiles");
     List<AttributeSet> allAttributeSets = (List<AttributeSet>) request.getAttribute("allAttributeSets");
@@ -78,6 +82,10 @@
         wordCount = connector.getMinProcedureWords();
 		qaCount = connector.getQaCount();
 		checkDuration = connector.getCheckDuration();
+		userName = connector.getLoginUser();
+		String tmpUserCalendar = connector.getUserCalendar();
+		if (StringUtil.isNotEmpty(tmpUserCalendar))
+		    userCalendar = tmpUserCalendar;
 	}
 	else
 	{
@@ -390,6 +398,22 @@ function validName()
         <tr class="autoOption">
             <td>&nbsp;</td>
             <td class="standardText">
+                <select name="userTimeZone">
+                    <%
+                        List list = (ArrayList)request.getAttribute("tzs");
+                        for (int i = 0; i < list.size(); i++)
+                        {
+                            String timeZoneId = (String)list.get(i);
+
+                            out.println("<option value='" + timeZoneId + "'");
+                            if (TimeZone.getTimeZone(timeZoneId).getOffset(0) == TimeZone.getTimeZone(userCalendar).getOffset(0))               {
+                                out.println(" selected ");
+                            }
+                            out.println(">" + timeZoneId + "  " + bundle.getString(timeZoneId) + "</option>");
+                        }
+                    %>
+                </select>
+                &nbsp;
                 <select id="pullHour" name="pullHour" class="standardText">
                     <%
                         for (int i=0;i<24;i++) {
@@ -398,6 +422,10 @@ function validName()
                     <% } %>
                 </select>
             </td>
+        </tr>
+        <tr class="autoOption">
+            <td class="standardText"><%=bundle.getString("lb_blaise_owner")%>:</td>
+            <td class="standardText"><%=userName%></td>
         </tr>
         <tr class="autoOption">
             <td class="standardText"><%=bundle.getString("lb_blaise_combine_by_language")%>:</td>

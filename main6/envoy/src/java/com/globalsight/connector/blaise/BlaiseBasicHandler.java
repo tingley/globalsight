@@ -29,6 +29,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.AutoCompleteActivityThread;
 import jodd.util.StringBand;
 import org.apache.log4j.Logger;
@@ -126,6 +127,7 @@ public class BlaiseBasicHandler extends PageActionHandler
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+        request.setAttribute("currentUsername", user.getUserName());
         List<String> extensions = new ArrayList<>(1);
         extensions.add("xlf");
         extensions.add("xliff");
@@ -169,6 +171,8 @@ public class BlaiseBasicHandler extends PageActionHandler
         }
         request.setAttribute("typeAttributes", typeAttributes);
         request.setAttribute("attributeData", attributeData);
+
+        request.setAttribute("tzs", CalendarHelper.getTimeZones(session));
 
         response.setCharacterEncoding("utf-8");
     }

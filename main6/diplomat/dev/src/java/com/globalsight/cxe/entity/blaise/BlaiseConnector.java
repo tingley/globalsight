@@ -44,6 +44,17 @@ public class BlaiseConnector extends PersistentObject
     private String loginUser = "";
     private int qaCount = 10;
     private int checkDuration = 59;
+    private String userCalendar = "";
+
+    public String getUserCalendar()
+    {
+        return userCalendar;
+    }
+
+    public void setUserCalendar(String userCalendar)
+    {
+        this.userCalendar = userCalendar;
+    }
 
     public String getUserPullDays()
     {

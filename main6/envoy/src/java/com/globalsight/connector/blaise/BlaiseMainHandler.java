@@ -17,7 +17,6 @@
 package com.globalsight.connector.blaise;
 
 import com.cognitran.translation.client.TranslationPageCommand;
-import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.connector.blaise.form.*;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
@@ -29,15 +28,12 @@ import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.permission.Permission;
-import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.BlaiseConnectorComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
@@ -72,36 +68,30 @@ public class BlaiseMainHandler extends PageActionHandler
         HttpSession session = request.getSession(false);
         SessionManager sessionManager = (SessionManager) session.getAttribute(SESSION_MANAGER);
         User user = (User) sessionManager.getAttribute(USER);
-        PermissionSet permissionSet = (PermissionSet) session.getAttribute(PERMISSIONS);
+
+        String tmp = request.getParameter("userTimeZone");
+        connector.setUserCalendar(tmp);
+
         int hours = 0;
-        if (permissionSet.getPermissionFor(Permission.USER_CAL_VIEW))
+        Calendar systemCalendar = Calendar.getInstance();
+        Calendar userCalendar = Calendar.getInstance(TimeZone.getTimeZone(tmp));
+        if (systemCalendar.getTimeZone().getRawOffset() != userCalendar.getTimeZone()
+                .getRawOffset())
         {
-            UserFluxCalendar userFluxCalendar = CalendarHelper
-                    .getUserCalendarByOwner(user.getUserId());
-            if (userFluxCalendar != null)
-            {
-                Calendar systemCalendar = Calendar.getInstance();
-                Calendar userCalendar = Calendar.getInstance(userFluxCalendar.getTimeZone());
-                if (systemCalendar.getTimeZone().getRawOffset() != userCalendar.getTimeZone()
-                        .getRawOffset())
-                {
-                    //user set a different time zone from system time zone
-                    Calendar cal = Calendar.getInstance();
-                    cal.set(userCalendar.get(Calendar.YEAR), userCalendar.get(Calendar.MONTH),
-                            userCalendar.get(Calendar.DATE),
-                            userCalendar.get(Calendar.HOUR_OF_DAY),
-                            userCalendar.get(Calendar.MINUTE), userCalendar.get(Calendar.SECOND));
-                    long times = cal.getTimeInMillis() - systemCalendar.getTimeInMillis();
-                    hours = (int) times / 3600000;
-                }
-            }
+            //user set a different time zone from system time zone
+            Calendar cal = Calendar.getInstance();
+            cal.set(userCalendar.get(Calendar.YEAR), userCalendar.get(Calendar.MONTH),
+                    userCalendar.get(Calendar.DATE),
+                    userCalendar.get(Calendar.HOUR_OF_DAY),
+                    userCalendar.get(Calendar.MINUTE), userCalendar.get(Calendar.SECOND));
+            long times = cal.getTimeInMillis() - systemCalendar.getTimeInMillis();
+            hours = (int) times / 3600000;
         }
 
         String[] days = new String[] { "monday", "tuesday", "wednesday", "thursday", "friday",
                 "saturday", "sunday" };
         StringBand pullDays = new StringBand();
         ArrayList<Integer> pullDaysList = new ArrayList<>();
-        String tmp = null;
         for (String day : days)
         {
             tmp = request.getParameter(day);
@@ -131,7 +121,7 @@ public class BlaiseMainHandler extends PageActionHandler
                 cz = -1;
                 iHours = 24 + iHours;
             }
-            else if (iHours > 24)
+            else if (iHours >= 24)
             {
                 cz = 1;
                 iHours = iHours - 24;
@@ -153,8 +143,14 @@ public class BlaiseMainHandler extends PageActionHandler
         connector.setAutomatic("true".equals(tmp));
         tmp = request.getParameter("combined");
         connector.setCombined("true".equals(tmp));
-        tmp = request.getParameter("qaCount");
-        connector.setQaCount(Integer.parseInt(tmp));
+        tmp = request.getParameter("checkDuration");
+        if (StringUtil.isEmpty(tmp))
+            connector.setCheckDuration(0);
+        tmp = request.getParameter("qaCountString");
+        if (StringUtil.isEmpty(tmp) || "all".equalsIgnoreCase(tmp))
+            connector.setQaCount(0);
+        else
+            connector.setQaCount(Integer.parseInt(tmp));
         connector.setLoginUser(user.getUserId());
 
         boolean isNew = connector.getId() == -1;
@@ -167,9 +163,11 @@ public class BlaiseMainHandler extends PageActionHandler
             if (isNew)
             {
                 BlaiseAutoManager.startThread(connector);
-            } else
+            }
+            else
                 BlaiseAutoManager.resetThread(connector);
-        } else
+        }
+        else
             BlaiseAutoManager.cancelThread(connector.getId());
     }
 
@@ -178,7 +176,8 @@ public class BlaiseMainHandler extends PageActionHandler
         List<BlaiseConnectorAttribute> attributes = new ArrayList<>();
         BlaiseConnectorAttribute attribute;
         Enumeration<String> names = request.getParameterNames();
-        while (names.hasMoreElements()) {
+        while (names.hasMoreElements())
+        {
             String param = names.nextElement();
             String value;
             attribute = new BlaiseConnectorAttribute();
@@ -187,13 +186,18 @@ public class BlaiseMainHandler extends PageActionHandler
             if (!param.startsWith("anyAttr") && !param.startsWith("hduAttr")
                     && !param.startsWith("isheetAttr"))
                 continue;
-            if (param.startsWith("anyAttr")) {
+            if (param.startsWith("anyAttr"))
+            {
                 param = param.substring("anyAttr".length());
                 attribute.setBlaiseJobType("A");
-            } else if (param.startsWith("hduAttr")) {
+            }
+            else if (param.startsWith("hduAttr"))
+            {
                 param = param.substring("hudAttr".length());
                 attribute.setBlaiseJobType("H");
-            } else if (param.startsWith("isheetAttr")) {
+            }
+            else if (param.startsWith("isheetAttr"))
+            {
                 param = param.substring("isheetAttr".length());
                 attribute.setBlaiseJobType("I");
             }
@@ -249,8 +253,10 @@ public class BlaiseMainHandler extends PageActionHandler
             ArrayList<TranslationInboxEntryVo> hduEntries = new ArrayList<>();
             ArrayList<TranslationInboxEntryVo> edmEntries = new ArrayList<>();
             ArrayList<TranslationInboxEntryVo> otherEntries = new ArrayList<>();
-            if (entries != null) {
-                for (TranslationInboxEntryVo entry : entries) {
+            if (entries != null)
+            {
+                for (TranslationInboxEntryVo entry : entries)
+                {
                     if (entry.isUsageOfHDU())
                         hduEntries.add(entry);
                     else if (entry.isUsageOfIsSheet())
@@ -261,13 +267,14 @@ public class BlaiseMainHandler extends PageActionHandler
                 }
                 ExecutorService pool = Executors.newFixedThreadPool(10);
                 HttpSession session = request.getSession(false);
-                SessionManager sessionMgr =  (SessionManager) session
+                SessionManager sessionMgr = (SessionManager) session
                         .getAttribute(WebAppConstants.SESSION_MANAGER);
                 User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
                 String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
                 List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
-                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, blc.getDefaultFileProfileId());
-                for (int i=0;i<entries.size();i++)
+                FileProfile fp = HibernateUtil
+                        .get(FileProfileImpl.class, blc.getDefaultFileProfileId());
+                for (int i = 0; i < entries.size(); i++)
                     fileProfiles.add(fp);
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setBlaiseConnectorId(String.valueOf(cId));

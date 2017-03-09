@@ -422,6 +422,7 @@ function recursion(data,beginIndex){
         }, 100);
     }else{
         $(".ul:even").addClass("alt");
+        HighlightSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
     }
 }
 
@@ -744,19 +745,7 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
     localData=null;
-    var submintAction = url_refresh+"&action=comment";
-    var formParam = $("#CommentForm").serialize();
-    $.ajax({
-        type:'post',      
-        url:submintAction,  
-        data:formParam,  
-        cache:false,  
-        dataType:'json',  
-        success:function(data)
-        {
-        }  
-    });
-    //o_form.submit();   
+    o_form.submit();   
 }
 
 function contextForX(e)

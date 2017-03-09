@@ -42,8 +42,19 @@ public class BlaiseConnector extends PersistentObject
     private boolean combined = true;
     private long lastMaxEntryId = -1L;
     private String loginUser = "";
-    private int qaCount = 10;
-    private int checkDuration = 60;
+    private int qaCount = 0;
+    private int checkDuration = 0;
+    private String userCalendar = "";
+
+    public String getUserCalendar()
+    {
+        return userCalendar;
+    }
+
+    public void setUserCalendar(String userCalendar)
+    {
+        this.userCalendar = userCalendar;
+    }
 
     public String getUserPullDays()
     {

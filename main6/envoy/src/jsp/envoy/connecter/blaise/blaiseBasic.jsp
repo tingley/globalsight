@@ -11,13 +11,7 @@
 <%@ page import="com.globalsight.cxe.entity.customAttribute.AttributeSet" %>
 <%@ page import="com.globalsight.connector.blaise.form.BlaiseConnectorAttribute" %>
 <%@ page import="com.globalsight.util.StringUtil" %>
-<%@ page import="com.globalsight.everest.permission.*" %>
-<%@ page import="com.globalsight.everest.foundation.User" %>
-<%@ page
-        import="com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper" %>
-<%@ page import="com.globalsight.calendar.UserFluxCalendar" %>
-<%@ page import="com.globalsight.everest.servlet.util.SessionManager" %>
-<%@ page import="java.util.Calendar" %>
+<%@ page import="com.globalsight.everest.util.system.SystemConfiguration" %>
 
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 
@@ -50,17 +44,19 @@
 	String pullDays = "";
 	int pullHour = 7;
 	long fileProfileId = -1L;
-	long attributeGroupId = -1L;
 	boolean isCombined = true;
 	int wordCount = 600;
 	String clientCoreVersion = "2.0";// default "2.0".
 	long companyId = -1;
     boolean edit = false;
-	int qaCount = 10;
-	int checkDuration = 1800;
+	int qaCount = 0;
+	int checkDuration = 0;
+	String userCalendar = "";
+	Calendar sysCal = Calendar.getInstance();
+	userCalendar = sysCal.getTimeZone().getID();
+	String userName = (String) request.getAttribute("currentUsername");
 	BlaiseConnector connector = (BlaiseConnector) request.getAttribute("blaise");
 	ArrayList<FileProfileImpl> fps = (ArrayList<FileProfileImpl>) request.getAttribute("fileProfiles");
-    List<AttributeSet> allAttributeSets = (List<AttributeSet>) request.getAttribute("allAttributeSets");
 	List<BlaiseConnectorAttribute> typeAttributes = (List<BlaiseConnectorAttribute>) request.getAttribute("typeAttributes");
 	String attributeData = (String) request.getAttribute("attributeData");
 	if (connector != null)
@@ -83,15 +79,22 @@
         pullHour = connector.getUserPullHour();
         isCombined = connector.isCombined();
         fileProfileId = connector.getDefaultFileProfileId();
-        attributeGroupId = connector.getJobAttributeGroupId();
         wordCount = connector.getMinProcedureWords();
 		qaCount = connector.getQaCount();
 		checkDuration = connector.getCheckDuration();
+		userName = connector.getLoginUser();
+		String tmpUserCalendar = connector.getUserCalendar();
+		if (StringUtil.isNotEmpty(tmpUserCalendar))
+		    userCalendar = tmpUserCalendar;
 	}
 	else
 	{
 		title = bundle.getString("lb_new_blaise_connector");
 	}
+	boolean enableSetCheckDuration = false;
+	String value = SystemConfiguration.getInstance().getStringParameter("blaise.check.duration.enabled");
+	if ("true".equalsIgnoreCase(value))
+	    enableSetCheckDuration = true;
 %>
 
 <html>
@@ -104,11 +107,6 @@
 <SCRIPT language="JavaScript1.2" SRC="/globalsight/includes/jquery.form.js"></SCRIPT>
 <SCRIPT language="JavaScript1.2" SRC="/globalsight/includes/jquery.loadmask.min.js"></SCRIPT>
 <link href="/globalsight/includes/css/jquery.loadmask.css" rel="stylesheet" type="text/css" />
-<!--
-    <script type="text/javascript" src="/globalsight/jquery/jquery.validator.min.js"></script>
-    <script type="text/javascript" src="/globalsight/jquery/local/en.js"></script>
-    <link href="/globalsight/jquery/jquery.validator.css" rel="stylesheet" type="text/css" />
-	-->
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <%@ include file="/envoy/common/warning.jspIncl"%>
 <script>
@@ -249,23 +247,24 @@ function confirmForm()
 			
 			$("input[name*=Attr][data-rule*=integer]").each(function(){
 			    if ($(this).val() != "") {
-                    if (!isInteger($(this).val())) {
+                    if (isAllDigits($(this).val())) {
+						var tmp1 = $(this).attr("data-range");
+						if (tmp1 == "" || tmp1.indexOf(",") == -1)
+							return false;
+						else {
+							var tmpArray = tmp1.split(",");
+							if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+								alert("The range of input integer value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+								$(this).focus();
+								result = false;
+								return false;
+							}
+						} 
+					} else {
                         alert("Please input correct integer value into fields first.");
                         $(this).focus();
                         result = false;
                         return false;
-                    }
-                    var tmp1 = $(this).attr("data-range");
-                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
-                        return false;
-                    else {
-                        var tmpArray = tmp1.split(",");
-                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
-                            alert("The range of input integer value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
-                            $(this).focus();
-                            result = false;
-                            return false;
-                        }
                     }
                 }
 			});
@@ -273,35 +272,37 @@ function confirmForm()
 			
 			$("input[name*=Attr][data-rule*=range]").each(function(){
 			    if ($(this).val() != "") {
-                    if (!isFloat($(this).val()) || !isInteger($(this).val())) {
-                        alert("Please input correct float value into fields first.");
-                        $(this).focus();
-                        result = false;
-                        return false;
-                    }
-                    var tmp1 = $(this).attr("data-range");
-                    if (tmp1 == "" || tmp1.indexOf(",") == -1)
-                        return false;
-                    else {
-                        var tmpArray = tmp1.split(",");
-                        if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
-                            alert("The range of input float value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
-                            $(this).focus();
-                            result = false;
-                            return false;
-                        }
-                    }
-                }
+                    if (isInteger($(this).val()) || isFloat($(this).val())) {
+						var tmp1 = $(this).attr("data-range");
+						if (tmp1 == "" || tmp1.indexOf(",") == -1)
+							return false;
+						else {
+							var tmpArray = tmp1.split(",");
+							if ($(this).val() < eval(tmpArray[0]) || $(this).val() > eval(tmpArray[1])) {
+								alert("The range of input float value is from " + tmpArray[0] + " to " + tmpArray[1] + ".");
+								$(this).focus();
+								result = false;
+								return false;
+							}
+						}
+					} else {
+						alert("Please input correct float value into fields first.");
+							$(this).focus();
+							result = false;
+							return false;
+					}
+				}
 			});
-			
-			if (!result) return false;
-        }
 
-        $tmp = $("#checkDuration").val();
-        if (!isInteger($tmp) || $tmp < 1 || $tmp > 59)
-        {
-            alert("<%=bundle.getString("msg_blaise_wrong_check_duration")%>");
-            return false;
+			var tmp = $("#qaCountString").val().trim().toLowerCase();
+			if ("all" != tmp && (!isAllDigits(tmp) || tmp < 1 || tmp > 99999))
+            {
+                alert("Please input integer value [1 to 99999] or 'All' for Entry Count field.");
+                $("#qaCountString").focus();
+                result = false;
+                return false;
+            }
+			if (!result) return false;
         }
     }
 
@@ -397,6 +398,22 @@ function validName()
         <tr class="autoOption">
             <td>&nbsp;</td>
             <td class="standardText">
+                <select name="userTimeZone">
+                    <%
+                        List list = (ArrayList)request.getAttribute("tzs");
+                        for (int i = 0; i < list.size(); i++)
+                        {
+                            String timeZoneId = (String)list.get(i);
+
+                            out.println("<option value='" + timeZoneId + "'");
+                            if (TimeZone.getTimeZone(timeZoneId).getOffset(0) == TimeZone.getTimeZone(userCalendar).getOffset(0))               {
+                                out.println(" selected ");
+                            }
+                            out.println(">" + timeZoneId + "  " + bundle.getString(timeZoneId) + "</option>");
+                        }
+                    %>
+                </select>
+                &nbsp;
                 <select id="pullHour" name="pullHour" class="standardText">
                     <%
                         for (int i=0;i<24;i++) {
@@ -405,6 +422,10 @@ function validName()
                     <% } %>
                 </select>
             </td>
+        </tr>
+        <tr class="autoOption">
+            <td class="standardText"><%=bundle.getString("lb_blaise_owner")%>:</td>
+            <td class="standardText"><%=userName%></td>
         </tr>
         <tr class="autoOption">
             <td class="standardText"><%=bundle.getString("lb_blaise_combine_by_language")%>:</td>
@@ -489,13 +510,19 @@ function validName()
                 </table>
             </td>
         </tr>
+        <%
+            if (enableSetCheckDuration) {
+        %>
         <tr class="standardText autoOption">
-            <td class="standardText"><%=bundle.getString("lb_blaise_check_duration")%>:</td>
-            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /><%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
+            <td class="standardText">Check Duration</td>
+            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration == 0 ? 60 : checkDuration %>" /> <%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
         </tr>
+        <%
+            }
+        %>
 		<tr class="standardText autoOption">
-		  <td class="standardText">Entry count(QA)</td>
-		  <td><input type="text" id="qaCount" name="qaCount" size=10 value="<%=qaCount%>" /></td>
+		  <td class="standardText">Entry Count</td>
+		  <td><input type="text" id="qaCountString" name="qaCountString" size=10 value="<%=qaCount == 0 ? "All" : qaCount%>" /></td>
 		</tr>
         <tr>
     		<td colspan="2" align="left">
@@ -504,6 +531,7 @@ function validName()
     		</td>
     	</tr>
     </table>
+
     </FORM>
 </div>
 </div>

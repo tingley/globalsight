@@ -215,6 +215,7 @@ function recursion(data,beginIndex, se_able){
 		initUI();
 		main.setShow(modeFrom);
 		showFinish = true;
+		HighlightSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
 	}
 }
 

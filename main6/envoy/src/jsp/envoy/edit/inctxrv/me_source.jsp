@@ -53,7 +53,6 @@ if (state.isSourceAsTarget()) {
 }
 String str_targetLocale = state.getTargetLocale().toString();
 String str_segmentCount = String.valueOf(state.getPageInfo().getSegmentCount());
-
 String str_scrollHandler = "";
 if (!b_singlePage && b_autoSync)
 {
@@ -409,9 +408,20 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
     main.localData=null;
-    o_form.submit();
-    
-    parent.parent.target.content.Refresh();
+    var submintAction = "<%=url_refresh%>";
+    var formParam = $("#CommentForm").serialize();
+    $.ajax({
+        type:'post',      
+        url:submintAction,  
+        data:formParam,  
+        cache:false,  
+        dataType:'json',  
+        success:function(data)
+        {
+        }  
+    });
+    setTimeout("parent.parent.target.content.Refresh("+tuId+","+tuvId+","+subId+")","2000");
+    setTimeout("window.top.RefreshCommentPane()","2000");
     
 }
 
@@ -761,7 +771,7 @@ function update_tr(id)
 <INPUT TYPE="hidden" NAME="curTuvId" VALUE="0">
 <INPUT TYPE="hidden" NAME="curSubId" VALUE="0">
 </FORM>
-<FORM name="CommentForm" METHOD="POST" action="<%=url_refresh%>">
+<FORM name="CommentForm" id="CommentForm" METHOD="POST" action="<%=url_refresh%>">
 <input type="hidden" name="tuId"        value="">
 <input type="hidden" name="tuvId"       value="">
 <input type="hidden" name="subId"       value="">

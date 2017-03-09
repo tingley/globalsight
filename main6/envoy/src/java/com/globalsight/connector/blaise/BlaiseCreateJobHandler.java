@@ -531,11 +531,11 @@ public class BlaiseCreateJobHandler extends PageActionHandler
                     FileUtil.copyFolder(srcFolder, trgFolder);
                 }
 
-                List<JobAttribute> jobAttribtues = getJobAttributes(
+                List<JobAttribute> jobAttributes = getJobAttributes(
                         blaiseForm.getAttributeString(), l10Profile);
                 CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
                         blc, blaiseForm, entries, fileProfiles, attachFile,
-                        blaiseForm.getAttachment(), uuid, jobAttribtues);
+                        blaiseForm.getAttachment(), uuid, jobAttributes);
                 Thread t = new MultiCompanySupportedThread(runnable);
                 pool.execute(t);
             }
@@ -561,11 +561,11 @@ public class BlaiseCreateJobHandler extends PageActionHandler
                     FileUtil.copyFolder(srcFolder, trgFolder);
                 }
 
-                List<JobAttribute> jobAttribtues = getJobAttributes(
+                List<JobAttribute> jobAttributes = getJobAttributes(
                         blaiseForm.getAttributeString(), l10Profile);
                 CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
                         blc, blaiseForm, entries, fileProfiles, attachFile,
-                        blaiseForm.getAttachment(), uuid, jobAttribtues);
+                        blaiseForm.getAttachment(), uuid, jobAttributes);
                 Thread t = new MultiCompanySupportedThread(runnable);
                 pool.execute(t);
             }

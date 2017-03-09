@@ -28,14 +28,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -46,8 +44,6 @@ import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilterManager;
-import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
-import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManagerWLRemote;
 import com.globalsight.everest.foundation.BasicL10nProfile;
@@ -64,10 +60,7 @@ public class FileProfileImporter implements ConfigConstants
     private static final Logger logger = Logger.getLogger(FileProfileImporter.class);
     private String sessionId;
     private long companyId;
-    private String filterName;
-    private String xmlDtdName;
-    private String qaFilterName;
-    private String extensionNames;
+//    private String filterName;
 
     public FileProfileImporter(String sessionId, String companyId, String importToCompId)
     {
@@ -171,6 +164,8 @@ public class FileProfileImporter implements ConfigConstants
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
         dateFormat.setLenient(false);
         FileProfileImpl fileProfile = new FileProfileImpl();
+        String filterName2 = null;
+        String filterTableName = null;
         try
         {
             String keyField = null;
@@ -203,7 +198,24 @@ public class FileProfileImporter implements ConfigConstants
                 }
                 else if ("XML_DTD_NAME".equalsIgnoreCase(keyField))
                 {
-                    xmlDtdName = valueField;
+                    XmlDtdImpl xmlDtd = null;
+                    if (StringUtil.isNotEmptyAndNull(valueField))
+                    {
+                        List<XmlDtdImpl> xmlDtdList = XmlDtdManager
+                                .getAllXmlDtdByCompanyId(companyId);
+                       
+                        for (XmlDtdImpl dtd : xmlDtdList)
+                        {
+                            String dtdName = dtd.getName();
+                            if (dtdName.equals(valueField)
+                                    || dtdName.startsWith(valueField + "_import_"))
+                            {
+                                xmlDtd = dtd;
+                                break;
+                            }
+                        }
+                    }
+                    fileProfile.setXmlDtd(xmlDtd);
                 }
                 else if ("L10N_PROFILE_NAME".equalsIgnoreCase(keyField))
                 {
@@ -237,15 +249,35 @@ public class FileProfileImporter implements ConfigConstants
                 }
                 else if ("FILTER_NAME".equalsIgnoreCase(keyField))
                 {
-                    filterName = valueField;
+                    filterName2 = valueField;
                 }
                 else if ("FILTER_TABLE_NAME".equalsIgnoreCase(keyField))
                 {
                     fileProfile.setFilterTableName(valueField);
+                    filterTableName = valueField;
                 }
                 else if ("QA_FILTER_NAME".equalsIgnoreCase(keyField))
                 {
-                    qaFilterName = valueField;
+                    if (StringUtil.isNotEmptyAndNull(valueField))
+                    {
+                        List<Filter> qaFilterList = QAFilterManager.getAllQAFilters(companyId);
+                        if (qaFilterList.size() == 0)
+                            fileProfile.setQaFilter(null);
+                        for (Filter qaFilter : qaFilterList)
+                        {
+                            String filterName = qaFilter.getFilterName();
+                            if (filterName.equals(valueField)
+                                    || filterName.startsWith(valueField + "_import_"))
+                            {
+                                fileProfile.setQaFilter((QAFilter) qaFilter);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        fileProfile.setQaFilter(null);
+                    }
                 }
                 else if ("COMPANYID".equalsIgnoreCase(keyField))
                 {
@@ -288,8 +320,41 @@ public class FileProfileImporter implements ConfigConstants
                 }
                 else if ("EXTENSION_NAMES".equalsIgnoreCase(keyField))
                 {
-                    extensionNames = valueField;
+                    Vector extensionIds = new Vector();
+                    String[] extensionNameList = valueField.split(",");
+                    for (String extensionName : extensionNameList)
+                    {
+                        FileExtensionImpl fileExtension = ServerProxy.getFileProfilePersistenceManager()
+                                .getFileExtensionByNameAndCompanyId(extensionName, companyId);
+                        if(fileExtension!=null){
+                            extensionIds.add(fileExtension.getId());
+                        }
+                    }
+                    fileProfile.setFileExtensionIds(extensionIds);
                 }
+            }
+            
+            Filter origFilter = FilterHelper.getFilter(filterTableName, filterName2, companyId);
+            if (origFilter != null)
+            {
+                List<Filter> filters = FilterHelper.getFiltersByTableName(filterTableName,
+                        companyId);
+                if (filters.size() == 0)
+                    fileProfile.setFilterId(-1);
+                for (Filter filter : filters)
+                {
+                    String filterName = filter.getFilterName();
+                    if (filterName.equals(origFilter.getFilterName())
+                            || filterName.startsWith(origFilter.getFilterName() + "_import_"))
+                    {
+                        fileProfile.setFilterId(filter.getId());
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                fileProfile.setFilterId(-1);
             }
         }
         catch (Exception e)
@@ -403,87 +468,16 @@ public class FileProfileImporter implements ConfigConstants
             fileProfile.setXlfSourceAsUnTranslatedTarget(originalFileProfile
                     .getXlfSourceAsUnTranslatedTarget());
             fileProfile.setEolEncoding(originalFileProfile.getEolEncoding());
-            Vector extensionIds = new Vector();
-            String[] extensionNameList = extensionNames.split(",");
-            for (String extensionName : extensionNameList)
-            {
-                FileExtensionImpl fileExtension = ServerProxy.getFileProfilePersistenceManager()
-                        .getFileExtensionByNameAndCompanyId(extensionName, companyId);
-                if(fileExtension!=null){
-                    extensionIds.add(fileExtension.getId());
-                }
-            }
-            fileProfile.setFileExtensionIds(extensionIds);
+            fileProfile.setFileExtensionIds(originalFileProfile.getFileExtensionIds());
 
             // saves xmlDtd
-            KnownFormatTypeImpl knownFormat = HibernateUtil.get(KnownFormatTypeImpl.class,
-                    originalFileProfile.getKnownFormatTypeId());
-            if (knownFormat != null && !KnownFormatType.XML.equals(knownFormat.getName()))
-            {
-                fileProfile.setXmlDtd(null);
-            }
-            else
-            {
-                List<XmlDtdImpl> xmlDtdList = XmlDtdManager.getAllXmlDtdByCompanyId(companyId);
-                XmlDtdImpl xmlDtd = null;
-                for (XmlDtdImpl dtd : xmlDtdList)
-                {
-                    String dtdName = dtd.getName();
-                    if (dtdName.equals(xmlDtdName) || dtdName.startsWith(xmlDtdName + "_import_"))
-                    {
-                        xmlDtd = dtd;
-                        break;
-                    }
-                }
-                fileProfile.setXmlDtd(xmlDtd);
-            }
+            fileProfile.setXmlDtd(originalFileProfile.getXmlDtd());
 
             // saves filter
-            String filterTableName = originalFileProfile.getFilterTableName();
-            Filter origFilter = FilterHelper.getFilter(filterTableName, filterName, companyId);
-            if (origFilter != null)
-            {
-                List<Filter> filters = FilterHelper.getFiltersByTableName(filterTableName,
-                        companyId);
-                if (filters.size() == 0)
-                    fileProfile.setFilterId(-1);
-                for (Filter filter : filters)
-                {
-                    String filterName = filter.getFilterName();
-                    if (filterName.equals(origFilter.getFilterName())
-                            || filterName.startsWith(origFilter.getFilterName() + "_import_"))
-                    {
-                        fileProfile.setFilterId(filter.getId());
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                fileProfile.setFilterId(-1);
-            }
+            fileProfile.setFilterId(originalFileProfile.getFilterId());
 
             // saves qa filter
-            if (StringUtil.isNotEmptyAndNull(qaFilterName))
-            {
-                List<Filter> qaFilterList = QAFilterManager.getAllQAFilters(companyId);
-                if (qaFilterList.size() == 0)
-                    fileProfile.setQaFilter(null);
-                for (Filter qaFilter : qaFilterList)
-                {
-                    String filterName = qaFilter.getFilterName();
-                    if (filterName.equals(qaFilterName)
-                            || filterName.startsWith(qaFilterName + "_import_"))
-                    {
-                        fileProfile.setQaFilter((QAFilter) qaFilter);
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                fileProfile.setQaFilter(null);
-            }
+            fileProfile.setQaFilter(originalFileProfile.getQaFilter());
         }
         catch (Exception e)
         {
@@ -534,7 +528,7 @@ public class FileProfileImporter implements ConfigConstants
 
     private String getFileProfileNewName(String oldName, long companyId)
     {
-        String hql = "select fp.name from FileProfileImpl fp where fp.companyId=:companyId";
+        String hql = "select fp.name from FileProfileImpl fp where fp.companyId=:companyId and fp.isActive='Y'";
         Map map = new HashMap();
         map.put("companyId", companyId);
         List itList = HibernateUtil.search(hql, map);

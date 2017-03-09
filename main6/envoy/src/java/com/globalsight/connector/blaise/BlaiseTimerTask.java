@@ -37,6 +37,8 @@ public class BlaiseTimerTask extends Thread
             if (StringUtil.isNotEmpty(connector.getPullDays()))
             {
                 int checkDuration = connector.getCheckDuration();
+                if (checkDuration == 0)
+                    checkDuration = 60;
                 long checkTime = checkDuration * 60000;
 
                 while (true)
@@ -50,20 +52,20 @@ public class BlaiseTimerTask extends Thread
                         pullDays += ",";
                     Calendar calendar = Calendar.getInstance();
                     String currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) + ",";
-                    logger.debug("Thread [" + getName() + "] is running check..." + pullDays + ", "
+                    logger.info("**** Time Thread [" + getName() + "] is running check..." + pullDays + ", current == "
                             + currentDayOfWeek);
                     if (pullDays.indexOf(currentDayOfWeek) > -1)
                     {
                         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-                        logger.debug(
+                        logger.info(
                                 "Current hour == " + currentHour + ", defined hour == " + connector
                                         .getPullHour());
                         if (connector.getPullHour() == currentHour)
                         {
                             //match the time condition
-                            BlaiseAutoHelper.getInstance()
-                                    .setCompanyId(String.valueOf(connector.getCompanyId()));
-                            BlaiseAutoHelper.getInstance().runAutomatic(connector);
+                            BlaiseAutoHelper autoHelper = new BlaiseAutoHelper();
+                            autoHelper.setCompanyId(String.valueOf(connector.getCompanyId()));
+                            autoHelper.runAutomatic(connector);
                         }
                     }
 

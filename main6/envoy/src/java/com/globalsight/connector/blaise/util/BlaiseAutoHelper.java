@@ -28,18 +28,10 @@ public class BlaiseAutoHelper
 {
     private static Logger logger = Logger.getLogger(BlaiseAutoHelper.class);
     private static boolean running = false;
-    private static BlaiseAutoHelper autoHelper = new BlaiseAutoHelper();
     private String companyId = "";
 
-    private BlaiseAutoHelper()
+    public BlaiseAutoHelper()
     {
-    }
-
-    public static BlaiseAutoHelper getInstance()
-    {
-        if (autoHelper == null)
-            autoHelper = new BlaiseAutoHelper();
-        return autoHelper;
     }
 
     public String getCompanyId()
@@ -62,6 +54,7 @@ public class BlaiseAutoHelper
         {
             running = true;
         }
+        logger.info("****** Start to run automatic operation for " + companyId);
         helper.groupInboxEntries();
         running = false;
     }

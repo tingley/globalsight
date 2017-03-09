@@ -334,16 +334,21 @@ public class BlaiseHelper
             ArrayList<TranslationInboxEntryVo> hduEntries = null;
             ArrayList<TranslationInboxEntryVo> inSheetEntries = null;
             ArrayList<TranslationInboxEntryVo> otherEntries = null;
-            TranslationPageCommand command = null;
-            int count = blc.getQaCount();
+            TranslationPageCommand command = new TranslationPageCommand();
+            int count = 100;
+            if (blc.getQaCount() > 0)
+                count = blc.getQaCount();
+            else
+                count = getInboxEntryCount(command);
             int fetchCount = 0;
             List<Long> existedEntryIds = getEntryIdsInGS(blc.getId());
             long tmpEntryId = -1L;
             int pageIndex = 0;
             String tmp;
+            logger.info("**** ==== Start to fetch entries for company [" + companyId + "]");
             while (fetchCount < count)
             {
-                command = initTranslationPageCommand(pageIndex, blc.getQaCount(),
+                command = initTranslationPageCommand(pageIndex, 100,
                         null,
                         sourceLocale.toString(), null, null, null, 0, false);
                 command.sortById();
@@ -359,11 +364,12 @@ public class BlaiseHelper
                             continue;
                         totalEntries.add(vo);
                         fetchCount++;
-                        if (fetchCount == count)
+                        if (fetchCount >= count)
                             break;
                     }
                 }
                 pageIndex++;
+                logger.info("**** ==== Current page index == " + pageIndex + ", fetch count == " + fetchCount + ", count == " + count);
             }
 
             if (totalEntries != null && totalEntries.size() > 0)
@@ -391,6 +397,7 @@ public class BlaiseHelper
                                 + "]");
                     }
                 }
+                logger.info("**** ==== End to fetch entries for company [" + companyId + "]");
 
                 BasicL10nProfile l10Profile = HibernateUtil
                         .get(BasicL10nProfile.class, fp.getL10nProfileId());
@@ -404,15 +411,18 @@ public class BlaiseHelper
                 String companyIdString = String.valueOf(companyId);
                 if (inSheetEntries != null && inSheetEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "I", companyIdString, userId, fp, inSheetEntries, blc.isCombined());
+                    createJob(blaiseForm, "I", companyIdString, userId, fp, inSheetEntries,
+                            blc.isCombined());
                 }
                 if (otherEntries != null && otherEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "A", companyIdString, userId, fp, otherEntries, blc.isCombined());
+                    createJob(blaiseForm, "A", companyIdString, userId, fp, otherEntries,
+                            blc.isCombined());
                 }
                 if (hduEntries != null && hduEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "H", companyIdString, userId, fp, hduEntries, blc.isCombined());
+                    createJob(blaiseForm, "H", companyIdString, userId, fp, hduEntries,
+                            blc.isCombined());
                 }
             }
         }
@@ -436,8 +446,7 @@ public class BlaiseHelper
         if (entries != null && entries.size() > 0)
         {
             String attributeString = getJobAttributeString(blc.getId(), type);
-            List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
-                    l10Profile);
+
             if (isCombinedByLang)
             {
                 blaiseJobForm.setCombineByLangs("on");
@@ -453,6 +462,7 @@ public class BlaiseHelper
                     fps = new ArrayList<>(size);
                     for (int i = 0; i < size; i++)
                         fps.add(fp);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             String.valueOf(companyId),
                             blc, blaiseJobForm, localeEntries, fps, null,
@@ -461,15 +471,6 @@ public class BlaiseHelper
                     pool.execute(t);
                 }
             } else {
-                size = entries.size();
-//                fps = new ArrayList<>(size);
-//                for (int i = 0; i < size; i++)
-//                    fps.add(fp);
-//                blaiseJobForm.setCombineByLangs("");
-//                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-//                        String.valueOf(companyId),
-//                        blc, blaiseJobForm, entries, fps, null,
-//                        null, JobImpl.createUuid(), jobAttributes);
                 fps = new ArrayList<>(1);
                 fps.add(fp);
                 blaiseJobForm.setCombineByLangs("");
@@ -479,7 +480,7 @@ public class BlaiseHelper
                 {
                     jobEntries = new ArrayList<>(1);
                     jobEntries.add(entry);
-                    jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
                             companyIdString, blc, blaiseJobForm, jobEntries, fps, null,
                             null, JobImpl.createUuid(), jobAttributes, entry.getTargetLocaleAsString());

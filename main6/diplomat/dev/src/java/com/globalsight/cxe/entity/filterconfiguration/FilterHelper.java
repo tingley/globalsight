@@ -1048,10 +1048,15 @@ public class FilterHelper
         {
             return null;
         }
-        Map map = new HashMap();
-        String hql = "select * from " + filter + " where filterName =:filterName and companyId =:companyId";
-        map.put("filterName", filterName);
-        map.put("companyId", companyId);
-        return (Filter) HibernateUtil.search(hql, map);
+        String sql = "select * from " + filterTableName + " where filter_name =? and company_id =?";
+        List<Filter> list = (List<Filter>) HibernateUtil.searchWithSql(filter.getClass(), sql, filterName, companyId);
+        if (list.size() > 0)
+        {
+            return list.get(0);
+        }
+        else
+        {
+            return null;
+        }
     }   
 }

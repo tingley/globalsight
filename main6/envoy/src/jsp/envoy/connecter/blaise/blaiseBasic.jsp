@@ -293,7 +293,15 @@ function confirmForm()
 					}
 				}
 			});
-			
+
+			var tmp = $("#qaCountString").val().trim().toLowerCase();
+			if ("all" != tmp || !isAllDigits(tmp) || tmp > 99999 || tmp < 1)
+            {
+                alert("Please input integer value [1 to 99999] or 'All' for Entry Count field.");
+                $("#qaCountString").focus();
+                result = false;
+                return false;
+            }
 			if (!result) return false;
         }
     }
@@ -507,14 +515,14 @@ function validName()
         %>
         <tr class="standardText autoOption">
             <td class="standardText">Check Duration</td>
-            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /></td>
+            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /> <%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
         </tr>
         <%
             }
         %>
 		<tr class="standardText autoOption">
 		  <td class="standardText">Entry count</td>
-		  <td><input type="text" id="qaCount" name="qaCount" size=10 value="<%=qaCount == 0 ? "All" : qaCount%>" /></td>
+		  <td><input type="text" id="qaCountString" name="qaCountString" size=10 value="<%=qaCount == 0 ? "All" : qaCount%>" /></td>
 		</tr>
         <tr>
     		<td colspan="2" align="left">

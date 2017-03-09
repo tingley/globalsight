@@ -78,8 +78,7 @@ public class BlaiseBasicHandler extends PageActionHandler
         }
     }
 
-    @ActionHandler(action = "getAttributes", formClass = "com.globalsight.cxe.entity.blaise"
-            + ".BlaiseConnector")
+    @ActionHandler(action = "getAttributes", formClass = "com.globalsight.cxe.entity.blaise.BlaiseConnector")
     public void getAttributes(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {

@@ -81,14 +81,18 @@ public class BlaiseManager
                 connector.setIsActive("Y".equalsIgnoreCase(rs.getString("IS_ACTIVE")));
                 connector.setCompanyId(rs.getLong("COMPANY_ID"));
                 connector.setAutomatic("Y".equalsIgnoreCase(rs.getString("IS_AUTOMATIC")));
+                connector.setUserCalendar(rs.getString("USER_CALENDAR"));
                 connector.setPullDays(rs.getString("PULL_DAYS"));
+                connector.setUserPullDays(rs.getString("USER_PULL_DAYS"));
                 connector.setPullHour(rs.getInt("PULL_HOUR"));
+                connector.setUserPullHour(rs.getInt("USER_PULL_HOUR"));
                 connector.setDefaultFileProfileId(rs.getLong("DEFAULT_FILE_PROFILE_ID"));
                 connector.setMinProcedureWords(rs.getInt("MIN_PROCEDURE_WORDS"));
                 connector.setCombined("Y".equals(rs.getString("IS_COMBINED")));
                 connector.setLastMaxEntryId(rs.getLong("LAST_MAX_ENTRY_ID"));
                 connector.setLoginUser(rs.getString("LOGIN_USER"));
                 connector.setCheckDuration(rs.getInt("CHECK_DURATION"));
+                connector.setQaCount(rs.getInt("QA_COUNT"));
 
                 connectors.add(connector);
             }

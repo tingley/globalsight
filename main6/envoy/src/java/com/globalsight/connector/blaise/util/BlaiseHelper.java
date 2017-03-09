@@ -335,14 +335,17 @@ public class BlaiseHelper
             ArrayList<TranslationInboxEntryVo> inSheetEntries = null;
             ArrayList<TranslationInboxEntryVo> otherEntries = null;
             TranslationPageCommand command = new TranslationPageCommand();
-            int currentEntryCountInServer = getInboxEntryCount(command);
-            int count = blc.getQaCount() == 0 ? currentEntryCountInServer : blc.getQaCount();
+            int count = 100;
+            if (blc.getQaCount() > 0)
+                count = blc.getQaCount();
+            else
+                count = getInboxEntryCount(command);
             int fetchCount = 0;
             List<Long> existedEntryIds = getEntryIdsInGS(blc.getId());
             long tmpEntryId = -1L;
             int pageIndex = 0;
             String tmp;
-            logger.info("****** ==== Start to fetch entries for company [" + companyId + "]");
+            logger.info("**** ==== Start to fetch entries for company [" + companyId + "]");
             while (fetchCount < count)
             {
                 command = initTranslationPageCommand(pageIndex, 100,
@@ -361,11 +364,12 @@ public class BlaiseHelper
                             continue;
                         totalEntries.add(vo);
                         fetchCount++;
-                        if (fetchCount == count)
+                        if (fetchCount >= count)
                             break;
                     }
                 }
                 pageIndex++;
+                logger.info("**** ==== Current page index == " + pageIndex + ", fetch count == " + fetchCount + ", count == " + count);
             }
 
             if (totalEntries != null && totalEntries.size() > 0)
@@ -393,7 +397,7 @@ public class BlaiseHelper
                                 + "]");
                     }
                 }
-                logger.info("****** ==== End to fetch entries for company [" + companyId + "]");
+                logger.info("**** ==== End to fetch entries for company [" + companyId + "]");
 
                 BasicL10nProfile l10Profile = HibernateUtil
                         .get(BasicL10nProfile.class, fp.getL10nProfileId());

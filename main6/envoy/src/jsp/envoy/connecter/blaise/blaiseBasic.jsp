@@ -50,7 +50,7 @@
 	long companyId = -1;
     boolean edit = false;
 	int qaCount = 0;
-	int checkDuration = 60;
+	int checkDuration = 0;
 	String userCalendar = "";
 	Calendar sysCal = Calendar.getInstance();
 	userCalendar = sysCal.getTimeZone().getID();
@@ -515,7 +515,7 @@ function validName()
         %>
         <tr class="standardText autoOption">
             <td class="standardText">Check Duration</td>
-            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /> <%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
+            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration == 0 ? 60 : checkDuration %>" /> <%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
         </tr>
         <%
             }

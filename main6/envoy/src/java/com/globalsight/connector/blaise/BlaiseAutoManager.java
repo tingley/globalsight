@@ -2,6 +2,7 @@ package com.globalsight.connector.blaise;
 
 import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.StringUtil;
 import org.apache.log4j.Logger;
 
@@ -46,20 +47,29 @@ public class BlaiseAutoManager
                     Calendar now = Calendar.getInstance();
                     int hour = now.get(Calendar.HOUR_OF_DAY);
                     int minute = 0;
-                    if (hour == connector.getPullHour())
+                    String checkDurationEnabled = SystemConfiguration.getInstance()
+                            .getStringParameter("blaise.check.duration.enabled");
+                    if ("false".equalsIgnoreCase(checkDurationEnabled) || checkDuration == 0)
                     {
-                        BlaiseTimerTask timerTask = new BlaiseTimerTask(connector);
-                        scheduledExecutorService.schedule(timerTask, 0, TimeUnit.MINUTES);
+                        // User don't switch on check duration setting, non-debug mode
+                        if (hour == connector.getPullHour())
+                        {
+                            // Check once immediately
+                            BlaiseTimerTask timerTask = new BlaiseTimerTask(connector);
+                            scheduledExecutorService.schedule(timerTask, 0, TimeUnit.MINUTES);
+                        }
+                        minute = 60 - now.get(Calendar.MINUTE);
+                        checkDuration = 60;
                     }
-                    minute = 60 - now.get(Calendar.MINUTE);
-                    logger.info("The first automatic creation check will be run after " + minute + " min.");
+
                     BlaiseTimerTask timerTask = new BlaiseTimerTask(connector);
                     scheduledExecutorService
                             .scheduleAtFixedRate(timerTask, minute, checkDuration, TimeUnit.MINUTES);
                     threads.put(connector.getId(), timerTask);
                     logger.info(
                             "**** Start thread for Blaise automatic. Thread [" + timerTask.getId()
-                                    + ", " + timerTask.getName() + "]");
+                                    + ", " + timerTask.getName() + "]. After " + minute
+                                    + " mins, checkDuration is " + checkDuration + " mins");
                 }
             }
         }
@@ -73,22 +83,32 @@ public class BlaiseAutoManager
         if (bc == null || !bc.isAutomatic())
             return;
 
+        int checkDuration = bc.getCheckDuration();
         Calendar now = Calendar.getInstance();
         int hour = now.get(Calendar.HOUR_OF_DAY);
         int minute = 0;
-        if (hour == bc.getPullHour())
+        String checkDurationEnabled = SystemConfiguration.getInstance()
+                .getStringParameter("blaise.check.duration.enabled");
+        if ("false".equalsIgnoreCase(checkDurationEnabled) || checkDuration == 0)
         {
-            BlaiseTimerTask timerTask = new BlaiseTimerTask(bc);
-            scheduledExecutorService.schedule(timerTask, 0, TimeUnit.MINUTES);
+            // User don't switch on check duration setting, non-debug mode
+            if (hour == bc.getPullHour())
+            {
+                // Check once immediately
+                BlaiseTimerTask timerTask = new BlaiseTimerTask(bc);
+                scheduledExecutorService.schedule(timerTask, 0, TimeUnit.MINUTES);
+            }
+            minute = 60 - now.get(Calendar.MINUTE);
+            checkDuration = 60;
         }
-        minute = 60 - now.get(Calendar.MINUTE);
-        logger.info("The first automatic creation check will be run after " + minute + " min.");
         BlaiseTimerTask timerTask = new BlaiseTimerTask(bc);
         scheduledExecutorService
-                .scheduleAtFixedRate(timerTask, minute, bc.getCheckDuration(), TimeUnit.MINUTES);
+                .scheduleAtFixedRate(timerTask, minute, checkDuration, TimeUnit.MINUTES);
         threads.put(bc.getId(), timerTask);
-        logger.info("**** Start thread for Blaise automatic. Thread [" + timerTask.getId() + ", "
-                + timerTask.getName() + "]");
+        logger.info(
+                "**** Start thread for Blaise automatic. Thread [" + timerTask.getId()
+                        + ", " + timerTask.getName() + "]. After " + minute
+                        + " mins, checkDuration is " + checkDuration + " mins");
     }
 
     /**

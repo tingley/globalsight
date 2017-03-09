@@ -145,7 +145,7 @@ public class BlaiseMainHandler extends PageActionHandler
         connector.setCombined("true".equals(tmp));
         tmp = request.getParameter("checkDuration");
         if (StringUtil.isEmpty(tmp))
-            connector.setCheckDuration(60);
+            connector.setCheckDuration(0);
         tmp = request.getParameter("qaCountString");
         if (StringUtil.isEmpty(tmp) || "all".equalsIgnoreCase(tmp))
             connector.setQaCount(0);

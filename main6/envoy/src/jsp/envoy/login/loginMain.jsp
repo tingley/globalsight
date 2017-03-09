@@ -155,6 +155,125 @@ body {
     <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
+
+<SCRIPT TYPE="text/javascript">
+    function getLangCookie()
+    {
+        if (document.cookie.length > 0)
+        {
+            offset = document.cookie.indexOf("localelang");
+            if (offset != -1)
+            {
+                offset += 11;
+                end = document.cookie.indexOf(";", offset);
+                if (end == -1)
+                {
+                    end = document.cookie.length;
+                }
+                var languageSelected = unescape(document.cookie.substring(offset, end));
+            }
+        }
+        if (languageSelected == null)
+            languageSelected = "-1";
+        setLangCookie(languageSelected);
+        return languageSelected;
+    }
+
+    function setLangCookie(langSent) {
+        setCookie("localelang", langSent, 365);
+    }
+
+    function confirmForm(formSent) {
+        // Make sure a name has been given
+        if (isEmptyString(formSent.nameField.value))
+        {
+            displayNameMessage();
+            formSent.nameField.value = "";
+            formSent.nameField.focus();
+            return false;
+        }
+
+        // Make sure the password has been entered
+        if (isEmptyString(formSent.passwordField.value))
+        {
+            displayPwdMessage();
+            formSent.passwordField.value = "";
+            formSent.passwordField.focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    function displayNameMessage()
+    {
+        alert("<%=bundle.getString("jsmsg_login_name")%>");
+
+        return true;
+    }
+
+    function displayPwdMessage()
+    {
+        alert("<%=bundle.getString("jsmsg_login_password")%>");
+
+        return true;
+    }
+
+    function changeLanguage(strLocale) {
+        setLangCookie(strLocale);
+        loginForm.uiLocale.value = strLocale;
+        loginForm.isJustChangeUILocale.value = "True";
+        loginForm.submit();
+    }
+
+    function init() {
+        var selectedLang = getLangCookie();
+        var cookieUiLocaleFromJava = "<c:out value="${cookieUiLocale}"/>";
+
+        if (selectedLang != cookieUiLocaleFromJava) {
+            selectedLang = cookieUiLocaleFromJava;
+            setLangCookie(selectedLang);
+        }
+        document.loginForm.isJustChangeUILocale.value = "false";
+        var elemSSO = document.loginForm.isSSO;
+        if (elemSSO != null) {
+            elemSSO.checked =<%=isSSO%>;
+        }
+    }
+
+    function switchIsSSO() {
+        var ele = document.getElementById("ssoIdpUrlCC");
+        var display = document.loginForm.isSSO.checked ? "" : "none";
+        ele.style.display = display;
+    }
+
+    function onChangeName() {
+        if(loginForm.nameField.value!='<c:out value="${userName}"/>'){
+            document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value=''
+        }
+        else{
+            document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value = '<c:out value="${from}"/>'
+        }
+    }
+
+    $(document).ready(function() {
+        var width = $(window).width();
+
+        $("#logoTable").css("width", width);
+        $("#navigationTable").css("width", width);
+        $("#loginTable").css("width", width);
+        $(window).resize(function(e) {
+            width = $(window).width();
+            $("#logoTable").css("width", width);
+            $("#navigationTable").css("width", width);
+            $("#loginTable").css("width", width);
+        });
+
+    });
+</SCRIPT>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onLoad="init();">
     <!-- Header info -->
     <DIV ID="header0" STYLE="POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 0px;">
@@ -291,125 +410,6 @@ body {
         <%@ include file="/envoy/common/shutdownBanner.jspIncl"%>
     </DIV>
 
-    <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-    <SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
-    <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
-
-    <SCRIPT TYPE="text/javascript">
-        function getLangCookie()
-        {
-            if (document.cookie.length > 0)
-            {
-                offset = document.cookie.indexOf("localelang");
-                if (offset != -1)
-                {
-                    offset += 11;
-                    end = document.cookie.indexOf(";", offset);
-                    if (end == -1)
-                    {
-                        end = document.cookie.length;
-                    }
-                    var languageSelected = unescape(document.cookie.substring(offset, end));
-                }
-            }
-            if (languageSelected == null)
-                languageSelected = "-1";
-            setLangCookie(languageSelected);
-            return languageSelected;
-        }
-
-        function setLangCookie(langSent) {
-            setCookie("localelang", langSent, 365);
-        }
-
-        function confirmForm(formSent) {
-            // Make sure a name has been given
-            if (isEmptyString(formSent.nameField.value))
-            {
-                displayNameMessage();
-                formSent.nameField.value = "";
-                formSent.nameField.focus();
-                return false;
-            }
-
-            // Make sure the password has been entered
-            if (isEmptyString(formSent.passwordField.value))
-            {
-                displayPwdMessage();
-                formSent.passwordField.value = "";
-                formSent.passwordField.focus();
-                return false;
-            }
-
-            return true;
-        }
-
-        function displayNameMessage()
-        {
-            alert("<%=bundle.getString("jsmsg_login_name")%>");
-
-            return true;
-        }
-
-        function displayPwdMessage()
-        {
-            alert("<%=bundle.getString("jsmsg_login_password")%>");
-
-            return true;
-        }
-
-        function changeLanguage(strLocale) {
-            setLangCookie(strLocale);
-            loginForm.uiLocale.value = strLocale;
-            loginForm.isJustChangeUILocale.value = "True";
-            loginForm.submit();
-        }
-
-        function init() {
-            var selectedLang = getLangCookie();
-            var cookieUiLocaleFromJava = "<c:out value="${cookieUiLocale}"/>";
-
-            if (selectedLang != cookieUiLocaleFromJava) {
-                selectedLang = cookieUiLocaleFromJava;
-                setLangCookie(selectedLang);
-            }
-            document.loginForm.isJustChangeUILocale.value = "false";
-            var elemSSO = document.loginForm.isSSO;
-            if (elemSSO != null) {
-                elemSSO.checked =<%=isSSO%>;
-            }
-        }
-
-        function switchIsSSO() {
-            var ele = document.getElementById("ssoIdpUrlCC");
-            var display = document.loginForm.isSSO.checked ? "" : "none";
-            ele.style.display = display;
-        }
-
-        function onChangeName() {
-            if(loginForm.nameField.value!='<c:out value="${userName}"/>'){
-                document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value=''
-            }
-            else{
-                document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value = '<c:out value="${from}"/>'
-            }
-        }
-
-        $(document).ready(function() {
-            var width = $(window).width();
-
-            $("#logoTable").css("width", width);
-            $("#navigationTable").css("width", width);
-            $("#loginTable").css("width", width);
-            $(window).resize(function(e) {
-                width = $(window).width();
-                $("#logoTable").css("width", width);
-                $("#navigationTable").css("width", width);
-                $("#loginTable").css("width", width);
-            });
-
-        });
-    </SCRIPT>
 
 </BODY>
 </HTML>

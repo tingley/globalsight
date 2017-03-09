@@ -38,6 +38,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfoKey;
@@ -253,15 +254,20 @@ public class LocProfileImporter implements ConfigConstants
                 else if ("WF_STATE_POST_NAME".equalsIgnoreCase(keyField))
                 {
                     long wfStatePostId = -1;
-                    List<WorkflowStatePosts> wfStatePosts = ServerProxy.getProjectHandler()
-                            .getWfStatePostProfileByCompanyId(companyId);
-                    for (WorkflowStatePosts workflowStatePost : wfStatePosts)
+                    Company company = HibernateUtil.get(Company.class, companyId);
+                    if (company.getEnableWorkflowStatePosts())
                     {
-                        if (workflowStatePost.getName().equalsIgnoreCase(valueField)
-                                || workflowStatePost.getName().startsWith(valueField + "_import_"))
+                        List<WorkflowStatePosts> wfStatePosts = ServerProxy.getProjectHandler()
+                                .getWfStatePostProfileByCompanyId(companyId);
+                        for (WorkflowStatePosts workflowStatePost : wfStatePosts)
                         {
-                            wfStatePostId = workflowStatePost.getId();
-                            break;
+                            if (workflowStatePost.getName().equalsIgnoreCase(valueField)
+                                    || workflowStatePost.getName().startsWith(
+                                            valueField + "_import_"))
+                            {
+                                wfStatePostId = workflowStatePost.getId();
+                                break;
+                            }
                         }
                     }
                     l10nProfile.setWfStatePostId(wfStatePostId);
@@ -428,7 +434,7 @@ public class LocProfileImporter implements ConfigConstants
 
     private String getL10NNewName(String oldName, long companyId)
     {
-        String hql = "select lp.name from BasicL10nProfile lp where lp.companyId=:companyId";
+        String hql = "select lp.name from BasicL10nProfile lp where lp.companyId=:companyId and lp.isActive='Y'";
         Map map = new HashMap();
         map.put("companyId", companyId);
         List itList = HibernateUtil.search(hql, map);

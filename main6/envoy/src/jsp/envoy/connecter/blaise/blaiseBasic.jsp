@@ -295,7 +295,7 @@ function confirmForm()
 			});
 
 			var tmp = $("#qaCountString").val().trim().toLowerCase();
-			if ("all" != tmp || !isAllDigits(tmp) || tmp > 99999 || tmp < 1)
+			if ("all" != tmp && (!isAllDigits(tmp) || tmp < 1 || tmp > 99999))
             {
                 alert("Please input integer value [1 to 99999] or 'All' for Entry Count field.");
                 $("#qaCountString").focus();
@@ -521,7 +521,7 @@ function validName()
             }
         %>
 		<tr class="standardText autoOption">
-		  <td class="standardText">Entry count</td>
+		  <td class="standardText">Entry Count</td>
 		  <td><input type="text" id="qaCountString" name="qaCountString" size=10 value="<%=qaCount == 0 ? "All" : qaCount%>" /></td>
 		</tr>
         <tr>

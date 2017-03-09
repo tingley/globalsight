@@ -334,8 +334,9 @@ public class BlaiseHelper
             ArrayList<TranslationInboxEntryVo> hduEntries = null;
             ArrayList<TranslationInboxEntryVo> inSheetEntries = null;
             ArrayList<TranslationInboxEntryVo> otherEntries = null;
-            TranslationPageCommand command = null;
-            int count = blc.getQaCount();
+            TranslationPageCommand command = new TranslationPageCommand();
+            int currentEntryCountInServer = getInboxEntryCount(command);
+            int count = blc.getQaCount() == 0 ? currentEntryCountInServer : blc.getQaCount();
             int fetchCount = 0;
             List<Long> existedEntryIds = getEntryIdsInGS(blc.getId());
             long tmpEntryId = -1L;
@@ -344,7 +345,7 @@ public class BlaiseHelper
             logger.info("****** ==== Start to fetch entries for company [" + companyId + "]");
             while (fetchCount < count)
             {
-                command = initTranslationPageCommand(pageIndex, blc.getQaCount(),
+                command = initTranslationPageCommand(pageIndex, 100,
                         null,
                         sourceLocale.toString(), null, null, null, 0, false);
                 command.sortById();

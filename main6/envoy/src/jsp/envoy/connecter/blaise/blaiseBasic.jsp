@@ -11,6 +11,7 @@
 <%@ page import="com.globalsight.cxe.entity.customAttribute.AttributeSet" %>
 <%@ page import="com.globalsight.connector.blaise.form.BlaiseConnectorAttribute" %>
 <%@ page import="com.globalsight.util.StringUtil" %>
+<%@ page import="com.globalsight.everest.util.system.SystemConfiguration" %>
 
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb"%>
 
@@ -48,7 +49,8 @@
 	String clientCoreVersion = "2.0";// default "2.0".
 	long companyId = -1;
     boolean edit = false;
-	int qaCount = 10;
+	int qaCount = 0;
+	int checkDuration = 60;
 	String userCalendar = "";
 	Calendar sysCal = Calendar.getInstance();
 	userCalendar = sysCal.getTimeZone().getID();
@@ -79,6 +81,7 @@
         fileProfileId = connector.getDefaultFileProfileId();
         wordCount = connector.getMinProcedureWords();
 		qaCount = connector.getQaCount();
+		checkDuration = connector.getCheckDuration();
 		userName = connector.getLoginUser();
 		String tmpUserCalendar = connector.getUserCalendar();
 		if (StringUtil.isNotEmpty(tmpUserCalendar))
@@ -88,6 +91,10 @@
 	{
 		title = bundle.getString("lb_new_blaise_connector");
 	}
+	boolean enableSetCheckDuration = false;
+	String value = SystemConfiguration.getInstance().getStringParameter("blaise.check.duration.enabled");
+	if ("true".equalsIgnoreCase(value))
+	    enableSetCheckDuration = true;
 %>
 
 <html>
@@ -495,9 +502,19 @@ function validName()
                 </table>
             </td>
         </tr>
+        <%
+            if (enableSetCheckDuration) {
+        %>
+        <tr class="standardText autoOption">
+            <td class="standardText">Check Duration</td>
+            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration%>" /></td>
+        </tr>
+        <%
+            }
+        %>
 		<tr class="standardText autoOption">
-		  <td class="standardText">Entry count(QA)</td>
-		  <td><input type="text" id="qaCount" name="qaCount" size=10 value="<%=qaCount%>" /></td>
+		  <td class="standardText">Entry count</td>
+		  <td><input type="text" id="qaCount" name="qaCount" size=10 value="<%=qaCount == 0 ? "All" : qaCount%>" /></td>
 		</tr>
         <tr>
     		<td colspan="2" align="left">
@@ -506,7 +523,7 @@ function validName()
     		</td>
     	</tr>
     </table>
-        <input type="hidden" id="checkDuration" name="checkDuration" value="60" />
+
     </FORM>
 </div>
 </div>

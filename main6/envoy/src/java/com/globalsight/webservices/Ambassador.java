@@ -153,6 +153,7 @@ import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.ProjectInfo;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTmTuT;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.projecthandler.ProjectTmTuvT;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
@@ -268,6 +269,7 @@ import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.UTC;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.edit.EditUtil;
@@ -430,10 +432,14 @@ public class Ambassador extends AbstractWebService
 
     private final static String ENTRY_XML = "\r\n\t<entry>" + "\r\n\t\t<tm id={0}>{1}</tm>"
             + "\r\n\t\t<percentage>{2}%</percentage>" + "\r\n\t\t<sid>{3}</sid>"
-            + "\r\n\t\t<source>" + "\r\n\t\t\t<locale>{4}</locale>"
-            + "\r\n\t\t\t<segment>{5}</segment>" + "\r\n\t\t</source>" + "\r\n\t\t<target>"
-            + "\r\n\t\t\t<locale>{6}</locale>" + "\r\n\t\t\t<segment>{7}</segment>"
-            + "\r\n\t\t</target>" + "\r\n\t</entry>";
+            + "\r\n\t\t<createdBy>{4}</createdBy>" + "\r\n\t\t<createdOn>{5}</createdOn>"
+            + "\r\n\t\t<modifiedBy>{6}</modifiedBy>" + "\r\n\t\t<modifiedOn>{7}</modifiedOn>"
+            + "\r\n\t\t<lastUsageDate>{8}</lastUsageDate>" + "\r\n\t\t<jobId>{9}</jobId>"
+            + "\r\n\t\t<jobName>{10}</jobName>"
+            + "\r\n\t\t<tuAttributes>{11}\r\n\t\t</tuAttributes>" + "\r\n\t\t<source>"
+            + "\r\n\t\t\t<locale>{12}</locale>" + "\r\n\t\t\t<segment>{13}</segment>"
+            + "\r\n\t\t</source>" + "\r\n\t\t<target>" + "\r\n\t\t\t<locale>{14}</locale>"
+            + "\r\n\t\t\t<segment>{15}</segment>" + "\r\n\t\t</target>" + "\r\n\t</entry>";
 
     private final static String ENTRY_XML_SAVE = "<entry>" + "\r\n\t<sid>{0}</sid>"
             + "\r\n\t<source>\r\n\t\t<locale>{1}</locale>\r\n\t\t" + "{2}\r\n\t</source>\r\n\t"
@@ -1236,7 +1242,7 @@ public class Ambassador extends AbstractWebService
 
         createJob(args);
     }
-    
+
     /**
      * To create a job
      * 
@@ -1393,9 +1399,10 @@ public class Ambassador extends AbstractWebService
             }
             args.put("jobId", String.valueOf(job.getId()));
 
-            //For aem 6.2 support due time.
-            JobInfoData.addJobData(job.getId(), JobInfoData.DUE_TIME, args.get(JobInfoData.DUE_TIME));
-            
+            // For aem 6.2 support due time.
+            JobInfoData.addJobData(job.getId(), JobInfoData.DUE_TIME,
+                    args.get(JobInfoData.DUE_TIME));
+
             createJobOnInitial(args);
         }
         catch (Exception e)
@@ -1433,7 +1440,8 @@ public class Ambassador extends AbstractWebService
      * Creates a job on the instance initialized during upload process.
      * <p>
      * From GBS-2137.
-     * @throws WebServiceException 
+     * 
+     * @throws WebServiceException
      */
     @SuppressWarnings("unchecked")
     public void createJobOnInitial(HashMap args) throws WebServiceException
@@ -2219,10 +2227,11 @@ public class Ambassador extends AbstractWebService
             String srcLocale = findSrcLocale(fileProfileId);
             String path = getRealPath(jobId, filePath, srcLocale, true);
             writeFile(path, bytes, fp.getCompanyId());
-            
+
             // For GBS-4401 Plugin for AEM 6.2
             byte[] previewbytes = (byte[]) args.get("previewbytes");
-            if (previewbytes != null) {
+            if (previewbytes != null)
+            {
                 String previewPath = filePath + ".p.zip";
                 path = getRealPath(jobId, previewPath, srcLocale, true);
                 writeFile(path, previewbytes, fp.getCompanyId());
@@ -5881,7 +5890,7 @@ public class Ambassador extends AbstractWebService
             activityStart = WebServicesLog.start(Ambassador.class,
                     "addComment(p_accessToken,p_objectId,p_objectType,p_userId,p_comment,p_file,p_fileName,p_access)",
                     activityArgs);
-            
+
             if (p_objectType == Comment.TASK && p_access != null
                     && p_access.trim().equals(CommentUpload.SUPPORT_FILE))
             {
@@ -6050,7 +6059,7 @@ public class Ambassador extends AbstractWebService
             Job job = queryJob(p_jobName, p_accessToken);
             Comment comment = ServerProxy.getCommentManager().saveComment(job, job.getId(),
                     ServerProxy.getUserManager().getUser(p_userId).getUserName(), p_comment);
-            
+
             // if there are attachments
             if (p_file != null && p_file.length > 0)
             {
@@ -6064,20 +6073,19 @@ public class Ambassador extends AbstractWebService
                     access = p_access;
                 }
 
-                StringBuffer finalPath = new StringBuffer(AmbFileStoragePathUtils
-                        .getCommentReferenceDir().getAbsolutePath());
+                StringBuffer finalPath = new StringBuffer(
+                        AmbFileStoragePathUtils.getCommentReferenceDir().getAbsolutePath());
                 finalPath.append(File.separator).append(comment.getId()).append(File.separator)
                         .append(access);
 
                 File tempFile = new File(finalPath.toString(), p_fileName);
                 tempFile.getParentFile().mkdirs();
                 tempFile.createNewFile();
-                DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
-                        new FileOutputStream(tempFile)));
+                DataOutputStream out = new DataOutputStream(
+                        new BufferedOutputStream(new FileOutputStream(tempFile)));
                 out.write(p_file);
                 out.close();
             }
-
 
             StringBuffer xml = new StringBuffer();
             xml.append("<addCommentStatus>\r\n");
@@ -6496,7 +6504,7 @@ public class Ambassador extends AbstractWebService
      * Cancel the Documentum job using objectId and jobId.
      * 
      * @deprecated since 8.7.3
-     *  
+     * 
      * @param p_accessToken
      *            - The access token received from the login.
      * @param objectId
@@ -8550,8 +8558,15 @@ public class Ambassador extends AbstractWebService
                         {
                             LeveragedTuv matchedTuv = matchedTuvs.get(i);
                             BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
-
                             long tmId = sourceTuv.getTu().getTmId();
+                            ProjectHandler ph = ServerProxy.getProjectHandler();
+                            Tm tm = ph.getProjectTMById(tmId, false);
+                            List<Long> tuIds = new ArrayList<Long>();
+                            tuIds.add(sourceTuv.getTu().getId());
+                            List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(tm,
+                                    tuIds);
+                            SegmentTmTu tmTu = tus.get(0);
+
                             logger.info("tmId : " + tmId);
                             try
                             {
@@ -8564,15 +8579,59 @@ public class Ambassador extends AbstractWebService
                             logger.info("tmName : " + tmName);
                             String strTmId = "'" + tmId + "'";
 
-                            String entryXml = MessageFormat.format(ENTRY_XML, strTmId, tmName,
-                                    matchedTuv.getScore(), sourceTuv.getSid(),
-                                    sourceTuv.getLocale(), sourceTuv.getSegmentNoTopTag(),
-                                    matchedTuv.getLocale(), matchedTuv.getSegmentNoTopTag());
-
-                            if (sourceTuv.getSid() == null || sourceTuv.getSid().length() == 0)
+                            String na = "N/A";
+                            String sid = sourceTuv.getSid() == null ? na : sourceTuv.getSid();
+                            String createdBy = matchedTuv.getCreationUser() == null ? na
+                                    : UserUtil.getUserNameById(matchedTuv.getCreationUser());
+                            String createdOn = matchedTuv.getCreationDate() == null ? na
+                                    : UTC.valueOf(matchedTuv.getCreationDate());
+                            String modifyBy = matchedTuv.getModifyUser() == null ? na
+                                    : UserUtil.getUserNameById(matchedTuv.getModifyUser());
+                            String modifyOn = matchedTuv.getModifyDate() == null ? na
+                                    : UTC.valueOf(matchedTuv.getModifyDate());
+                            String lastUsageDate = matchedTuv.getLastUsageDate() == null ? na
+                                    : UTC.valueOf(matchedTuv.getLastUsageDate());
+                            String jobIdStr = matchedTuv.getJobId() == -1 ? na
+                                    : String.valueOf(matchedTuv.getJobId());
+                            String jobName = matchedTuv.getJobName() == null
+                                    || matchedTuv.getJobName().equalsIgnoreCase("null") ? na
+                                            : matchedTuv.getJobName();
+                            StringBuffer tuAttributeBuffer = new StringBuffer();
+                            Collection<ProjectTmTuTProp> tuProps = tmTu.getProps();
+                            if (tuProps != null && tuProps.size() > 0)
                             {
-                                entryXml = entryXml.replaceAll("\r\n\t\t<sid>.*?</sid>", "");
+                                Iterator<ProjectTmTuTProp> itProp = tmTu.getProps().iterator();
+                                while (itProp.hasNext())
+                                {
+                                    ProjectTmTuTProp p = itProp.next();
+                                    String propType = p.getPropType();
+                                    propType = propType.substring(5);
+                                    tuAttributeBuffer.append("\r\n\t\t\t<tuAttribute>");
+                                    tuAttributeBuffer.append(propType + ":" + p.getPropValue());
+                                    tuAttributeBuffer.append("</tuAttribute>");
+                                }
                             }
+                            else
+                            {
+                                tuAttributeBuffer.append("\r\n\t\t\t<tuAttribute>");
+                                tuAttributeBuffer.append(na);
+                                tuAttributeBuffer.append("</tuAttribute>");
+                            }
+
+                            String entryXml = MessageFormat.format(ENTRY_XML, strTmId, tmName,
+                                    matchedTuv.getScore(), sid, createdBy, createdOn, modifyBy,
+                                    modifyOn, lastUsageDate, jobIdStr, jobName,
+                                    tuAttributeBuffer.toString(), sourceTuv.getLocale(),
+                                    sourceTuv.getSegmentNoTopTag(), matchedTuv.getLocale(),
+                                    matchedTuv.getSegmentNoTopTag());
+
+                            // if (sourceTuv.getSid() == null ||
+                            // sourceTuv.getSid().length() == 0)
+                            // {
+                            // entryXml =
+                            // entryXml.replaceAll("\r\n\t\t<sid>.*?</sid>",
+                            // "");
+                            // }
 
                             returnString.append(entryXml);
                         }
@@ -8686,6 +8745,7 @@ public class Ambassador extends AbstractWebService
                 while (iter.hasNext())
                 {
                     Map.Entry entry = (Map.Entry) iter.next();
+                    // int trgLocaleId = (Integer)entry.getKey();
                     long trgLocaleId = ((Long) entry.getKey()).longValue();
                     GlobalSightLocale trgLocale = localeManager.getLocaleById(trgLocaleId);
                     trgLocales.add(trgLocale);
@@ -8791,11 +8851,66 @@ public class Ambassador extends AbstractWebService
                     while (itMatch.hasNext())
                     {
                         LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
+                        String na = "N/A";
+                        String sid = matchedTuv.getSourceTuv().getSid() == null ? na
+                                : matchedTuv.getSourceTuv().getSid();
+                        String createdBy = matchedTuv.getCreationUser() == null ? na
+                                : UserUtil.getUserNameById(matchedTuv.getCreationUser());
+                        String createdOn = matchedTuv.getCreationDate() == null ? na
+                                : UTC.valueOf(matchedTuv.getCreationDate());
+                        String modifyBy = matchedTuv.getModifyUser() == null ? na
+                                : UserUtil.getUserNameById(matchedTuv.getModifyUser());
+                        String modifyOn = matchedTuv.getModifyDate() == null ? na
+                                : UTC.valueOf(matchedTuv.getModifyDate());
+                        String lastUsageDate = matchedTuv.getLastUsageDate() == null ? na
+                                : UTC.valueOf(matchedTuv.getLastUsageDate());
+                        String jobIdStr = matchedTuv.getJobId() == -1 ? na
+                                : String.valueOf(matchedTuv.getJobId());
+                        String jobName = matchedTuv.getJobName() == null
+                                || matchedTuv.getJobName().equalsIgnoreCase("null") ? na
+                                        : matchedTuv.getJobName();
+                        long tmId = matchedTuv.getSourceTuv().getTu().getTmId();
+                        ProjectHandler ph = ServerProxy.getProjectHandler();
+                        Tm tm = ph.getProjectTMById(tmId, false);
+                        List<Long> tuIds = new ArrayList<Long>();
+                        tuIds.add(matchedTuv.getSourceTuv().getTu().getId());
+                        List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(tm, tuIds);
+                        SegmentTmTu tmTu = tus.get(0);
+                        StringBuffer tuAttributeBuffer = new StringBuffer();
+                        Collection<ProjectTmTuTProp> tuProps = tmTu.getProps();
+                        if (tuProps != null && tuProps.size() > 0)
+                        {
+                            Iterator<ProjectTmTuTProp> itProp = tmTu.getProps().iterator();
+                            while (itProp.hasNext())
+                            {
+                                ProjectTmTuTProp p = itProp.next();
+                                String propType = p.getPropType();
+                                propType = propType.substring(5);
+                                tuAttributeBuffer.append(propType + ":" + p.getPropValue())
+                                        .append(",");
+                            }
+                        }
+
+                        String tuAttribute = na;
+                        if (tuAttributeBuffer.toString().contains(","))
+                        {
+                            tuAttribute = tuAttributeBuffer.toString().substring(0,
+                                    tuAttributeBuffer.toString().lastIndexOf(","));
+                        }
 
                         HashMap matchInfoMap = new HashMap();
                         String subId = ((SegmentTmTu) levMatches.getOriginalTuv().getTu())
                                 .getSubId();
                         matchInfoMap.put("subId", subId);
+                        matchInfoMap.put("sid", sid);
+                        matchInfoMap.put("createdBy", createdBy);
+                        matchInfoMap.put("createdOn", createdOn);
+                        matchInfoMap.put("modifyBy", modifyBy);
+                        matchInfoMap.put("modifyOn", modifyOn);
+                        matchInfoMap.put("lastUsageDate", lastUsageDate);
+                        matchInfoMap.put("jobId", jobIdStr);
+                        matchInfoMap.put("jobName", jobName);
+                        matchInfoMap.put("tuAttributes", tuAttribute);
                         String matchedSegment = matchedTuv.getSegmentNoTopTag();
                         matchedSegment = matchedTuv.getSegment();
                         matchInfoMap.put("matchedSegment", matchedSegment);
@@ -13065,9 +13180,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @param p_state
      *            : task state number, available values: 3 : "ACTIVE" (for
-     *            "Available" tasks) 8 : "ACCEPTED" (for "In Progress" tasks)
-     *            -1 : "COMPLETED" (for "Finished" tasks)
-     *             4 : "DEACTIVE" (for "Rejected" tasks)
+     *            "Available" tasks) 8 : "ACCEPTED" (for "In Progress" tasks) -1
+     *            : "COMPLETED" (for "Finished" tasks) 4 : "DEACTIVE" (for
+     *            "Rejected" tasks)
      * @see com.globalsight.everest.taskmanager.Task
      * 
      *      As the three state are all task inner state, no need more actions
@@ -13129,6 +13244,7 @@ public class Ambassador extends AbstractWebService
      * Upload translated files to server for offline uploading purpose.
      * 
      * This should be invoked before importOfflineTargetFiles() API.
+     * 
      * @deprecated
      * 
      * @param p_accessToken
@@ -14718,7 +14834,7 @@ public class Ambassador extends AbstractWebService
             // 75%-84%
             xml.append("\t\t<75%-84%>").append(wf.getThresholdMedFuzzyWordCount())
                     .append("</75%-84%>\r\n");
-            
+
             // perplexity
             // For GBS-4495 perplexity score on MT
             long cId = wf.getCompanyId();
@@ -14726,7 +14842,7 @@ public class Ambassador extends AbstractWebService
             if (c.isEnablePerplexity())
             {
                 xml.append("\t\t<perplexityCount>").append(wf.getPerplexityWordCount())
-                .append("</perplexityCount>\r\n");
+                        .append("</perplexityCount>\r\n");
             }
 
             // noMatch (50%-74% & < 50)
@@ -15081,7 +15197,7 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
-        
+
         // perplexity
         // For GBS-4495 perplexity score on MT
         long cId = workflow.getCompanyId();
@@ -15089,7 +15205,7 @@ public class Ambassador extends AbstractWebService
         if (c.isEnablePerplexity())
         {
             xml.append("\t\t<perplexityCount>").append(workflow.getPerplexityWordCount())
-            .append("</perplexityCount>\r\n");
+                    .append("</perplexityCount>\r\n");
         }
 
         // noMatch (50%-74% & < 50)
@@ -16664,7 +16780,7 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
-        
+
         // perplexity
         // For GBS-4495 perplexity score on MT
         long cId = workflow.getCompanyId();
@@ -16672,10 +16788,9 @@ public class Ambassador extends AbstractWebService
         if (c.isEnablePerplexity())
         {
             xml.append(tab).append("\t\t<perplexityCount>")
-            .append(workflow.getPerplexityWordCount())
-            .append("</perplexityCount>\r\n");
+                    .append(workflow.getPerplexityWordCount()).append("</perplexityCount>\r\n");
         }
-        
+
         // noMatch (50%-74% & < 50)
         int noMatch = workflow.getThresholdNoMatchWordCount()
                 + workflow.getThresholdLowFuzzyWordCount();
@@ -18650,18 +18765,68 @@ public class Ambassador extends AbstractWebService
                     xml.append("\t\t<targetSegment>")
                             .append(GxmlUtil.stripRootTag(trgTuv.getSegment()))
                             .append("</targetSegment>\r\n");
-                    String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
-                    if (null == sid)
-                    {
-                        sid = "N/A";
-                    }
+                    String na = "N/A";
+                    String sid = trgTuv.getSid() == null ? na : trgTuv.getSid();
+                    String createdBy = trgTuv.getCreationUser() == null ? na
+                            : UserUtil.getUserNameById(trgTuv.getCreationUser());
+                    String createdOn = trgTuv.getCreationDate() == null ? na
+                            : UTC.valueOf(trgTuv.getCreationDate());
+                    String modifyBy = trgTuv.getModifyUser() == null ? na
+                            : UserUtil.getUserNameById(trgTuv.getModifyUser());
+                    String modifyOn = trgTuv.getModifyDate() == null ? na
+                            : UTC.valueOf(trgTuv.getModifyDate());
+                    String lastUsageDate = trgTuv.getLastUsageDate() == null ? na
+                            : UTC.valueOf(trgTuv.getLastUsageDate());
+                    String jobIdStr = trgTuv.getJobId() == -1 ? na
+                            : String.valueOf(trgTuv.getJobId());
+                    String jobName = trgTuv.getJobName() == null
+                            || trgTuv.getJobName().equalsIgnoreCase("null") ? na
+                                    : trgTuv.getJobName();
                     long tmId = trgTuv.getTu().getTmId();
+                    List<Long> tuIds = new ArrayList<Long>();
+                    tuIds.add(trgTuv.getTu().getId());
+                    ProjectHandler ph = ServerProxy.getProjectHandler();
+                    Tm tm = ph.getProjectTMById(tmId, false);
+                    List<SegmentTmTu> tuList = tm.getSegmentTmInfo().getSegmentsById(tm, tuIds);
+                    SegmentTmTu tmTu = tuList.get(0);
+                    StringBuffer tuAttributeBuffer = new StringBuffer();
+                    Collection<ProjectTmTuTProp> tuProps = tmTu.getProps();
+                    if (tuProps != null && tuProps.size() > 0)
+                    {
+                        Iterator<ProjectTmTuTProp> itProp = tmTu.getProps().iterator();
+                        while (itProp.hasNext())
+                        {
+                            ProjectTmTuTProp p = itProp.next();
+                            String propType = p.getPropType();
+                            propType = propType.substring(5);
+                            tuAttributeBuffer.append("\r\n\t\t\t<tuAttribute>");
+                            tuAttributeBuffer.append(propType + ":" + p.getPropValue());
+                            tuAttributeBuffer.append("</tuAttribute>");
+                        }
+                    }
+                    else
+                    {
+                        tuAttributeBuffer.append("\r\n\t\t\t<tuAttribute>");
+                        tuAttributeBuffer.append(na);
+                        tuAttributeBuffer.append("</tuAttribute>");
+                    }
+
                     xml.append("\t\t<sid>").append(EditUtil.encodeXmlEntities(sid))
                             .append("</sid>\r\n");
                     xml.append("\t\t<tmName>").append(
                             ServerProxy.getProjectHandler().getProjectTMById(tmId, false).getName())
                             .append("</tmName>\r\n");
+                    xml.append("\t\t<createdBy>").append(createdBy).append("</createdBy>\r\n");
+                    xml.append("\t\t<createdOn>").append(createdOn).append("</createdOn>\r\n");
+                    xml.append("\t\t<modifiedBy>").append(modifyBy).append("</modifiedBy>\r\n");
+                    xml.append("\t\t<modifiedOn>").append(modifyOn).append("</modifiedOn>\r\n");
+                    xml.append("\t\t<lastUsageDate>").append(lastUsageDate)
+                            .append("</lastUsageDate>\r\n");
+                    xml.append("\t\t<jobId>").append(jobIdStr).append("</jobId>\r\n");
+                    xml.append("\t\t<jobName>").append(jobName).append("</jobName>\r\n");
+                    xml.append("\t\t<tuAttributes>").append(tuAttributeBuffer.toString())
+                            .append("\r\n\t\t</tuAttributes>\r\n");
                 }
                 xml.append("\t</segment>\r\n");
             }
@@ -19120,22 +19285,22 @@ public class Ambassador extends AbstractWebService
             }
         }
     }
-    
+
     private Long getLastestFileProfileIdAsLong(Long id)
     {
         FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, id, false);
         if (fp == null)
             return null;
-        
+
         Long nId = fp.getNewId();
         if (nId == null)
             return id;
-        
+
         Long nId2 = getLastestFileProfileIdAsLong(nId);
-        
+
         if (nId2 != null)
             return nId2;
-        
+
         return nId;
     }
 
@@ -19143,13 +19308,12 @@ public class Ambassador extends AbstractWebService
     public String getLastestFileProfileId(String accessToken, String id) throws WebServiceException
     {
         checkAccess(accessToken, "getLastestFileProfileId");
-        
+
         if (id == null)
             return id;
-        
+
         Long nId = getLastestFileProfileIdAsLong(Long.parseLong(id));
-       
-        
+
         return nId.toString();
     }
 }

@@ -515,7 +515,15 @@ function validName()
         %>
         <tr class="standardText autoOption">
             <td class="standardText">Check Duration</td>
-            <td><input type="text" id="checkDuration" name="checkDuration" size=10 value="<%=checkDuration == 0 ? 60 : checkDuration %>" /> <%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
+            <td>
+            <select id="checkDuration" name="checkDuration" value="<%=checkDuration == 0 ? 60 : checkDuration %>">
+                <%
+                int n = checkDuration == 0 ? 60 : checkDuration;
+                for (int i = 1; i < 61; i++){ %>
+                     <option value="<%=i%>" <%if(n == i) {%>selected="selected"<%}%>><%=i%></option>
+                <%} %>
+            </select>
+             <%=bundle.getString("lb_blaise_automatic_time_unit")%></td>
         </tr>
         <%
             }

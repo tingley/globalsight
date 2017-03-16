@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This interface contains all of the configuration export and import related constants.
+ * This interface contains all of the configuration export and import related
+ * constants.
  */
 public interface ConfigConstants
 {
@@ -32,7 +33,7 @@ public interface ConfigConstants
     public static final String MT_FILE_NAME = "MachineTranslationProfiles_";
     public static final String FILTER_FILE_NAME = "FilterConfiguration_";
     public static final String ACTIVITY_FILE_NAME = "ActivityTypes_";
-    public static final String PERMISSION_GROUP_NAME ="PermissionGroups_";
+    public static final String PERMISSION_GROUP_NAME = "PermissionGroups_";
     public static final String TM_FILE_NAME = "TranslationMemories_";
     public static final String SEGMENT_RULE_FILE_NAME = "SegmentRlues_";
     public static final String TM_PROFILE_FILE_NAME = "TranslationMemoryProfiles_";
@@ -41,6 +42,12 @@ public interface ConfigConstants
     public static final String LOC_PROFILE_FILE_NAME = " LocalizationProfiles_";
     public static final String XML_RULE_FILE_NAME = "XMLRules_";
     public static final String FILE_PROFILE_FILE_NAME = "FileProfiles_";
-    
-    
+    public static final String ATTRIBUTE_FILE_NAME = "Attributes_";
+    public static final String ATTRIBUTE_SET_FILE_NAME = "AttributeSets_";
+    public static final String CURRENCY_FILE_NAME = "Currency_";
+    public static final String RATE_FILE_NAME = "Rates_";
+    public static final String TERMINOLOGY_FILE_NAME = "Termbases_";
+    public static final String WORKFLOW_STATE_POST_PROFILE_FILE_NAME = "WfStateProfiles_";
+    public static final String PERPLEXITY_SERVICE = "PerplexityService_";
+
 }

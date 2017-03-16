@@ -56,8 +56,7 @@ public interface JobHandler
      * @param p_boolean
      *            - from reimport?
      */
-    public void cancelJob(Job p_job, boolean p_reimport)
-            throws RemoteException, JobException;
+    public void cancelJob(Job p_job, boolean p_reimport) throws RemoteException, JobException;
 
     /**
      * Cancel the entire job and all its workflows. This is used by the
@@ -79,8 +78,8 @@ public interface JobHandler
      * @param p_state
      *            the workflow state to cancel. If NULL then cancel all.
      */
-    public void cancelJob(String p_idOfUserRequestingCancel, Job p_job,
-            String p_state) throws RemoteException, JobException;
+    public void cancelJob(String p_idOfUserRequestingCancel, Job p_job, String p_state)
+            throws RemoteException, JobException;
 
     public void dispatchJob(Job p_job) throws RemoteException, JobException;
 
@@ -99,8 +98,7 @@ public interface JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public Activity createActivity(Activity p_activity) throws RemoteException,
-            JobException;
+    public Activity createActivity(Activity p_activity) throws RemoteException, JobException;
 
     /**
      * Get the activity with the specified name.
@@ -109,8 +107,7 @@ public interface JobHandler
      * @param p_activityName
      *            - The name of the activity to find.
      */
-    public Activity getActivity(String p_activityName) throws RemoteException,
-            JobException;
+    public Activity getActivity(String p_activityName) throws RemoteException, JobException;
 
     /**
      * Get the activity with the specified name.
@@ -131,8 +128,8 @@ public interface JobHandler
      * @param p_companyId
      *            - The id of the company this activity belongs to.
      */
-    public Activity getActivityByCompanyId(String p_activityName,
-            String p_companyId) throws RemoteException, JobException;
+    public Activity getActivityByCompanyId(String p_activityName, String p_companyId)
+            throws RemoteException, JobException;
 
     /**
      * Get a list of all existing activities in the system.
@@ -143,8 +140,7 @@ public interface JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public Collection<Activity> getAllActivities() throws RemoteException,
-            JobException;
+    public Collection<Activity> getAllActivities() throws RemoteException, JobException;
 
     /**
      * Get a list of all existing activities in the system.
@@ -183,7 +179,7 @@ public interface JobHandler
      *             Component related exception.
      */
     public void createCategory(Category category) throws JobException;
-    
+
     /**
      * Create a scorecard category.
      * 
@@ -202,8 +198,7 @@ public interface JobHandler
      * @throws JobException
      *             Component related exception.
      */
-    public void createPostReviewCategory(
-            PostReviewCategory postReviewCategory) throws JobException;
+    public void createPostReviewCategory(PostReviewCategory postReviewCategory) throws JobException;
 
     /**
      * Get the company with the specified name.
@@ -212,8 +207,7 @@ public interface JobHandler
      * @param p_companyName
      *            - The name of the company to find.
      */
-    public Company getCompany(String p_companyName) throws RemoteException,
-            JobException;
+    public Company getCompany(String p_companyName) throws RemoteException, JobException;
 
     /**
      * Get the company with the specified id.
@@ -222,14 +216,11 @@ public interface JobHandler
      * @param p_companyName
      *            - The id of the company to find.
      */
-    public Company getCompanyById(long p_companyId) throws RemoteException,
-            JobException;
+    public Company getCompanyById(long p_companyId) throws RemoteException, JobException;
 
-    public Collection getAllDtpActivities() throws RemoteException,
-            JobException;
+    public Collection getAllDtpActivities() throws RemoteException, JobException;
 
-    public Collection getAllTransActivities() throws RemoteException,
-            JobException;
+    public Collection getAllTransActivities() throws RemoteException, JobException;
 
     /**
      * Get a list of all existing companies in the system.
@@ -253,8 +244,7 @@ public interface JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public void removeCompany(Company p_company) throws RemoteException,
-            JobException;
+    public void removeCompany(Company p_company) throws RemoteException, JobException;
 
     /**
      * Modify an company's description.
@@ -267,8 +257,7 @@ public interface JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public void modifyCompany(Company p_company) throws RemoteException,
-            JobException;
+    public void modifyCompany(Company p_company) throws RemoteException, JobException;
 
     /**
      * Gets a collection of Jobs based on the search params
@@ -301,14 +290,12 @@ public interface JobHandler
      *            The state interested in.
      * @return Collection of job objects.
      */
-    public Collection<JobImpl> getJobsByState(String p_state)
-            throws RemoteException, JobException;
+    public Collection<JobImpl> getJobsByState(String p_state) throws RemoteException, JobException;
 
     public Collection<JobImpl> getJobsByState(String p_state, String userId)
             throws RemoteException, JobException;
 
-    public Collection<JobImpl> getJobsByRate(String p_rateId)
-            throws RemoteException, JobException;
+    public Collection<JobImpl> getJobsByRate(String p_rateId) throws RemoteException, JobException;
 
     public Collection<JobImpl> getJobsByStateList(Vector<String> p_listOfStates)
             throws RemoteException, JobException;
@@ -325,9 +312,8 @@ public interface JobHandler
      * 
      * @return A collection of jobs in the given states.
      */
-    public Collection<JobImpl> getJobsByStateList(
-            Vector<String> p_listOfStates, boolean p_queryLimitByDate)
-            throws RemoteException, JobException;
+    public Collection<JobImpl> getJobsByStateList(Vector<String> p_listOfStates,
+            boolean p_queryLimitByDate) throws RemoteException, JobException;
 
     public Collection<JobImpl> getJobsByStateList(String p_httpSessionId,
             Vector<String> p_listOfStates) throws RemoteException, JobException;
@@ -335,12 +321,11 @@ public interface JobHandler
     public Collection<JobImpl> getJobsByManagerId(String p_managerId)
             throws RemoteException, JobException;
 
-    public Collection<JobImpl> getJobsByManagerIdAndState(String p_managerId,
-            String p_state) throws RemoteException, JobException;
-
-    public Collection<JobImpl> getJobsByManagerIdAndStateList(
-            String p_managerId, Vector<String> p_listOfStates)
+    public Collection<JobImpl> getJobsByManagerIdAndState(String p_managerId, String p_state)
             throws RemoteException, JobException;
+
+    public Collection<JobImpl> getJobsByManagerIdAndStateList(String p_managerId,
+            Vector<String> p_listOfStates) throws RemoteException, JobException;
 
     /**
      * Get a collection of Jobs for a Workflow Manager (who assists PM for
@@ -359,21 +344,18 @@ public interface JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public Collection<JobImpl> getJobsByWfManagerIdAndStateList(
-            String p_wfManagerId, Vector<String> p_listOfStates)
+    public Collection<JobImpl> getJobsByWfManagerIdAndStateList(String p_wfManagerId,
+            Vector<String> p_listOfStates) throws RemoteException, JobException;
+
+    public Collection<JobImpl> getJobsByProjectManager(String p_userId, String p_state)
             throws RemoteException, JobException;
 
-    public Collection<JobImpl> getJobsByProjectManager(String p_userId,
-            String p_state) throws RemoteException, JobException;
-
-    public L10nProfile getL10nProfileByJobId(long p_jobId)
-            throws RemoteException, JobException;
+    public L10nProfile getL10nProfileByJobId(long p_jobId) throws RemoteException, JobException;
 
     /**
      * Return all the the source pages associated with the specified job id.
      */
-    public Collection getSourcePageByJobId(long p_jobId)
-            throws RemoteException, JobException;
+    public Collection getSourcePageByJobId(long p_jobId) throws RemoteException, JobException;
 
     /**
      * Returns all the source pages associated with the specified job id and
@@ -381,11 +363,10 @@ public interface JobHandler
      * 
      * @see PrimaryFile for the valid types.
      */
-    public Collection getSourcePagesByTypeAndJobId(int p_primaryFileType,
-            long p_jobId) throws RemoteException, JobException;
-
-    public Collection getRequestListByJobId(long p_jobId)
+    public Collection getSourcePagesByTypeAndJobId(int p_primaryFileType, long p_jobId)
             throws RemoteException, JobException;
+
+    public Collection getRequestListByJobId(long p_jobId) throws RemoteException, JobException;
 
     /**
      * Find the job that contains the specific source page.
@@ -396,8 +377,7 @@ public interface JobHandler
      * @return Either the job that contains that source page or NULL if a job
      *         doesn't contain that page.
      */
-    public Job findJobOfPage(long p_sourcePageId) throws RemoteException,
-            JobException;
+    public Job findJobOfPage(long p_sourcePageId) throws RemoteException, JobException;
 
     /**
      * Cancel all the error pages in an IMPORT_FAIL job, so releases the job to
@@ -408,8 +388,8 @@ public interface JobHandler
      * @param p_job
      *            The job to cancel the error pages from.
      */
-    public void cancelImportErrorPages(String p_idOfUserRequestingCancel,
-            Job p_job) throws RemoteException, JobException;
+    public void cancelImportErrorPages(String p_idOfUserRequestingCancel, Job p_job)
+            throws RemoteException, JobException;
 
     /**
      * Update the number of pages there are in a job.
@@ -420,8 +400,7 @@ public interface JobHandler
      *            The new number of pages.
      * @return The job updated with the new number of pages.
      */
-    public Job updatePageCount(Job p_job, int p_pageCount)
-            throws RemoteException, JobException;
+    public Job updatePageCount(Job p_job, int p_pageCount) throws RemoteException, JobException;
 
     /**
      * Update the date of quotation email in a job.
@@ -431,8 +410,7 @@ public interface JobHandler
      * @param p_quoteDate
      *            The new date of quotation email.
      */
-    public void updateQuoteDate(Job p_job, String p_quoteDate)
-            throws RemoteException, JobException;
+    public void updateQuoteDate(Job p_job, String p_quoteDate) throws RemoteException, JobException;
 
     /**
      * Update the date of Approved quote date in a job.
@@ -464,8 +442,7 @@ public interface JobHandler
      * @throws RemoteException
      * @throws JobException
      */
-    public void updateAuthoriserUser(Job p_job, User user)
-            throws RemoteException, JobException;
+    public void updateAuthoriserUser(Job p_job, User user) throws RemoteException, JobException;
 
     /**
      * Overrides the total word count (source page word count) for the job. This
@@ -478,8 +455,7 @@ public interface JobHandler
      *            The word count amount that overrides the calculated word
      *            count.
      */
-    public Job overrideWordCount(Job p_job, int p_wordCount)
-            throws RemoteException, JobException;
+    public Job overrideWordCount(Job p_job, int p_wordCount) throws RemoteException, JobException;
 
     /**
      * Removes the overriden word count on a job. Not the total word count will
@@ -488,8 +464,7 @@ public interface JobHandler
      * @param p_job
      *            The job to remove the overriden word count from.
      */
-    public Job clearOverridenWordCount(Job p_job) throws RemoteException,
-            JobException;
+    public Job clearOverridenWordCount(Job p_job) throws RemoteException, JobException;
 
     /**
      * Modify an activity's description.
@@ -502,8 +477,7 @@ public interface JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public void modifyActivity(Activity p_activity) throws RemoteException,
-            JobException;
+    public void modifyActivity(Activity p_activity) throws RemoteException, JobException;
 
     /**
      * Remove an existing activity.
@@ -516,8 +490,7 @@ public interface JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public void removeActivity(Activity p_activity) throws RemoteException,
-            JobException;
+    public void removeActivity(Activity p_activity) throws RemoteException, JobException;
 
     /**
      * Get the job object specified by its job name.
@@ -528,8 +501,7 @@ public interface JobHandler
      * @throws RemoteException
      * @throws JobException
      */
-    public Job getJobByJobName(String p_jobName) throws RemoteException,
-            JobException;
+    public Job getJobByJobName(String p_jobName) throws RemoteException, JobException;
 
     /**
      * Get job IDs with special range of fetching records
@@ -545,9 +517,8 @@ public interface JobHandler
      * @throws JobException
      * @author Vincent Yan, 2011/01/12
      */
-	public String[] getJobIdsByCompany(String p_companyId, int p_offset,
-			int p_count, boolean p_isDescOrder, String currentUserId)
-			throws RemoteException, JobException;
+    public String[] getJobIdsByCompany(String p_companyId, int p_offset, int p_count,
+            boolean p_isDescOrder, String currentUserId) throws RemoteException, JobException;
 
     /**
      * Get job IDs with special job state and range of fetching records
@@ -565,10 +536,9 @@ public interface JobHandler
      * @throws JobException
      * @author Vincent Yan, 2011/01/12
      */
-	public String[] getJobIdsByState(String p_companyId, String p_state,
-			int p_offset, int p_count, boolean p_isDescOrder,
-			String currentUserId) throws RemoteException, JobException;
-    
+    public String[] getJobIdsByState(String p_companyId, String p_state, int p_offset, int p_count,
+            boolean p_isDescOrder, String currentUserId) throws RemoteException, JobException;
+
     /**
      * Get job IDs with special creator userName and range of fetching records
      * 
@@ -584,10 +554,9 @@ public interface JobHandler
      * @throws RemoteException
      * @throws JobException
      */
-	public String[] getJobIdsByCreator(long p_companyId,
-			String p_creatorUserId, int p_offset, int p_count,
-			boolean p_isDescOrder, String currentUserId)
-			throws RemoteException, JobException;
+    public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId, int p_offset,
+            int p_count, boolean p_isDescOrder, String currentUserId)
+            throws RemoteException, JobException;
 
     /**
      * Get counts of every job state with speical company id
@@ -607,4 +576,10 @@ public interface JobHandler
      */
     public Collection<JobImpl> getJobsByUserIdAndState(String p_userId,
             Vector<String> p_listOfStates) throws RemoteException, JobException;
+
+    /**
+     * Gets the activity with the display name and company id.
+     */
+    public Activity getActivityByDisplayNameCompanyId(String p_displayActivityName,
+            String p_companyId) throws RemoteException, JobException;
 }

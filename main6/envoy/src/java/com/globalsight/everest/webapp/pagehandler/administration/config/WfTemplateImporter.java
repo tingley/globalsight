@@ -42,12 +42,14 @@ import org.dom4j.io.XMLWriter;
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.def.ProcessDefinition;
 
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.LeverageLocales;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityManager;
 import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityService;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -204,14 +206,14 @@ public class WfTemplateImporter implements ConfigConstants
                 }
                 else if ("SOURCE_LOCALE_ID".equalsIgnoreCase(keyField))
                 {
-                    GlobalSightLocale sourceLocale = ServerProxy.getLocaleManager().getLocaleById(
-                            Long.parseLong(valueField));
+                    GlobalSightLocale sourceLocale = ServerProxy.getLocaleManager()
+                            .getLocaleById(Long.parseLong(valueField));
                     wftInfo.setSourceLocale(sourceLocale);
                 }
                 else if ("TARGET_LOCALE_ID".equalsIgnoreCase(keyField))
                 {
-                    GlobalSightLocale targetLocale = ServerProxy.getLocaleManager().getLocaleById(
-                            Long.parseLong(valueField));
+                    GlobalSightLocale targetLocale = ServerProxy.getLocaleManager()
+                            .getLocaleById(Long.parseLong(valueField));
                     wftInfo.setTargetLocale(targetLocale);
                 }
                 else if ("CHAR_SET".equalsIgnoreCase(keyField))
@@ -238,19 +240,38 @@ public class WfTemplateImporter implements ConfigConstants
                 {
                     wftInfo.setScorecardShowType(Integer.parseInt(valueField));
                 }
-                else if ("PERPLEXITY_ID".equalsIgnoreCase(keyField))
+                else if ("PERPLEXITY_NAME".equalsIgnoreCase(keyField))
                 {
-                    if (StringUtil.isEmptyAndNull(valueField))
+                    Company company = HibernateUtil.get(Company.class, companyId);
+                    if (StringUtil.isEmptyAndNull(valueField) || !company.isEnablePerplexity())
                     {
                         wftInfo.setPerplexityService(null);
+                        wftInfo.setPerplexityKey(null);
+                        wftInfo.setPerplexitySourceThreshold(0);
+                        wftInfo.setPerplexityTargetThreshold(0);
                     }
                     else
                     {
-                        PerplexityService ps = HibernateUtil.get(PerplexityService.class,
-                                Long.parseLong(valueField));
-                        wftInfo.setPerplexityService(ps);
+                        PerplexityService perplexityService = null;
+                        List<PerplexityService> psList = PerplexityManager
+                                .getAllPerplexityByCompanyId(companyId);
+                        for (PerplexityService ps : psList)
+                        {
+                            if (ps.getName().equals(valueField)
+                                    || ps.getName().startsWith(valueField + "_import_"))
+                            {
+                                perplexityService = ps;
+                                break;
+                            }
+                        }
+                        wftInfo.setPerplexityService(perplexityService);
+                        if (perplexityService == null)
+                        {
+                            wftInfo.setPerplexityKey(null);
+                            wftInfo.setPerplexitySourceThreshold(0);
+                            wftInfo.setPerplexityTargetThreshold(0);
+                        }
                     }
-
                 }
                 else if ("PERPLEXITY_KEY".equalsIgnoreCase(keyField))
                 {
@@ -290,8 +311,8 @@ public class WfTemplateImporter implements ConfigConstants
 
                     for (String localeId : localeIds)
                     {
-                        GlobalSightLocale gsl = ServerProxy.getLocaleManager().getLocaleById(
-                                Long.parseLong(localeId));
+                        GlobalSightLocale gsl = ServerProxy.getLocaleManager()
+                                .getLocaleById(Long.parseLong(localeId));
                         LeverageLocales leverageLocales = new LeverageLocales(gsl);
                         leveragedLocales.add(leverageLocales);
                     }
@@ -412,10 +433,10 @@ public class WfTemplateImporter implements ConfigConstants
         XMLWriter writer = null;
         try
         {
-            writer = new XMLWriter(new FileOutputStream(AmbFileStoragePathUtils
-                    .getWorkflowTemplateXmlDir().getAbsolutePath()
-                    + File.separator
-                    + p_templateName + WorkflowConstants.SUFFIX_XML), format);
+            writer = new XMLWriter(new FileOutputStream(
+                    AmbFileStoragePathUtils.getWorkflowTemplateXmlDir().getAbsolutePath()
+                            + File.separator + p_templateName + WorkflowConstants.SUFFIX_XML),
+                    format);
             writer.write(p_document);
         }
         catch (Exception e)
@@ -458,8 +479,8 @@ public class WfTemplateImporter implements ConfigConstants
             List<String> wfmIds = workflowTemplateInfo.getWorkflowManagerIds();
             ArrayList<String> wfmanagerIds = new ArrayList<String>();
             ArrayList<String> userIds = new ArrayList<String>();
-            Vector<User> users = ServerProxy.getUserManager().getUsersFromCompany(
-                    String.valueOf(companyId));
+            Vector<User> users = ServerProxy.getUserManager()
+                    .getUsersFromCompany(String.valueOf(companyId));
             for (User user : users)
             {
                 userIds.add(user.getUserId());
@@ -476,6 +497,7 @@ public class WfTemplateImporter implements ConfigConstants
                 }
             }
             workflowTemplateInfo.setWorkflowManagerIds(wfmanagerIds);
+
         }
         catch (Exception e)
         {
@@ -511,15 +533,15 @@ public class WfTemplateImporter implements ConfigConstants
 
     private void addToError(String msg)
     {
-        String former = config_error_map.get(sessionId) == null ? "" : config_error_map
-                .get(sessionId);
+        String former = config_error_map.get(sessionId) == null ? ""
+                : config_error_map.get(sessionId);
         config_error_map.put(sessionId, former + "<p>" + msg);
     }
 
     private void addMessage(String msg)
     {
-        String former = config_error_map.get(sessionId) == null ? "" : config_error_map
-                .get(sessionId);
+        String former = config_error_map.get(sessionId) == null ? ""
+                : config_error_map.get(sessionId);
         config_error_map.put(sessionId, former + "<p>" + msg);
     }
 }

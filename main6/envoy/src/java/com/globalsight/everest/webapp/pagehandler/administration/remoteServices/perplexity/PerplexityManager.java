@@ -61,4 +61,14 @@ public class PerplexityManager
         return perplexityService != null
                 && (id == null || Long.parseLong(id) != perplexityService.getId());
     }
+
+    public static List<PerplexityService> getAllPerplexityByCompanyId(long companyId)
+    {
+        String hql = "from PerplexityService ps where ps.companyId = :companyId";
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        map.put("companyId", companyId);
+
+        return (List<PerplexityService>) HibernateUtil.search(hql, map);
+    }
 }

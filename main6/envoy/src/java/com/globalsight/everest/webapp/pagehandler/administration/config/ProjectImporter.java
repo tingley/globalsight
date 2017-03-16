@@ -51,16 +51,20 @@ import com.globalsight.util.StringUtil;
 public class ProjectImporter implements ConfigConstants
 {
     private static final Logger logger = Logger.getLogger(ProjectImporter.class);
-    private String currentCompanyId;
     private String sessionId;
-    private String importToCompId;
-    private String attrSetName;
+    private long companyId;
 
-    public ProjectImporter(String sessionId, String companyId, String importToCompId)
+    public ProjectImporter(String sessionId, String currentCompanyId, String importToCompId)
     {
         this.sessionId = sessionId;
-        this.currentCompanyId = companyId;
-        this.importToCompId = importToCompId;
+        if (importToCompId != null && !importToCompId.equals("-1"))
+        {
+            this.companyId = Long.parseLong(importToCompId);
+        }
+        else
+        {
+            this.companyId = Long.parseLong(currentCompanyId);
+        }
     }
 
     public void analysisAndImport(File uploadedFile)
@@ -182,14 +186,7 @@ public class ProjectImporter implements ConfigConstants
                 }
                 else if ("COMPANYID".equalsIgnoreCase(keyField))
                 {
-                    if (importToCompId != null && !importToCompId.equals("-1"))
-                    {
-                        project.setCompanyId(Long.parseLong(importToCompId));
-                    }
-                    else
-                    {
-                        project.setCompanyId(Long.parseLong(currentCompanyId));
-                    }
+                    project.setCompanyId(companyId);
                 }
                 else if ("IS_ACTIVE".equalsIgnoreCase(keyField))
                 {
@@ -201,7 +198,22 @@ public class ProjectImporter implements ConfigConstants
                 }
                 else if ("ATTRIBUTE_SET_NAME".equalsIgnoreCase(keyField))
                 {
-                    attrSetName = valueField;
+                    AttributeSet currentAttSet = null;
+                    if (StringUtil.isNotEmptyAndNull(valueField))
+                    {
+                        List<AttributeSet> attrSets = (List<AttributeSet>) AttributeManager
+                                .getAllAttributeSets(companyId);
+                        for (AttributeSet attrSet : attrSets)
+                        {
+                            if (attrSet.getName().equals(valueField)
+                                    || attrSet.getName().startsWith(valueField + "_import_"))
+                            {
+                                currentAttSet = attrSet;
+                                break;
+                            }
+                        }
+                        project.setAttributeSet(currentAttSet);
+                    }
                 }
                 else if ("POREQUIRED".equalsIgnoreCase(keyField))
                 {
@@ -320,10 +332,9 @@ public class ProjectImporter implements ConfigConstants
             for (int i = 0; i < projectList.size(); i++)
             {
                 origProject = projectList.get(i);
-                long companyId = origProject.getCompanyId();
                 // checks project manager exsits
-                Vector<User> users = ServerProxy.getUserManager().getUsersFromCompany(
-                        String.valueOf(companyId));
+                Vector<User> users = ServerProxy.getUserManager()
+                        .getUsersFromCompany(String.valueOf(companyId));
                 String managerId = origProject.getProjectManagerId();
                 User projectManager = null;
                 for (User user : users)
@@ -378,8 +389,8 @@ public class ProjectImporter implements ConfigConstants
         try
         {
             long companyId = project.getCompanyId();
-            Vector<User> users = ServerProxy.getUserManager().getUsersFromCompany(
-                    String.valueOf(companyId));
+            Vector<User> users = ServerProxy.getUserManager()
+                    .getUsersFromCompany(String.valueOf(companyId));
             project.setName(newName);
 
             // save termbase
@@ -403,25 +414,6 @@ public class ProjectImporter implements ConfigConstants
                 {
                     project.setTermbase("");
                 }
-            }
-
-            // save attributeSet
-            AttributeSet currentAttSet = null;
-            if (StringUtil.isNotEmptyAndNull(attrSetName))
-            {
-                List<AttributeSet> attrSets = (List<AttributeSet>) AttributeManager
-                        .getAllAttributeSets(companyId);
-                for (AttributeSet attrSet : attrSets)
-                {
-                    if (attrSet.getName().equals(attrSetName)
-                            || attrSet.getName().startsWith(attrSetName + "_import_"))
-                    {
-                        currentAttSet = AttributeManager.getAttributeSetByNameAndCompanyId(
-                                attrSet.getName(), companyId);
-                        break;
-                    }
-                }
-                project.setAttributeSet(currentAttSet);
             }
 
             // save quotePerson
@@ -483,7 +475,7 @@ public class ProjectImporter implements ConfigConstants
 
     private String getProjectNewName(String oldName, long companyId)
     {
-        String hql = "select p.name from ProjectImpl p where p.companyId=:companyId";
+        String hql = "select p.name from ProjectImpl p where p.companyId=:companyId and p.isActive='Y'";
         Map map = new HashMap();
         map.put("companyId", companyId);
         List itList = HibernateUtil.search(hql, map);
@@ -515,15 +507,15 @@ public class ProjectImporter implements ConfigConstants
 
     private void addToError(String msg)
     {
-        String former = config_error_map.get(sessionId) == null ? "" : config_error_map
-                .get(sessionId);
+        String former = config_error_map.get(sessionId) == null ? ""
+                : config_error_map.get(sessionId);
         config_error_map.put(sessionId, former + "<p>" + msg);
     }
 
     private void addMessage(String msg)
     {
-        String former = config_error_map.get(sessionId) == null ? "" : config_error_map
-                .get(sessionId);
+        String former = config_error_map.get(sessionId) == null ? ""
+                : config_error_map.get(sessionId);
         config_error_map.put(sessionId, former + "<p>" + msg);
     }
 }

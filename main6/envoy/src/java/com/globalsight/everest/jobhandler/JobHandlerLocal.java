@@ -16,7 +16,34 @@
  */
 package com.globalsight.everest.jobhandler;
 
-import com.globalsight.calendar.*;
+import java.io.File;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.naming.NamingException;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import com.globalsight.calendar.CalendarWorkingDay;
+import com.globalsight.calendar.CalendarWorkingHour;
+import com.globalsight.calendar.FluxCalendar;
+import com.globalsight.calendar.Holiday;
+import com.globalsight.calendar.WorkingHour;
 import com.globalsight.config.SystemParameter;
 import com.globalsight.config.SystemParameterEntityException;
 import com.globalsight.config.SystemParameterImpl;
@@ -25,11 +52,22 @@ import com.globalsight.cxe.entity.exportlocation.ExportLocation;
 import com.globalsight.cxe.entity.exportlocation.ExportLocationImpl;
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationEntityException;
-import com.globalsight.everest.company.*;
+import com.globalsight.everest.company.Category;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.company.PostReviewCategory;
+import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.IsoCurrency;
-import com.globalsight.everest.foundation.*;
+import com.globalsight.everest.foundation.BasicL10nProfile;
+import com.globalsight.everest.foundation.ContainerRole;
+import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.foundation.LocalePair;
+import com.globalsight.everest.foundation.Role;
+import com.globalsight.everest.foundation.Timestamp;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.jobmanagement.JobDispatchEngine;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.page.PrimaryFile;
@@ -70,17 +108,6 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
-import javax.naming.NamingException;
-import java.io.File;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.*;
 
 /**
  * JobHandlerLocal implements JobHandler and is responsible for handling and
@@ -565,10 +592,11 @@ public class JobHandlerLocal implements JobHandler
                 c.setEnableDitaChecks(p_company.getEnableDitaChecks());
                 c.setEnableWorkflowStatePosts(p_company.getEnableWorkflowStatePosts());
                 c.setEnableBlankTmSearch(p_company.getEnableBlankTmSearch());
-                isPasswordSettingChanged = c.isEnableStrongPassword() != p_company.isEnableStrongPassword();
+                isPasswordSettingChanged = c.isEnableStrongPassword() != p_company
+                        .isEnableStrongPassword();
                 c.setEnableStrongPassword(p_company.isEnableStrongPassword());
                 c.setDisableUploadFileTypes(p_company.getDisableUploadFileTypes());
-                //For GBS-4495 perplexity score on MT
+                // For GBS-4495 perplexity score on MT
                 c.setEnablePerplexity(p_company.isEnablePerplexity());
                 HibernateUtil.update(c);
 
@@ -589,8 +617,10 @@ public class JobHandlerLocal implements JobHandler
 
                 if (isPasswordSettingChanged)
                 {
-                    //Admin modify the password policy of company
-                    //If the company uses STRONG password policy, all users in the company will have 3 times to change his weak password,
+                    // Admin modify the password policy of company
+                    // If the company uses STRONG password policy, all users in
+                    // the company will have 3 times to change his weak
+                    // password,
                     String companyName = p_company.getCompanyName();
                     String sql = "UPDATE user SET RESET_PASSWORD_TIMES="
                             + (p_company.isEnableStrongPassword() ? "4" : "-1")
@@ -1028,20 +1058,17 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("WorkflowManager");
         permGroup.setDescription("Default Workflow Manager Group");
-        permGroup
-                .setPermissionSet("|14|20|21|22|23|24|25|26|27|28|29|30|31|"
-                        + "32|86|87|88|128|130|132|133|134|135|136|137|138|140|141|142|"
-                        + "143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|"
-                        + "158|159|160|161|162|163|164|165|166|167|169|170|171|172|173|"
-                        + "192|198|199|");
+        permGroup.setPermissionSet("|14|20|21|22|23|24|25|26|27|28|29|30|31|"
+                + "32|86|87|88|128|130|132|133|134|135|136|137|138|140|141|142|"
+                + "143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|"
+                + "158|159|160|161|162|163|164|165|166|167|169|170|171|172|173|" + "192|198|199|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("LocaleManager");
         permGroup.setDescription("Default Locale Manager Group");
-        permGroup
-                .setPermissionSet("|163|164|166|167|168|169|170|171|172|173|199|");
+        permGroup.setPermissionSet("|163|164|166|167|168|169|170|171|172|173|199|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -2908,5 +2935,34 @@ public class JobHandlerLocal implements JobHandler
         c_category.debug("The query is " + sb.toString());
 
         return sb.toString();
+    }
+
+    /**
+     * Gets the activity with the display name and company id.
+     */
+    public Activity getActivityByDisplayNameCompanyId(String p_displayActivityName,
+            String p_companyId) throws RemoteException, JobException
+    {
+        Activity result = null;
+        try
+        {
+            String hql = "from Activity a where a.isActive = 'Y' and a.displayName = :displayName and a.companyId = :cId";
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("displayName", p_displayActivityName);
+            map.put("cId", Long.parseLong(p_companyId));
+            Iterator<?> it = HibernateUtil.search(hql, map).iterator();
+            if (it.hasNext())
+            {
+                result = (Activity) it.next();
+            }
+        }
+        catch (Exception e)
+        {
+            c_category.error("JobHandlerLocal::getActivity", e);
+            String[] args = new String[1];
+            args[0] = p_displayActivityName;
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ACTIVITY, args, e);
+        }
+        return result;
     }
 }

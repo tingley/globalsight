@@ -37,8 +37,9 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
     private int wfXmlSize;
 
     private static final Logger logger = Logger.getLogger(ConfigImporter.class);
-    public ConfigImporter(String sessionId, Map<String, File> fileInfo, User user,
-            String companyId, String importToCompId, int wfxmlFileSize)
+
+    public ConfigImporter(String sessionId, Map<String, File> fileInfo, User user, String companyId,
+            String importToCompId, int wfxmlFileSize)
     {
         this.sessionId = sessionId;
         this.uploadFiles = fileInfo;
@@ -59,6 +60,25 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
         {
             int size = fileInfo.keySet().size() - wfXmlSize;
             int i = 0;
+
+            if (fileInfo.containsKey(ATTRIBUTE_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(ATTRIBUTE_FILE_NAME);
+                AttributeImporter attrImporter = new AttributeImporter(sessionId, companyId,
+                        importToCompId);
+                attrImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(ATTRIBUTE_SET_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(ATTRIBUTE_SET_FILE_NAME);
+                AttributeSetImporter attrSetImporter = new AttributeSetImporter(sessionId,
+                        companyId, importToCompId);
+                attrSetImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
             if (fileInfo.containsKey(LOCALEPAIR_FILE_NAME))
             {
                 i++;
@@ -77,30 +97,22 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 actImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
-            if (fileInfo.containsKey(USER_FILE_NAME))
+            if (fileInfo.containsKey(CURRENCY_FILE_NAME))
             {
                 i++;
-                File file = fileInfo.get(USER_FILE_NAME);
-                UserImport userImporter = new UserImport(sessionId, user, companyId, importToCompId);
-                userImporter.analysisAndImport(file);
-                this.cachePercentage(i, size);
-            }
-            if (fileInfo.containsKey(MT_FILE_NAME))
-            {
-                i++;
-                File file = fileInfo.get(MT_FILE_NAME);
-                MTProfileImport mtImporter = new MTProfileImport(sessionId, companyId,
+                File file = fileInfo.get(CURRENCY_FILE_NAME);
+                CurrencyImporter currImporter = new CurrencyImporter(sessionId, companyId,
                         importToCompId);
-                mtImporter.analysisAndImport(file);
+                currImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
-            if (fileInfo.containsKey(FILTER_FILE_NAME))
+            if (fileInfo.containsKey(RATE_FILE_NAME))
             {
                 i++;
-                File file = fileInfo.get(FILTER_FILE_NAME);
-                FilterConfigImport filterImporter = new FilterConfigImport(sessionId,
-                        user.getUserId(), companyId, importToCompId);
-                filterImporter.analysisAndImport(file);
+                File file = fileInfo.get(RATE_FILE_NAME);
+                RatesImporter rateImporter = new RatesImporter(sessionId, companyId,
+                        importToCompId);
+                rateImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
             if (fileInfo.containsKey(PERMISSION_GROUP_NAME))
@@ -110,6 +122,15 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 PermissionImporter permImporter = new PermissionImporter(sessionId, companyId,
                         importToCompId);
                 permImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(USER_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(USER_FILE_NAME);
+                UserImport userImporter = new UserImport(sessionId, user, companyId,
+                        importToCompId);
+                userImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
             if (fileInfo.containsKey(TM_FILE_NAME))
@@ -139,6 +160,33 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 srImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
+            if (fileInfo.containsKey(MT_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(MT_FILE_NAME);
+                MTProfileImport mtImporter = new MTProfileImport(sessionId, companyId,
+                        importToCompId);
+                mtImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(PERPLEXITY_SERVICE))
+            {
+                i++;
+                File file = fileInfo.get(PERPLEXITY_SERVICE);
+                PerplexityServiceImporter psImporter = new PerplexityServiceImporter(sessionId,
+                        companyId, importToCompId);
+                psImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(TERMINOLOGY_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(TERMINOLOGY_FILE_NAME);
+                TermbaseImporter tbImporter = new TermbaseImporter(sessionId, companyId,
+                        importToCompId);
+                tbImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
             if (fileInfo.containsKey(PROJECT_FILE_NAME))
             {
                 i++;
@@ -157,6 +205,15 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 wfImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
+            if (fileInfo.containsKey(WORKFLOW_STATE_POST_PROFILE_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(WORKFLOW_STATE_POST_PROFILE_FILE_NAME);
+                WfStatePostProfileImporter wfStatePostImporter = new WfStatePostProfileImporter(
+                        sessionId, companyId, importToCompId);
+                wfStatePostImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
             if (fileInfo.containsKey(LOC_PROFILE_FILE_NAME))
             {
                 i++;
@@ -164,6 +221,15 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 LocProfileImporter wfImporter = new LocProfileImporter(sessionId, companyId,
                         importToCompId);
                 wfImporter.analysisAndImport(file);
+                this.cachePercentage(i, size);
+            }
+            if (fileInfo.containsKey(FILE_PROFILE_FILE_NAME))
+            {
+                i++;
+                File file = fileInfo.get(FILE_PROFILE_FILE_NAME);
+                FileProfileImporter fpImporter = new FileProfileImporter(sessionId, companyId,
+                        importToCompId);
+                fpImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
             if (fileInfo.containsKey(XML_RULE_FILE_NAME))
@@ -175,13 +241,13 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
                 srImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
-            if (fileInfo.containsKey(FILE_PROFILE_FILE_NAME))
+            if (fileInfo.containsKey(FILTER_FILE_NAME))
             {
                 i++;
-                File file = fileInfo.get(FILE_PROFILE_FILE_NAME);
-                FileProfileImporter fpImporter = new FileProfileImporter(sessionId, companyId,
-                        importToCompId);
-                fpImporter.analysisAndImport(file);
+                File file = fileInfo.get(FILTER_FILE_NAME);
+                FilterConfigImport filterImporter = new FilterConfigImport(sessionId,
+                        user.getUserId(), companyId, importToCompId);
+                filterImporter.analysisAndImport(file);
                 this.cachePercentage(i, size);
             }
         }
@@ -197,13 +263,12 @@ public class ConfigImporter extends MultiCompanySupportedThread implements Confi
         int percentage = (int) (i * 100 / size);
         config_percentage_map.put(sessionId, percentage);
     }
-    
+
     private void addToError(String msg)
     {
-        String former = config_error_map.get(sessionId) == null ? "" : config_error_map
-                .get(sessionId);
+        String former = config_error_map.get(sessionId) == null ? ""
+                : config_error_map.get(sessionId);
         config_error_map.put(sessionId, former + "<p style='color:red'>" + msg);
     }
-    
-    
+
 }

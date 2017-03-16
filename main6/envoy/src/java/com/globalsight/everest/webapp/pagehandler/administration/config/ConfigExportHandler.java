@@ -64,6 +64,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.costing.rate.Ra
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityManager;
+import com.globalsight.everest.webapp.pagehandler.administration.remoteServices.perplexity.PerplexityService;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowStatePostHandlerHelper;
@@ -87,8 +89,8 @@ public class ConfigExportHandler extends PageHandler
      * Invokes this PageHandler.
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context) throws ServletException,
-            IOException, EnvoyServletException
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
@@ -168,6 +170,9 @@ public class ConfigExportHandler extends PageHandler
 
             // 20. File Profiles
             getFileProfiles(p_request);
+
+            // 21. Perplexity Service
+            getAllPerplexity(p_request);
         }
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
@@ -184,29 +189,40 @@ public class ConfigExportHandler extends PageHandler
         {
             String[] idsArr = null;
             String userName = user.getUserName();
-            File localePropertyFile = LocalePairExportHelper.createPropertyFile(userName, companyId);
-            File userPropertyFile = UserExportHelper.createPropertyfile(companyId);
-            File mtPropertyFile = MTExportHelper.createPropertyfile(userName, companyId);
-            File filterPropertyFile = FilterExportHelper.createPropertyfile(userName, companyId);
+            File attrPropertyFile = AttributeExportHelper.createPropertyfile(userName, companyId);
+            File attrSetPropertyFile = AttributeSetExportHelper.createPropertyfile(userName,
+                    companyId);
+            File localePropertyFile = LocalePairExportHelper.createPropertyFile(userName,
+                    companyId);
             File activityFile = ActivityExportHelper.createPropertyfile(userName, companyId);
+            File currPropertyFile = CurrencyExportHelper.createPropertyfile(userName, companyId);
+            File ratePropertyFile = RatesExportHelper.createPropertyfile(userName, companyId);
             File permissionFile = PermissionExportHelper.createPropertyfile(userName, companyId);
+            File userPropertyFile = UserExportHelper.createPropertyfile(companyId);
             File tmPropertyFile = TMExportHelper.createPropertyfile(userName, companyId);
-            File srxPropertyFile = SegmentationRuleExportHelper.createPropertyfile(userName, companyId);
+            File srxPropertyFile = SegmentationRuleExportHelper.createPropertyfile(userName,
+                    companyId);
             File tmpPropertyFile = TMProfileExportHelper.createPropertyfile(userName, companyId);
+            File mtPropertyFile = MTExportHelper.createPropertyfile(userName, companyId);
+            File psPropertyFile = PerplexityServiceExportHelper.createPropertyfile(userName,
+                    companyId);
+            File termPropertyFile = TermbaseExportHelper.createPropertyfile(userName, companyId);
             File projectFile = ProjectExportHelper.createPropertyfile(userName, companyId);
             File wfPropertyFile = WfTemplateExportHelper.createPropertyfile(userName, companyId);
+            File wfspPropertyFile = WfStatePostProfileExportHelper.createPropertyfile(userName,
+                    companyId);
             File locPropertyFile = LocProfileExportHelper.createPropertyfile(userName, companyId);
-            File xrPropertyFile = XmlRuleExportHelper.createPropertyfile(userName, companyId);
             File fpPropertyFile = FileProfileExportHelper.createPropertyfile(userName, companyId);
+            File xrPropertyFile = XmlRuleExportHelper.createPropertyfile(userName, companyId);
+            File filterPropertyFile = FilterExportHelper.createPropertyfile(userName, companyId);
             List<File> xmlFileList = new ArrayList<File>();
-
             Element root = new Element("UserInfo");
             Document Doc = new Document(root);
             Element segRoot = new Element("SegmentationRuleInfo");
             Document segDoc = new Document(segRoot);
             Element xmlRoot = new Element("XMLRuleInfo");
             Document xmlDoc = new Document(xmlRoot);
-            
+
             if (ids != null && !ids.equals(""))
             {
                 idsArr = ids.split(",");
@@ -215,17 +231,71 @@ public class ConfigExportHandler extends PageHandler
                     for (int n = 0; n < idsArr.length; n++)
                     {
                         String[] idArr = idsArr[n].split("-");
-                        if ("localePair".equals(idArr[0]))
+                        if ("attr".equals(idArr[0]))
+                        {
+                            // gets attribute property file
+                            attrPropertyFile = AttributeExportHelper
+                                    .exportAttribute(attrPropertyFile, idArr[1]);
+                        }
+                        else if ("attrSet".equals(idArr[0]))
+                        {
+                            // gets attribute group property file
+                            attrSetPropertyFile = AttributeSetExportHelper
+                                    .exportAttributeSet(attrSetPropertyFile, idArr[1]);
+                        }
+                        else if ("localePair".equals(idArr[0]))
                         {
                             // gets locale pair property file
                             LocalePairExportHelper.propertiesInputLocalePair(localePropertyFile,
                                     idArr[1]);
+                        }
+                        else if ("activity".equals(idArr[0]))
+                        {
+                            // gets activity type property file
+                            activityFile = ActivityExportHelper.exportActivities(activityFile,
+                                    idArr[1]);
+                        }
+                        else if ("curr".equals(idArr[0]))
+                        {
+                            // gets currency property file
+                            currPropertyFile = CurrencyExportHelper.exportCurrency(currPropertyFile,
+                                    idArr[1]);
+                        }
+                        else if ("rate".equals(idArr[0]))
+                        {
+                            // gets rate property file
+                            ratePropertyFile = RatesExportHelper.exportRates(ratePropertyFile,
+                                    idArr[1]);
+                        }
+                        else if ("perm".equals(idArr[0]))
+                        {
+                            // gets permission group property file
+                            permissionFile = PermissionExportHelper
+                                    .exportPermissions(permissionFile, idArr[1]);
                         }
                         else if ("user".equals(idArr[0]))
                         {
                             // gets user property file
                             userPropertyFile = UserExportHelper.exportUsers(userPropertyFile, root,
                                     Doc, user, idArr[1]);
+                        }
+                        else if ("tm".equals(idArr[0]))
+                        {
+                            // gets tm property property file
+                            tmPropertyFile = TMExportHelper.propertiesInputTM(tmPropertyFile,
+                                    idArr[1]);
+                        }
+                        else if ("srx".equals(idArr[0]))
+                        {
+                            // gets segmentation rule property file
+                            srxPropertyFile = SegmentationRuleExportHelper
+                                    .propertiesInputSR(srxPropertyFile, segRoot, segDoc, idArr[1]);
+                        }
+                        else if ("tmp".equals(idArr[0]))
+                        {
+                            // gets tm profile property file
+                            tmpPropertyFile = TMProfileExportHelper
+                                    .propertiesInputTMP(tmpPropertyFile, idArr[1]);
                         }
                         else if ("mt".equals(idArr[0]))
                         {
@@ -238,43 +308,15 @@ public class ConfigExportHandler extends PageHandler
                                         mtp);
                             }
                         }
-                        else if ("filter".equals(idArr[0]))
+                        else if ("ps".equals(idArr[0]))
                         {
-                            // gets filter property file
-                            SpecialFilterToExport specialFilterToExport = new SpecialFilterToExport(
-                                    Long.parseLong(idArr[2]), idArr[1]);
-                            filterPropertyFile = FilterExportHelper.exportFilters(
-                                    filterPropertyFile, specialFilterToExport, companyId);
+                            psPropertyFile = PerplexityServiceExportHelper
+                                    .propertiesInputPS(psPropertyFile, idArr[1]);
                         }
-                        else if ("activity".equals(idArr[0]))
+                        else if ("term".equals(idArr[0]))
                         {
-                            // gets activity type property file
-                            activityFile = ActivityExportHelper.exportActivities(activityFile,
+                            termPropertyFile = TermbaseExportHelper.exportTermbase(termPropertyFile,
                                     idArr[1]);
-                        }
-                        else if ("perm".equals(idArr[0]))
-                        {
-                            // gets permission group property file
-                            permissionFile = PermissionExportHelper.exportPermissions(
-                                    permissionFile, idArr[1]);
-                        }
-                        else if ("tm".equals(idArr[0]))
-                        {
-                            // gets tm property property file
-                            tmPropertyFile = TMExportHelper.propertiesInputTM(tmPropertyFile,
-                                    idArr[1]);
-                        }
-                        else if ("srx".equals(idArr[0]))
-                        {
-                            // gets segmentation rule property file
-                            srxPropertyFile = SegmentationRuleExportHelper.propertiesInputSR(
-                                    srxPropertyFile, segRoot, segDoc, idArr[1]);
-                        }
-                        else if ("tmp".equals(idArr[0]))
-                        {
-                            // gets tm profile property file
-                            tmpPropertyFile = TMProfileExportHelper.propertiesInputTMP(
-                                    tmpPropertyFile, idArr[1]);
                         }
                         else if ("pro".equals(idArr[0]))
                         {
@@ -285,15 +327,27 @@ public class ConfigExportHandler extends PageHandler
                         else if ("wf".equals(idArr[0]))
                         {
                             // gets workflow property file
-                            wfPropertyFile = WfTemplateExportHelper.propertiesInputWfTemplate(
-                                    wfPropertyFile, idArr[1]);
+                            wfPropertyFile = WfTemplateExportHelper
+                                    .propertiesInputWfTemplate(wfPropertyFile, idArr[1]);
                             xmlFileList.add(WfTemplateExportHelper.exportXml(idArr[1]));
+                        }
+                        else if ("wspf".equals(idArr[0]))
+                        {
+                            // gets workflow state post profile property file
+                            wfspPropertyFile = WfStatePostProfileExportHelper
+                                    .exportWfStatePostProfile(wfspPropertyFile, idArr[1]);
                         }
                         else if ("lp".equals(idArr[0]))
                         {
                             // gets l10n profile property file
-                            locPropertyFile = LocProfileExportHelper.propertiesInputLP(
-                                    locPropertyFile, idArr[1]);
+                            locPropertyFile = LocProfileExportHelper
+                                    .propertiesInputLP(locPropertyFile, idArr[1]);
+                        }
+                        else if ("fp".equals(idArr[0]))
+                        {
+                            // gets file profile property file
+                            fpPropertyFile = FileProfileExportHelper
+                                    .propertiesInputFP(fpPropertyFile, idArr[1]);
                         }
                         else if ("xr".equals(idArr[0]))
                         {
@@ -301,38 +355,48 @@ public class ConfigExportHandler extends PageHandler
                             xrPropertyFile = XmlRuleExportHelper.propertiesInputXR(xrPropertyFile,
                                     xmlRoot, xmlDoc, idArr[1]);
                         }
-                        else if ("fp".equals(idArr[0]))
+                        else if ("filter".equals(idArr[0]))
                         {
-                            // gets file profile property file
-                            fpPropertyFile = FileProfileExportHelper.propertiesInputFP(
-                                    fpPropertyFile, idArr[1]);
+                            // gets filter property file
+                            SpecialFilterToExport specialFilterToExport = new SpecialFilterToExport(
+                                    Long.parseLong(idArr[2]), idArr[1]);
+                            filterPropertyFile = FilterExportHelper.exportFilters(
+                                    filterPropertyFile, specialFilterToExport, companyId);
                         }
                     }
                 }
             }
-            if (userPropertyFile.length() > 0)
+            if (attrPropertyFile.length() > 0)
             {
-                entryFiles.add(userPropertyFile);
+                entryFiles.add(attrPropertyFile);
+            }
+            if (attrSetPropertyFile.length() > 0)
+            {
+                entryFiles.add(attrSetPropertyFile);
             }
             if (localePropertyFile.length() > 0)
             {
                 entryFiles.add(localePropertyFile);
             }
-            if (mtPropertyFile.length() > 0)
-            {
-                entryFiles.add(mtPropertyFile);
-            }
-            if (filterPropertyFile.length() > 0)
-            {
-                entryFiles.add(filterPropertyFile);
-            }
             if (activityFile.length() > 0)
             {
                 entryFiles.add(activityFile);
             }
+            if (currPropertyFile.length() > 0)
+            {
+                entryFiles.add(currPropertyFile);
+            }
+            if (ratePropertyFile.length() > 0)
+            {
+                entryFiles.add(ratePropertyFile);
+            }
             if (permissionFile.length() > 0)
             {
                 entryFiles.add(permissionFile);
+            }
+            if (userPropertyFile.length() > 0)
+            {
+                entryFiles.add(userPropertyFile);
             }
             if (tmPropertyFile.length() > 0)
             {
@@ -346,6 +410,18 @@ public class ConfigExportHandler extends PageHandler
             {
                 entryFiles.add(tmpPropertyFile);
             }
+            if (mtPropertyFile.length() > 0)
+            {
+                entryFiles.add(mtPropertyFile);
+            }
+            if (psPropertyFile.length() > 0)
+            {
+                entryFiles.add(psPropertyFile);
+            }
+            if (termPropertyFile.length() > 0)
+            {
+                entryFiles.add(termPropertyFile);
+            }
             if (projectFile.length() > 0)
             {
                 entryFiles.add(projectFile);
@@ -358,18 +434,27 @@ public class ConfigExportHandler extends PageHandler
                     entryFiles.add(file);
                 }
             }
-            if (xrPropertyFile.length() > 0)
+            if (wfspPropertyFile.length() > 0)
             {
-                entryFiles.add(xrPropertyFile);
+                entryFiles.add(wfspPropertyFile);
             }
             if (locPropertyFile.length() > 0)
             {
                 entryFiles.add(locPropertyFile);
             }
-            if (fpPropertyFile.length()>0)
+            if (fpPropertyFile.length() > 0)
             {
                 entryFiles.add(fpPropertyFile);
             }
+            if (xrPropertyFile.length() > 0)
+            {
+                entryFiles.add(xrPropertyFile);
+            }
+            if (filterPropertyFile.length() > 0)
+            {
+                entryFiles.add(filterPropertyFile);
+            }
+
             downLoadFile = new File(ZIP_FILE_NAME);
             String configPath = getQAReportWorkflowPath(companyId);
             if (File.separator.equals("\\"))
@@ -398,6 +483,19 @@ public class ConfigExportHandler extends PageHandler
         sb.append(File.separator);
 
         return sb.toString();
+    }
+
+    private void getAllPerplexity(HttpServletRequest p_request)
+    {
+        try
+        {
+            List<PerplexityService> perplexityServices = PerplexityManager.getAllPerplexity();
+            p_request.setAttribute("perplexityServices", perplexityServices);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -541,8 +639,8 @@ public class ConfigExportHandler extends PageHandler
     {
         try
         {
-            List<TermbaseInfo> termBases = ServerProxy.getTermbaseManager().getTermbaseList(
-                    uiLocale);
+            List<TermbaseInfo> termBases = ServerProxy.getTermbaseManager()
+                    .getTermbaseList(uiLocale);
             p_request.setAttribute("termBases", termBases);
         }
         catch (Exception e)

@@ -53,6 +53,9 @@ public class TestManagerImpl extends AbstractTestManager
         int paramSize = operation.getParaList().size();
         Class[] parameterTypes = new Class[paramSize];
         Object[] realParams = new Object[paramSize];
+        // GBS-4702
+        Class[] parameterTypesFor4702 = null;
+        Object[] realParamsFor4702 = null;
         for (int i = 0; i < paramSize; i++)
         {
             String typeName = operation.getParaList().get(i).getType().toLowerCase();
@@ -275,17 +278,13 @@ public class TestManagerImpl extends AbstractTestManager
                 Map segmentMap = new HashMap();
                 segmentMap.put(new Long(-1), realParams[parameters.size() - 1]);
                 realParams[2] = segmentMap;
-                // remove "p_string" parameter
-                parameters.remove(parameters.size() - 1);
-                Class[] newParameterTypes = new Class[parameters.size()];
-                Object[] newRealParams = new Object[parameters.size()];
-                for (int i = 0; i < parameters.size(); i++)
+                parameterTypesFor4702 = new Class[parameters.size() - 1];
+                realParamsFor4702 = new Object[parameters.size() - 1];
+                for (int i = 0; i < parameters.size() - 1; i++)
                 {
-                    newParameterTypes[i] = parameterTypes[i];
-                    newRealParams[i] = realParams[i];
+                    parameterTypesFor4702[i] = parameterTypes[i];
+                    realParamsFor4702[i] = realParams[i];
                 }
-                parameterTypes = newParameterTypes;
-                realParams = newRealParams;
             }
         }
 
@@ -305,13 +304,27 @@ public class TestManagerImpl extends AbstractTestManager
 
         try
         {
-            method = cls.getMethod(operation.getName(), parameterTypes);
+            if ("searchEntriesInBatch".equals(operation.getName()))
+            {
+                method = cls.getMethod(operation.getName(), parameterTypesFor4702);
+            }
+            else
+            {
+                method = cls.getMethod(operation.getName(), parameterTypes);
+            }
         }
         catch (Exception e)
         {
             try
             {
-                method = findMethod(cls, operation, parameterTypes);
+                if ("searchEntriesInBatch".equals(operation.getName()))
+                {
+                    method = findMethod(cls, operation, parameterTypesFor4702);
+                }
+                else
+                {
+                    method = findMethod(cls, operation, parameterTypes);
+                }
             }
             catch (Exception e1)
             {
@@ -327,7 +340,14 @@ public class TestManagerImpl extends AbstractTestManager
         String result = null;
         if (operation.getReturnType() != null)
         {
-            result = String.valueOf(method.invoke(this.getProxy(), realParams));
+            if ("searchEntriesInBatch".equals(operation.getName()))
+            {
+                result = String.valueOf(method.invoke(this.getProxy(), realParamsFor4702));
+            }
+            else
+            {
+                result = String.valueOf(method.invoke(this.getProxy(), realParams));
+            }
             logger.info("Return content for method " + method.getName() + "\r\n" + result);
         }
 

@@ -1,23 +1,5 @@
 package test;
 
-import com.globalsight.www.webservices.Ambassador4FalconProxy;
-import com.globalsight.www.webservices.AmbassadorProxy;
-import jodd.props.Props;
-import jodd.util.StringUtil;
-import org.apache.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
-import util.*;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,6 +8,30 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
+import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
+
+import com.globalsight.www.webservices.Ambassador4FalconProxy;
+import com.globalsight.www.webservices.AmbassadorProxy;
+
+import jodd.props.Props;
+import jodd.util.StringUtil;
+import util.Account;
+import util.FileUtil;
+import util.Operation;
+import util.Parameter;
+import util.WebServiceConstants;
 
 public abstract class AbstractTestManager implements TestManager
 {
@@ -42,56 +48,71 @@ public abstract class AbstractTestManager implements TestManager
     String defaultWSDLClass = "com.globalsight.www.webservice.Ambassador";
     private String currentPath = FileUtil.getCurrentPath();
 
-    public AbstractTestManager() {
+    public AbstractTestManager()
+    {
     }
 
-    public AbstractTestManager(Account account) {
+    public AbstractTestManager(Account account)
+    {
         this.account = account;
         String currentPath = FileUtil.getCurrentPath();
         File testPropertyFile = new File(currentPath, WebServiceConstants.TEST_PROPERTIES);
-        if (testPropertyFile.exists() && testPropertyFile.isFile()) {
-            try {
+        if (testPropertyFile.exists() && testPropertyFile.isFile())
+        {
+            try
+            {
                 props.load(testPropertyFile);
                 defaultWSDLUrl = props.getValue("webservice.url");
                 defaultWSDLClass = props.getValue("webservice.class");
             }
-            catch (IOException ioe) {
+            catch (IOException ioe)
+            {
                 logger.error("Failed to load test.properties file.", ioe);
             }
         }
         logger.info("defaultWSDLUrl == " + defaultWSDLUrl);
 
         String endpoint;
-        if ("false".equalsIgnoreCase(account.getHttps())) {
+        if ("false".equalsIgnoreCase(account.getHttps()))
+        {
             endpoint = "http://" + account.getHost() + ":" + account.getPort() + defaultWSDLUrl;
-        } else {
+        }
+        else
+        {
             endpoint = "https://" + account.getHost() + ":" + account.getPort() + defaultWSDLUrl;
         }
 
-        logger.info("User " + account.getUserName() + " [" + account.getPassword() + "] is accessing WSDL " + endpoint);
+        logger.info("User " + account.getUserName() + " [" + account.getPassword()
+                + "] is accessing WSDL " + endpoint);
         String mainClassName = defaultWSDLClass.substring(defaultWSDLClass.lastIndexOf(".") + 1);
-        if ("Ambassador".equalsIgnoreCase(mainClassName)) {
+        if ("Ambassador".equalsIgnoreCase(mainClassName))
+        {
             isFalconTest = false;
             proxy = new AmbassadorProxy(endpoint);
-        } else {
+        }
+        else
+        {
             isFalconTest = true;
             falconProxy = new Ambassador4FalconProxy(endpoint);
         }
 
-        //get realToken
-        try {
+        // get realToken
+        try
+        {
             String fullAccessToken = "";
             String username = account.getUserName();
             String password = account.getPassword();
-            fullAccessToken = isFalconTest ? falconProxy.login(username, password) : proxy.login(username, password);
+            fullAccessToken = isFalconTest ? falconProxy.login(username, password)
+                    : proxy.login(username, password);
             logger.info("Access token ==== " + fullAccessToken);
             realToken = getRealAccessToken(fullAccessToken);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             logger.error("Failed to login to " + endpoint, e);
         }
 
-        //Abassador Webservice WSDL to operations(XML) file
+        // Abassador Webservice WSDL to operations(XML) file
         parseWSDL(endpoint);
 
         // read operation XML files to operationList
@@ -99,11 +120,14 @@ public abstract class AbstractTestManager implements TestManager
     }
 
     // transform "fullAccessToken" into "realToken"
-    private static String getRealAccessToken(String fullAccessToken) {
+    private static String getRealAccessToken(String fullAccessToken)
+    {
         String realToken = fullAccessToken;
-        if (StringUtil.isBlank(realToken)) {
+        if (StringUtil.isBlank(realToken))
+        {
             int index = fullAccessToken.indexOf("+_+");
-            if (index > 0) {
+            if (index > 0)
+            {
                 realToken = fullAccessToken.substring(0, index);
             }
         }
@@ -111,68 +135,86 @@ public abstract class AbstractTestManager implements TestManager
         return realToken;
     }
 
-    //parsing Abassador Webservice WSDL file into operations(XML) file
-    private void parseWSDL(String endpoint) {
+    // parsing Abassador Webservice WSDL file into operations(XML) file
+    private void parseWSDL(String endpoint)
+    {
         TransformerFactory tFactory = TransformerFactory.newInstance();
         Transformer tr;
-        try {
+        try
+        {
             logger.info("Start parsing WSDL into local operation XML file ...");
-            tr = tFactory.newTransformer(new StreamSource(currentPath + "/" + WebServiceConstants.WSDL2OPERATION_FILE));
-            tr.transform(new StreamSource(endpoint), new StreamResult(currentPath + "/" + WebServiceConstants.OPERATION_FILE));
+            tr = tFactory.newTransformer(
+                    new StreamSource(currentPath + "/" + WebServiceConstants.WSDL2OPERATION_FILE));
+            tr.transform(new StreamSource(endpoint),
+                    new StreamResult(currentPath + "/" + WebServiceConstants.OPERATION_FILE));
             logger.info("Start parsing WSDL into local operation XML file successfully.");
         }
-        catch (TransformerException e) {
+        catch (TransformerException e)
+        {
             logger.error("Failed to parse WSDL file.", e);
         }
     }
 
-    private ArrayList<Operation> readOpeationXML() {
+    private ArrayList<Operation> readOpeationXML()
+    {
         String filePath = currentPath + "/" + WebServiceConstants.OPERATION_FILE;
         File operationXML = new File(filePath);
-        if (!operationXML.exists() || !operationXML.isFile()) {
-            logger.error("operations_" + account.getHost() + "_" + account.getPort() + ".xml does not exist.");
+        if (!operationXML.exists() || !operationXML.isFile())
+        {
+            logger.error("operations_" + account.getHost() + "_" + account.getPort()
+                    + ".xml does not exist.");
             return null;
         }
 
         Document doc = null;
-        try {
+        try
+        {
             doc = new SAXReader().read(operationXML);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             logger.error("Failed to read operations.xml file.", e);
         }
 
         Element root = doc.getRootElement();
         ArrayList<Operation> operationList = new ArrayList<Operation>();
         List<Element> operations = root.elements("operation");
-        for (Element operation : operations) {
+        for (Element operation : operations)
+        {
             String name = operation.attributeValue("name");
             String returnType = operation.element("return").attributeValue("type");
             ArrayList<Parameter> paramList = new ArrayList<Parameter>();
 
             List<Element> params = operation.elements("param");
-            for (Element param : params) {
+            for (Element param : params)
+            {
                 String paramType = param.attributeValue("type");
                 String paramName = param.getStringValue();
                 paramList.add(new Parameter(paramType, paramName));
             }
+            // for GBS-4702 "searchEntriesInBatch" api update, added "p_string"
+            // parameter temporarily in UI for testing purpose.
+            if ("searchEntriesInBatch".equals(name))
+            {
+                paramList.add(new Parameter("string", "p_string"));
+            }
             operationList.add(new Operation(name, returnType, paramList));
-
         }
-        Collections.sort(operationList,
-                new Comparator()
-                {
-                    public int compare(Object a, Object b) {
-                        Operation o1 = (Operation) a;
-                        Operation o2 = (Operation) b;
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
+        Collections.sort(operationList, new Comparator()
+        {
+            public int compare(Object a, Object b)
+            {
+                Operation o1 = (Operation) a;
+                Operation o2 = (Operation) b;
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
 
         return operationList;
     }
 
-    private static void createAccountXML(Account account, String fileName) {
+    private static void createAccountXML(Account account, String fileName)
+    {
         if (account == null || StringUtil.isBlank(fileName))
             return;
 
@@ -198,30 +240,36 @@ public abstract class AbstractTestManager implements TestManager
 
         // write XML file
         File accountsXML = new File(fileName);
-        try {
+        try
+        {
             OutputFormat format = OutputFormat.createPrettyPrint();
             format.setEncoding("UTF-8");
             XMLWriter out = new XMLWriter(new FileWriter(accountsXML), format);
             out.write(doc);
             out.close();
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             logger.error("Failed to create account XML file.", e);
         }
     }
 
-    private static void addAccountXML(Account newAccount, String fileName) {
+    private static void addAccountXML(Account newAccount, String fileName)
+    {
         File accountsXML = new File(fileName);
-        if (!accountsXML.exists() || !accountsXML.isFile()) {
+        if (!accountsXML.exists() || !accountsXML.isFile())
+        {
             logger.error("Failed to read account XML file " + fileName);
             createAccountXML(newAccount, fileName);
         }
 
         Document doc = null;
-        try {
+        try
+        {
             doc = new SAXReader().read(accountsXML);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             logger.error("Failed to add new account to XML file.", e);
         }
         Element root = doc.getRootElement();
@@ -242,69 +290,81 @@ public abstract class AbstractTestManager implements TestManager
         Element httpsElement = newAccountElement.addElement("https");
         httpsElement.setText(newAccount.getHttps());
 
-        try {
+        try
+        {
             OutputFormat format = OutputFormat.createPrettyPrint();
             format.setEncoding("UTF-8");
             XMLWriter out = new XMLWriter(new FileWriter(accountsXML), format);
             out.write(doc);
             out.close();
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             logger.error("Failed to write account XML file.", e);
         }
     }
 
-
     /**
      * @return the realToken
      */
-    public String getRealToken() {
+    public String getRealToken()
+    {
         return realToken;
     }
 
     /**
      * @return the account
      */
-    public Account getAccount() {
+    public Account getAccount()
+    {
         return account;
     }
 
     /**
      * @return the proxy
      */
-    public Object getProxy() {
+    public Object getProxy()
+    {
         return isFalconTest ? falconProxy : proxy;
     }
 
     /**
      * @return the operationList
      */
-    public ArrayList<Operation> getOperationList() {
+    public ArrayList<Operation> getOperationList()
+    {
         return operationList;
     }
 
     /**
-     * @param realToken the realToken to set
+     * @param realToken
+     *            the realToken to set
      */
-    public void setRealToken(String realToken) {
+    public void setRealToken(String realToken)
+    {
         this.realToken = realToken;
     }
 
     /**
-     * @param account the account to set
+     * @param account
+     *            the account to set
      */
-    public void setAccount(Account account) {
+    public void setAccount(Account account)
+    {
         this.account = account;
     }
 
     /**
-     * @param operationList the operationList to set
+     * @param operationList
+     *            the operationList to set
      */
-    public void setOperationList(ArrayList<Operation> operationList) {
+    public void setOperationList(ArrayList<Operation> operationList)
+    {
         this.operationList = operationList;
     }
 
-    public boolean isFalconTest() {
+    public boolean isFalconTest()
+    {
         return isFalconTest;
     }
 }

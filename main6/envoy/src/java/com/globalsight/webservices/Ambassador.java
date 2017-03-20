@@ -8768,6 +8768,32 @@ public class Ambassador extends AbstractWebService
                     }
                 }
             }
+            else
+            {
+                Vector localePairs = null;
+                try
+                {
+                    localePairs = ServerProxy.getLocaleManager().getSourceTargetLocalePairs();
+                }
+                catch (Exception e)
+                {
+                    String message = "Unable to get all locale pairs";
+                    logger.error(message, e);
+                    throw new WebServiceException(message);
+                }
+
+                Iterator it = localePairs.iterator();
+                while (it.hasNext())
+                {
+                    LocalePair localePair = (LocalePair) it.next();
+                    if (localePair.getSource().equals(sourceLocale))
+                    {
+                        GlobalSightLocale targetLocale = localePair.getTarget();
+                        trgLocales.add(targetLocale);
+                        levLocales.setLeveragingLocale(targetLocale, null);
+                    }
+                }
+            }
 
             // tm profile
             TranslationMemoryProfile tmp = TMProfileHandlerHelper

@@ -1136,7 +1136,7 @@ abstract class TuStorage<T extends TM3Data>
                 }
             }
         }
-        if (!isBlankSearch && targetLocales != null)
+        if (!isBlankSearch && targetLocales != null && targetLocales.size() > 0)
         {
             // an exists subselect seems simpler, but mysql bug 46947 causes
             // exists subselects to take locks even in repeatable read

@@ -103,8 +103,8 @@ public class TestManagerImpl extends AbstractTestManager
             {
                 try
                 {
-                    realParams[i] = "".equals(dataNotMap) ? null : (new Integer(dataNotMap))
-                            .intValue();
+                    realParams[i] = "".equals(dataNotMap) ? null
+                            : (new Integer(dataNotMap)).intValue();
                 }
                 catch (Exception e)
                 {
@@ -118,8 +118,8 @@ public class TestManagerImpl extends AbstractTestManager
             {
                 try
                 {
-                    realParams[i] = "".equals(dataNotMap) ? null : (new Long(dataNotMap))
-                            .longValue();
+                    realParams[i] = "".equals(dataNotMap) ? null
+                            : (new Long(dataNotMap)).longValue();
                 }
                 catch (Exception e)
                 {
@@ -131,8 +131,8 @@ public class TestManagerImpl extends AbstractTestManager
             }
             else if ("double".equalsIgnoreCase(typeName))
             {
-                realParams[i] = "".equals(dataNotMap) ? null : (new Double(dataNotMap))
-                        .doubleValue();
+                realParams[i] = "".equals(dataNotMap) ? null
+                        : (new Double(dataNotMap)).doubleValue();
             }
             else if ("base64binary".equalsIgnoreCase(typeName))
             {
@@ -156,8 +156,8 @@ public class TestManagerImpl extends AbstractTestManager
             }
             else if ("boolean".equalsIgnoreCase(typeName))
             {
-                realParams[i] = "".equals(dataNotMap) ? null : (new Boolean(dataNotMap))
-                        .booleanValue();
+                realParams[i] = "".equals(dataNotMap) ? null
+                        : (new Boolean(dataNotMap)).booleanValue();
             }
             else if ("map".equalsIgnoreCase(typeName))
             {
@@ -180,8 +180,8 @@ public class TestManagerImpl extends AbstractTestManager
                     // the type of parameter in the map
                     String typeInMap = parametersList.get(j).toString().toLowerCase();
                     // the data of the parameter
-                    String data = params.get(
-                            parametersList.get(j + 1) + "(" + parametersList.get(j) + ")")
+                    String data = params
+                            .get(parametersList.get(j + 1) + "(" + parametersList.get(j) + ")")
                             .toString();
                     if ("string".equalsIgnoreCase(typeInMap))
                     {
@@ -191,16 +191,14 @@ public class TestManagerImpl extends AbstractTestManager
                     {
                         try
                         {
-                            args.put(parametersList.get(j + 1), "".equals(data) ? null
-                                    : (new Integer(data)).intValue());
+                            args.put(parametersList.get(j + 1),
+                                    "".equals(data) ? null : (new Integer(data)).intValue());
                         }
                         catch (Exception e)
                         {
-                            JOptionPane
-                                    .showMessageDialog(
-                                            null,
-                                            "Type error: Please input an 'int' type in the int type fileld",
-                                            "Type error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null,
+                                    "Type error: Please input an 'int' type in the int type fileld",
+                                    "Type error", JOptionPane.ERROR_MESSAGE);
                             return null;
                         }
                     }
@@ -208,23 +206,21 @@ public class TestManagerImpl extends AbstractTestManager
                     {
                         try
                         {
-                            args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Long(
-                                    data)).longValue());
+                            args.put(parametersList.get(j + 1),
+                                    "".equals(data) ? null : (new Long(data)).longValue());
                         }
                         catch (Exception e)
                         {
-                            JOptionPane
-                                    .showMessageDialog(
-                                            null,
-                                            "Type error: Please input an 'long' type in the long type fileld",
-                                            "Type error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null,
+                                    "Type error: Please input an 'long' type in the long type fileld",
+                                    "Type error", JOptionPane.ERROR_MESSAGE);
                             return null;
                         }
                     }
                     else if ("double".equalsIgnoreCase(typeInMap))
                     {
-                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Double(
-                                data)).doubleValue());
+                        args.put(parametersList.get(j + 1),
+                                "".equals(data) ? null : (new Double(data)).doubleValue());
                     }
                     else if ("base64binary".equalsIgnoreCase(typeInMap))
                     {
@@ -243,19 +239,20 @@ public class TestManagerImpl extends AbstractTestManager
                         catch (Exception e)
                         {
                             logger.error(
-                                    "Failed to read content from file " + file.getAbsolutePath(), e);
+                                    "Failed to read content from file " + file.getAbsolutePath(),
+                                    e);
                         }
                         args.put(parametersList.get(j + 1), content);
                     }
                     else if ("boolean".equalsIgnoreCase(typeInMap))
                     {
-                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Boolean(
-                                data)).booleanValue());
+                        args.put(parametersList.get(j + 1),
+                                "".equals(data) ? null : (new Boolean(data)).booleanValue());
                     }
                     else
                     {
-                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Boolean(
-                                data)).booleanValue());
+                        args.put(parametersList.get(j + 1),
+                                "".equals(data) ? null : (new Boolean(data)).booleanValue());
                     }
                 }
                 realParams[i] = args;
@@ -263,6 +260,32 @@ public class TestManagerImpl extends AbstractTestManager
             else
             {
                 realParams[i] = "".equals(dataNotMap) ? null : dataNotMap;
+            }
+        }
+        // for GBS-4702 "searchEntriesInBatch" api update, added "p_string"
+        // parameter temporarily in UI for testing purpose.
+        if ("searchEntriesInBatch".equals(operation.getName()))
+        {
+            // p_string
+            List<util.Parameter> parameters = operation.getParaList();
+            util.Parameter pString = operation.getParaList().get(parameters.size() - 1);
+            if (pString != null)
+            {
+                // p_segmentMap
+                Map segmentMap = new HashMap();
+                segmentMap.put(new Long(-1), realParams[parameters.size() - 1]);
+                realParams[2] = segmentMap;
+                // remove "p_string" parameter
+                parameters.remove(parameters.size() - 1);
+                Class[] newParameterTypes = new Class[parameters.size()];
+                Object[] newRealParams = new Object[parameters.size()];
+                for (int i = 0; i < parameters.size(); i++)
+                {
+                    newParameterTypes[i] = parameterTypes[i];
+                    newRealParams[i] = realParams[i];
+                }
+                parameterTypes = newParameterTypes;
+                realParams = newRealParams;
             }
         }
 

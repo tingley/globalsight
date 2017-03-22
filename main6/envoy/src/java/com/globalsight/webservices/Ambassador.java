@@ -8927,6 +8927,7 @@ public class Ambassador extends AbstractWebService
                         HashMap matchInfoMap = new HashMap();
                         String subId = ((SegmentTmTu) levMatches.getOriginalTuv().getTu())
                                 .getSubId();
+                        matchInfoMap.put("tmName", tm.getName());
                         matchInfoMap.put("subId", subId);
                         matchInfoMap.put("sid", sid);
                         matchInfoMap.put("createdBy", createdBy);

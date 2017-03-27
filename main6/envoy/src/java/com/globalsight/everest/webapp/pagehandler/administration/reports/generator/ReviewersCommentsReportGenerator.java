@@ -39,7 +39,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.category.CategoryType;
@@ -862,16 +861,18 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
 
                     // Source segment
                     cell = ExcelUtil.getCell(currentRow, col);
-                    setCellForInternalText(cell, getSegment(pData, sourceTuv, jobId),
-                            m_rtlSourceLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell,
+                            getSegment(pData, sourceTuv, jobId), m_rtlSourceLocale,
+                            REPORT_STYLE.getInternalFont(), REPORT_STYLE.getContentFont());
                     cell.setCellStyle(
                             m_rtlSourceLocale ? REPORT_STYLE.getRtlContentStyle() : contentStyle);
                     col++;
 
                     // Target segment
                     cell = ExcelUtil.getCell(currentRow, col);
-                    setCellForInternalText(cell, getSegment(pData, targetTuv, jobId),
-                            m_rtlTargetLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell,
+                            getSegment(pData, targetTuv, jobId), m_rtlTargetLocale,
+                            REPORT_STYLE.getInternalFont(), REPORT_STYLE.getContentFont());
                     cell.setCellStyle(
                             m_rtlTargetLocale ? REPORT_STYLE.getRtlContentStyle() : contentStyle);
                     col++;
@@ -1004,44 +1005,6 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         }
 
         return p_row;
-    }
-
-    /**
-     * Sets the cell value for internal text.
-     * 
-     * @since GBS-4663
-     */
-    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
-    {
-        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-        {
-            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
-                    "");
-            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
-                    "");
-            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
-                    : contentWithoutMark;
-            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
-            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-            {
-                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
-                content = content.substring(0, internalBpt)
-                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
-                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
-                content = content.substring(0, internalEpt)
-                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
-
-                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
-                        rtlLocale ? internalEpt + 1 : internalEpt, REPORT_STYLE.getInternalFont());
-                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
-                        REPORT_STYLE.getContentFont());
-            }
-            p_cell.setCellValue(ts);
-        }
-        else
-        {
-            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
-        }
     }
 
     /**
@@ -1205,7 +1168,15 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 dataType = tuv.getDataType(p_jobId);
                 pData.setAddables(dataType);
                 pData.setIsFromReportGeneration(true);
-                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+                // GBS-4735, remove ignored string
+                String gxml = tuv.getGxmlExcludeTopTags();
+                gxml = StringUtil.replaceWithRE(gxml, "<bpt[^>]*?internal=\"yes\"[^>]*?/>"
+                        + IGNORED_STRING_X000D + "<ept[^>]*?/>", "");
+                gxml = StringUtil.replaceWithRE(gxml,
+                        "<bpt[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>" + IGNORED_STRING_X000D
+                                + "<ept[^>]*?>[^<]*?</ept>",
+                        "");
+                TmxPseudo.tmx2Pseudo(gxml, pData);
                 content.append(pData.getPTagSourceString());
 
                 if (subFlows != null && subFlows.size() > 0)

@@ -30,6 +30,8 @@ import com.globalsight.util.GlobalSightLocale;
 public interface ReportGenerator extends ReportConstants
 {
     public static final String DEFAULT_DATE_FORMAT = "MM/dd/yy hh:mm:ss a z";
+    // GBS-4735, ignored string
+    public static final String IGNORED_STRING_X000D = "_x000D_";
 
     /**
      * Generates report files.
@@ -40,8 +42,8 @@ public interface ReportGenerator extends ReportConstants
      *            Target Locales List, used as report data.
      * @throws Exception
      */
-    public File[] generateReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales) throws Exception;
+    public File[] generateReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales)
+            throws Exception;
 
     /**
      * Gets the report type of report generator.

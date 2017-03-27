@@ -40,7 +40,6 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -596,8 +595,9 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Source segment
                     Cell cell_B = getCell(currentRow, col);
-                    setCellForInternalText(cell_B, getSegment(pData, sourceTuv, jobId),
-                            m_rtlSourceLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell_B,
+                            getSegment(pData, sourceTuv, jobId), m_rtlSourceLocale,
+                            REPORT_STYLE.getInternalFont(), REPORT_STYLE.getContentFont());
                     cell_B.setCellStyle(contentStyle);
                     col++;;
 
@@ -609,8 +609,9 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Target segment
                     Cell cell_D = getCell(currentRow, col);
-                    setCellForInternalText(cell_D, getSegment(pData, targetTuv, jobId),
-                            m_rtlTargetLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell_D,
+                            getSegment(pData, targetTuv, jobId), m_rtlTargetLocale,
+                            REPORT_STYLE.getInternalFont(), REPORT_STYLE.getContentFont());
                     cell_D.setCellStyle(contentStyle);
                     col++;
 
@@ -630,44 +631,6 @@ public class CharacterCountReportGenerator implements ReportGenerator
             }
         }
         totalSegmentCount.put(p_targetLang, p_row - 7);
-    }
-
-    /**
-     * Sets the cell value for internal text.
-     * 
-     * @since GBS-4663
-     */
-    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
-    {
-        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-        {
-            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
-                    "");
-            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
-                    "");
-            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
-                    : contentWithoutMark;
-            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
-            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-            {
-                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
-                content = content.substring(0, internalBpt)
-                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
-                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
-                content = content.substring(0, internalEpt)
-                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
-
-                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
-                        rtlLocale ? internalEpt + 1 : internalEpt, REPORT_STYLE.getInternalFont());
-                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
-                        REPORT_STYLE.getContentFont());
-            }
-            p_cell.setCellValue(ts);
-        }
-        else
-        {
-            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
-        }
     }
 
     private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)
@@ -710,7 +673,15 @@ public class CharacterCountReportGenerator implements ReportGenerator
                 dataType = tuv.getDataType(p_jobId);
                 pData.setAddables(dataType);
                 pData.setIsFromReportGeneration(true);
-                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+                // GBS-4735, remove ignored string
+                String gxml = tuv.getGxmlExcludeTopTags();
+                gxml = StringUtil.replaceWithRE(gxml, "<bpt[^>]*?internal=\"yes\"[^>]*?/>"
+                        + IGNORED_STRING_X000D + "<ept[^>]*?/>", "");
+                gxml = StringUtil.replaceWithRE(gxml,
+                        "<bpt[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>" + IGNORED_STRING_X000D
+                                + "<ept[^>]*?>[^<]*?</ept>",
+                        "");
+                TmxPseudo.tmx2Pseudo(gxml, pData);
                 content.append(pData.getPTagSourceString());
 
                 if (subFlows != null && subFlows.size() > 0)

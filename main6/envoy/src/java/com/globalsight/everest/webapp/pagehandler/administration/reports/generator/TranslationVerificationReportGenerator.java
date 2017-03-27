@@ -48,7 +48,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.comment.Issue;
@@ -656,8 +655,9 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     CellStyle srcStyle = m_rtlSourceLocale ? m_style.getRtlContentStyle()
                             : m_style.getContentStyle();
                     Cell cell_A = getCell(currentRow, col);
-                    setCellForInternalText(cell_A, getSegment(pData, sourceTuv, p_job.getId()),
-                            m_rtlSourceLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell_A,
+                            getSegment(pData, sourceTuv, p_job.getId()), m_rtlSourceLocale,
+                            m_style.getInternalFont(), m_style.getContentFont());
                     cell_A.setCellStyle(srcStyle);
                     col++;
 
@@ -667,7 +667,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                             targetTuv, p_job.getId(), pData);
                     String currentSegments = getSegment(pData, targetTuv, p_job.getId());
                     Cell cell_B = getCell(currentRow, col);
-                    setCellForInternalText(cell_B, previousSegments, m_rtlTargetLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell_B, previousSegments,
+                            m_rtlTargetLocale, m_style.getInternalFont(), m_style.getContentFont());
                     if (StringUtil.isNotEmpty(previousSegments)
                             && !previousSegments.endsWith(currentSegments))
                     {
@@ -687,7 +688,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
                     // getRtlContentStyle(p_workBook)
                     // : getContentStyle(p_workBook);
                     Cell cell_C = getCell(currentRow, col);
-                    setCellForInternalText(cell_C, currentSegments, m_rtlTargetLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell_C, currentSegments,
+                            m_rtlTargetLocale, m_style.getInternalFont(), m_style.getContentFont());
                     cell_C.setCellStyle(trgStyle);
                     col++;
 
@@ -796,44 +798,6 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
         }
 
         return p_row;
-    }
-
-    /**
-     * Sets the cell value for internal text.
-     * 
-     * @since GBS-4663
-     */
-    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
-    {
-        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-        {
-            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
-                    "");
-            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
-                    "");
-            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
-                    : contentWithoutMark;
-            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
-            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-            {
-                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
-                content = content.substring(0, internalBpt)
-                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
-                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
-                content = content.substring(0, internalEpt)
-                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
-
-                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
-                        rtlLocale ? internalEpt + 1 : internalEpt, m_style.getInternalFont());
-                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
-                        m_style.getContentFont());
-            }
-            p_cell.setCellValue(ts);
-        }
-        else
-        {
-            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
-        }
     }
 
     private void addCommentStatus(Sheet p_sheet, Set<Integer> rowsWithCommentSet, int last_row)
@@ -1203,7 +1167,14 @@ public class TranslationVerificationReportGenerator implements ReportGenerator, 
             dataType = tuv.getDataType(p_jobId);
             pData.setAddables(dataType);
             pData.setIsFromReportGeneration(true);
-            TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+            // GBS-4735, remove ignored string
+            String gxml = tuv.getGxmlExcludeTopTags();
+            gxml = StringUtil.replaceWithRE(gxml,
+                    "<bpt[^>]*?internal=\"yes\"[^>]*?/>" + IGNORED_STRING_X000D + "<ept[^>]*?/>",
+                    "");
+            gxml = StringUtil.replaceWithRE(gxml, "<bpt[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>"
+                    + IGNORED_STRING_X000D + "<ept[^>]*?>[^<]*?</ept>", "");
+            TmxPseudo.tmx2Pseudo(gxml, pData);
             content.append(pData.getPTagSourceString());
 
             // If there are subflows, output them too.

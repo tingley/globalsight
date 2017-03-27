@@ -23,16 +23,61 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.tuv.Tuv;
-
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.gxml.GxmlElement;
 
 public class ReportGeneratorUtil
 {
+    /**
+     * Sets the cell value for internal text.
+     * 
+     * @since GBS-4663
+     */
+    public static void setCellForInternalText(Cell p_cell, String p_content, boolean p_rtlLocale,
+            Font p_internalFont, Font p_contentFont)
+    {
+        // GBS-4735, remove ignored string
+        p_content = StringUtil.replace(p_content, ReportGenerator.IGNORED_STRING_X000D, "");
+        if (p_content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+        {
+            String contentWithoutMark = StringUtil.replace(p_content, GxmlElement.GS_INTERNAL_BPT,
+                    "");
+            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
+                    "");
+            contentWithoutMark = p_rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
+                    : contentWithoutMark;
+            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
+            while (p_content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
+            {
+                int internalBpt = p_content.indexOf(GxmlElement.GS_INTERNAL_BPT);
+                p_content = p_content.substring(0, internalBpt)
+                        + p_content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
+                int internalEpt = p_content.indexOf(GxmlElement.GS_INTERNAL_EPT);
+                p_content = p_content.substring(0, internalEpt)
+                        + p_content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
+
+                ts.applyFont(p_rtlLocale ? internalBpt + 1 : internalBpt,
+                        p_rtlLocale ? internalEpt + 1 : internalEpt, p_internalFont);
+                ts.applyFont(p_rtlLocale ? internalEpt + 1 : internalEpt,
+                        contentWithoutMark.length(), p_contentFont);
+            }
+            p_cell.setCellValue(ts);
+        }
+        else
+        {
+            p_cell.setCellValue(p_rtlLocale ? EditUtil.toRtlString(p_content) : p_content);
+        }
+    }
 
     /**
      * Gets TM Matches.
@@ -82,13 +127,13 @@ public class ReportGeneratorUtil
         {
             if (targetTuv.isRepeated())
             {
-                matches.append("\r\n").append(
-                        bundle.getString("jobinfo.tradosmatches.invoice.repeated"));
+                matches.append("\r\n")
+                        .append(bundle.getString("jobinfo.tradosmatches.invoice.repeated"));
             }
             else if (targetTuv.getRepetitionOfId() > 0)
             {
-                matches.append("\r\n").append(
-                        bundle.getString("jobinfo.tradosmatches.invoice.repetition"));
+                matches.append("\r\n")
+                        .append(bundle.getString("jobinfo.tradosmatches.invoice.repetition"));
             }
         }
 
@@ -106,8 +151,8 @@ public class ReportGeneratorUtil
             {
                 LeverageMatch lm = type.getLeverageMatch();
                 if ((lm.getMtName() != null && lm.getMtName().toLowerCase().endsWith("_mt"))
-                        || (lm.getCreationUser() != null && lm.getCreationUser().toLowerCase()
-                                .endsWith("_mt")))
+                        || (lm.getCreationUser() != null
+                                && lm.getCreationUser().toLowerCase().endsWith("_mt")))
                 {
                     matches.append("\r\n").append("MT Match");
                 }

@@ -51,7 +51,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -83,9 +82,7 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.ReportStyle;
 import com.globalsight.util.SortUtil;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.gxml.GxmlElement;
 
 public class MTPostEditDistanceReportGenerator implements ReportGenerator
 {
@@ -763,7 +760,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
             Cell cell_F = getCell(curRow, col);
             String source = data.getSource();
-            setCellForInternalText(cell_F, source, rtlSourceLocale);
+            ReportGeneratorUtil.setCellForInternalText(cell_F, source, rtlSourceLocale,
+                    m_style.getInternalFont(), m_style.getContentFont());
             CellStyle srcStyle = rtlSourceLocale ? m_style.getRtlContentStyle()
                     : m_style.getContentStyle();
             cell_F.setCellStyle(srcStyle);
@@ -771,7 +769,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
             Cell cell_G = getCell(curRow, col);
             String mt = data.getMt();
-            setCellForInternalText(cell_G, mt, rtlSourceLocale);
+            ReportGeneratorUtil.setCellForInternalText(cell_G, mt, rtlSourceLocale,
+                    m_style.getInternalFont(), m_style.getContentFont());
             CellStyle mtStyle = rtlTargetLocale ? m_style.getRtlContentStyle()
                     : m_style.getContentStyle();
             cell_G.setCellStyle(mtStyle);
@@ -779,7 +778,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
             Cell cell_H = getCell(curRow, col);
             String target = data.getTarget();
-            setCellForInternalText(cell_H, target, rtlSourceLocale);
+            ReportGeneratorUtil.setCellForInternalText(cell_H, target, rtlSourceLocale,
+                    m_style.getInternalFont(), m_style.getContentFont());
             CellStyle targetStyle = rtlTargetLocale ? m_style.getRtlContentStyle()
                     : m_style.getContentStyle();
             cell_H.setCellStyle(targetStyle);
@@ -820,44 +820,6 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             }
 
             row.inc();
-        }
-    }
-
-    /**
-     * Sets the cell value for internal text.
-     * 
-     * @since GBS-4663
-     */
-    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
-    {
-        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-        {
-            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
-                    "");
-            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
-                    "");
-            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
-                    : contentWithoutMark;
-            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
-            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-            {
-                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
-                content = content.substring(0, internalBpt)
-                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
-                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
-                content = content.substring(0, internalEpt)
-                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
-
-                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
-                        rtlLocale ? internalEpt + 1 : internalEpt, m_style.getInternalFont());
-                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
-                        m_style.getContentFont());
-            }
-            p_cell.setCellValue(ts);
-        }
-        else
-        {
-            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
         }
     }
 

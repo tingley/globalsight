@@ -15,11 +15,49 @@
  */
 package com.globalsight.connector.blaise.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
 import com.cognitran.blaise.translation.api.ClientFactory;
 import com.cognitran.blaise.translation.api.TranslationAgencyClient;
 import com.cognitran.client.IncompatibleVersionException;
 import com.cognitran.core.model.util.Collections;
-import com.cognitran.translation.client.*;
+import com.cognitran.translation.client.PublicationTypeUsageDetails;
+import com.cognitran.translation.client.TranslationPageCommand;
+import com.cognitran.translation.client.TranslationStatisticsDetails;
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.cognitran.workflow.client.InboxEntry;
 import com.globalsight.connector.blaise.BlaiseConstants;
@@ -29,29 +67,30 @@ import com.globalsight.connector.blaise.form.CreateBlaiseJobForm;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
-import com.globalsight.cxe.entity.customAttribute.*;
+import com.globalsight.cxe.entity.customAttribute.Attribute;
+import com.globalsight.cxe.entity.customAttribute.AttributeClone;
+import com.globalsight.cxe.entity.customAttribute.Condition;
+import com.globalsight.cxe.entity.customAttribute.DateCondition;
+import com.globalsight.cxe.entity.customAttribute.FloatCondition;
+import com.globalsight.cxe.entity.customAttribute.IntCondition;
+import com.globalsight.cxe.entity.customAttribute.JobAttribute;
+import com.globalsight.cxe.entity.customAttribute.ListCondition;
+import com.globalsight.cxe.entity.customAttribute.SelectOption;
+import com.globalsight.cxe.entity.customAttribute.TextCondition;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
-import com.globalsight.everest.foundation.*;
+import com.globalsight.everest.foundation.BasicL10nProfile;
+import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.BlaiseInboxEntryComparator;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
-import java.io.*;
-import java.net.*;
-import java.rmi.RemoteException;
-import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.zip.GZIPInputStream;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 public class BlaiseHelper
 {
@@ -63,15 +102,11 @@ public class BlaiseHelper
 
     private static List<String> specialChars = new ArrayList<String>();
 
-    public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util
-            .Locale>();
-    public static final HashMap<String, com.cognitran.core.model.i18n.Locale>
-            blaiseSupportedLocalesMap = new HashMap<String, com.cognitran.core.model.i18n.Locale>();
+    public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util.Locale>();
+    public static final HashMap<String, com.cognitran.core.model.i18n.Locale> blaiseSupportedLocalesMap = new HashMap<String, com.cognitran.core.model.i18n.Locale>();
 
-    public static final SortedMap<String, String> relatedObjectClassName2Type = new
-            TreeMap<String, String>();
-    public static final SortedMap<String, String> type2RelatedObjectClassName = new
-            TreeMap<String, String>();
+    public static final SortedMap<String, String> relatedObjectClassName2Type = new TreeMap<String, String>();
+    public static final SortedMap<String, String> type2RelatedObjectClassName = new TreeMap<String, String>();
 
     static
     {
@@ -86,23 +121,23 @@ public class BlaiseHelper
             blaiseSupportedLocalesMap.put(key.toLowerCase(), blaiseLocale);
         }
 
-        relatedObjectClassName2Type
-                .put(BlaiseConstants.BLAISE_TYPE_GRAPHIC, BlaiseConstants.GS_TYPE_GRAPHIC);
-        relatedObjectClassName2Type
-                .put(BlaiseConstants.BLAISE_TYPE_STANDALONE, BlaiseConstants.GS_TYPE_STANDALONE);
-        relatedObjectClassName2Type
-                .put(BlaiseConstants.BLAISE_TYPE_PROCEDURE, BlaiseConstants.GS_TYPE_PROCEDURE);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_GRAPHIC,
+                BlaiseConstants.GS_TYPE_GRAPHIC);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_STANDALONE,
+                BlaiseConstants.GS_TYPE_STANDALONE);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_PROCEDURE,
+                BlaiseConstants.GS_TYPE_PROCEDURE);
         relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_CONTROLLED_CONTENT,
                 BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT);
         relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_TRANSLATABLE_OBJECT,
                 BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT);
 
-        type2RelatedObjectClassName
-                .put(BlaiseConstants.GS_TYPE_GRAPHIC, BlaiseConstants.BLAISE_TYPE_GRAPHIC);
-        type2RelatedObjectClassName
-                .put(BlaiseConstants.GS_TYPE_STANDALONE, BlaiseConstants.BLAISE_TYPE_STANDALONE);
-        type2RelatedObjectClassName
-                .put(BlaiseConstants.GS_TYPE_PROCEDURE, BlaiseConstants.BLAISE_TYPE_PROCEDURE);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_GRAPHIC,
+                BlaiseConstants.BLAISE_TYPE_GRAPHIC);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_STANDALONE,
+                BlaiseConstants.BLAISE_TYPE_STANDALONE);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_PROCEDURE,
+                BlaiseConstants.BLAISE_TYPE_PROCEDURE);
         type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT,
                 BlaiseConstants.BLAISE_TYPE_CONTROLLED_CONTENT);
         type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT,
@@ -127,8 +162,8 @@ public class BlaiseHelper
         }
         catch (SecurityException e)
         {
-            logger.warn("Incorrect username or password: " + blc.getUsername() + "/" + blc
-                    .getPassword());
+            logger.warn("Incorrect username or password: " + blc.getUsername() + "/"
+                    + blc.getPassword());
             return "Incorrect username or password!";
         }
         catch (IncompatibleVersionException e)
@@ -197,11 +232,11 @@ public class BlaiseHelper
     }
 
     /**
-     * Converts a set of Blaise inbox entries to GlobalSight TranslationInboxEntryVo objects
+     * Converts a set of Blaise inbox entries to GlobalSight
+     * TranslationInboxEntryVo objects
      */
     private List<TranslationInboxEntryVo> convertToGS(List<InboxEntry> entries,
-            TranslationAgencyClient client)
-            throws Exception
+            TranslationAgencyClient client) throws Exception
     {
         if (entries == null || entries.size() == 0 || client == null)
             return new ArrayList<TranslationInboxEntryVo>();
@@ -251,14 +286,16 @@ public class BlaiseHelper
     }
 
     /**
-     * Converts Blaise translation inbox entry to GlobalSight TranslationInboxEntryVo object
+     * Converts Blaise translation inbox entry to GlobalSight
+     * TranslationInboxEntryVo object
      */
     private TranslationInboxEntryVo convert(TranslationInboxEntry entry,
             TranslationAgencyClient client) throws Exception
     {
         long runTime = System.currentTimeMillis();
         TranslationInboxEntryVo vo = new TranslationInboxEntryVo(entry);
-        //logger.info("Convert TranslationInboxEntry directly used " + (System.currentTimeMillis
+        // logger.info("Convert TranslationInboxEntry directly used " +
+        // (System.currentTimeMillis
         // () - runTime) + " ms");
         Set<Long> idSet = new HashSet<>(1);
         idSet.add(entry.getId());
@@ -278,7 +315,8 @@ public class BlaiseHelper
             }
         }
         vo.setUsages(entryUsages);
-        //logger.info("Fetch usages of entry used " + (System.currentTimeMillis() - runTime) + "
+        // logger.info("Fetch usages of entry used " +
+        // (System.currentTimeMillis() - runTime) + "
         // ms");
 
         runTime = System.currentTimeMillis();
@@ -348,28 +386,29 @@ public class BlaiseHelper
             logger.info("**** ==== Start to fetch entries for company [" + companyId + "]");
             while (fetchCount < count)
             {
-                command = initTranslationPageCommand(pageIndex, 100,
-                        null,
-                        sourceLocale.toString(), null, null, null, 0, false);
+                command = initTranslationPageCommand(pageIndex, 100, null, sourceLocale.toString(),
+                        null, null, null, 0, false);
                 command.sortById();
                 command.setSortDesc(false);
                 entries = listInbox(command);
-                if (entries != null)
+                if (entries == null || entries.isEmpty())
                 {
-                    for (TranslationInboxEntryVo vo : entries)
-                    {
-                        tmpEntryId = vo.getEntry().getId();
-                        tmp = vo.getEntry().getTargetLocale().getLocaleCode();
-                        if (existedEntryIds.contains(tmpEntryId) || !targetLocaleList.contains(tmp))
-                            continue;
-                        totalEntries.add(vo);
-                        fetchCount++;
-                        if (fetchCount >= count)
-                            break;
-                    }
+                    break;
+                }
+                for (TranslationInboxEntryVo vo : entries)
+                {
+                    tmpEntryId = vo.getEntry().getId();
+                    tmp = vo.getEntry().getTargetLocale().getLocaleCode();
+                    if (existedEntryIds.contains(tmpEntryId) || !targetLocaleList.contains(tmp))
+                        continue;
+                    totalEntries.add(vo);
+                    fetchCount++;
+                    if (fetchCount >= count)
+                        break;
                 }
                 pageIndex++;
-                logger.info("**** ==== Current page index == " + pageIndex + ", fetch count == " + fetchCount + ", count == " + count);
+                logger.info("**** ==== Current page index == " + pageIndex + ", fetch count == "
+                        + fetchCount + ", count == " + count);
             }
 
             if (totalEntries != null && totalEntries.size() > 0)
@@ -393,14 +432,14 @@ public class BlaiseHelper
                     }
                     catch (Exception e)
                     {
-                        logger.error("Error found when claiming entry [" + vo.getEntry().getId()
-                                + "]");
+                        logger.error(
+                                "Error found when claiming entry [" + vo.getEntry().getId() + "]");
                     }
                 }
                 logger.info("**** ==== End to fetch entries for company [" + companyId + "]");
 
-                BasicL10nProfile l10Profile = HibernateUtil
-                        .get(BasicL10nProfile.class, fp.getL10nProfileId());
+                BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class,
+                        fp.getL10nProfileId());
                 ExecutorService pool = Executors.newFixedThreadPool(5);
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setPriority("3");
@@ -436,8 +475,8 @@ public class BlaiseHelper
             String userId, FileProfile fp, ArrayList<TranslationInboxEntryVo> entries,
             boolean isCombinedByLang) throws RemoteException
     {
-        BasicL10nProfile l10Profile = HibernateUtil
-                .get(BasicL10nProfile.class, fp.getL10nProfileId());
+        BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class,
+                fp.getL10nProfileId());
         User user = ServerProxy.getUserManager().getUser(userId);
 
         ExecutorService pool = Executors.newFixedThreadPool(5);
@@ -450,7 +489,8 @@ public class BlaiseHelper
             if (isCombinedByLang)
             {
                 blaiseJobForm.setCombineByLangs("on");
-                HashMap<String, ArrayList<TranslationInboxEntryVo>> localeGroup = groupEntriesByLang(entries);
+                HashMap<String, ArrayList<TranslationInboxEntryVo>> localeGroup = groupEntriesByLang(
+                        entries);
                 Iterator<String> keys = localeGroup.keySet().iterator();
                 String targetLocale;
                 ArrayList<TranslationInboxEntryVo> localeEntries;
@@ -462,15 +502,17 @@ public class BlaiseHelper
                     fps = new ArrayList<>(size);
                     for (int i = 0; i < size; i++)
                         fps.add(fp);
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
+                            l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-                            String.valueOf(companyId),
-                            blc, blaiseJobForm, localeEntries, fps, null,
+                            String.valueOf(companyId), blc, blaiseJobForm, localeEntries, fps, null,
                             null, JobImpl.createUuid(), jobAttributes, targetLocale);
                     Thread t = new MultiCompanySupportedThread(runnable);
                     pool.execute(t);
                 }
-            } else {
+            }
+            else
+            {
                 fps = new ArrayList<>(1);
                 fps.add(fp);
                 blaiseJobForm.setCombineByLangs("");
@@ -480,10 +522,11 @@ public class BlaiseHelper
                 {
                     jobEntries = new ArrayList<>(1);
                     jobEntries.add(entry);
-                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString, l10Profile);
+                    List<JobAttribute> jobAttributes = getJobAttributes(attributeString,
+                            l10Profile);
                     CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-                            companyIdString, blc, blaiseJobForm, jobEntries, fps, null,
-                            null, JobImpl.createUuid(), jobAttributes, entry.getTargetLocaleAsString());
+                            companyIdString, blc, blaiseJobForm, jobEntries, fps, null, null,
+                            JobImpl.createUuid(), jobAttributes, entry.getTargetLocaleAsString());
                     Thread t = new MultiCompanySupportedThread(runnable);
                     pool.execute(t);
                 }
@@ -548,8 +591,7 @@ public class BlaiseHelper
                         }
                     }
                 }
-                data.append("5,.,").append(attrId).append(",.,").append(attrValue)
-                        .append(";.;");
+                data.append("5,.,").append(attrId).append(",.,").append(attrValue).append(";.;");
             }
             result = data.toString();
             if (result.length() > 0)
@@ -580,10 +622,10 @@ public class BlaiseHelper
         if (vo == null || !vo.isUsageOfHDU())
             return false;
         String type = vo.getType();
-        if (type.equals(BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT) || type
-                .equals(BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT) || type
-                .equals(BlaiseConstants.GS_TYPE_GRAPHIC) || type
-                .equals(BlaiseConstants.GS_TYPE_PROCEDURE))
+        if (type.equals(BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT)
+                || type.equals(BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT)
+                || type.equals(BlaiseConstants.GS_TYPE_GRAPHIC)
+                || type.equals(BlaiseConstants.GS_TYPE_PROCEDURE))
             return true;
         return false;
     }
@@ -593,8 +635,8 @@ public class BlaiseHelper
         if (vo == null || !vo.isUsageOfIsSheet())
             return false;
         String type = vo.getType();
-        if (type.equals(BlaiseConstants.GS_TYPE_STANDALONE) || type
-                .equals(BlaiseConstants.GS_TYPE_GRAPHIC))
+        if (type.equals(BlaiseConstants.GS_TYPE_STANDALONE)
+                || type.equals(BlaiseConstants.GS_TYPE_GRAPHIC))
             return true;
         return false;
     }
@@ -806,8 +848,10 @@ public class BlaiseHelper
     /**
      * Download XLIFF file. Note that current entry must be claimed already.
      *
-     * @param entry     -- TranslationInboxEntryVo
-     * @param storeFile -- storeFile
+     * @param entry
+     *            -- TranslationInboxEntryVo
+     * @param storeFile
+     *            -- storeFile
      */
     public void downloadXliff(TranslationInboxEntryVo entry, File storeFile)
     {
@@ -861,8 +905,8 @@ public class BlaiseHelper
 
             // A simple replace to "cheat" Blaise API
             String content = FileUtil.readFile(file, BlaiseConstants.ENCODING);
-            content = StringUtil
-                    .replace(content, "<target state=\"new\"", "<target state=\"translated\"");
+            content = StringUtil.replace(content, "<target state=\"new\"",
+                    "<target state=\"translated\"");
             content = StringUtil.replace(content, "<target state=\"needs-review-translation\"",
                     "<target state=\"translated\"");
             content = StringUtil.replace(content, "<target state=\"needs-i10n\"",
@@ -1159,7 +1203,8 @@ public class BlaiseHelper
      * Blaise inbox entry file name is like
      * "Blaise inbox entry - Alerts - 40768 - 2 - es_MX.xlf".
      *
-     * @param entry - TranslationInboxEntry boject
+     * @param entry
+     *            - TranslationInboxEntry boject
      * @return the file name which is used to create job in GlobalSight.
      */
     public static String getEntryFileName(TranslationInboxEntryVo entry)
@@ -1182,9 +1227,8 @@ public class BlaiseHelper
         String localeInfo = entry.getTargetLocaleAsString();
         fileName.append(BlaiseConstants.FILENAME_PREFIX).append(entry.getRelatedObjectId())
                 .append(BlaiseConstants.DASH).append(entry.getSourceRevision())
-                .append(BlaiseConstants.DASH).append(des)
-                .append(BlaiseConstants.DASH).append(localeInfo)
-                .append(BlaiseConstants.FILENAME_EXTENSION).toString();
+                .append(BlaiseConstants.DASH).append(des).append(BlaiseConstants.DASH)
+                .append(localeInfo).append(BlaiseConstants.FILENAME_EXTENSION).toString();
         String fileNameStr = fileName.toString();
 
         return handleSpecialChars(fileNameStr);
@@ -1194,8 +1238,10 @@ public class BlaiseHelper
      * A typical Harley job name is
      * "Harley_[Falcon Target Value]_[target locale]_[plus a random number]".
      *
-     * @param entry             -- TranslationInboxEntryVo
-     * @param falconTargetValue -- value of job attribute "Falcon Target Value".
+     * @param entry
+     *            -- TranslationInboxEntryVo
+     * @param falconTargetValue
+     *            -- value of job attribute "Falcon Target Value".
      * @return String -- job name
      */
     public static String getHarlyJobName(TranslationInboxEntryVo entry, String falconTargetValue)
@@ -1210,13 +1256,15 @@ public class BlaiseHelper
         return handleSpecialChars(jobName);
     }
 
-    public static String getHarlyJobName(List<TranslationInboxEntryVo> entries, String falconTargetValue)
+    public static String getHarlyJobName(List<TranslationInboxEntryVo> entries,
+            String falconTargetValue)
     {
         if (falconTargetValue != null && falconTargetValue.length() > 55)
         {
             falconTargetValue = falconTargetValue.substring(0, 55);
         }
-        String jobName = BlaiseConstants.HARLEY + "_" + falconTargetValue + "_" + entries.get(0).getSourceLocaleAsString();
+        String jobName = BlaiseConstants.HARLEY + "_" + falconTargetValue + "_"
+                + entries.get(0).getSourceLocaleAsString();
 
         return handleSpecialChars(jobName);
     }
@@ -1418,8 +1466,8 @@ public class BlaiseHelper
         {
             conn = DbUtil.getConnection();
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from connector_blaise_attributes where "
-                    + "connector_id=" + blcId);
+            ResultSet rs = stmt.executeQuery(
+                    "select * from connector_blaise_attributes where " + "connector_id=" + blcId);
             BlaiseConnectorAttribute attr = null;
             while (rs.next())
             {
@@ -1462,8 +1510,8 @@ public class BlaiseHelper
             conn = DbUtil.getConnection();
             conn.setAutoCommit(false);
             Statement stmt = conn.createStatement();
-            stmt.execute("delete from connector_blaise_attributes where connector_id=" +
-                    attributes.get(0).getBlaiseConnectorId());
+            stmt.execute("delete from connector_blaise_attributes where connector_id="
+                    + attributes.get(0).getBlaiseConnectorId());
 
             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO "
                     + "connector_blaise_attributes (Connector_ID,Attribute_ID,Attribute_Value,"
@@ -1506,8 +1554,7 @@ public class BlaiseHelper
         }
     }
 
-    private List<JobAttribute> getJobAttributes(String attributeString,
-            BasicL10nProfile l10Profile)
+    private List<JobAttribute> getJobAttributes(String attributeString, BasicL10nProfile l10Profile)
     {
         List<JobAttribute> jobAttributeList = new ArrayList<JobAttribute>();
 
@@ -1525,15 +1572,13 @@ public class BlaiseHelper
                 {
                     String attributeId = ele.substring(ele.indexOf(",.,") + 3,
                             ele.lastIndexOf(",.,"));
-                    String attributeValue = ele.substring(ele
-                            .lastIndexOf(",.,") + 3);
+                    String attributeValue = ele.substring(ele.lastIndexOf(",.,") + 3);
 
                     Attribute attribute = HibernateUtil.get(Attribute.class,
                             Long.parseLong(attributeId));
                     JobAttribute jobAttribute = new JobAttribute();
                     jobAttribute.setAttribute(attribute.getCloneAttribute());
-                    if (attribute != null
-                            && StringUtils.isNotEmpty(attributeValue))
+                    if (attribute != null && StringUtils.isNotEmpty(attributeValue))
                     {
                         Condition condition = attribute.getCondition();
                         if (condition instanceof TextCondition)
@@ -1542,20 +1587,16 @@ public class BlaiseHelper
                         }
                         else if (condition instanceof IntCondition)
                         {
-                            jobAttribute.setIntegerValue(Integer
-                                    .parseInt(attributeValue));
+                            jobAttribute.setIntegerValue(Integer.parseInt(attributeValue));
                         }
                         else if (condition instanceof FloatCondition)
                         {
-                            jobAttribute.setFloatValue(Float
-                                    .parseFloat(attributeValue));
+                            jobAttribute.setFloatValue(Float.parseFloat(attributeValue));
                         }
                         else if (condition instanceof DateCondition)
                         {
-                            SimpleDateFormat sdf = new SimpleDateFormat(
-                                    DateCondition.FORMAT);
-                            jobAttribute
-                                    .setDateValue(sdf.parse(attributeValue));
+                            SimpleDateFormat sdf = new SimpleDateFormat(DateCondition.FORMAT);
+                            jobAttribute.setDateValue(sdf.parse(attributeValue));
                         }
                         else if (condition instanceof ListCondition)
                         {
@@ -1574,8 +1615,8 @@ public class BlaiseHelper
         }
         else
         {
-            List<Attribute> attsList = l10Profile.getProject()
-                    .getAttributeSet().getAttributeAsList();
+            List<Attribute> attsList = l10Profile.getProject().getAttributeSet()
+                    .getAttributeAsList();
             for (Attribute att : attsList)
             {
                 JobAttribute jobAttribute = new JobAttribute();

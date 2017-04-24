@@ -16,8 +16,47 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.naming.NamingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.globalsight.everest.category.CategoryType;
-import com.globalsight.everest.comment.*;
+import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.comment.IssueHistory;
+import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
@@ -28,11 +67,17 @@ import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.persistence.tuv.*;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.tuv.*;
+import com.globalsight.everest.tuv.TaskTuv;
+import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvException;
+import com.globalsight.everest.tuv.TuvManager;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -42,27 +87,19 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportH
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.everest.workflow.*;
+import com.globalsight.everest.workflow.DQFData;
+import com.globalsight.everest.workflow.ScorecardScore;
+import com.globalsight.everest.workflow.ScorecardScoreHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
-import com.globalsight.util.*;
+import com.globalsight.util.ExcelUtil;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ReportStyle;
+import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.gxml.GxmlElement;
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import javax.naming.NamingException;
-import javax.servlet.http.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * Comments Analysis Report Generator Include Comments Analysis Report in popup
@@ -1005,7 +1042,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     CellStyle srcStyle = rtlSourceLocale ? REPORT_STYLE.getRtlContentStyle()
                             : contentStyle;
                     cell = ExcelUtil.getCell(currentRow, col);
-                    setCellForInternalText(cell, sourceSegmentString, rtlSourceLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell, sourceSegmentString,
+                            rtlSourceLocale, REPORT_STYLE.getInternalFont(),
+                            REPORT_STYLE.getContentFont());
                     cell.setCellStyle(srcStyle);
                     col++;
 
@@ -1013,7 +1052,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     CellStyle trgStyle = rtlTargetLocale ? REPORT_STYLE.getRtlContentStyle()
                             : contentStyle;
                     cell = ExcelUtil.getCell(currentRow, col);
-                    setCellForInternalText(cell, targetSegmentString, rtlTargetLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell, targetSegmentString,
+                            rtlTargetLocale, REPORT_STYLE.getInternalFont(),
+                            REPORT_STYLE.getContentFont());
                     cell.setCellStyle(trgStyle);
                     col++;
 
@@ -1095,11 +1136,15 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     col++;
 
                     // Previous segment
-                    //String previousSegments = getPreviousSegments(allTuvMap, targetTuv.getId(),
-                    //targetSegmentString, jobId);
-                    String previousSegments = getPreviousSegments(allTuvMap, targetTuv, targetLocaleId);
+                    // String previousSegments = getPreviousSegments(allTuvMap,
+                    // targetTuv.getId(),
+                    // targetSegmentString, jobId);
+                    String previousSegments = getPreviousSegments(allTuvMap, targetTuv,
+                            targetLocaleId);
                     cell = ExcelUtil.getCell(currentRow, col);
-                    setCellForInternalText(cell, previousSegments, rtlTargetLocale);
+                    ReportGeneratorUtil.setCellForInternalText(cell, previousSegments,
+                            rtlTargetLocale, REPORT_STYLE.getInternalFont(),
+                            REPORT_STYLE.getContentFont());
                     cell.setCellStyle(contentStyle);
 
                     p_row++;
@@ -1131,44 +1176,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
 
         return p_row;
-    }
-
-    /**
-     * Sets the cell value for internal text.
-     * 
-     * @since GBS-4663
-     */
-    private void setCellForInternalText(Cell p_cell, String content, boolean rtlLocale)
-    {
-        if (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-        {
-            String contentWithoutMark = StringUtil.replace(content, GxmlElement.GS_INTERNAL_BPT,
-                    "");
-            contentWithoutMark = StringUtil.replace(contentWithoutMark, GxmlElement.GS_INTERNAL_EPT,
-                    "");
-            contentWithoutMark = rtlLocale ? EditUtil.toRtlString(contentWithoutMark)
-                    : contentWithoutMark;
-            XSSFRichTextString ts = new XSSFRichTextString(contentWithoutMark);
-            while (content.indexOf(GxmlElement.GS_INTERNAL_BPT) != -1)
-            {
-                int internalBpt = content.indexOf(GxmlElement.GS_INTERNAL_BPT);
-                content = content.substring(0, internalBpt)
-                        + content.substring(internalBpt + GxmlElement.GS_INTERNAL_BPT.length());
-                int internalEpt = content.indexOf(GxmlElement.GS_INTERNAL_EPT);
-                content = content.substring(0, internalEpt)
-                        + content.substring(internalEpt + GxmlElement.GS_INTERNAL_EPT.length());
-
-                ts.applyFont(rtlLocale ? internalBpt + 1 : internalBpt,
-                        rtlLocale ? internalEpt + 1 : internalEpt, REPORT_STYLE.getInternalFont());
-                ts.applyFont(rtlLocale ? internalEpt + 1 : internalEpt, contentWithoutMark.length(),
-                        REPORT_STYLE.getContentFont());
-            }
-            p_cell.setCellValue(ts);
-        }
-        else
-        {
-            p_cell.setCellValue(rtlLocale ? EditUtil.toRtlString(content) : content);
-        }
     }
 
     private void addCriteriaSheet(Workbook p_workbook, List<Job> p_jobsList, Set<String> stateSet,
@@ -1519,33 +1526,22 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     }
 
     /**
-    private Map<Long, Tuv> getAllTuvsMap(TargetPage targetPage)
-    {
-        Map<Long, Tuv> result = new HashMap<Long, Tuv>();
-        try
-        {
-            List<Tuv> tuvs = SegmentTuvUtil.getAllTargetTuvs(targetPage);
-            for (Tuv tuv : tuvs)
-            {
-                result.put(tuv.getIdAsLong(), tuv);
-            }
-        }
-        catch (Exception e)
-        {
-        }
-
-        return result;
-    }
+     * private Map<Long, Tuv> getAllTuvsMap(TargetPage targetPage) { Map<Long,
+     * Tuv> result = new HashMap<Long, Tuv>(); try { List<Tuv> tuvs =
+     * SegmentTuvUtil.getAllTargetTuvs(targetPage); for (Tuv tuv : tuvs) {
+     * result.put(tuv.getIdAsLong(), tuv); } } catch (Exception e) { }
+     * 
+     * return result; }
      */
 
     private Map<Long, List<Tuv>> getAllTuvsMap(TargetPage targetPage) throws Exception
     {
         HashMap<Long, List<Tuv>> tempHashMap = new HashMap<Long, List<Tuv>>();
         List<Tuv> allTargetTuvs = SegmentTuvUtil.getAllTargetTuvs(targetPage);
-        for(Tuv tuv: allTargetTuvs)
+        for (Tuv tuv : allTargetTuvs)
         {
             long tuId = tuv.getTuId();
-            if(tempHashMap.get(tuId) == null)
+            if (tempHashMap.get(tuId) == null)
             {
                 List<Tuv> tempTuvList = new ArrayList<Tuv>();
                 tempTuvList.add(tuv);
@@ -1594,7 +1590,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
     private void sortById(List<Tuv> tempTuvList)
     {
-        if(tempTuvList.size() > 1)
+        if (tempTuvList.size() > 1)
         {
             Collections.sort(tempTuvList, new Comparator<Tuv>()
             {

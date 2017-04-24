@@ -168,5 +168,7 @@
         <mapping resource="com/globalsight/persistence/hibernate/xml/JobComment.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/TaskComment.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowComment.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/SidFilter.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/GlobalExclusionFilter.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

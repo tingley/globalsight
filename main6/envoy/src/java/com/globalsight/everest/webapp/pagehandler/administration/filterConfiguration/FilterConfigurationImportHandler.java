@@ -32,6 +32,7 @@ import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping;
 import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilter;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
@@ -47,6 +48,7 @@ import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
@@ -321,6 +323,7 @@ public class FilterConfigurationImportHandler extends PageHandler
         private Map<Long, Long> plainTextFilterIdMap = new HashMap<Long, Long>();
         private Map<Long, Long> poFilterIdMap = new HashMap<Long, Long>();
         private Map<Long, Long> jsonFilterIdMap = new HashMap<Long, Long>();
+        private Map<Long, Long> sidFilterIdMap = new HashMap<Long, Long>();
 
         public DoImport(String sessionId, File uploadedFile, String companyId)
         {
@@ -411,6 +414,8 @@ public class FilterConfigurationImportHandler extends PageHandler
             List<XmlRuleFileImpl> xmlRuleList = new ArrayList<XmlRuleFileImpl>();
             List<QAFilter> qaFilterList = new ArrayList<QAFilter>();
             List<JsonFilter> jsonFilterList = new ArrayList<JsonFilter>();
+            List<SidFilter> sidFilterList = new ArrayList<SidFilter>();
+            List<GlobalExclusionFilter> globalExclusionFilterList = new ArrayList<GlobalExclusionFilter>();
 
             Set<String> keySet = map.keySet();
             Iterator it = keySet.iterator();
@@ -516,6 +521,16 @@ public class FilterConfigurationImportHandler extends PageHandler
                         QAFilter qaFilter = putDataIntoQAFilter(valueMap);
                         qaFilterList.add(qaFilter);
                     }
+                    else if (FilterConstants.SID_TABLENAME.equalsIgnoreCase(keyArr[0]))
+                    {
+                        SidFilter filter = putDataIntoSidFilter(valueMap);
+                        sidFilterList.add(filter);
+                    }
+                    else if (FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME.equalsIgnoreCase(keyArr[0]))
+                    {
+                        GlobalExclusionFilter filter = putDataIntoGlobalExclusionFilter(valueMap);
+                        globalExclusionFilterList.add(filter);
+                    }
                 }
             }
             if (frameMakerFilterList.size() > 0)
@@ -575,6 +590,12 @@ public class FilterConfigurationImportHandler extends PageHandler
             if (qaFilterList.size() > 0)
                 dataMap.put(FilterConstants.QA_TABLENAME, qaFilterList);
             
+            if (globalExclusionFilterList.size() > 0)
+                dataMap.put("global_exclusion_filter", globalExclusionFilterList);
+            
+            if (sidFilterList.size() > 0)
+                dataMap.put("sid_filter", sidFilterList);
+            
             return dataMap;
         }
 
@@ -587,6 +608,15 @@ public class FilterConfigurationImportHandler extends PageHandler
 
             try
             {
+                // stores "sid_filter" data
+                if (dataMap.containsKey(FilterConstants.SID_TABLENAME))
+                {
+                    i++;
+                    storeSidFilterData(dataMap);
+                    this.cachePercentage(i, size);
+                    Thread.sleep(100);
+                }
+                
                 // store "base_filter" data to database
                 if (dataMap.containsKey("base_filter"))
                 {
@@ -740,6 +770,15 @@ public class FilterConfigurationImportHandler extends PageHandler
                     this.cachePercentage(i, size);
                     Thread.sleep(100);
                 }
+                
+                // stores "global_exclusion_filter" data
+                if (dataMap.containsKey(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME))
+                {
+                    i++;
+                    storeGlobalExclusionFilterFilterData(dataMap);
+                    this.cachePercentage(i, size);
+                    Thread.sleep(100);
+                }
 
                 addMessage("<b>Imported successfully !</b>");
             }
@@ -809,6 +848,80 @@ public class FilterConfigurationImportHandler extends PageHandler
             catch (Exception e)
             {
                 String msg = "Upload Base Text Filter data failed !";
+                logger.warn(msg);
+                addToError(msg);
+            }
+        }
+        
+        /**
+         * Stores sid_filter data.
+         */
+        @SuppressWarnings("unchecked")
+        private void storeSidFilterData(Map<String, List> dataMap)
+        {
+            List<SidFilter> filterList = (List<SidFilter>) dataMap.get(FilterConstants.SID_TABLENAME);
+            try
+            {
+                for (SidFilter f : filterList)
+                {
+                    Long id = f.getId();
+                    String name = f.getFilterName();
+                    // gets new filter name
+                    String newFilterName = checkFilterNameExists(name, "SidFilter");
+                    f.setFilterName(newFilterName);
+                    // stores data to database
+                    HibernateUtil.save(f);
+                    sidFilterIdMap.put(id, f.getId());
+                    if (name.equals(newFilterName))
+                    {
+                        addMessage("<b>" + newFilterName + "</b> imported successfully.");
+                    }
+                    else
+                    {
+                        addMessage("sid Filter name <b>" + name + "</b> already exists. <b>"
+                                + newFilterName + "</b> imported successfully.");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                String msg = "Upload sid Filter data failed !";
+                logger.warn(msg);
+                addToError(msg);
+            }
+        }
+        
+        /**
+         * Stores global_exclusion_filter data.
+         */
+        @SuppressWarnings("unchecked")
+        private void storeGlobalExclusionFilterFilterData(Map<String, List> dataMap)
+        {
+            List<GlobalExclusionFilter> filterList = (List<GlobalExclusionFilter>) dataMap.get(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME);
+            try
+            {
+                for (GlobalExclusionFilter f : filterList)
+                {
+                    String name = f.getFilterName();
+                    // gets new filter name
+                    String newFilterName = checkFilterNameExists(name, "GlobalExclusionFilter");
+                    f.setFilterName(newFilterName);
+                    // stores data to database
+                    HibernateUtil.save(f);
+                    if (name.equals(newFilterName))
+                    {
+                        addMessage("<b>" + newFilterName + "</b> imported successfully.");
+                    }
+                    else
+                    {
+                        addMessage("Global Exclusion Filter name <b>" + name + "</b> already exists. <b>"
+                                + newFilterName + "</b> imported successfully.");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                String msg = "Upload Global Exclusion Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
             }
@@ -964,10 +1077,35 @@ public class FilterConfigurationImportHandler extends PageHandler
                                 .getXmlRuleId()));
                     }
 
+                    HibernateUtil.save(xmlRuleFilter);
+                    // get new id
+                    Long newId = xmlRuleFilter.getId();
+                    
                     XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
                             xmlRuleFilter);
                     xmlFilterConfigParser.parserXml();
-
+                    
+                    String sidFilterId = xmlFilterConfigParser.getSidFilterId();
+                    if (sidFilterId != null)
+                    {
+                        Long newSidFilterId = sidFilterIdMap.get(Long
+                                .parseLong(sidFilterId));
+                        if (newSidFilterId != null)
+                        {
+                            sidFilterId = String.valueOf(newSidFilterId);
+                        }
+                        else
+                        {
+                            // for old data. Need parser again.
+                            xmlFilterConfigParser = new XmlFilterConfigParser(
+                                    xmlRuleFilter);
+                            xmlFilterConfigParser.parserXml();
+                        }
+                        String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
+                                "sidFilterId", sidFilterId);
+                        xmlRuleFilter.setConfigXml(newconfigXmlStr);
+                    }
+                    //xmlFilterConfigParser.getSidFilterId();
                     // elementPostFilterId
                     String postFilterTableName = xmlFilterConfigParser
                             .getElementPostFilterTableName();
@@ -1036,10 +1174,9 @@ public class FilterConfigurationImportHandler extends PageHandler
                     xmlRuleFilter.setConfigXml(newConfigXmlStr);
 
                     // store data to database
-                    HibernateUtil.save(xmlRuleFilter);
+                    HibernateUtil.update(xmlRuleFilter);
                     addMessage("<b>" + newFilterName + "</b>  is imported successfully !");
-                    // get new id
-                    Long newId = selectNewId(newFilterName, "XMLRuleFilter");
+                   
                     xmlRuleFilterIdMap.put(id, newId);
                     OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION, newFilterName);
@@ -1087,6 +1224,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                         jsonFilter.setElementPostFilterId(htmlFilterIdMap
                                 .get(jsonFilter.getElementPostFilterId()));
                     }
+                    
+                    SidFilter sf = jsonFilter.getSidFilter();
+                    if (sf != null)
+                    {
+                        sf = HibernateUtil.get(SidFilter.class, sidFilterIdMap.get(sf.getId()));
+                        jsonFilter.setSidFilter(sf);
+                    }
+                    
                     // store data to database
                     HibernateUtil.save(jsonFilter);
                     addMessage("<b>" + newFilterName + "</b>  is imported successfully !");
@@ -1135,6 +1280,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                         javaPropertiesFilter.setSecondFilterId(htmlFilterIdMap
                                 .get(javaPropertiesFilter.getSecondFilterId()));
                     }
+                    
+                    SidFilter sf = javaPropertiesFilter.getSidFilter();
+                    if (sf != null)
+                    {
+                        sf = HibernateUtil.get(SidFilter.class, sidFilterIdMap.get(sf.getId()));
+                        javaPropertiesFilter.setSidFilter(sf);
+                    }
+                    
                     // store data to database
                     HibernateUtil.save(javaPropertiesFilter);
                     addMessage("<b>" + newFilterName + "</b>  is imported successfully !");
@@ -1556,6 +1709,7 @@ public class FilterConfigurationImportHandler extends PageHandler
 
                     PlainTextFilterParser parser = new PlainTextFilterParser(plainTextFilter);
                     parser.parserXml();
+                    
                     String postFilterTableName = parser.getElementPostFilterTableName();
                     String postFilterId = parser.getElementPostFilterId();
                     if (FilterConstants.HTML_TABLENAME.equalsIgnoreCase(postFilterTableName)
@@ -1568,10 +1722,29 @@ public class FilterConfigurationImportHandler extends PageHandler
                     }
                     // store data to database
                     HibernateUtil.save(plainTextFilter);
+                    
+                    long sidFilterId = parser.getSidFilterId();
+                    if (sidFilterId > 0)
+                    {
+                        Long sidId = sidFilterIdMap.get(sidFilterId);
+                        if (sidId != null)
+                        {
+                            sidFilterId = sidId;
+                        }
+                        else
+                        {
+                            // for old data. Need parser again.
+                            parser = new PlainTextFilterParser(plainTextFilter);
+                            parser.parserXml();
+                        }
+                        String newconfigXmlStr = parser.getNewConfigXml(
+                                "sidFilterId", String.valueOf(sidFilterId));
+                        plainTextFilter.setConfigXml(newconfigXmlStr);
+                    }
+                    HibernateUtil.update(plainTextFilter);
+                    
                     addMessage("<b>" + newFilterName + "</b> is imported successfully !");
-                    // get new id
-                    Long newId = selectNewId(newFilterName, "PlainTextFilter");
-                    plainTextFilterIdMap.put(id, newId);
+                    plainTextFilterIdMap.put(id, plainTextFilter.getId());
                     OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION, newFilterName);
                 }
@@ -1822,6 +1995,88 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             return fmFilter;
         }
+        
+        
+        private SidFilter putDataIntoSidFilter(Map<String, String> valueMap)
+        {
+            SidFilter sidFilter = new SidFilter();
+            String keyField = null;
+            String valueField = null;
+            Set<String> valueKey = valueMap.keySet();
+            Iterator itor = valueKey.iterator();
+            while (itor.hasNext())
+            {
+                keyField = (String) itor.next();
+                valueField = valueMap.get(keyField);
+
+                if (keyField.equalsIgnoreCase("ID"))
+                {
+                    sidFilter.setId(Long.parseLong(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("FILTER_NAME"))
+                {
+                    sidFilter.setFilterName(containSpecialChar(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("FILTER_DESCRIPTION"))
+                {
+                    sidFilter.setFilterDescription(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("TYPE"))
+                {
+                    sidFilter.setType(Integer.parseInt(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("CONFIG"))
+                {
+                    sidFilter.setConfigXml(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("COMPANY_ID"))
+                {
+                    sidFilter.setCompanyId(Long.parseLong(companyId));
+                }
+            }
+            return sidFilter;
+        }
+        
+        private GlobalExclusionFilter putDataIntoGlobalExclusionFilter(Map<String, String> valueMap)
+        {
+            GlobalExclusionFilter globalExclusionFilter = new GlobalExclusionFilter();
+            String keyField = null;
+            String valueField = null;
+            Set<String> valueKey = valueMap.keySet();
+            Iterator itor = valueKey.iterator();
+            while (itor.hasNext())
+            {
+                keyField = (String) itor.next();
+                valueField = valueMap.get(keyField);
+
+                if (keyField.equalsIgnoreCase("ID"))
+                {
+                    globalExclusionFilter.setId(Long.parseLong(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("FILTER_NAME"))
+                {
+                    globalExclusionFilter.setFilterName(containSpecialChar(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("FILTER_DESCRIPTION"))
+                {
+                    globalExclusionFilter.setFilterDescription(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("TYPE"))
+                {
+                    globalExclusionFilter.setType(Integer.parseInt(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("CONFIG"))
+                {
+                    globalExclusionFilter.setConfigXml(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("COMPANY_ID"))
+                {
+                    globalExclusionFilter.setCompanyId(Long.parseLong(companyId));
+                }
+            }
+            return globalExclusionFilter;
+        }
+
 
         private HtmlFilter putDataIntoHtmlFilter(Map<String, String> valueMap)
         {
@@ -2142,6 +2397,12 @@ public class FilterConfigurationImportHandler extends PageHandler
                 {
                     jsonFilter.setBaseFilterId(Long.parseLong(valueField));
                 }
+                else if (keyField.equalsIgnoreCase("SID_FILTER_ID"))
+                {
+                    SidFilter sf = new SidFilter();
+                    sf.setId(Long.parseLong(valueField));
+                    jsonFilter.setSidFilter(sf);
+                }
                 else if (keyField.equalsIgnoreCase("ELEMENT_POST_FILTER_ID"))
                 {
                     jsonFilter.setElementPostFilterId(Long.parseLong(valueField));
@@ -2185,6 +2446,12 @@ public class FilterConfigurationImportHandler extends PageHandler
                 else if (keyField.equalsIgnoreCase("ENABLE_SID_SUPPORT"))
                 {
                     javaPropertiesFilter.setEnableSidSupport(Boolean.parseBoolean(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("SID_FILTER_ID"))
+                {
+                    SidFilter sf = new SidFilter();
+                    sf.setId(Long.parseLong(valueField));
+                    javaPropertiesFilter.setSidFilter(sf);
                 }
                 else if (keyField.equalsIgnoreCase("ENABLE_UNICODE_ESCAPE"))
                 {

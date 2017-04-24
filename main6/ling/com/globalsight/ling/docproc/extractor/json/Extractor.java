@@ -19,7 +19,6 @@ import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
-import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.PTEscapeSequence;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;

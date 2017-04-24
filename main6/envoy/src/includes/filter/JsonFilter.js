@@ -75,8 +75,8 @@ JsonFilter.prototype.generateDiv = function(topFilterId, color) {
 	str.append("<table border=0 width='100%'>");
 
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td' nowrap>" + jsEnableSIDSupport+ "</td>");
-	str.append("<td class='htmlFilter_right_td'><input id='isSupportSid' type='checkbox' name='supportSid' value='true'/></td>");
+	str.append("<td class='htmlFilter_left_td' nowrap>" + jsFilterNameSidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport() + "</td>");
 	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
 	str.append("</tr>");
 
@@ -104,6 +104,25 @@ JsonFilter.prototype.generateDiv = function(topFilterId, color) {
 	saveJson.edit = false;
 	saveJson.color = color;
 	saveJson.topFilterId = topFilterId;
+}
+
+JsonFilter.prototype.generateSidSupport = function (filter)
+{	
+	var str = new StringBuffer("<select id='jsonSidFilter' style='width:100%;' class='xml_filter_select'>");
+	str.append("<option value='-1'" + ((filter && filter.sidFilterId == "-1") ? " selected" : "") + ">Choose&nbsp;&nbsp;&nbsp;</option>");	
+	var data = {
+		type : 4
+	}
+	var sidFilters = getAjaxValue("getSidFilters", data);
+	if (sidFilters){
+		sidFilters = eval(sidFilters);
+	}
+	for (var i = 0; i <　sidFilters.length; i++){
+		var sf = eval("(" + sidFilters[i] + ")");
+		str.append("<option value='" + sf.id + "'" + ((filter && filter.sidFilterId == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
+	}
+	str.append("</select>");
+	return str.toString();
 }
 
 JsonFilter.prototype.generateElementPostFilter = function(filter) {
@@ -177,8 +196,6 @@ function saveJson() {
 	var isNew = (saveJson.edit) ? "false" : "true";
 	var filterId = saveJson.filterId;
 	var filterDesc = document.getElementById("jsonDesc").value;
-	var isSupportSid = document.getElementById("isSupportSid").checked;
-
 	var baseFilterSelect = document.getElementById("filter_json_baseFilterSelect");
 	var indexBase = baseFilterSelect.selectedIndex;
 	var baseFilterId = baseFilterSelect.options[indexBase].value;
@@ -186,6 +203,7 @@ function saveJson() {
 	var elementPostFilters = document.getElementById("jsonElementPostFilter");
 	var indexElement = elementPostFilters.selectedIndex;
 	var elementPostFilters = elementPostFilters.options[indexElement].value;
+	var sidFilterId = $("#jsonSidFilter").val();
 
 	ch = new Array; 
 	ch = elementPostFilters.split("-"); 
@@ -198,7 +216,7 @@ function saveJson() {
 		filterId : filterId,
 		filterName : filterName,
 		filterDesc : filterDesc,
-		isSupportSid : isSupportSid,
+		sidFilterId : sidFilterId,
 		companyId : companyId,
 		baseFilterId : baseFilterId,
 		elementPostFilterId : elementPostFilterId,
@@ -239,7 +257,7 @@ function saveJsonFilterCallback(data) {
 		jpFilter.filterTableName = "filter_json";
 		jpFilter.filterName = checkExistJsonCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJsonCallback.obj.filterDesc;
-		jpFilter.enableSidSupport = checkExistJsonCallback.obj.isSupportSid;
+		jpFilter.sidFilterId = checkExistJsonCallback.obj.sidFilterId;
 		jpFilter.companyId = companyId;
 		jpFilter.baseFilterId = checkExistJsonCallback.obj.baseFilterId;
 		jpFilter.elementPostFilterId = checkExistJsonCallback.obj.elementPostFilterId;
@@ -261,7 +279,7 @@ function updateJsonFilterCallback(data)
 		jpFilter.filterTableName = "filter_json";
 		jpFilter.filterName = checkExistJsonCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJsonCallback.obj.filterDesc;
-		jpFilter.enableSidSupport = checkExistJsonCallback.obj.isSupportSid;
+		jpFilter.sidFilterId = checkExistJsonCallback.obj.sidFilterId;
 		jpFilter.companyId = companyId;
 		jpFilter.baseFilterId = checkExistJsonCallback.obj.baseFilterId;
 		jpFilter.elementPostFilterId = checkExistJsonCallback.obj.elementPostFilterId;
@@ -296,9 +314,8 @@ JsonFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 
 	str.append("<table border=0 width='100%'>");
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td' nowrap>" + jsEnableSIDSupport+ "</td>");
-	str.append("<td class='htmlFilter_right_td'><input id='isSupportSid' type='checkbox' name='supportSid' value='"
-				+ this.filter.enableSidSupport+ "' "+ isCheckSid+ "/></td>");
+	str.append("<td class='htmlFilter_left_td' nowrap>" + jsFilterNameSidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport(this.filter) + "</td>");
 	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
 	str.append("</tr>");
 

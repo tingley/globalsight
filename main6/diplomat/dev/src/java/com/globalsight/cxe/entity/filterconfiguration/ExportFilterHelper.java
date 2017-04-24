@@ -160,6 +160,14 @@ public class ExportFilterHelper
             {
                 propertiesInputJsonFilter(propertyFile, tableName, filterId, companyId);
             }
+            else if(FilterConstants.SID_TABLENAME.equalsIgnoreCase(tableName))
+            {
+                propertiesInputSidFilter(propertyFile, tableName, filterId, companyId);
+            }
+            else if(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME.equalsIgnoreCase(tableName))
+            {
+                propertiesInputGlobalExclusionFilter(propertyFile, tableName, filterId, companyId);
+            }
         }
 
         ExportUtil.writeToResponse(response, propertyFile, fileName);
@@ -235,6 +243,13 @@ public class ExportFilterHelper
                         filterSet.add(FilterConstants.BASE_TABLENAME + "." + bfm.getBaseFilterId());
                     }
                 }
+                
+                if (javaPropertiesFilter.getSidFilter() != null)
+                {
+                    SidFilter f = javaPropertiesFilter.getSidFilter();
+                    filterSet.add(f.getFilterTableName() + "."
+                            + f.getId());
+                }
             }
             else if (FilterConstants.JSON_TABLENAME.equalsIgnoreCase(filterTableName))
             {
@@ -256,6 +271,13 @@ public class ExportFilterHelper
                         filterSet.add(FilterConstants.BASE_TABLENAME + "." + bfm.getBaseFilterId());
                     }
                 }
+                
+                if (jsonFilter.getSidFilter() != null)
+                {
+                    SidFilter f = jsonFilter.getSidFilter();
+                    filterSet.add(f.getFilterTableName() + "."
+                            + f.getId());
+                }
             }
             else if (filterTableName.equalsIgnoreCase(FilterConstants.PLAINTEXT_TABLENAME))
             {
@@ -264,6 +286,13 @@ public class ExportFilterHelper
                     PlainTextFilter plainTextFilter = (PlainTextFilter) filter;
                     PlainTextFilterParser parser = new PlainTextFilterParser(plainTextFilter);
                     parser.parserXml();
+                    
+                    if (parser.getSidFilterId() > 0)
+                    {
+                        filterSet.add("sid_filter."
+                                + parser.getSidFilterId());
+                    }
+                    
                     String postFilterTableName = parser.getElementPostFilterTableName();
                     String postFilterId = parser.getElementPostFilterId();
 
@@ -565,6 +594,14 @@ public class ExportFilterHelper
                                 JsonFilter jsonFilter = (JsonFilter) selectFilterDataFromDataBase(
                                         postFilterTableName, Long.parseLong(postFilterTableID),
                                         companyId);
+                                
+                                if (jsonFilter.getSidFilter() != null)
+                                {
+                                    SidFilter f = jsonFilter.getSidFilter();
+                                    filterSet.add(f.getFilterTableName() + "."
+                                            + f.getId());
+                                }
+                                
                                 BaseFilterMapping jsoBFM = checkInternalFilterIsUsedByFilter(
                                         postFilterTableName, Long.parseLong(postFilterTableID));
 
@@ -656,6 +693,12 @@ public class ExportFilterHelper
                                     }
                                 }
                             }
+                        }
+                        
+                        if (xmlFilterConfigParser.getSidFilterId() != null)
+                        {
+                            filterSet.add("sid_filter."
+                                    + xmlFilterConfigParser.getSidFilterId());
                         }
 
                         List<String> list = xmlFilterConfigParser.getPostFilterIdAndName();
@@ -1334,9 +1377,12 @@ public class ExportFilterHelper
                     .append(".FILTER_DESCRIPTION = ")
                     .append(editUtil.removeCRLF(jsonsFilter.getFilterDescription()))
                     .append(NEW_LINE);
-            buffer.append("json_filter.").append(jsonsFilter.getId())
-                    .append(".ENABLE_SID_SUPPORT = ")
-                    .append(jsonsFilter.isEnableSidSupport()).append(NEW_LINE);
+            if (jsonsFilter.getSidFilter() != null)
+            {
+                buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".SID_FILTER_ID = ").append(jsonsFilter.getSidFilter().getId())
+                    .append(NEW_LINE);
+            }
             buffer.append("json_filter.").append(jsonsFilter.getId())
                     .append(".BASE_FILTER_ID = ")
                     .append(jsonsFilter.getBaseFilterId()).append(NEW_LINE);
@@ -1350,6 +1396,94 @@ public class ExportFilterHelper
                     .append(".COMPANY_ID = ").append(jsonsFilter.getCompanyId())
                     .append(NEW_LINE);
             buffer.append("##json_filter.").append(jsonsFilter.getId())
+                    .append(".end").append(NEW_LINE).append(NEW_LINE);
+
+            writeToFile(propertyFile, buffer.toString().getBytes());
+        }
+    }
+    
+    /**
+     * Write sidFilter the properties file
+     * 
+     * @param prop
+     * @param filter
+     * @param baseFilterMapping
+     * */
+    private static void propertiesInputSidFilter(File propertyFile, String tableName,
+            Long filterId, Long companyId)
+    {
+        StringBuffer buffer = new StringBuffer();
+        Filter filter = selectFilterDataFromDataBase(tableName, filterId, companyId);
+        if (filter != null)
+        {
+            SidFilter sidsFilter = (SidFilter) filter;
+
+            buffer.append("##sid_filter.").append(sidsFilter.getId())
+            .append(".begin").append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".ID = ").append(sidsFilter.getId()).append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".FILTER_NAME = ")
+                    .append(editUtil.removeCRLF(sidsFilter.getFilterName()))
+                    .append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".FILTER_DESCRIPTION = ")
+                    .append(editUtil.removeCRLF(sidsFilter.getFilterDescription()))
+                    .append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".TYPE = ")
+                    .append(sidsFilter.getType()).append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".CONFIG = ")
+                    .append(checkSpecialChar(sidsFilter.getConfigXml())).append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".COMPANY_ID = ").append(sidsFilter.getCompanyId())
+                    .append(NEW_LINE);
+            buffer.append("##sid_filter.").append(sidsFilter.getId())
+                    .append(".end").append(NEW_LINE).append(NEW_LINE);
+
+            writeToFile(propertyFile, buffer.toString().getBytes());
+        }
+    }
+    
+    /**
+     * Write sidFilter the properties file
+     * 
+     * @param prop
+     * @param filter
+     * @param baseFilterMapping
+     * */
+    private static void propertiesInputGlobalExclusionFilter(File propertyFile, String tableName,
+            Long filterId, Long companyId)
+    {
+        StringBuffer buffer = new StringBuffer();
+        Filter filter = selectFilterDataFromDataBase(tableName, filterId, companyId);
+        if (filter != null)
+        {
+            GlobalExclusionFilter globalExclusionFilter = (GlobalExclusionFilter) filter;
+
+            buffer.append("##global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".begin").append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".ID = ").append(globalExclusionFilter.getId()).append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".FILTER_NAME = ")
+                    .append(editUtil.removeCRLF(globalExclusionFilter.getFilterName()))
+                    .append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".FILTER_DESCRIPTION = ")
+                    .append(editUtil.removeCRLF(globalExclusionFilter.getFilterDescription()))
+                    .append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".TYPE = ")
+                    .append(globalExclusionFilter.getType()).append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".CONFIG = ")
+                    .append(checkSpecialChar(globalExclusionFilter.getConfigXml())).append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".COMPANY_ID = ").append(globalExclusionFilter.getCompanyId())
+                    .append(NEW_LINE);
+            buffer.append("##global_exclusion_filter.").append(globalExclusionFilter.getId())
                     .append(".end").append(NEW_LINE).append(NEW_LINE);
 
             writeToFile(propertyFile, buffer.toString().getBytes());
@@ -1384,9 +1518,12 @@ public class ExportFilterHelper
                     .append(".FILTER_DESCRIPTION = ")
                     .append(editUtil.removeCRLF(javaPropertiesFilter.getFilterDescription()))
                     .append(NEW_LINE);
-            buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
-                    .append(".ENABLE_SID_SUPPORT = ")
-                    .append(javaPropertiesFilter.getEnableSidSupport()).append(NEW_LINE);
+            if (javaPropertiesFilter.getSidFilter() != null)
+            {
+                buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
+                    .append(".SID_FILTER_ID = ").append(javaPropertiesFilter.getSidFilter().getId())
+                    .append(NEW_LINE);
+            }
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".ENABLE_UNICODE_ESCAPE = ")
                     .append(javaPropertiesFilter.getEnableUnicodeEscape()).append(NEW_LINE);
@@ -1796,6 +1933,9 @@ public class ExportFilterHelper
 
     private static String checkSpecialChar(String str)
     {
+        if (str == null)
+            return "";
+        
         char[] chars = str.toCharArray();
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < chars.length; i++)

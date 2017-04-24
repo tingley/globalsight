@@ -21,6 +21,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -646,7 +648,37 @@ public class CustomTextRuleHelper
                         }
                     }
 
-                    int[] sidIndex = extractOneLine(l0, p_customSidRules);
+                    int[] sidIndex = null;
+                    List<CustomTextRuleSid> rs = new ArrayList<>();
+                    try
+                    {
+                        for (CustomTextRuleBase c : p_customSidRules)
+                        {
+                            rs.add((CustomTextRuleSid) c);
+                        }
+                        Collections.sort(rs, new Comparator<CustomTextRuleSid>()
+                        {
+                            @Override
+                            public int compare(CustomTextRuleSid o1, CustomTextRuleSid o2)
+                            {
+                                return o1.getPriority() - o2.getPriority();
+                            }
+                        });
+                        
+                        for (CustomTextRuleSid r : rs)
+                        {
+                            List rs2 = new ArrayList<>();
+                            rs2.add(r);
+                            sidIndex = extractOneLine(l0, rs2);
+                            if (sidIndex != null)
+                                break;
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        CATEGORY.error(e);
+                        sidIndex = extractOneLine(l0, p_customSidRules);
+                    }
 
                     if (sidIndex != null && sidIndex.length == 2)
                     {

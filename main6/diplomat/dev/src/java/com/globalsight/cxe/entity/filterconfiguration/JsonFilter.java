@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,6 +27,7 @@ public class JsonFilter implements Filter
     private long elementPostFilterId;
     private long baseFilterId;
     private String elementPostFilterTableName;
+    private SidFilter sidFilter = null;
 
     public String getElementPostFilterTableName()
     {
@@ -66,15 +68,67 @@ public class JsonFilter implements Filter
     {
         this.filterDescription = filterDescription;
     }
+    
+    public boolean isSupportSid()
+    {
+        return enableSidSupport;
+    }
+    
+    public void setSupportSid(boolean enableSidSupport)
+    {
+        this.enableSidSupport = enableSidSupport;
+    }
 
     public boolean isEnableSidSupport()
     {
-        return enableSidSupport;
+        if (enableSidSupport == true)
+        {
+            if (this.getSidFilter() != null)
+                return true;
+            
+            String hql = "from SidFilter s where s.type = 4 and companyId = ?";
+            SidFilter s = (SidFilter) HibernateUtil.getFirst(hql, companyId);
+            if (s == null)
+            {
+                s = new SidFilter();
+                s.setCompanyId(companyId);
+                s.setType(4);
+                String namePre = "Json SID Filter ";
+                int i = 1;
+                String name = namePre + i;
+                while (s.checkExistsNew(name, companyId)){
+                    i++;
+                    name = namePre + i;
+                }
+                
+                s.setFilterName(name);
+                HibernateUtil.saveOrUpdate(s);
+            }
+            
+            this.setSidFilter(s);
+            this.enableSidSupport = false;
+            HibernateUtil.saveOrUpdate(s);
+            try
+            {
+                HibernateUtil.saveOrUpdate(this);
+            }
+            catch (HibernateException e)
+            {
+                // ignore the error. the name may be null if the filter is importing.
+            }
+        }
+        
+        return this.getSidFilter() != null;
     }
 
     public void setEnableSidSupport(boolean enableSidSupport)
     {
         this.enableSidSupport = enableSidSupport;
+        if (enableSidSupport)
+        {
+            //for old data.
+            isEnableSidSupport();
+        }
     }
 
     public long getCompanyId()
@@ -144,6 +198,9 @@ public class JsonFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        // for old data.
+        isEnableSidSupport();
+        
         JSONObject json = new JSONObject();
         try
         {
@@ -151,7 +208,7 @@ public class JsonFilter implements Filter
             json.put("companyId", companyId);
             json.put("filterName", filterName);
             json.put("filterDescription", filterDescription);
-            json.put("enableSidSupport", enableSidSupport);
+            json.put("sidFilterId", sidFilter == null ? -1 : sidFilter.getId());
             json.put("elementPostFilterId", elementPostFilterId);
             json.put("elementPostFilterTableName", elementPostFilterTableName);
             json.put("baseFilterId", baseFilterId);
@@ -164,4 +221,13 @@ public class JsonFilter implements Filter
         return json.toString();
     }
 
+    public SidFilter getSidFilter()
+    {
+        return sidFilter;
+    }
+
+    public void setSidFilter(SidFilter sidFilter)
+    {
+        this.sidFilter = sidFilter;
+    }
 }

@@ -1360,7 +1360,7 @@ function saveHtmlFilter()
 	var localizeFunction = document.getElementById("localizeFunction").value;
 	var baseFilterId = document.getElementById("html_filter_baseFilterSelect").value;
 	
-	var wsHandleModeHtml = getRadioValue(fpForm.wsHandleModeHTML);
+	var wsHandleModeHtml = $("input[name='wsHandleModeHTML'][checked]").val();
 	var whitespacePreserve = (wsHandleModeHtml == 2);
 	
 	// do not add this alert as there is no secondary or post filter in html filter

@@ -35,6 +35,8 @@ public class XmlFilterTags
     private List<XmlFilterSidTag> sidTags = new ArrayList<XmlFilterSidTag>();
     private List<SrcCmtXmlComment> srcCmtXmlComment = new ArrayList<SrcCmtXmlComment>();
     private List<SrcCmtXmlTag> srcCmtXmlTag = new ArrayList<SrcCmtXmlTag>();
+    private long sidFilterId = -1;
+    private String sidPrecedence = "xml";
 
     public List<SrcCmtXmlTag> getSrcCmtXmlTag()
     {
@@ -150,5 +152,25 @@ public class XmlFilterTags
     public void setSrcCmtXmlComment(List<SrcCmtXmlComment> srcCmtXmlComment)
     {
         this.srcCmtXmlComment = srcCmtXmlComment;
+    }
+
+    public long getSidFilterId()
+    {
+        return sidFilterId;
+    }
+
+    public void setSidFilterId(long sidFilterId)
+    {
+        this.sidFilterId = sidFilterId;
+    }
+
+    public String getSidPrecedence()
+    {
+        return sidPrecedence;
+    }
+
+    public void setSidPrecedence(String sidPrecedence)
+    {
+        this.sidPrecedence = sidPrecedence;
     }
 }

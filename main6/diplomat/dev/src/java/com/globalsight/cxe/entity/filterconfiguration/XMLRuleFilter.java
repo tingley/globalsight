@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.FilterComparator;
@@ -36,6 +38,9 @@ import com.globalsight.util.SortUtil;
  */
 public class XMLRuleFilter implements Filter
 {
+    static private final Logger logger = Logger
+            .getLogger(XMLRuleFilter.class);
+    
     private long id;
     private String filterName;
     private String filterDescription;
@@ -155,6 +160,8 @@ public class XMLRuleFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        logger.debug("xml filter configXml:" + this.getConfigXml());
+        
         XmlFilterConfigParser parser = new XmlFilterConfigParser(this);
         boolean isParsed = false;
         try
@@ -235,6 +242,10 @@ public class XMLRuleFilter implements Filter
                 .append(isParsed ? parser.getSidTagName() : "").append("\",");
         sb.append("\"sidSupportAttName\":").append("\"")
                 .append(isParsed ? parser.getSidAttrName() : "").append("\",");
+        sb.append("\"sidFilterId\":").append("\"").append(isParsed ? parser.getSidFilterId() : "")
+                .append("\",");
+        sb.append("\"sidFilterPrecedence\":").append("\"").append(isParsed ? parser.getSidPrecedence() : "")
+                .append("\",");
         sb.append("\"isCheckWellFormed\":").append(isParsed ? parser.isCheckWellFormed() : "false")
                 .append(",");
         sb.append("\"isGerateLangInfo\":").append(isParsed ? parser.isGerateLangInfo() : "false")

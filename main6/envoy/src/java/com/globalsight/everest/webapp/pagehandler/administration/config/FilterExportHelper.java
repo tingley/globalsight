@@ -33,6 +33,7 @@ import com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping;
 import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilter;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
@@ -49,6 +50,7 @@ import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.cxe.entity.filterconfiguration.SpecialFilterToExport;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
@@ -186,8 +188,104 @@ public class FilterExportHelper implements ConfigConstants
             {
                 propertiesInputJsonFilter(filterPropertyFile, tableName, filterId, companyId);
             }
+            else if(FilterConstants.SID_TABLENAME.equalsIgnoreCase(tableName))
+            {
+                propertiesInputSidFilter(filterPropertyFile, tableName, filterId, companyId);
+            }
+            else if(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME.equalsIgnoreCase(tableName))
+            {
+                propertiesInputGlobalExclusionFilter(filterPropertyFile, tableName, filterId, companyId);
+            }
         }
         return filterPropertyFile;
+    }
+    
+    /**
+     * Write sidFilter the properties file
+     * 
+     * @param prop
+     * @param filter
+     * @param baseFilterMapping
+     * */
+    private static void propertiesInputSidFilter(File propertyFile, String tableName,
+            Long filterId, Long companyId)
+    {
+        StringBuffer buffer = new StringBuffer();
+        Filter filter = selectFilterDataFromDataBase(tableName, filterId, companyId);
+        if (filter != null)
+        {
+            SidFilter sidsFilter = (SidFilter) filter;
+
+            buffer.append("##sid_filter.").append(sidsFilter.getId())
+            .append(".begin").append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".ID = ").append(sidsFilter.getId()).append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".FILTER_NAME = ")
+                    .append(EditUtil.removeCRLF(sidsFilter.getFilterName()))
+                    .append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".FILTER_DESCRIPTION = ")
+                    .append(EditUtil.removeCRLF(sidsFilter.getFilterDescription()))
+                    .append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".TYPE = ")
+                    .append(sidsFilter.getType()).append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".CONFIG = ")
+                    .append(checkSpecialChar(sidsFilter.getConfigXml())).append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                    .append(".COMPANY_ID = ").append(sidsFilter.getCompanyId())
+                    .append(NEW_LINE);
+            buffer.append("##sid_filter.").append(sidsFilter.getId())
+                    .append(".end").append(NEW_LINE).append(NEW_LINE);
+
+            writeToFile(propertyFile, buffer.toString().getBytes());
+        }
+    }
+    
+    /**
+     * Write sidFilter the properties file
+     * 
+     * @param prop
+     * @param filter
+     * @param baseFilterMapping
+     * */
+    private static void propertiesInputGlobalExclusionFilter(File propertyFile, String tableName,
+            Long filterId, Long companyId)
+    {
+        StringBuffer buffer = new StringBuffer();
+        Filter filter = selectFilterDataFromDataBase(tableName, filterId, companyId);
+        if (filter != null)
+        {
+            GlobalExclusionFilter globalExclusionFilter = (GlobalExclusionFilter) filter;
+
+            buffer.append("##global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".begin").append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".ID = ").append(globalExclusionFilter.getId()).append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".FILTER_NAME = ")
+                    .append(EditUtil.removeCRLF(globalExclusionFilter.getFilterName()))
+                    .append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".FILTER_DESCRIPTION = ")
+                    .append(EditUtil.removeCRLF(globalExclusionFilter.getFilterDescription()))
+                    .append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".TYPE = ")
+                    .append(globalExclusionFilter.getType()).append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".CONFIG = ")
+                    .append(checkSpecialChar(globalExclusionFilter.getConfigXml())).append(NEW_LINE);
+            buffer.append("global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".COMPANY_ID = ").append(globalExclusionFilter.getCompanyId())
+                    .append(NEW_LINE);
+            buffer.append("##global_exclusion_filter.").append(globalExclusionFilter.getId())
+                    .append(".end").append(NEW_LINE).append(NEW_LINE);
+
+            writeToFile(propertyFile, buffer.toString().getBytes());
+        }
     }
 
     /**
@@ -776,9 +874,13 @@ public class FilterExportHelper implements ConfigConstants
                     .append(".FILTER_DESCRIPTION = ")
                     .append(EditUtil.removeCRLF(jsonsFilter.getFilterDescription()))
                     .append(NEW_LINE);
-            buffer.append("json_filter.").append(jsonsFilter.getId())
-                    .append(".ENABLE_SID_SUPPORT = ").append(jsonsFilter.isEnableSidSupport())
+            if (jsonsFilter.getSidFilter() != null)
+            {
+                buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".SID_FILTER_ID = ").append(jsonsFilter.getSidFilter().getId())
                     .append(NEW_LINE);
+            }
+            
             buffer.append("json_filter.").append(jsonsFilter.getId()).append(".BASE_FILTER_ID = ")
                     .append(jsonsFilter.getBaseFilterId()).append(NEW_LINE);
             buffer.append("json_filter.").append(jsonsFilter.getId())
@@ -820,9 +922,12 @@ public class FilterExportHelper implements ConfigConstants
                     .append(".FILTER_DESCRIPTION = ")
                     .append(EditUtil.removeCRLF(javaPropertiesFilter.getFilterDescription()))
                     .append(NEW_LINE);
-            buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
-                    .append(".ENABLE_SID_SUPPORT = ")
-                    .append(javaPropertiesFilter.getEnableSidSupport()).append(NEW_LINE);
+            if (javaPropertiesFilter.getSidFilter() != null)
+            {
+                buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
+                    .append(".SID_FILTER_ID = ").append(javaPropertiesFilter.getSidFilter().getId())
+                    .append(NEW_LINE);
+            }
             buffer.append("java_properties_filter.").append(javaPropertiesFilter.getId())
                     .append(".ENABLE_UNICODE_ESCAPE = ")
                     .append(javaPropertiesFilter.getEnableUnicodeEscape()).append(NEW_LINE);
@@ -1164,6 +1269,13 @@ public class FilterExportHelper implements ConfigConstants
                     filterSet.add(FilterConstants.BASE_TABLENAME + "." + bfm.getBaseFilterId());
                 }
             }
+            
+            if (javaPropertiesFilter.getSidFilter() != null)
+            {
+                SidFilter f = javaPropertiesFilter.getSidFilter();
+                filterSet.add(f.getFilterTableName() + "."
+                        + f.getId());
+            }
         }
         else if (FilterConstants.JSON_TABLENAME.equalsIgnoreCase(filterTableName))
         {
@@ -1185,6 +1297,13 @@ public class FilterExportHelper implements ConfigConstants
                     filterSet.add(FilterConstants.BASE_TABLENAME + "." + bfm.getBaseFilterId());
                 }
             }
+            
+            if (jsonFilter.getSidFilter() != null)
+            {
+                SidFilter f = jsonFilter.getSidFilter();
+                filterSet.add(f.getFilterTableName() + "."
+                        + f.getId());
+            }
         }
         else if (filterTableName.equalsIgnoreCase(FilterConstants.PLAINTEXT_TABLENAME))
         {
@@ -1193,6 +1312,13 @@ public class FilterExportHelper implements ConfigConstants
                 PlainTextFilter plainTextFilter = (PlainTextFilter) filter;
                 PlainTextFilterParser parser = new PlainTextFilterParser(plainTextFilter);
                 parser.parserXml();
+                
+                if (parser.getSidFilterId() > 0)
+                {
+                    filterSet.add("sid_filter."
+                            + parser.getSidFilterId());
+                }
+                
                 String postFilterTableName = parser.getElementPostFilterTableName();
                 String postFilterId = parser.getElementPostFilterId();
 
@@ -1454,6 +1580,13 @@ public class FilterExportHelper implements ConfigConstants
                     XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
                             xmlRuleFilter);
                     xmlFilterConfigParser.parserXml();
+                    
+                    if (xmlFilterConfigParser.getSidFilterId() != null)
+                    {
+                        filterSet.add("sid_filter."
+                                + xmlFilterConfigParser.getSidFilterId());
+                    }
+                    
                     String postFilterTableName = xmlFilterConfigParser
                             .getElementPostFilterTableName();
                     String postFilterTableID = xmlFilterConfigParser.getElementPostFilterId();
@@ -1482,6 +1615,13 @@ public class FilterExportHelper implements ConfigConstants
                                     companyId);
                             BaseFilterMapping jsoBFM = checkInternalFilterIsUsedByFilter(
                                     postFilterTableName, Long.parseLong(postFilterTableID));
+                            
+                            if (jsonFilter.getSidFilter() != null)
+                            {
+                                SidFilter f = jsonFilter.getSidFilter();
+                                filterSet.add(f.getFilterTableName() + "."
+                                        + f.getId());
+                            }
 
                             if (jsoBFM != null)
                             {
@@ -1612,6 +1752,7 @@ public class FilterExportHelper implements ConfigConstants
         }
         return filterSet;
     }
+
 
     /**
      * Finds xmlRuleFilter data according to filterId and companyId.

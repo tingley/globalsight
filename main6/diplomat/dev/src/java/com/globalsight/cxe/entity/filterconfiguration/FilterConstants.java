@@ -44,6 +44,8 @@ public class FilterConstants
     public final static String PLAINTEXT_TABLENAME = "plain_text_filter";
     public final static String QA_TABLENAME = "qa_filter";
     public final static String JSON_TABLENAME = "filter_json";
+    public final static String SID_TABLENAME = "sid_filter";
+    public final static String GLOBAL_EXCLUSIONS_TABLENAME = "global_exclusion_filter";
 
     public final static ArrayList<String> ALL_FILTER_TABLE_NAMES = new ArrayList<String>();
     public final static Map<String, String> FILTER_TABLE_NAMES_FORMAT = new HashMap<String, String>();
@@ -65,6 +67,8 @@ public class FilterConstants
         ALL_FILTER_TABLE_NAMES.add(FM_TABLENAME);
         ALL_FILTER_TABLE_NAMES.add(PLAINTEXT_TABLENAME);
         ALL_FILTER_TABLE_NAMES.add(JSON_TABLENAME);
+        ALL_FILTER_TABLE_NAMES.add(SID_TABLENAME);
+        ALL_FILTER_TABLE_NAMES.add(GLOBAL_EXCLUSIONS_TABLENAME);
 
         FILTER_TABLE_NAMES_FORMAT.put(HTML_TABLENAME, IFormatNames.FORMAT_HTML);
         FILTER_TABLE_NAMES_FORMAT.put(MSOFFICEDOC_TABLENAME,

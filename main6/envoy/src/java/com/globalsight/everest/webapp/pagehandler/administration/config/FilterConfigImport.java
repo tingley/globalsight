@@ -36,6 +36,7 @@ import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping;
 import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilter;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
@@ -51,6 +52,7 @@ import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
@@ -80,6 +82,7 @@ public class FilterConfigImport implements ConfigConstants
     private Map<Long, Long> plainTextFilterIdMap = new HashMap<Long, Long>();
     private Map<Long, Long> poFilterIdMap = new HashMap<Long, Long>();
     private Map<Long, Long> jsonFilterIdMap = new HashMap<Long, Long>();
+    private Map<Long, Long> sidFilterIdMap = new HashMap<Long, Long>();
     private static final Logger logger = Logger.getLogger(FilterConfigImport.class);
 
     public FilterConfigImport(String sessionId, String userId, String companyId, String importToCompId)
@@ -170,6 +173,8 @@ public class FilterConfigImport implements ConfigConstants
         List<XmlRuleFileImpl> xmlRuleList = new ArrayList<XmlRuleFileImpl>();
         List<QAFilter> qaFilterList = new ArrayList<QAFilter>();
         List<JsonFilter> jsonFilterList = new ArrayList<JsonFilter>();
+        List<SidFilter> sidFilterList = new ArrayList<SidFilter>();
+        List<GlobalExclusionFilter> globalExclusionFilterList = new ArrayList<GlobalExclusionFilter>();
 
         Set<String> keySet = map.keySet();
         Iterator it = keySet.iterator();
@@ -275,6 +280,16 @@ public class FilterConfigImport implements ConfigConstants
                     QAFilter qaFilter = putDataIntoQAFilter(valueMap);
                     qaFilterList.add(qaFilter);
                 }
+                else if (FilterConstants.SID_TABLENAME.equalsIgnoreCase(keyArr[0]))
+                {
+                    SidFilter filter = putDataIntoSidFilter(valueMap);
+                    sidFilterList.add(filter);
+                }
+                else if (FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME.equalsIgnoreCase(keyArr[0]))
+                {
+                    GlobalExclusionFilter filter = putDataIntoGlobalExclusionFilter(valueMap);
+                    globalExclusionFilterList.add(filter);
+                }
             }
         }
         if (frameMakerFilterList.size() > 0)
@@ -297,6 +312,13 @@ public class FilterConfigImport implements ConfigConstants
 
         if (jsonFilterList.size() > 0)
             dataMap.put("json_filter", jsonFilterList);
+        
+        if (globalExclusionFilterList.size() > 0)
+            dataMap.put("global_exclusion_filter", globalExclusionFilterList);
+        
+        if (sidFilterList.size() > 0)
+            dataMap.put("sid_filter", sidFilterList);
+        
 
         if (javaScriptFilterList.size() > 0)
             dataMap.put("java_script_filter", javaScriptFilterList);
@@ -343,6 +365,18 @@ public class FilterConfigImport implements ConfigConstants
             return;
         try
         {
+            // stores "sid_filter" data
+            if (dataMap.containsKey(FilterConstants.SID_TABLENAME))
+            {
+                storeSidFilterData(dataMap);
+            }
+            
+            // stores "global_exclusions_filter" data
+            if (dataMap.containsKey(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME))
+            {
+                storeGlobalExclusionFilterFilterData(dataMap);
+            }
+            
             // stores "base_filter" data to database
             if (dataMap.containsKey("base_filter"))
             {
@@ -439,7 +473,7 @@ public class FilterConfigImport implements ConfigConstants
             {
                 storeQAFilterData(dataMap);
             }
-
+            
             addMessage("<b>Done importing Filter Configurations.</b>");
         }
         catch (Exception e)
@@ -486,6 +520,81 @@ public class FilterConfigImport implements ConfigConstants
             addToError(msg);
         }
     }
+    
+    /**
+     * Stores sid_filter data.
+     */
+    @SuppressWarnings("unchecked")
+    private void storeSidFilterData(Map<String, List> dataMap)
+    {
+        List<SidFilter> filterList = (List<SidFilter>) dataMap.get(FilterConstants.SID_TABLENAME);
+        try
+        {
+            for (SidFilter f : filterList)
+            {
+                Long id = f.getId();
+                String name = f.getFilterName();
+                // gets new filter name
+                String newFilterName = checkFilterNameExists(name, "SidFilter");
+                f.setFilterName(newFilterName);
+                // stores data to database
+                HibernateUtil.save(f);
+                sidFilterIdMap.put(id, f.getId());
+                if (name.equals(newFilterName))
+                {
+                    addMessage("<b>" + newFilterName + "</b> imported successfully.");
+                }
+                else
+                {
+                    addMessage("sid Filter name <b>" + name + "</b> already exists. <b>"
+                            + newFilterName + "</b> imported successfully.");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            String msg = "Upload sid Filter data failed !";
+            logger.warn(msg);
+            addToError(msg);
+        }
+    }
+    
+    /**
+     * Stores qa_filter data.
+     */
+    @SuppressWarnings("unchecked")
+    private void storeGlobalExclusionFilterFilterData(Map<String, List> dataMap)
+    {
+        List<GlobalExclusionFilter> filterList = (List<GlobalExclusionFilter>) dataMap.get(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME);
+        try
+        {
+            for (GlobalExclusionFilter f : filterList)
+            {
+                String name = f.getFilterName();
+                // gets new filter name
+                String newFilterName = checkFilterNameExists(name, "GlobalExclusionFilter");
+                f.setFilterName(newFilterName);
+                // stores data to database
+                HibernateUtil.save(f);
+                if (name.equals(newFilterName))
+                {
+                    addMessage("<b>" + newFilterName + "</b> imported successfully.");
+                }
+                else
+                {
+                    addMessage("Global Exclusion Filter name <b>" + name + "</b> already exists. <b>"
+                            + newFilterName + "</b> imported successfully.");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            String msg = "Upload Global Exclusion Filter data failed !";
+            logger.warn(msg);
+            addToError(msg);
+        }
+    }
+
 
     /**
      * Stores base_filter data.
@@ -702,17 +811,28 @@ public class FilterConfigImport implements ConfigConstants
                 XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
                         xmlRuleFilter);
                 xmlFilterConfigParser.parserXml();
-
-                String postFilterTableName = xmlFilterConfigParser.getElementPostFilterTableName();
+                
+                
+                String sidFilterId = xmlFilterConfigParser.getSidFilterId();
+                if (sidFilterId != null)
+                {
+                    String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
+                            "sidFilterId", String.valueOf(sidFilterIdMap.get(Long
+                                    .parseLong(sidFilterId))));
+                    xmlRuleFilter.setConfigXml(newconfigXmlStr);
+                }
+                //xmlFilterConfigParser.getSidFilterId();
                 // elementPostFilterId
+                String postFilterTableName = xmlFilterConfigParser
+                        .getElementPostFilterTableName();
                 String postFilterTableID = xmlFilterConfigParser.getElementPostFilterId();
                 // Judgments "Xml_Filter" are references "html_filter"
                 if (postFilterTableName.equalsIgnoreCase("html_filter")
                         && htmlFilterIdMap.containsKey(Long.parseLong(postFilterTableID)))
                 {
                     String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
-                            "elementPostFilterId",
-                            String.valueOf(htmlFilterIdMap.get(Long.parseLong(postFilterTableID))));
+                            "elementPostFilterId", String.valueOf(htmlFilterIdMap.get(Long
+                                    .parseLong(postFilterTableID))));
                     xmlRuleFilter.setConfigXml(newconfigXmlStr);
                 }
                 // Judgments "Xml_Filter" are references "java_script_filter"
@@ -720,16 +840,16 @@ public class FilterConfigImport implements ConfigConstants
                         && javaScriptFilterIdMap.containsKey(Long.parseLong(postFilterTableID)))
                 {
                     String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
-                            "elementPostFilterId", String.valueOf(javaScriptFilterIdMap.get(Long
-                                    .parseLong(postFilterTableID))));
+                            "elementPostFilterId", String.valueOf(javaScriptFilterIdMap
+                                    .get(Long.parseLong(postFilterTableID))));
                     xmlRuleFilter.setConfigXml(newconfigXmlStr);
                 }
                 else if (postFilterTableName.equalsIgnoreCase("filter_json")
                         && jsonFilterIdMap.containsKey(Long.parseLong(postFilterTableID)))
                 {
                     String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
-                            "elementPostFilterId",
-                            String.valueOf(jsonFilterIdMap.get(Long.parseLong(postFilterTableID))));
+                            "elementPostFilterId", String.valueOf(jsonFilterIdMap.get(Long
+                                    .parseLong(postFilterTableID))));
                     xmlRuleFilter.setConfigXml(newconfigXmlStr);
                 }
 
@@ -742,8 +862,8 @@ public class FilterConfigImport implements ConfigConstants
                         && htmlFilterIdMap.containsKey(Long.parseLong(cdataPostFilterID)))
                 {
                     String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
-                            "cdataPostFilterId",
-                            String.valueOf(htmlFilterIdMap.get(Long.parseLong(cdataPostFilterID))));
+                            "cdataPostFilterId", String.valueOf(htmlFilterIdMap.get(Long
+                                    .parseLong(cdataPostFilterID))));
                     xmlRuleFilter.setConfigXml(newconfigXmlStr);
                 }
                 // Judgments "Xml_Filter" are references "java_script_filter"
@@ -759,13 +879,14 @@ public class FilterConfigImport implements ConfigConstants
                         && jsonFilterIdMap.containsKey(Long.parseLong(cdataPostFilterID)))
                 {
                     String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
-                            "cdataPostFilterId",
-                            String.valueOf(jsonFilterIdMap.get(Long.parseLong(cdataPostFilterID))));
+                            "cdataPostFilterId", String.valueOf(jsonFilterIdMap.get(Long
+                                    .parseLong(cdataPostFilterID))));
                     xmlRuleFilter.setConfigXml(newconfigXmlStr);
                 }
 
                 // cdataPostfilterTags
-                String newConfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(htmlFilterIdMap);
+                String newConfigXmlStr = xmlFilterConfigParser
+                        .getNewConfigXmlStr(htmlFilterIdMap);
                 xmlRuleFilter.setConfigXml(newConfigXmlStr);
 
                 // stores data to database
@@ -775,6 +896,7 @@ public class FilterConfigImport implements ConfigConstants
                 xmlRuleFilterIdMap.put(id, newId);
                 OperationLog.log(userId, OperationLog.EVENT_ADD,
                         OperationLog.COMPONET_FILTER_CONFIGURATION, newFilterName);
+                
                 if (name.equals(newFilterName))
                 {
                     addMessage("<b>" + newFilterName + "</b> imported successfully.");
@@ -814,16 +936,25 @@ public class FilterConfigImport implements ConfigConstants
                 jsonFilter.setFilterName(newFilterName);
                 if (baseFilterIdMap.get(jsonFilter.getBaseFilterId()) != null)
                 {
-                    jsonFilter.setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
+                    jsonFilter
+                            .setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
                 }
 
                 // Judgments "json_Filter" are references "html_filter"
                 if (jsonFilter.getElementPostFilterTableName().equalsIgnoreCase("html_filter")
                         && htmlFilterIdMap.containsKey(jsonFilter.getElementPostFilterId()))
                 {
-                    jsonFilter.setElementPostFilterId(htmlFilterIdMap.get(jsonFilter
-                            .getElementPostFilterId()));
+                    jsonFilter.setElementPostFilterId(htmlFilterIdMap
+                            .get(jsonFilter.getElementPostFilterId()));
                 }
+                
+                SidFilter sf = jsonFilter.getSidFilter();
+                if (sf != null)
+                {
+                    sf = HibernateUtil.get(SidFilter.class, sidFilterIdMap.get(sf.getId()));
+                    jsonFilter.setSidFilter(sf);
+                }
+                
                 // stores data to database
                 HibernateUtil.save(jsonFilter);
                 Long newId = selectNewId(newFilterName, "JsonFilter");
@@ -868,14 +999,24 @@ public class FilterConfigImport implements ConfigConstants
                 // gets new filter name
                 String newFilterName = checkFilterNameExists(name, "JavaPropertiesFilter");
                 javaPropertiesFilter.setFilterName(newFilterName);
-                // Judgments "Java_Properties_Filter" are references
-                // "html_filter"
-                if (javaPropertiesFilter.getSecondFilterTableName().equalsIgnoreCase("html_filter")
-                        && htmlFilterIdMap.containsKey(javaPropertiesFilter.getSecondFilterId()))
+
+                // Judgments "Xml_Filter" are references "html_filter"
+                if (javaPropertiesFilter.getSecondFilterTableName().equalsIgnoreCase(
+                        "html_filter")
+                        && htmlFilterIdMap
+                                .containsKey(javaPropertiesFilter.getSecondFilterId()))
                 {
-                    javaPropertiesFilter.setSecondFilterId(htmlFilterIdMap.get(javaPropertiesFilter
-                            .getSecondFilterId()));
+                    javaPropertiesFilter.setSecondFilterId(htmlFilterIdMap
+                            .get(javaPropertiesFilter.getSecondFilterId()));
                 }
+                
+                SidFilter sf = javaPropertiesFilter.getSidFilter();
+                if (sf != null)
+                {
+                    sf = HibernateUtil.get(SidFilter.class, sidFilterIdMap.get(sf.getId()));
+                    javaPropertiesFilter.setSidFilter(sf);
+                }
+                
                 // stores data to database
                 HibernateUtil.save(javaPropertiesFilter);
                 // gets new id
@@ -1373,6 +1514,26 @@ public class FilterConfigImport implements ConfigConstants
                 }
                 // stores data to database
                 HibernateUtil.save(plainTextFilter);
+                long sidFilterId = parser.getSidFilterId();
+                if (sidFilterId > 0)
+                {
+                    Long sidId = sidFilterIdMap.get(sidFilterId);
+                    if (sidId != null)
+                    {
+                        sidFilterId = sidId;
+                    }
+                    else
+                    {
+                        // for old data. Need parser again.
+                        parser = new PlainTextFilterParser(plainTextFilter);
+                        parser.parserXml();
+                    }
+                    String newconfigXmlStr = parser.getNewConfigXml(
+                            "sidFilterId", String.valueOf(sidFilterId));
+                    plainTextFilter.setConfigXml(newconfigXmlStr);
+                }
+                HibernateUtil.update(plainTextFilter);
+                
                 // gets new id
                 Long newId = selectNewId(newFilterName, "PlainTextFilter");
                 plainTextFilterIdMap.put(id, newId);
@@ -1926,6 +2087,12 @@ public class FilterConfigImport implements ConfigConstants
             {
                 jsonFilter.setEnableSidSupport(Boolean.parseBoolean(valueField));
             }
+            else if (keyField.equalsIgnoreCase("SID_FILTER_ID"))
+            {
+                SidFilter sf = new SidFilter();
+                sf.setId(Long.parseLong(valueField));
+                jsonFilter.setSidFilter(sf);
+            }
             else if (keyField.equalsIgnoreCase("BASE_FILTER_ID"))
             {
                 jsonFilter.setBaseFilterId(Long.parseLong(valueField));
@@ -1951,6 +2118,93 @@ public class FilterConfigImport implements ConfigConstants
             }
         }
         return jsonFilter;
+    }
+    
+    private SidFilter putDataIntoSidFilter(Map<String, String> valueMap)
+    {
+        SidFilter sidFilter = new SidFilter();
+        String keyField = null;
+        String valueField = null;
+        Set<String> valueKey = valueMap.keySet();
+        Iterator itor = valueKey.iterator();
+        while (itor.hasNext())
+        {
+            keyField = (String) itor.next();
+            valueField = valueMap.get(keyField);
+
+            if (keyField.equalsIgnoreCase("ID"))
+            {
+                sidFilter.setId(Long.parseLong(valueField));
+            }
+            else if (keyField.equalsIgnoreCase("FILTER_NAME"))
+            {
+                sidFilter.setFilterName(containSpecialChar(valueField));
+            }
+            else if (keyField.equalsIgnoreCase("FILTER_DESCRIPTION"))
+            {
+                sidFilter.setFilterDescription(valueField);
+            }
+            else if (keyField.equalsIgnoreCase("TYPE"))
+            {
+                sidFilter.setType(Integer.parseInt(valueField));
+            }
+            else if (keyField.equalsIgnoreCase("CONFIG"))
+            {
+                sidFilter.setConfigXml(valueField);
+            }
+            else if (keyField.equalsIgnoreCase("COMPANY_ID"))
+            {
+                sidFilter.setCompanyId(Long.parseLong(companyId));
+            }
+        }
+        return sidFilter;
+    }
+    
+    private GlobalExclusionFilter putDataIntoGlobalExclusionFilter(Map<String, String> valueMap)
+    {
+        GlobalExclusionFilter globalExclusionFilter = new GlobalExclusionFilter();
+        String keyField = null;
+        String valueField = null;
+        Set<String> valueKey = valueMap.keySet();
+        Iterator itor = valueKey.iterator();
+        while (itor.hasNext())
+        {
+            keyField = (String) itor.next();
+            valueField = valueMap.get(keyField);
+
+            if (keyField.equalsIgnoreCase("ID"))
+            {
+                globalExclusionFilter.setId(Long.parseLong(valueField));
+            }
+            else if (keyField.equalsIgnoreCase("FILTER_NAME"))
+            {
+                globalExclusionFilter.setFilterName(containSpecialChar(valueField));
+            }
+            else if (keyField.equalsIgnoreCase("FILTER_DESCRIPTION"))
+            {
+                globalExclusionFilter.setFilterDescription(valueField);
+            }
+            else if (keyField.equalsIgnoreCase("TYPE"))
+            {
+                globalExclusionFilter.setType(Integer.parseInt(valueField));
+            }
+            else if (keyField.equalsIgnoreCase("CONFIG"))
+            {
+                globalExclusionFilter.setConfigXml(valueField);
+            }
+            else if (keyField.equalsIgnoreCase("COMPANY_ID"))
+            {
+                if (importToCompId != null && !importToCompId.equals("-1"))
+                {
+                    globalExclusionFilter.setCompanyId(Long.parseLong(importToCompId));
+                }
+                else
+                {
+                    globalExclusionFilter.setCompanyId(Long.parseLong(companyId));
+                }
+            }
+        }
+        return globalExclusionFilter;
     }
 
     private JavaPropertiesFilter putDataIntoJavaPropertiesFilter(Map<String, String> valueMap)
@@ -1980,6 +2234,12 @@ public class FilterConfigImport implements ConfigConstants
             else if (keyField.equalsIgnoreCase("ENABLE_SID_SUPPORT"))
             {
                 javaPropertiesFilter.setEnableSidSupport(Boolean.parseBoolean(valueField));
+            }
+            else if (keyField.equalsIgnoreCase("SID_FILTER_ID"))
+            {
+                SidFilter sf = new SidFilter();
+                sf.setId(Long.parseLong(valueField));
+                javaPropertiesFilter.setSidFilter(sf);
             }
             else if (keyField.equalsIgnoreCase("ENABLE_UNICODE_ESCAPE"))
             {

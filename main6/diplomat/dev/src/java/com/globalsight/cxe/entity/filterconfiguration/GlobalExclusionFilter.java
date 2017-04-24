@@ -21,21 +21,17 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.SortUtil;
 
-public class PlainTextFilter implements Filter
+public class GlobalExclusionFilter implements Filter
 {
-    static private final Logger logger = Logger
-            .getLogger(PlainTextFilter.class);
-    
     private long id;
     private String filterName;
     private String filterDescription;
     private String configXml = "";
+    private int type = 0;
     private long companyId;
 
     @SuppressWarnings("unchecked")
@@ -43,7 +39,7 @@ public class PlainTextFilter implements Filter
     {
         ArrayList<Filter> filters = null;
         filters = new ArrayList<Filter>();
-        String hql = "from PlainTextFilter f where f.companyId=" + companyId;
+        String hql = "from GlobalExclusionFilter f where f.companyId=" + companyId;
         try
         {
             filters = (ArrayList<Filter>) HibernateUtil.search(hql);
@@ -58,7 +54,7 @@ public class PlainTextFilter implements Filter
 
     public boolean checkExistsNew(String filterName, long companyId)
     {
-        String hql = "from PlainTextFilter f "
+        String hql = "from GlobalExclusionFilter f "
                 + "where f.filterName =:filterName "
                 + "and f.companyId =:companyId";
         Map map = new HashMap();
@@ -70,7 +66,7 @@ public class PlainTextFilter implements Filter
     public boolean checkExistsEdit(long filterId, String filterName,
             long companyId)
     {
-        String hql = "from PlainTextFilter f " + "where f.id<>:filterId "
+        String hql = "from GlobalExclusionFilter f " + "where f.id<>:filterId "
                 + "and f.filterName =:filterName "
                 + "and f.companyId =:companyId";
         Map map = new HashMap();
@@ -82,26 +78,11 @@ public class PlainTextFilter implements Filter
 
     public String getFilterTableName()
     {
-        return FilterConstants.PLAINTEXT_TABLENAME;
+        return FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME;
     }
 
     public String toJSON(long companyId)
     {
-        logger.debug("Plain Text filter config Xml:" + this.getConfigXml());
-        PlainTextFilterParser parser = new PlainTextFilterParser(this);
-        
-        boolean isParsed = false;
-        try
-        {
-            parser.parserXml();
-            isParsed = true;
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("configXml : " + configXml, e);
-            isParsed = false;
-        }
-
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":")
@@ -113,40 +94,14 @@ public class PlainTextFilter implements Filter
         sb.append("\"filterDescription\":").append("\"")
                 .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
+        sb.append("\"filterType\":").append("\"").append(type).append("\"").append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"customTextRules\":")
+        sb.append("\"jsonText\":")
                 .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getCustomTextRulesJson()) : "[]").append("\",");
-        sb.append("\"customTextRuleSids\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getCustomTextRuleSidsJson()) : "[]").append("\",");
-        sb.append("\"elementPostFilter\":").append("\"")
-                .append(isParsed ? parser.getElementPostFilterTableName() : "")
-                .append("\",");
-        sb.append("\"elementPostFilterId\":").append("\"")
-                .append(isParsed ? parser.getElementPostFilterId() : "")
-                .append("\",");
-        sb.append("\"sidFilterId\":").append("\"")
-        .append(isParsed ? parser.getSidFilterId() : "").append("\",");
-        sb.append("\"baseFilterId\":").append("\"").append(getBaseFilterId())
-                .append("\"");
+                .append(FilterHelper.escape(configXml)).append("\",");
+
         sb.append("}");
         return sb.toString();
-    }
-
-    public long getBaseFilterId()
-    {
-        if (id > 0)
-        {
-            return BaseFilterManager.getBaseFilterIdByMapping(id,
-                    FilterConstants.PLAINTEXT_TABLENAME);
-        }
-        else
-        {
-            return -2;
-        }
     }
 
     public long getId()
@@ -197,5 +152,19 @@ public class PlainTextFilter implements Filter
     public void setConfigXml(String configXml)
     {
         this.configXml = configXml;
+    }
+    
+    public int getType()
+    {
+        return type;
+    }
+
+    /**
+     * 1 : sid
+     * @param type
+     */
+    public void setType(int type)
+    {
+        this.type = type;
     }
 }

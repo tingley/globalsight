@@ -49,6 +49,7 @@ import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilter;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlInternalTag;
 import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
@@ -65,6 +66,7 @@ import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.RemoveInfo;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.cxe.entity.filterconfiguration.SpecialFilterToDelete;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
@@ -157,7 +159,15 @@ public class AjaxService extends HttpServlet
     public void loadFilterConfigurations()
     {
         // writer = response.getWriter();
-        String filterConfigurationsJSON = FilterHelper.filterConfigurationsToJSON(companyId);
+        String filterConfigurationsJSON = "";
+        try
+        {
+            filterConfigurationsJSON = FilterHelper.filterConfigurationsToJSON(companyId);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e);
+        }
         writer.write(filterConfigurationsJSON);
         writer.close();
     }
@@ -209,7 +219,6 @@ public class AjaxService extends HttpServlet
     {
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
         long baseFilterId = -2;
         long elementPostFilterId = -1;
         String elementPostFilterTableName = request.getParameter("elementPostFilterTableName");
@@ -223,8 +232,18 @@ public class AjaxService extends HttpServlet
         catch (Exception ex)
         {
         }
+        
+        long sidFilterId = -1;
+        
+        try
+        {
+            sidFilterId = Long.parseLong(request.getParameter("sidFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
 
-        long filterId = FilterHelper.saveJsonFilter(filterName, filterDesc, isSupportSid,
+        long filterId = FilterHelper.saveJsonFilter(filterName, filterDesc, sidFilterId,
                 baseFilterId, elementPostFilterId, companyId,elementPostFilterTableName);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
@@ -236,7 +255,6 @@ public class AjaxService extends HttpServlet
     {
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
         long fId = Long.parseLong(request.getParameter("filterId"));        
         long baseFilterId = -2;
         long elementPostFilterId = -1;
@@ -251,8 +269,18 @@ public class AjaxService extends HttpServlet
         catch (Exception ex)
         {
         }
+        
+        long sidFilterId = -1;
+        
+        try
+        {
+            sidFilterId = Long.parseLong(request.getParameter("sidFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
 
-        long filterId = FilterHelper.updateJsonFilter(filterName, filterDesc, isSupportSid,
+        long filterId = FilterHelper.updateJsonFilter(filterName, filterDesc, sidFilterId,
                 baseFilterId, elementPostFilterId, companyId, fId,elementPostFilterTableName);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
@@ -268,7 +296,6 @@ public class AjaxService extends HttpServlet
         // writer = response.getWriter();
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
         boolean isUnicodeEscape = Boolean.parseBoolean(request.getParameter("isUnicodeEscape"));
         boolean isPreserveSpaces = Boolean.parseBoolean(request.getParameter("isPreserveSpaces"));
         long secondFilterId = -2;
@@ -290,7 +317,17 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update java properties filter with error:", e);
         }
-        long filterId = FilterHelper.saveJavaPropertiesFilter(filterName, filterDesc, isSupportSid,
+        
+        long sidFilterId = -1;
+        try
+        {
+            sidFilterId = Long.parseLong(request.getParameter("sidFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+        
+        long filterId = FilterHelper.saveJavaPropertiesFilter(filterName, filterDesc, sidFilterId,
                 isUnicodeEscape, isPreserveSpaces, companyId, secondFilterId,
                 secondFilterTableName, internalTexts);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
@@ -304,7 +341,7 @@ public class AjaxService extends HttpServlet
         long fId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
+        long sidFilterId = Long.parseLong(request.getParameter("sidFilterId"));
         boolean isUnicodeEscape = Boolean.parseBoolean(request.getParameter("isUnicodeEscape"));
         boolean isPreserveSpaces = Boolean.parseBoolean(request.getParameter("isPreserveSpaces"));
 
@@ -327,8 +364,9 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update java properties filter with error:", e);
         }
+        
         long filterId = FilterHelper.updateJavaPropertiesFilter(fId, filterName, filterDesc,
-                isSupportSid, isUnicodeEscape, isPreserveSpaces, companyId, secondFilterId,
+                sidFilterId, isUnicodeEscape, isPreserveSpaces, companyId, secondFilterId,
                 secondFilterTableName, internalTexts);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
@@ -560,16 +598,14 @@ public class AjaxService extends HttpServlet
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         String customTextRules = request.getParameter("customTextRules");
-        String customTextRuleSids = request.getParameter("customTextRuleSids");
+        String sidFilterId = request.getParameter("sidFilterId");
         String elementPostFilter = request.getParameter("elementPostFilter");
         String elementPostFilterId = request.getParameter("elementPostFilterId");
 
         JSONArray jsonArrayCustomTextRules = new JSONArray();
-        JSONArray jsonArrayCustomTextRuleSids = new JSONArray();
         try
         {
             jsonArrayCustomTextRules = new JSONArray(customTextRules);
-            jsonArrayCustomTextRuleSids = new JSONArray(customTextRuleSids);
         }
         catch (Exception e)
         {
@@ -580,7 +616,7 @@ public class AjaxService extends HttpServlet
         try
         {
             configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules,
-                    jsonArrayCustomTextRuleSids, elementPostFilter, elementPostFilterId);
+                    sidFilterId, elementPostFilter, elementPostFilterId);
         }
         catch (Exception e)
         {
@@ -1078,6 +1114,72 @@ public class AjaxService extends HttpServlet
 
         writer.write(value);
     }
+    
+    public void saveOrUpdateSidFilter()
+    {
+        SidFilter f = new SidFilter();
+        String filterName = request.getParameter("filterName").trim();
+        String id = request.getParameter("filterId");
+        if (id != null)
+        {
+            f = HibernateUtil.get(SidFilter.class, Long.parseLong(id));
+        }
+        
+        String hql = "from SidFilter where filterName = ? and companyId = ?";
+        List<SidFilter> fs = (List<SidFilter>) HibernateUtil.search(hql, filterName, companyId);
+        for (SidFilter f1 : fs)
+        {
+            if (id == null || Long.parseLong(id) != f1.getId())
+            {
+                writer.write("name_exists");
+                return;
+            }
+        }
+        
+        String rule = request.getParameter("rule");
+        f.setFilterName(filterName);
+        f.setCompanyId(companyId);
+        f.setConfigXml(rule);
+        f.setType(Integer.parseInt(request.getParameter("filterType")));
+        f.setFilterDescription(request.getParameter("filterDesc").trim());
+        HibernateUtil.saveOrUpdate(f);
+        
+        writer.write(f.getId() + "");
+        return;
+    }
+    
+    public void saveOrUpdateGlobalExclusionFilter()
+    {
+        GlobalExclusionFilter f = new GlobalExclusionFilter();
+        String filterName = request.getParameter("filterName");
+        String id = request.getParameter("filterId");
+        if (id != null)
+        {
+            f = HibernateUtil.get(GlobalExclusionFilter.class, Long.parseLong(id));
+        }
+        
+        String hql = "from GlobalExclusionFilter where filterName = ? and companyId = ?";
+        List<GlobalExclusionFilter> fs = (List<GlobalExclusionFilter>) HibernateUtil.search(hql, filterName, companyId);
+        for (GlobalExclusionFilter f1 : fs)
+        {
+            if (id == null || Long.parseLong(id) != f1.getId())
+            {
+                writer.write("name_exists");
+                return;
+            }
+        }
+        
+        String rule = request.getParameter("rule");
+        f.setFilterName(filterName.trim());
+        f.setCompanyId(companyId);
+        f.setConfigXml(rule);
+        f.setType(Integer.parseInt(request.getParameter("filterType")));
+        f.setFilterDescription(request.getParameter("filterDesc").trim());
+        HibernateUtil.saveOrUpdate(f);
+        
+        writer.write(f.getId() + "");
+        return;
+    }
 
     public void isFilterValid()
     {
@@ -1160,8 +1262,8 @@ public class AjaxService extends HttpServlet
         String transAttrTags = request.getParameter("transAttrTags");
         String contentInclTags = request.getParameter("contentInclTags");
         String cdataPostfilterTags = request.getParameter("cdataPostfilterTags");
-        String sidSupportTagName = request.getParameter("sidSupportTagName");
-        String sidSupportAttName = request.getParameter("sidSupportAttName");
+        String sidFilterId = request.getParameter("sidFilterId");
+        String sidFilterPrecedence = request.getParameter("sidFilterPrecedence");
         String isCheckWellFormed = request.getParameter("isCheckWellFormed");
         String isGerateLangInfo = request.getParameter("isGerateLangInfo");
         String entities = request.getParameter("entities");
@@ -1209,12 +1311,11 @@ public class AjaxService extends HttpServlet
         {
             configXml = XmlFilterConfigParser.toXml(extendedWhitespaceChars, phConsolidationMode,
                     phTrimMode, nonasciiAs, wsHandleMode, emptyTagFormat, entityHandleMode, elementPostFilter,
-                    elementPostFilterId, cdataPostFilter, cdataPostFilterId, sidSupportTagName,
-                    sidSupportAttName, isCheckWellFormed, isGerateLangInfo,
+                    elementPostFilterId, cdataPostFilter, cdataPostFilterId,isCheckWellFormed, isGerateLangInfo,
                     jsonArrayPreserveWsTags, jsonArrayEmbTags, jsonArrayTransAttrTags,
                     jsonArrayContentInclTags, jsonArrayCdataPostfilterTags, jsonArrayEntities,
                     jsonArrayProcessIns, jsonArrayInternalTag, jsonArraySrcCmtXmlComment,
-                    jsonArraySrcCmtXmlTag);
+                    jsonArraySrcCmtXmlTag, sidFilterId, sidFilterPrecedence);
         }
         catch (Exception e)
         {
@@ -1747,5 +1848,18 @@ public class AjaxService extends HttpServlet
             // e.printStackTrace();
             writer.write("false");
         }
+    }
+    
+    public void getSidFilters()
+    {
+        int type =  Integer.parseInt(request.getParameter("type"));
+        String hql = "from SidFilter where companyId = ? and type = ?";
+        List<SidFilter> fs = (List<SidFilter>)HibernateUtil.search(hql, companyId, type);
+        JSONArray ob = new JSONArray();
+        for (SidFilter f : fs)
+        {
+            ob.put(f.toJSON(companyId));
+        }
+        writer.write(ob.toString());
     }
 }

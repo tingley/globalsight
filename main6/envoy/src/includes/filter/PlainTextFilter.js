@@ -60,14 +60,10 @@ PlainTextFilter.prototype.initOptionMap = function (filter)
 	{
 		var customTextRules = this.filter.customTextRules;
 		plaintextFilter.optionObjsMap[this.optionCustomTextRules] = JSON.parse(customTextRules);
-		
-		var customTextRuleSids = this.filter.customTextRuleSids;
-		plaintextFilter.optionObjsMap[this.optionCustomTextRuleSids] = JSON.parse(customTextRuleSids);
 	}
 	else
 	{
 		plaintextFilter.optionObjsMap[this.optionCustomTextRules] = new Array();
-		plaintextFilter.optionObjsMap[this.optionCustomTextRuleSids] = new Array();
 	}
 	
 	plaintextFilter.refreshCheckedIds();
@@ -126,6 +122,11 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 	str.append(this.generateElementPostFilter(this.filter));
 	str.append("</td>");
 	str.append("</tr>");
+		
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsFilterNameSidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport(this.filter) + "</td>");
+	str.append("</tr>");
 	
 	str.append("</table>");
 	
@@ -161,6 +162,47 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 	savePlainTextFilter.topFilterId = topFilterId;
 }
 
+PlainTextFilter.prototype.generateSidSupport = function (filter)
+{	
+	var str = new StringBuffer("<select id='txtSidFilter' class='xml_filter_select'>");
+	str.append("<option value='-1'" + ((filter && filter.sidFilterId == "-1") ? " selected" : "") + ">Choose&nbsp;&nbsp;&nbsp;</option>");	
+	var data = {
+		type : 2
+	}
+	var sidFilters = getAjaxValue("getSidFilters", data);
+	if (sidFilters){
+		sidFilters = eval(sidFilters);
+	}
+	for (var i = 0; i <　sidFilters.length; i++){
+		var sf = eval("(" + sidFilters[i] + ")");
+		str.append("<option value='" + sf.id + "'" + ((filter && filter.sidFilterId == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
+	}
+	str.append("</select>");
+	return str.toString();
+}
+
+var ajaxReturnString;
+function getAjaxValue(method, data)
+{
+	$.ajax({
+		type : "POST",
+		url : 'AjaxService?action=' + method,
+		async : false,
+		cache : false,
+		dataType : 'text',
+		data : data,
+		success : function(data) {
+			ajaxReturnString = data;
+		},
+		error : function(request, error, status) {
+			ajaxReturnString = "";
+			alert(error);
+		}
+	});
+	
+	return ajaxReturnString;
+}
+
 PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 {
 	this.initOptionMap();
@@ -192,6 +234,11 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("<td class='htmlFilter_right_td'>");
 	str.append(this.generateElementPostFilter());
 	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsFilterNameSidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport() + "</td>");
 	str.append("</tr>");
 	
 	str.append("</table>");
@@ -304,6 +351,7 @@ function savePlainTextFilter()
 	var splitedElementPostIdTable = splitByFirstIndex(elementPostFilterIdTable, "-");
 	var elementPostFilterId = (splitedElementPostIdTable) ? splitedElementPostIdTable[0] : "-1";
 	var elementPostFilter = (splitedElementPostIdTable) ? splitedElementPostIdTable[1] : "-1";
+	var sidFilterId = $("#txtSidFilter").val();
 	
 	//alertUserBaseFilter(baseFilterId);
 
@@ -317,7 +365,7 @@ function savePlainTextFilter()
 		companyId : companyId,
 		baseFilterId : baseFilterId,
 		customTextRules : customTextRules,
-		customTextRuleSids : customTextRuleSids,
+		sidFilterId : sidFilterId,
 		elementPostFilter : elementPostFilter,
 		elementPostFilterId : elementPostFilterId
 	};
@@ -375,7 +423,9 @@ function updatePlainTextFilterCallback(data)
 		xrFilter.customTextRuleSids = isFilterValidCallback.obj.customTextRuleSids;
 		xrFilter.elementPostFilter = isFilterValidCallback.obj.elementPostFilter;
 		xrFilter.elementPostFilterId = isFilterValidCallback.obj.elementPostFilterId;
+		xrFilter.sidFilterId = isFilterValidCallback.obj.sidFilterId;
 		xrFilter.companyId = companyId;
+		
 		var specialFilters = updateSpecialFilter(savePlainTextFilter.specialFilters, xrFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
 	}
@@ -399,6 +449,7 @@ function savePlainTextFilterCallback(data)
 		xrFilter.customTextRuleSids = isFilterValidCallback.obj.customTextRuleSids;
 		xrFilter.elementPostFilter = isFilterValidCallback.obj.elementPostFilter;
 		xrFilter.elementPostFilterId = isFilterValidCallback.obj.elementPostFilterId;
+		xrFilter.sidFilterId = isFilterValidCallback.obj.sidFilterId;
 		xrFilter.companyId = companyId;
 		filter.specialFilters.push(xrFilter);
 		reGenerateFilterList(topFilterId, filter.specialFilters, color);
@@ -464,11 +515,11 @@ PlainTextFilter.prototype.generateTagsTable = function (filter)
 	var str = new StringBuffer("");
 	str.append("<table border=0 width='450px' class='standardText'>");
 	str.append("<tr><td>");
-	str.append("<div id='plaintextFilterRulesContent' style='float:left'>")
+	str.append("<div id='plaintextFilterRulesContent' style='float:left; margin-top:5px;'>")
 	str.append("<label class='specialFilter_dialog_label'>");
-	str.append(jsChoose + ":");
+	str.append(jsCustomTextRule);
 	str.append("</label>"); 
-	str.append("<select id='plaintextFilterRulesSection' onchange='plaintextFilter.switchRules(this)'>");
+	str.append("<select id='plaintextFilterRulesSection' style=\"display:none\" onchange='plaintextFilter.switchRules(this)'>");
 	for(var i = 0; i < plaintextFilter.availableOptions.length; i++)
 	{
 		var optionV = plaintextFilter.availableOptions[i];

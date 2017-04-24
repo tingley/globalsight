@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.docproc.extractor.javaprop;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,10 +26,11 @@ import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterSid;
 import com.globalsight.cxe.entity.filterconfiguration.InternalText;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
-import com.globalsight.cxe.entity.filterconfiguration.PropertiesInternalText;
 import com.globalsight.ling.common.JPEscapeSequence;
 import com.globalsight.ling.common.JPMFEscapeSequence;
 import com.globalsight.ling.common.NativeEnDecoderException;
@@ -68,6 +70,9 @@ public class Extractor
     //private PropertiesInternalText internalText = null;
     private List<InternalText> internalTexts = null;
     private boolean useBptTag = true;
+    private String sid = null;
+    private StringBuffer sidBuf = new StringBuffer();
+    private ArrayList<GlobalExclusionFilterSid> allGlobalExclusionFilterSids = null;
     
     private List<InternalText> getInternalTexts() throws Exception
     {
@@ -155,19 +160,18 @@ public class Extractor
         // Set the main format depending on which (derived) class
         // we're called in.
         setFormat();
-
         Parser parser = new Parser(readInput());
         JPToken token = parser.getNextToken();
 
         while (token.m_nType != JPToken.EOF)
         {
-            if (token.m_nType == JPToken.KEY_VALUE && !exclude())
+            if (token.m_nType == JPToken.KEY_VALUE && !isUnextractSid(sid) && !exclude())
             {
             	// if trimSegment is checked in javaProperties filter, then trim it.
 //            	if (getTrimSegmentFlag()) {
 //            		token.m_strContent = token.m_strContent.trim();
 //            	}
-            	
+                
                 // Value tokens are now sent to appropriate value handler
                 switch (m_valueType)
                 {
@@ -194,11 +198,79 @@ public class Extractor
                     readExtractionDirectiveComment(str_comment);
                 }
 
+                String skeleton = token.m_strContent.trim();
+                if (skeleton.endsWith("="))
+                {
+                    int index = skeleton.lastIndexOf("\n");
+                    if (index > -1)
+                    {
+                        skeleton = skeleton
+                                .substring(index + 1);
+                    }
+
+                    // remove "="
+                    skeleton = skeleton.substring(0,
+                            skeleton.length() - 1);
+                    
+                    sidBuf.append(skeleton);
+                    sid = sidBuf.toString().trim();
+                    sidBuf = new StringBuffer();
+                }
+                else
+                {
+                    sidBuf.append(token.m_strContent);
+                }
+                
                 getOutput().addSkeleton(token.m_strContent);
             }
 
             token = parser.getNextToken();
         }
+    }
+    
+    private boolean isUnextractSid(String sid)
+    {
+        Filter filter = getMainFilter();
+        if (filter == null)
+            return false;
+        
+        if (!(filter instanceof JavaPropertiesFilter))
+            return false;
+        
+        JavaPropertiesFilter jpf = (JavaPropertiesFilter) filter;
+        if (jpf.getSidFilter() == null)
+            return false;
+        
+        if (sid == null)
+            return false;
+        
+        int n = sid.lastIndexOf("\n");
+        if (n > 0)
+        {
+            sid = sid.substring(n);
+        }
+        
+        sid = sid.trim();
+        if (sid.length() == 0)
+            return false;
+        
+        if (allGlobalExclusionFilterSids == null)
+            allGlobalExclusionFilterSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters();
+        
+        for (GlobalExclusionFilterSid f : allGlobalExclusionFilterSids)
+        {
+            if (!f.isSidIsRegEx() && f.getSid().equals(sid))
+            {
+                return true;
+            }
+            
+            if (f.isSidIsRegEx() && sid.matches(f.getSid()))
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
 

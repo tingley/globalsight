@@ -19,6 +19,7 @@ package com.globalsight.ling.docproc.extractor.xml;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,11 +39,17 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.ling.common.srccomment.SrcCmtXmlTag;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.extractor.xml.xmlrule.CommentRuleItem;
 import com.globalsight.ling.docproc.extractor.xml.xmlrule.RuleItemManager;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.sun.org.apache.xerces.internal.dom.NodeImpl;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * Encapsulates all rulesets contained in the rules XML file.
@@ -116,7 +123,6 @@ public class RuleSet implements EntityResolver, ErrorHandler
             List<XmlFilterTag> transAttrTags = xmlFilterTags.getTransAttrTags();
             List<XmlFilterTag> contentInclTags = xmlFilterTags
                     .getContentInclTags();
-            List<XmlFilterSidTag> sidTags = xmlFilterTags.getSidTags();
             List<XmlFilterTag> internalTag = xmlFilterTags.getInternalTag();
             List<SrcCmtXmlTag> srcCmtXmlTags = xmlFilterTags.getSrcCmtXmlTag();
 
@@ -126,10 +132,20 @@ public class RuleSet implements EntityResolver, ErrorHandler
             ruleMap = buildTransAttrTags(toBeExtracted, ruleMap, transAttrTags);
             ruleMap = buildContentInclTags(toBeExtracted, ruleMap,
                     contentInclTags);
-            ruleMap = buildSidTags(toBeExtracted, ruleMap, sidTags);
+            
             ruleMap = buildInternalTag(toBeExtracted, ruleMap, internalTag);
             ruleMap = buildSrcCmtXmlTag(toBeExtracted, ruleMap, srcCmtXmlTags);
 
+            long sidFilterId = xmlFilterTags.getSidFilterId();
+            if (sidFilterId > 0)
+            {
+                SidFilter f = HibernateUtil.get(SidFilter.class, xmlFilterTags.getSidFilterId());
+                if (f != null)
+                {
+                    ruleMap = buildSidTags2(toBeExtracted, ruleMap,f);
+                }
+            }
+            
             // comment this to translate filter data
             // if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(format))
             // {
@@ -368,6 +384,127 @@ public class RuleSet implements EntityResolver, ErrorHandler
         return ruleMap;
     }
 
+    private Map buildSidTags2(Document toBeExtracted, Map ruleMap,
+            SidFilter f) throws Exception
+    {
+        if (f != null)
+        {
+            if (ruleMap == null)
+            {
+                ruleMap = new HashMap();
+            }
+            
+            String json = f.getConfigXml();
+            
+            JSONArray items = JSONArray.fromObject(json);
+            for (int i = 0; i < items.size(); i++)
+            {
+                JSONObject ob = (JSONObject) items.get(i);
+                if (!ob.getBoolean("enable"))
+                    continue;
+               
+                NodeList ns = XPathAPIJdk.selectNodeList(toBeExtracted
+                        .getDocumentElement(), ob.getString("xpath"));
+                
+                for (int j = 0; j < ns.getLength(); j++)
+                {
+                    Node n = ns.item(j);
+                    if (Node.ATTRIBUTE_NODE == n.getNodeType())
+                    {
+                        Node root = null;
+                        if (n instanceof NodeImpl)
+                        {
+                            Field f1 = NodeImpl.class.getDeclaredField("ownerNode");
+                            f1.setAccessible(true);
+                            root = (Node) f1.get(n);
+                        }
+                        else if (n instanceof org.apache.xerces.dom.NodeImpl)
+                        {
+                            Field f1 = org.apache.xerces.dom.NodeImpl.class
+                                    .getDeclaredField("ownerNode");
+                            f1.setAccessible(true);
+                            root = (Node) f1.get(n);
+                        }
+                        
+                        String sidvalue = n.getNodeValue();
+                        String sidAttName = n.getNodeName();
+                        
+                       // get all child elements
+                        List<Node> enodes = new ArrayList<Node>();
+                        enodes.add(root);
+                        enodes.addAll(XmlFilterSidTag.getChildNodes(root));
+
+                        for (Node enode : enodes)
+                        {
+                            // node value
+                            NodeList childNodes = enode.getChildNodes();
+
+                            if (childNodes != null && childNodes.getLength() > 0)
+                            {
+                                for (int z = 0; z < childNodes.getLength(); z++)
+                                {
+                                    Node child = childNodes.item(z);
+                                    if (child.getNodeType() != Node.TEXT_NODE)
+                                    {
+                                        continue;
+                                    }
+
+                                    Rule rule = new Rule();
+                                    rule.setSid(sidvalue);
+                                    rule.setPriority(Integer.parseInt(ob.getString("priority")));
+                                    Rule previousRule = (Rule) ruleMap.get(child);
+                                    Rule newRule = rule;
+
+                                    if (previousRule != null)
+                                    {
+                                        newRule = previousRule.merge(rule);
+                                    }
+
+                                    ruleMap.put(child, newRule);
+                                }
+                            }
+
+                            // node attributes
+                            NamedNodeMap attributes = enode.getAttributes();
+
+                            if (attributes != null && attributes.getLength() > 1)
+                            {
+                                for (int z = 0; z < attributes.getLength(); z++)
+                                {
+                                    Node at = attributes.item(z);
+                                    if (sidAttName.equals(at.getNodeName()))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (Rule.extracts(ruleMap, at))
+                                    {
+                                        Rule atRule = new Rule();
+                                        atRule.setSid(sidvalue);
+                                        atRule.setPriority(Integer.parseInt(ob.getString("priority")));
+                                        Rule previousAtRule = (Rule) ruleMap
+                                                .get(at);
+                                        Rule newAtRule = atRule;
+
+                                        if (previousAtRule != null)
+                                        {
+                                            newAtRule = previousAtRule
+                                                    .merge(atRule);
+                                        }
+
+                                        ruleMap.put(at, newAtRule);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return ruleMap;
+    }
+     
     private Map buildSidTags(Document toBeExtracted, Map ruleMap,
             List<XmlFilterSidTag> sidTags) throws Exception
     {

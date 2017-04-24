@@ -30,6 +30,60 @@
   <tr valign="top">
     <td>
       <table border="0" class="standardText" cellpadding="2">
+         <tr valign="top">
+    		<td colspan=3>
+                <br/>        
+                <div id="toShowGlobalExclusionFilter" style="cursor:pointer;display:inline-block;" onclick="initConfigShow('toShowGlobalExclusionFilter','globalExclusionFilterPanel')">
+                    <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b><%=bundle.getString("lb_filter_global_exclusionfilter")%></b>
+                </div>
+                <div id="globalExclusionFilterPanel" style="display:none;">
+                
+      			<table border="0" class="standardText" cellpadding="2">
+      	
+      			<tr>
+      				<td>
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_global_exclusionfilter")%>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_filter_global_exclusionfilter")%>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="globalExclusionFilterFrom" name="globalExclusionFilterFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${globalExclusionFilter}">
+	      					<option title="${op.filterName}" value="filter-global_exclusion_filter-${op.id}">${op.filterName}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('globalExclusionFilterFrom','globalExclusionFilterTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('globalExclusionFilterTo','globalExclusionFilterFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="globalExclusionFilterTo" name="globalExclusionFilterTo" multiple class="standardText" size="10" style="width:250">
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+                </div>
+    		</td>
+  		</tr>
   		<tr valign="top">
     		<td colspan=3>
                 <br/>        
@@ -40,6 +94,7 @@
                 <div id="baseFilterPanel" style="display:none;">
                 
       			<table border="0" class="standardText" cellpadding="2">
+      	
       			<tr>
       				<td>
       					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_basefilter")%>s
@@ -76,6 +131,61 @@
         			</td>
         			<td>
         				<select id="baseFilterTo" name="baseFilterTo" multiple class="standardText" size="10" style="width:250">
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+                </div>
+    		</td>
+  		</tr>
+  		
+  		<tr valign="top">
+    		<td colspan=3>
+                <br/>        
+                <div id="toShowSidFilter" style="cursor:pointer;display:inline-block;" onclick="initConfigShow('toShowSidFilter','sidFilterPanel')">
+                    <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b><%=bundle.getString("lb_filter_sidfilter")%></b>
+                </div>
+                <div id="sidFilterPanel" style="display:none;">
+                
+      			<table border="0" class="standardText" cellpadding="2">
+      	
+      			<tr>
+      				<td>
+      					<span><%=bundle.getString("lb_all") + " "+ bundle.getString("lb_filter_sidfilter")%>s
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><%=bundle.getString("lb_selected") + " "+ bundle.getString("lb_filter_sidfilter")%>s
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="sidFilterFrom" name="sidFilterFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${sidFilter}">
+	      					<option title="${op.filterName}" value="filter-sid_filter-${op.id}">${op.filterName}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('sidFilterFrom','sidFilterTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('sidFilterTo','sidFilterFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="sidFilterTo" name="sidFilterTo" multiple class="standardText" size="10" style="width:250">
         				</select>
         			</td>
         		</tr>

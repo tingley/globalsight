@@ -51,6 +51,9 @@ public class MapOfTableNameAndSpecialFilter
                 new PlainTextFilter());
         TABLENAME_FILTER.put(FilterConstants.QA_TABLENAME, new QAFilter());
         TABLENAME_FILTER.put(FilterConstants.JSON_TABLENAME, new JsonFilter());
+        TABLENAME_FILTER.put(FilterConstants.SID_TABLENAME, new SidFilter());
+        
+        TABLENAME_FILTER.put(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME, new GlobalExclusionFilter());
     }
 
     public static Filter getFilterInstance(String tableName)

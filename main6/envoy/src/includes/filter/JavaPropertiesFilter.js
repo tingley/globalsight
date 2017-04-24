@@ -94,9 +94,8 @@ JavaPropertiesFilter.prototype.edit = function(filterId, color, specialFilters, 
 	var isPreserveSpaces = (this.filter.enablePreserveSpaces) ? "checked":"";
 	str.append("<table border=0 width='100%'>");
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td' nowrap>" + jsEnableSIDSupport + "</td>");
-	str.append("<td class='htmlFilter_right_td'><input id='isSupportSid' type='checkbox' name='supportSid' value='"+this.filter.enableSidSupport+"' "+isCheckSid+"/></td>");
-	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("<td class='htmlFilter_left_td' nowrap>" + jsFilterNameSidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport(this.filter) + "</td>");
 	str.append("</tr>");
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td' nowrap>" + jsEnableUnicodeEscape + "</td>");
@@ -135,6 +134,25 @@ JavaPropertiesFilter.prototype.edit = function(filterId, color, specialFilters, 
 	saveJavaProperties.filter = this.filter;
 	saveJavaProperties.specialFilters = specialFilters;
 	saveJavaProperties.topFilterId = topFilterId;
+}
+
+JavaPropertiesFilter.prototype.generateSidSupport = function (filter)
+{	
+	var str = new StringBuffer("<select id='javaPropertiesSidFilter' style='width:200px;' class='xml_filter_select'>");
+	str.append("<option value='-1'" + ((filter && filter.sidFilterId == "-1") ? " selected" : "") + ">Choose&nbsp;&nbsp;&nbsp;</option>");	
+	var data = {
+		type : 3
+	}
+	var sidFilters = getAjaxValue("getSidFilters", data);
+	if (sidFilters){
+		sidFilters = eval(sidFilters);
+	}
+	for (var i = 0; i <　sidFilters.length; i++){
+		var sf = eval("(" + sidFilters[i] + ")");
+		str.append("<option value='" + sf.id + "'" + ((filter && filter.sidFilterId == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
+	}
+	str.append("</select>");
+	return str.toString();
 }
 
 JavaPropertiesFilter.prototype.generateProprtiesTable = function (filter)
@@ -749,10 +767,10 @@ JavaPropertiesFilter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<table border=0 width='100%'>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td' nowrap>" + jsEnableSIDSupport + "</td>");
-	str.append("<td class='htmlFilter_right_td'><input id='isSupportSid' type='checkbox' name='supportSid' value='true'/></td>");
-	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("<td class='htmlFilter_left_td' nowrap>" + jsFilterNameSidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport() + "</td>");
 	str.append("</tr>");
+	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td' nowrap>" + jsEnableUnicodeEscape + "</td>");
 	str.append("<td class='htmlFilter_right_td'><input id='isUnicodeEscape' type='checkbox' name='unicodeEscape' value='true'/></td>");
@@ -853,9 +871,9 @@ function saveJavaProperties()
 	var isNew = (saveJavaProperties.edit) ? "false" : "true";
 	var filterId = saveJavaProperties.filterId;
 	var filterDesc = document.getElementById("javaPropertiesDesc").value;
-	var isSupportSid = document.getElementById("isSupportSid").checked;
 	var isUnicodeEscape = document.getElementById("isUnicodeEscape").checked;
 	var isPreserveSpaces = document.getElementById("isPreserveSpaces").checked;
+	var sidFilterId = $("#javaPropertiesSidFilter").val();
 	
 	var secondaryFilterIdAndTableName = document.getElementById("secondaryFilterSelect").value;
 	var index = secondaryFilterIdAndTableName.indexOf("-");
@@ -882,7 +900,8 @@ function saveJavaProperties()
 			filterTableName:"java_properties_filter",
 			filterId:filterId,
 			filterName:filterName, filterDesc:filterDesc, 
-			isSupportSid:isSupportSid, isUnicodeEscape:isUnicodeEscape, 
+			sidFilterId:sidFilterId,
+			isUnicodeEscape:isUnicodeEscape, 
 			isPreserveSpaces:isPreserveSpaces, 
 			companyId:companyId, 
 			secondFilterId:secondFilterId, 
@@ -909,7 +928,7 @@ function updateJavaPropertiesFilterCallback(data)
 		jpFilter.filterTableName = "java_properties_filter";
 		jpFilter.filterName = checkExistJavaPropertiesCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJavaPropertiesCallback.obj.filterDesc;
-		jpFilter.enableSidSupport = checkExistJavaPropertiesCallback.obj.isSupportSid;
+		jpFilter.sidFilterId = checkExistJavaPropertiesCallback.obj.sidFilterId;
 		jpFilter.enableUnicodeEscape = checkExistJavaPropertiesCallback.obj.isUnicodeEscape;
 		jpFilter.enablePreserveSpaces = checkExistJavaPropertiesCallback.obj.isPreserveSpaces;
 		jpFilter.secondFilterId = checkExistJavaPropertiesCallback.obj.secondFilterId;
@@ -959,7 +978,7 @@ function saveJavaPropertiesFilterCallback(data)
 		jpFilter.filterTableName = "java_properties_filter";
 		jpFilter.filterName = checkExistJavaPropertiesCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJavaPropertiesCallback.obj.filterDesc;
-		jpFilter.enableSidSupport = checkExistJavaPropertiesCallback.obj.isSupportSid;
+		jpFilter.sidFilterId = checkExistJavaPropertiesCallback.obj.sidFilterId;
 		jpFilter.enableUnicodeEscape = checkExistJavaPropertiesCallback.obj.isUnicodeEscape;
 		jpFilter.enablePreserveSpaces = checkExistJavaPropertiesCallback.obj.isPreserveSpaces;
 		jpFilter.companyId = companyId;

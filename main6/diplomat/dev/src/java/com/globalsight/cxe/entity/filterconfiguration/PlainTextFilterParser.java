@@ -41,6 +41,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.globalsight.persistence.hibernate.HibernateUtil;
+
 /**
  * The helper for config xml in base filter
  * 
@@ -54,6 +56,7 @@ public class PlainTextFilterParser
     public static final String NODE_SID = "customTextRuleSids";
     public static final String NODE_ELEMENT_POST_FILTER = "elementPostFilter";
     public static final String NODE_ELEMENT_POST_FILTER_ID = "elementPostFilterId";
+    public static final String NODE_SID_FILTER = "sidFilterId";
 
     public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</"
             + NODE_ROOT + ">";
@@ -66,10 +69,13 @@ public class PlainTextFilterParser
     private String m_configXml = null;
     private String m_elementPostFilter = null;
     private String m_elementPostFilterId = null;
-
+    private long sidFilterId = 0;
+    private PlainTextFilter f;
+    
     public PlainTextFilterParser(PlainTextFilter f)
     {
         this(f == null ? null : f.getConfigXml());
+        this.f = f;
     }
 
     public PlainTextFilterParser(String configXml)
@@ -85,7 +91,7 @@ public class PlainTextFilterParser
 
     // {tagName : "name1", itemid : 1, attributes : [{itemid : 0, aName :
     // "name1", aOp : "equal", aValue : "vvv1"}]}
-    public static String toXml(JSONArray customTextRules, JSONArray customTextRuleSids, 
+    public static String toXml(JSONArray customTextRules, String sidFilterId, 
             String elementPostFilter, String elementPostFilterId)
             throws Exception
     {
@@ -96,10 +102,12 @@ public class PlainTextFilterParser
                 : jsonArrayToXml(customTextRules));
         sb.append("</").append(NODE_CUSTOM).append(">");
         
-        sb.append("<").append(NODE_SID).append(">");
-        sb.append(customTextRuleSids == null ? ""
-                : jsonArrayToXml(customTextRuleSids));
-        sb.append("</").append(NODE_SID).append(">");
+        if (sidFilterId != null)
+        {
+            sb.append("<").append(NODE_SID_FILTER).append(">");
+            sb.append(sidFilterId);
+            sb.append("</").append(NODE_SID_FILTER).append(">");
+        }
         
         sb.append("<").append(NODE_ELEMENT_POST_FILTER).append(">");
         sb.append(elementPostFilter);
@@ -149,7 +157,7 @@ public class PlainTextFilterParser
         
         return result;
     }
-
+    
     private <T> List<T> getBaseFilterTagsFromXml(String nodename, T t)
     {
         List<T> result = new ArrayList<T>();
@@ -484,5 +492,50 @@ public class PlainTextFilterParser
         }
 
         return false;
+    }
+    
+    public long getSidFilterId()
+    {
+        // for old data.
+        String json = getCustomTextRuleSidsJson();
+        if (json.length() > 4)
+        {
+            long companyId = f.getCompanyId();
+            SidFilter sf = new SidFilter();
+            sf.setCompanyId(companyId);
+            String namePre = "Plain Text SID Filter ";
+            int i = 1;
+            String name = namePre + i;
+            while (sf.checkExistsNew(name, companyId)){
+                i++;
+                name = namePre + i;
+            }
+            
+            sf.setConfigXml(json);
+            sf.setFilterName(name);
+            sf.setType(2);
+            HibernateUtil.saveOrUpdate(sf);
+            
+            String oldXml = this.m_configXml;
+            String newXml = oldXml.replaceAll("<customTextRuleSids>.*?</customTextRuleSids>", "<sidFilterId>" + sf.getId() + "</sidFilterId>");
+            m_configXml = newXml;
+            f.setConfigXml(newXml);
+           
+            HibernateUtil.saveOrUpdate(f);
+            return sf.getId();
+        }
+        
+        if (sidFilterId == 0)
+        {
+            sidFilterId = -1;
+            
+            String id = getSingleElementValue(NODE_SID_FILTER);
+            if (id != null && !"null".equalsIgnoreCase(id))
+            {
+                sidFilterId = Long.parseLong(id);
+            }
+        }
+        
+        return sidFilterId;
     }
 }

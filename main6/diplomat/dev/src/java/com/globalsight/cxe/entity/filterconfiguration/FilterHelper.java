@@ -31,6 +31,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -46,6 +47,9 @@ import com.globalsight.util.SortUtil;
 
 public class FilterHelper
 {
+    static private final Logger logger = Logger.getLogger(FilterHelper.class);
+
+    
     public static String escape(String s)
     {
         if (s == null)
@@ -77,9 +81,17 @@ public class FilterHelper
         {
             FilterConfiguration fc = filterConfigurations.get(i);
 
-            if ("base_filter".equals(fc.getFilterTableName()))
+            if ("global_exclusion_filter".equals(fc.getFilterTableName()))
             {
                 sorted.add(0, fc);
+            }
+            else if (sorted.size() > 0 && "base_filter".equals(fc.getFilterTableName()))
+            {
+                sorted.add(1, fc);
+            }
+            else if ("sid_filter".equals(fc.getFilterTableName()))
+            {
+                sorted.add(2, fc);
             }
             else
             {
@@ -144,13 +156,23 @@ public class FilterHelper
     }
     
     public static long saveJsonFilter(String filterName,
-            String filterDesc, boolean isSupportSid, long baseFilterId,
+            String filterDesc, long sidFilterId, long baseFilterId,
             long elementPostFilterId,long companyId,String elementPostFilterTableName)
     {
         JsonFilter filter = new JsonFilter();
         filter.setFilterName(filterName);
         filter.setFilterDescription(filterDesc);
-        filter.setEnableSidSupport(isSupportSid);
+        filter.setSidFilter(null);
+        filter.setEnableSidSupport(false);
+        if (sidFilterId > 0)
+        {
+            SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
+            if (sf != null && sf.getType() == 4)
+            {
+                filter.setSidFilter(sf);
+            }
+        }
+        
         filter.setBaseFilterId(baseFilterId);
         filter.setElementPostFilterId(elementPostFilterId);
         filter.setCompanyId(companyId);
@@ -160,7 +182,7 @@ public class FilterHelper
         return filter.getId();
     }
     
-    public static long updateJsonFilter(String filterName, String filterDesc, boolean isSupportSid,
+    public static long updateJsonFilter(String filterName, String filterDesc, long sidFilterId,
             long baseFilterId, long elementPostFilterId, long companyId,long fId,String elementPostFilterTableName)
     {
         JsonFilter filter = null;
@@ -170,7 +192,16 @@ public class FilterHelper
             filter = (JsonFilter) HibernateUtil.search(hql).get(0);
             filter.setFilterName(filterName);
             filter.setFilterDescription(filterDesc);
-            filter.setEnableSidSupport(isSupportSid);
+            filter.setSidFilter(null);
+            filter.setEnableSidSupport(false);
+            if (sidFilterId > 0)
+            {
+                SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
+                if (sf != null && sf.getType() == 4)
+                {
+                    filter.setSidFilter(sf);
+                }
+            }
             filter.setBaseFilterId(baseFilterId);
             filter.setElementPostFilterId(elementPostFilterId);
             filter.setCompanyId(companyId);
@@ -182,17 +213,27 @@ public class FilterHelper
     }
     
     public static long saveJavaPropertiesFilter(String filterName,
-            String filterDesc, boolean isSupportSid, boolean isUnicodeEscape,
+            String filterDesc, long sidFilterId, boolean isUnicodeEscape,
             boolean isPreserveSpaces, long companyId, long secondFilterId,
             String secondFilterTableName, JSONArray internalTexts)
     {
         JavaPropertiesFilter filter = new JavaPropertiesFilter();
         filter.setCompanyId(companyId);
-        filter.setEnableSidSupport(isSupportSid);
         filter.setEnableUnicodeEscape(isUnicodeEscape);
         filter.setFilterDescription(filterDesc);
         filter.setFilterName(filterName);
         filter.setEnablePreserveSpaces(isPreserveSpaces);
+        filter.setSidFilter(null);
+        filter.setEnableSidSupport(false);
+        if (sidFilterId > 0)
+        {
+            SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
+            if (sf != null && sf.getType() == 3)
+            {
+                filter.setSidFilter(sf);
+            }
+        }
+        
         filter.setSecondFilterId(secondFilterId);
         filter.setSecondFilterTableName(secondFilterTableName);
         filter.setInternalTextJson(internalTexts);
@@ -202,7 +243,7 @@ public class FilterHelper
     }
 
     public static long updateJavaPropertiesFilter(long fId, String filterName,
-            String filterDesc, boolean isSupportSid, boolean isUnicodeEscape,
+            String filterDesc, long sidFilterId, boolean isUnicodeEscape,
             boolean isPreserveSpaces, long companyId, long secondFilterId,
             String secondFilterTableName, JSONArray internalTexts)
     {
@@ -212,7 +253,12 @@ public class FilterHelper
         {
             filter = (JavaPropertiesFilter) HibernateUtil.search(hql).get(0);
             filter.setCompanyId(companyId);
-            filter.setEnableSidSupport(isSupportSid);
+            filter.setSidFilter(null);
+            filter.setEnableSidSupport(false);
+            if (sidFilterId > 0)
+            {
+                filter.setSidFilter(HibernateUtil.get(SidFilter.class, sidFilterId));
+            }
             filter.setEnableUnicodeEscape(isUnicodeEscape);
             filter.setEnablePreserveSpaces(isPreserveSpaces);
             filter.setFilterDescription(filterDesc);
@@ -616,6 +662,7 @@ public class FilterHelper
         List<Long> htmlIDList = new ArrayList<Long>();
         List<Long> xmlIDList = new ArrayList<Long>();
         List<Long> baseIdList = new ArrayList<Long>();
+        List<Long> sidIdList = new ArrayList<Long>();
         for (SpecialFilterToDelete f : p_specialFilterToDeletes)
         {
             if (FilterConstants.HTML_TABLENAME.equals(f.getFilterTableName()))
@@ -631,6 +678,11 @@ public class FilterHelper
                     .getFilterTableName()))
             {
                 baseIdList.add(f.getSpecialFilterId());
+            }
+            else if (FilterConstants.SID_TABLENAME.equals(f
+                    .getFilterTableName()))
+            {
+                sidIdList.add(f.getSpecialFilterId());
             }
         }
 
@@ -651,6 +703,7 @@ public class FilterHelper
         checkXMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, xmlIDList,
                 p_removeInfo, p_companyId);
 
+        checkSidFilterIsUsedByFilter(sidIdList, p_removeInfo, p_companyId);
         checkBaseFilterIsUsedByFiter(baseIdList, p_removeInfo, p_companyId);
     }
 
@@ -781,6 +834,114 @@ public class FilterHelper
                                 contents[0].toString(), p_usedfilterTableName);
                         p_removeInfo.addUsedFilters(filterInfo);
                     }
+                }
+            }
+        }
+    }
+    
+    public static void checkSidFilterIsUsedByFilter(List<Long> p_filteIDList, RemoveInfo p_removeInfo, Long p_companyId)
+    {
+        String hql = "from XMLRuleFilter where companyId = ?";
+        List<XMLRuleFilter> fs = (List<XMLRuleFilter>) HibernateUtil.search(hql, p_companyId);
+        for (XMLRuleFilter f : fs)
+        {
+            XmlFilterConfigParser parser = new XmlFilterConfigParser(f);
+            for (Long hID : p_filteIDList)
+            {
+                try
+                {
+                    parser.parserXml();
+                }
+                catch (Exception e)
+                {
+                    logger.error("configXml : " + f.getConfigXml(), e);
+                }
+                if (Long.parseLong(parser.getSidFilterId()) == hID)
+                {
+                    if (!p_removeInfo.isUsedByFilters())
+                        p_removeInfo.setUsedByFilters(true);
+                    
+                    FilterInfos filterInfo = p_removeInfo.new FilterInfos(hID,
+                            FilterConstants.SID_TABLENAME,
+                            Long.toString(f.getId()), FilterConstants.XMLRULE_TABLENAME);
+                    p_removeInfo.addUsedFilters(filterInfo);
+                }
+            }
+        }
+        
+        hql = "from JsonFilter where sidFilter.id = ?";
+        for (Long hID : p_filteIDList)
+        {
+            List<JsonFilter> js = (List<JsonFilter>) HibernateUtil.search(hql, hID);
+            if (js.size() > 0)
+            {
+                for (JsonFilter j : js)
+                {
+                    FilterInfos filterInfo = p_removeInfo.new FilterInfos(hID,
+                            FilterConstants.SID_TABLENAME,
+                            Long.toString(j.getId()), FilterConstants.JSON_TABLENAME);
+                    p_removeInfo.addUsedFilters(filterInfo);
+                    
+                    if (!p_removeInfo.isUsedByFilters())
+                        p_removeInfo.setUsedByFilters(true);
+                }
+            }
+        }
+        
+        hql = "from PlainTextFilter where companyId = ?";
+        List<PlainTextFilter> ps = (List<PlainTextFilter>) HibernateUtil.search(hql, p_companyId);
+        for (PlainTextFilter p : ps)
+        {
+            PlainTextFilterParser parser = new PlainTextFilterParser(p);
+            try
+            {
+                parser.parserXml();
+            }
+            catch (Exception e1)
+            {
+                logger.error("configXml : " + p.getConfigXml(), e1);
+            }
+            
+            long sidFilterId = parser.getSidFilterId();
+            
+            for (Long hID : p_filteIDList)
+            {
+                try
+                {
+                    parser.parserXml();
+                }
+                catch (Exception e)
+                {
+                    logger.error("configXml : " + p.getConfigXml(), e);
+                }
+                if (sidFilterId == hID)
+                {
+                    if (!p_removeInfo.isUsedByFilters())
+                        p_removeInfo.setUsedByFilters(true);
+                    
+                    FilterInfos filterInfo = p_removeInfo.new FilterInfos(hID,
+                            FilterConstants.SID_TABLENAME,
+                            Long.toString(p.getId()), FilterConstants.PLAINTEXT_TABLENAME);
+                    p_removeInfo.addUsedFilters(filterInfo);
+                }
+            }
+        }
+        
+        hql = "from JavaPropertiesFilter where sidFilter.id = ?";
+        for (Long hID : p_filteIDList)
+        {
+            List<JavaPropertiesFilter> js = (List<JavaPropertiesFilter>) HibernateUtil.search(hql, hID);
+            if (js.size() > 0)
+            {
+                for (JavaPropertiesFilter j : js)
+                {
+                    FilterInfos filterInfo = p_removeInfo.new FilterInfos(hID,
+                            FilterConstants.SID_TABLENAME,
+                            Long.toString(j.getId()), FilterConstants.JAVAPROPERTIES_TABLENAME);
+                    p_removeInfo.addUsedFilters(filterInfo);
+                    
+                    if (!p_removeInfo.isUsedByFilters())
+                        p_removeInfo.setUsedByFilters(true);
                 }
             }
         }

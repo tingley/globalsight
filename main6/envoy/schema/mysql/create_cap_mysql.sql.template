@@ -2659,8 +2659,9 @@ VALUES
 (12,'Portable Object Filter','|42|','po_filter','The filter for Portable Object files.',1),
 (13,'Base Text Filter','|0|','base_filter','The filter to handle extracted text.',1),
 (14,'Plain Text Filter','|6|','plain_text_filter','The filter for Plain Text files.',1),
-(15,'QA Filter','|0|','qa_filter','The filter to handle QA checks.',1);
-
+(15,'QA Filter','|0|','qa_filter','The filter to handle QA checks.',1),
+(16,'SID Filter','','sid_filter','The filter for String IDs.',1);
+(17,'Global Exclusions','','global_exclusion_filter','The filter to handle extracted text.',1);
 UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `java_properties_filter`;
@@ -2670,6 +2671,7 @@ CREATE TABLE `java_properties_filter` (
   `FILTER_DESCRIPTION` varchar(4000) DEFAULT NULL,
   `ENABLE_SID_SUPPORT` char(1) NOT NULL DEFAULT 'N',
   `ENABLE_UNICODE_ESCAPE` char(1) NOT NULL DEFAULT 'N',
+  `SID_FILTER_ID` BIGINT(20) NULL,
   `ENABLE_TRIM_SEGMENT` char(1) NOT NULL DEFAULT 'N',
   `SECOND_FILTER_ID` bigint(11) DEFAULT '-2',
   `SECOND_FILTER_TABLE_NAME` varchar(45),
@@ -2963,6 +2965,28 @@ CREATE TABLE `base_filter` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `sid_filter`;
+CREATE TABLE IF NOT EXISTS `sid_filter` (
+  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `FILTER_NAME` varchar(255) NOT NULL,
+  `FILTER_DESCRIPTION` varchar(4000) DEFAULT NULL,
+  `COMPANY_ID` bigint(20) unsigned NOT NULL,
+  `FILTER_TYPE` INT NOT NULL,
+  `CONFIG_XML` text,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `global_exclusion_filter`;
+CREATE TABLE IF NOT EXISTS `global_exclusion_filter` (
+  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `FILTER_NAME` varchar(255) NOT NULL,
+  `FILTER_DESCRIPTION` varchar(4000) DEFAULT NULL,
+  `COMPANY_ID` bigint(20) unsigned NOT NULL,
+  `FILTER_TYPE` INT NOT NULL,
+  `CONFIG_XML` text,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;  
+
 DROP TABLE IF EXISTS `base_filter_mapping`;
 CREATE TABLE `base_filter_mapping` (
   `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -2979,6 +3003,7 @@ CREATE TABLE filter_json
   FILTER_NAME VARCHAR(255) NOT NULL,
   FILTER_DESCRIPTION VARCHAR(400) DEFAULT NULL,
   ENABLE_SID_SUPPORT CHAR(1) NOT NULL,
+  SID_FILTER_ID BIGINT(20) NULL,
   ELEMENT_POST_FILTER_ID BIGINT(20) DEFAULT NULL,
   ELEMENT_POST_FILTER_TABLE_NAME VARCHAR(100) DEFAULT NULL,
   BASE_FILTER_ID BIGINT(20) DEFAULT NULL,

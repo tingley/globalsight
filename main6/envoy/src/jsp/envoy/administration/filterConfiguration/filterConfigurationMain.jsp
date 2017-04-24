@@ -62,6 +62,7 @@ session="true" %>
         </SCRIPT>
         <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js">
         </SCRIPT>
+        <script SRC="/globalsight/jquery/jquery-1.11.3.min.js"></script>
         <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/Array.js">
         </SCRIPT>
         <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/json2.js">
@@ -100,6 +101,8 @@ session="true" %>
         </SCRIPT>
         <script type="text/javascript" src="/globalsight/includes/filter/POFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/BaseFilter.js"></script>
+        <script type="text/javascript" src="/globalsight/includes/filter/SidFilter.js"></script>
+        <script type="text/javascript" src="/globalsight/includes/filter/GlobalExclusionFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/PlainTextFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/QAFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/JsonFilter.js"></script>
@@ -1041,6 +1044,363 @@ session="true" %>
                             </div>
                             </td></tr>
                             </table>
+                        </div>
+                    </span>
+                    <div id="Global_Exclusion_Filter_content">
+                        <div id='globalExclusionFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:500px;position:absolute;top:100px;z-index:21'>
+                            <div id='globalExclusionFilterDialogT' onmousedown="DragAndDrop(document.getElementById('globalExclusionFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_global_exclusionfilter")%>
+                                </label>
+                            </div>
+                            <div id='globalExclusionFilterPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                                <table border=0 width='100%'>
+                                    <tr>
+                                        <td class='specialFilter_dialog_label' width='80px;'><%= bundle.getString("lb_loc_filter_name") %><span class="asterisk">*</span>:</td>
+                                        <td><input type='text' style='width:100%' id='globalExclusionFilterName' maxlength="40"  class="name"></input></td>
+                                        <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='specialFilter_dialog_label' VALIGN='bottom'><%= bundle.getString("lb_description") %>:</td>
+                                        <td class='specialFilter_dialog_label desc' VALIGN='bottom'>
+                                            <textarea style='width:100%' rows='4' id='globalExclusionFilterDesc' maxlength="4000" name='desc'></textarea>
+                                        </td>
+                                        <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='specialFilter_dialog_label' VALIGN='bottom'><%= bundle.getString("lb_filter_global_exclusion_based_on") %><span class="asterisk">*</span>:</td>
+                                        <td class='specialFilter_dialog_label desc' VALIGN='bottom'>
+                                            <select class="globalExclusionFilterType" name="globalExclusionFilterType" onchange="globalExclusionFilter.changeType(this)">
+                                                <option value="-1"><%= bundle.getString("lb_choose") %></option>
+                                                <option value="1"><%= bundle.getString("lb_sid") %></option>          
+                                            </select>
+                                        </td>
+                                        <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
+                                    </tr>
+                                </table>
+                                
+                                <div id="div_globalExclusion_filter_type_1" class="globalExclusionTypeDivs" style="width:100%; margin-top: 15px; ">
+                                    <div style="float:right;">
+                                        <input type="button" value="<%= bundle.getString("lb_add") %>" onclick="globalExclusionFilter.openSidRule()">
+                                        <input type="button" value="<%= bundle.getString("lb_delete") %>" onclick="globalExclusionFilter.deleteXmlRule()"> 
+                                    </div>
+									<table width="100%" class="standardText" id="sidGlobalExclusionFilterTagsContentTable" border="0">
+										<tbody>
+											<tr class="htmlFilter_emptyTable_tr">
+												<td width="5%"><input id="checkAllGlobalExclusionFilterSid" type="checkbox" onclick="globalExclusionFilter.checkAllGlobalExclusionFilterSid()"></td>
+												<td class="tagName_td"><%= bundle.getString("lb_sid") %></td>
+												<td width="60px;" class="tagName_td"><%= bundle.getString("lb_is_regex") %></td>
+											</tr>
+											<tr class="globalExclusionFilter_xml_emptyTable_tr">
+												<td colspan="2">
+												    <p>
+														<br>
+													</p>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<div>
+									    <a href='#' class='specialFilter_dialog_label' onclick=globalExclusionFilter.prePage(1)><%= bundle.getString("lb_previous") %></a>
+									    |
+									    <a href='#' class='specialFilter_dialog_label' onclick=globalExclusionFilter.nextPage(1)><%= bundle.getString("lb_next") %></a>
+									    |
+									    <input id='pageCountGlobalExclusionFilterSid' size=2 type='text' value="1" ></input>
+									    / 
+									    <span id='pageTotalSizeGlobalExclusionFilterSid' class='standardText'>1</span> 
+									    <input type='button' value='<%= bundle.getString("lb_go") %>' onclick=globalExclusionFilter.goToPage(1)></input>
+									</div>
+								</div>
+                                
+                               
+						   <div id="div_button_globalExclusion_filter" style="margin-left:45px;margin-right:45px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveGlobalExclusionFilter()'/>                                
+                                    <input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('globalExclusionFilterDialog'); globalExclusionFilter.closeAllTagPopup()"/>
+                                </center>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='addGlobalExclusionTypeRuleSid' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;hidden;position:absolute;top:120px;z-index:22'>
+                        <div id='addGlobalExclusionTypeRuleSidT' onmousedown="DragAndDrop(document.getElementById('addGlobalExclusionTypeRuleSid'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                            <label class='whiteBold'>
+                                <%=bundle.getString("lb_filter_sidfilter")%>
+                            </label>
+                        </div>
+                        <div id='addGlobalExclusionTypeRuleSidContent' style='width:540px;margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px;max-height:400px;overflow:auto;'>
+                            <table width="100%" cellpadding="3" border="0" cellspacing="1" class="standardText">
+                                <tr>
+                                    <td class='htmlFilter_left_td'><%=bundle.getString("lb_sid")%>:</td>
+                                    <td class='htmlFilter_right_td'><input type='text' id='globalExclusionFilterSid' maxlength="255" ></td>
+                                </tr>
+                                <tr>
+                                    <td class='htmlFilter_left_td'><%=bundle.getString("lb_is_regex")%>:</td>
+                                    <td class='htmlFilter_right_td'><input type="checkbox" id="globalExclusionFilterIsRegex"></input></td>
+                                </tr>                        
+                            </table>
+                        </div>
+                        <div  style="float:left;margin-left:220px;margin-right:220px;margin-top:10px;margin-bottom:20px">
+                            <center>
+                            <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='globalExclusionFilter.addSidRule()'/>
+                            <input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('addGlobalExclusionTypeRuleSid')"/>
+                            </center>
+                        </div>
+                    </div>
+                    <div id="sidFilter_content">
+                        <div id='sidFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:500px;position:absolute;top:100px;z-index:21'>
+                            <div id='sidFilterDialogT' onmousedown="DragAndDrop(document.getElementById('sidFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_sidfilter")%>
+                                </label>
+                            </div>
+                            <div id='sidFilterPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                                <table border=0 width='100%'>
+                                    <tr>
+                                        <td class='specialFilter_dialog_label' width='80px;'><%= bundle.getString("lb_loc_filter_name") %><span class="asterisk">*</span>:</td>
+                                        <td><input type='text' style='width:100%' id='sidFilterName' maxlength="40"  class="name"></input></td>
+                                        <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='specialFilter_dialog_label' VALIGN='bottom'><%= bundle.getString("lb_description") %>:</td>
+                                        <td class='specialFilter_dialog_label desc' VALIGN='bottom'>
+                                            <textarea style='width:100%' rows='4' id='sidFilterDesc' maxlength="4000" name='desc'></textarea>
+                                        </td>
+                                        <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='specialFilter_dialog_label' VALIGN='bottom'><%= bundle.getString("lb_filter_sid_type") %><span class="asterisk">*</span>:</td>
+                                        <td class='specialFilter_dialog_label desc' VALIGN='bottom'>
+                                            <select class="sidFilterType" name="sidFilterType" onchange="sidFilter.changeType(this)">
+                                                <option value="-1"><%= bundle.getString("lb_choose") %></option>
+                                                <option value="1"><%= bundle.getString("lb_filter_sid_type_xml") %></option>
+                                                <option value="2"><%= bundle.getString("lb_filter_sid_type_plain") %></option>
+                                                <option value="3"><%= bundle.getString("lb_filter_sid_type_java_properties") %></option>
+                                                <option value="4"><%= bundle.getString("lb_filter_sid_type_JSON") %></option>
+                                            </select>
+                                        </td>
+                                        <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
+                                    </tr>
+                                </table>
+                                
+                                <div id="div_sid_filter_type_1" class="sidTypeDivs" style="width:100%; margin-top: 15px; ">
+                                    <div style="float:right;">
+                                        <input type="button" value="<%= bundle.getString("lb_add") %>" onclick="sidFilter.openXmlRule()">
+                                        <input type="button" value="<%= bundle.getString("lb_delete") %>" onclick="sidFilter.deleteXmlRule()"> 
+                                    </div>
+									<table width="100%" class="standardText" id="xmlSidFilterTagsContentTable" border="0">
+										<tbody>
+											<tr class="htmlFilter_emptyTable_tr">
+												<td width="5%"><input id="checkAllSidFilterXpath" type="checkbox" onclick="sidFilter.checkAllSidFilterXpath()"></td>
+												<td  class="tagName_td"><%= bundle.getString("lb_xpath") %></td>
+												<td width="60px;" class="tagName_td"><%= bundle.getString("lb_priority") %></td>
+											</tr>
+											<tr class="sidFilter_xml_emptyTable_tr">
+												<td colspan="2">
+												    <p>
+														<br>
+													</p>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<div>
+									    <a href='#' class='specialFilter_dialog_label' onclick=sidFilter.prePage(1)><%= bundle.getString("lb_previous") %></a>
+									    |
+									    <a href='#' class='specialFilter_dialog_label' onclick=sidFilter.nextPage(1)><%= bundle.getString("lb_next") %></a>
+									    |
+									    <input id='pageCountSidXmlFilter' size=2 type='text' value="1" ></input>
+									    / 
+									    <span id='pageTotalSizeSidXmlFilter' class='standardText'>1</span> 
+									    <input type='button' value='<%= bundle.getString("lb_go") %>' onclick=sidFilter.goToPage(1)></input>
+									</div>
+								</div>
+                                
+                                <div id="div_sid_filter_type_2" class="sidTypeDivs" style="width:100%; margin-top: 15px; display:none;">
+                                    <div style="float:right;">
+                                        <input type="button" value="<%= bundle.getString("lb_add") %>" onclick="sidFilter.openPlainTextRule()">
+                                        <input type="button" value="<%= bundle.getString("lb_delete") %>" onclick="sidFilter.deletePlainTextRule()">
+                                    </div>
+									<table width="100%" class="standardText"
+										id="plainTextFilterTagsContentTable" border="0" >
+										<tbody>
+											<tr class="htmlFilter_emptyTable_tr">
+												<td width="5%"><input type="checkbox" id="checkAllSidFilterTxt" onclick="sidFilter.checkAllSidFilterTxt()"></td>
+												<td width="20%" class="tagName_td"><%= bundle.getString("lb_filter_plaintextfilter_StartStr") %></td>
+												<td width="15%" class="tagName_td"><%= bundle.getString("lb_filter_plaintextfilter_StartIs") %></td>
+												<td width="15%" class="tagName_td"><%= bundle.getString("lb_filter_plaintextfilter_StartOcc") %></td>
+												<td width="20%" class="tagName_td"><%= bundle.getString("lb_filter_plaintextfilter_FinishStr") %></td>
+												<td width="15%" class="tagName_td"><%= bundle.getString("lb_filter_plaintextfilter_FinishIs") %></td>
+												<td width="15%" class="tagName_td"><%= bundle.getString("lb_filter_plaintextfilter_FinishOcc") %></td>
+												<td class="tagName_td"><%= bundle.getString("lb_priority") %></td>
+											</tr>
+											<tr class="sidFilter_txt_emptyTable_tr">
+												<td colspan="2">
+												    <p>
+														<br>
+													</p>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<div>
+									    <a href='#' class='specialFilter_dialog_label' onclick=sidFilter.prePage(2)><%= bundle.getString("lb_previous") %></a>
+									    |
+									    <a href='#' class='specialFilter_dialog_label' onclick=sidFilter.nextPage(2)><%= bundle.getString("lb_next") %></a>
+									    |
+									    <input id='pageCountSidTxtFilter' size=2 type='text' value="1" ></input>
+									    / 
+									    <span id='pageTotalSizeSidTxtFilter' class='standardText'>1</span> 
+									    <input type='button' value='<%= bundle.getString("lb_go") %>' onclick=sidFilter.goToPage(2)></input>
+									</div>
+								</div>
+						   <div id="div_button_sid_filter" style="margin-left:45px;margin-right:45px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveSidFilter()'/>                                
+                                    <input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('sidFilterDialog'); sidFilter.closeAllTagPopup()"/>
+                                </center>
+                            </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='addSidTypeRuleXml' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;hidden;position:absolute;top:120px;z-index:22'>
+                        <div id='addSidTypeRuleXmlT' onmousedown="DragAndDrop(document.getElementById('addSidTypeRuleXml'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                            <label class='whiteBold'>
+                                <%=bundle.getString("lb_sid_rule")%>
+                            </label>
+                        </div>
+                        <div id='addSidTypeRuleXmlContent' style='width:540px;margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px;max-height:400px;overflow:auto;'>
+                            <table width="100%" cellpadding="3" border="0" cellspacing="1" class="standardText">
+                                <tr>
+                                    <td class='htmlFilter_left_td'><%=bundle.getString("lb_xpath")%>:</td>
+                                    <td class='htmlFilter_right_td'><input type='text' maxlength="200"  id='sidFilterXmlXpath'>&nbsp;<%=bundle.getString("lb_filter_sidfilter_xpath")%></td>
+                                </tr>
+                                <tr>
+                                    <td class='htmlFilter_left_td'><%=bundle.getString("lb_priority")%>:</td>
+                                    <td class='htmlFilter_right_td' colspan="2" ><input type='text'  maxlength="3" id='sidFilterXmlPriority'></input></td>
+                                </tr>                        
+                            </table>
+                        </div>
+                        <div id="div_button_editPriority_base" style="float:left;margin-left:220px;margin-right:220px;margin-top:10px;margin-bottom:20px">
+                            <center>
+                            <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='sidFilter.addXmlXpathRule()'/>
+                            <input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('addSidTypeRuleXml')"/>
+                            </center>
+                        </div>
+                    </div>
+								
+				   <div id='addSidTypeRulePlain' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;hidden;position:absolute;top:120px;z-index:22'>
+                           <div id='addSidTypeRulePlainT' onmousedown="DragAndDrop(document.getElementById('addSidTypeRulePlain'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                               <label class='whiteBold'>
+                                   <%=bundle.getString("lb_sid_rule")%>
+                               </label>
+                           </div>
+                           <div id='addSidTypeRulePlainContent' style='width:540px;margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px;max-height:400px;overflow:auto;'>
+                               <table width="100%" cellpadding="3" border="0" cellspacing="1" class="standardText">
+                                   <tr>
+                                       <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_StartStr")%>:</td>
+                                       <td class='htmlFilter_right_td'><input type='text' maxlength="80" id='sidFilter_customTextRule_startStr'></td>
+                                   </tr>
+                                   <tr>
+                                       <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_StartIs")%>:</td>
+                                       <td class='htmlFilter_right_td'><input type='checkbox' id='sidFilter_customTextRule_startIs' checked></td>
+                                   </tr>
+                                   <tr>
+                                       <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_StartOcc")%>:</td>
+                                       <td class='htmlFilter_right_td'>
+                                       <input type='radio' name='sidFilter_customTextRule_startOcc'  id='sidFilter_customTextRule_startOcc1' value='1' checked />
+                                       <%=bundle.getString("lb_filter_plaintextfilter_first")%>
+                                       <input type='radio' name='sidFilter_customTextRule_startOcc' id='sidFilter_customTextRule_startOcc2' value='2' />
+                                       <%=bundle.getString("lb_filter_plaintextfilter_last")%>
+                                       <input type='radio' name='sidFilter_customTextRule_startOcc' id='sidFilter_customTextRule_startOcc3' value='3' />
+                                       #<input type='text' id='sidFilter_customTextRule_startOccTimes' maxlength="3" size="3" style="width:28px">
+                                       </td>
+                                   </tr>
+                                   <tr>
+                                       <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_FinishStr")%>:</td>
+                                       <td class='htmlFilter_right_td'><input type='text' maxlength="80" id='sidFilter_customTextRule_finishStr'></td>
+                                   </tr>
+                                   <tr>
+                                       <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_FinishIs")%>:</td>
+                                       <td class='htmlFilter_right_td'><input type='checkbox' id='sidFilter_customTextRule_finishIs' checked></td>
+                                   </tr>
+                                   <tr>
+                                       <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_FinishOcc")%>:</td>
+                                       <td class='htmlFilter_right_td'>
+                                       <input type='radio' name='sidFilter_customTextRule_finishOcc' id='sidFilter_customTextRule_finishOcc1' value='1' checked />
+                                       <%=bundle.getString("lb_filter_plaintextfilter_first")%>
+                                       <input type='radio' name='sidFilter_customTextRule_finishOcc' id='sidFilter_customTextRule_finishOcc2' value='2' />
+                                       <%=bundle.getString("lb_filter_plaintextfilter_last")%>
+                                       <input type='radio' name='sidFilter_customTextRule_finishOcc' id='sidFilter_customTextRule_finishOcc3' value='3' />
+                                       #<input type='text' id='sidFilter_customTextRule_finishOccTimes' maxlength="3" size="3" style="width:28px">
+                                       </td>
+                                   </tr>
+                                   <tr>
+                                       <td class='htmlFilter_left_td'><%=bundle.getString("lb_priority")%>:</td>
+                                       <td class='htmlFilter_right_td'><input type='text' maxlength="3" id='sidFilter_customTextRule_priority'></input></td>
+                                   </tr>                        
+                               </table>
+                           </div>
+                           <div id="div_button_editPriority_base" style="float:left;margin-left:220px;margin-right:220px;margin-top:10px;margin-bottom:20px">
+                               <center>
+                               <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='sidFilter.addTxtRule()'/>
+                               <input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('addSidTypeRulePlain')"/>
+                               </center>
+                           </div>
+                       </div>
+                    <span id="delete_tag_content_global_exclusion_filter_sid">
+                        <div id='deleteGlobalExclusionSidTagDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:550px;position:absolute;top:120px;z-index:22'>
+                            <div id='deleteGlobalExclusionSidTagDialogT' onmousedown="DragAndDrop(document.getElementById('deleteGlobalExclusionSidTagDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_DeleteTags")%>
+                                </label>
+                            </div>
+                            <Label class="specialFilter_dialog_label" id='deleteGlobalExclusionSidTagDialogLable' style="margin-top:10px; margin-bottom:10px">
+                                <%=bundle.getString("lb_filter_DeleteTagsNote")%>
+                            </Label>
+                            <hr align='left' width=80%/>
+                            <span id='deleteGlobalExclusionSidTagTableContent'></span>
+                            <div style="float:left;margin-left:100px;margin-right:120px;margin-top:10px;margin-bottom:20px">
+                                <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='globalExclusionFilter.deleteCheckedSidTags()'/>
+                                <input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('deleteGlobalExclusionSidTagDialog')"/>
+                            </div>
+                        </div>
+                    </span>   
+                    <span id="delete_tag_content_sid_filter_xml">
+                        <div id='deleteSidxmlTagDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:550px;position:absolute;top:120px;z-index:22'>
+                            <div id='deleteSidxmlTagDialogT' onmousedown="DragAndDrop(document.getElementById('deleteSidxmlTagDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_DeleteTags")%>
+                                </label>
+                            </div>
+                            <Label class="specialFilter_dialog_label" id='deleteSidxmlTagDialogLable' style="margin-top:10px; margin-bottom:10px">
+                                <%=bundle.getString("lb_filter_DeleteTagsNote")%>
+                            </Label>
+                            <hr align='left' width=80%/>
+                            <span id='deleteSidxmlTagTableContent'></span>
+                            <div style="float:left;margin-left:100px;margin-right:120px;margin-top:10px;margin-bottom:20px">
+                                <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='sidFilter.deleteCheckedXmlTags()'/>
+                                <input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('deleteSidxmlTagDialog')"/>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="delete_tag_content_sid_filter_txt">
+                        <div id='deleteSidTxtTagDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:550px;position:absolute;top:120px;z-index:22'>
+                            <div id='deleteSidTxtTagDialogT' onmousedown="DragAndDrop(document.getElementById('deleteSidTxtTagDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_DeleteTags")%>
+                                </label>
+                            </div>
+                            <Label class="specialFilter_dialog_label" id='deleteSidTxtTagDialogLable' style="margin-top:10px; margin-bottom:10px">
+                                <%=bundle.getString("lb_filter_DeleteTagsNote")%>
+                            </Label>
+                            <hr align='left' width=80%/>
+                            <span id='deleteSidTxtTagTableContent'></span>
+                            <div style="float:left;margin-left:100px;margin-right:120px;margin-top:10px;margin-bottom:20px">
+                                <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='sidFilter.deleteCheckedTxtTags()'/>
+                                <input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('deleteSidTxtTagDialog')"/>
+                            </div>
                         </div>
                     </span>
                     <span id="plaintextFilter_customTextRule">

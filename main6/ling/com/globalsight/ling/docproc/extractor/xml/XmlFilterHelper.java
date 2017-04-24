@@ -539,7 +539,14 @@ public class XmlFilterHelper
         String filterTableName = getCdataPostFilterTableName();
         return getFormatForFilter(filterTableName);
     }
-
+    
+    public String getSidPrecedence()
+    {
+        if (m_xmlFilterConfigParser == null)
+            return "xml";
+        return m_xmlFilterConfigParser.getSidPrecedence();
+    }
+    
     public XmlFilterTags getXmlFilterTags()
     {
         if (tags == null)
@@ -589,6 +596,9 @@ public class XmlFilterHelper
 
                 List<SrcCmtXmlTag> srcCmtXmlTag = getSrcCmtXmlTagFromXml(XmlFilterConstants.NODE_SRCCMT_XMLTAG);
                 tags.setSrcCmtXmlTag(srcCmtXmlTag);
+                
+                tags.setSidFilterId(Long.parseLong(m_xmlFilterConfigParser.getSidFilterId()));
+                tags.setSidPrecedence(m_xmlFilterConfigParser.getSidPrecedence());
             }
         }
 

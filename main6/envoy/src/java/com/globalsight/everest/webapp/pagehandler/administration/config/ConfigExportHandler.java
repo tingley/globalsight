@@ -530,6 +530,14 @@ public class ConfigExportHandler extends PageHandler
             {
                 p_request.setAttribute("basefilter", specialFilters);
             }
+            if ("global_exclusion_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("globalExclusionFilter", specialFilters);
+            }
+            if ("sid_filter".equals(filterTableName))
+            {
+                p_request.setAttribute("sidFilter", specialFilters);
+            }
             else if ("frame_maker_filter".equals(filterTableName))
             {
                 p_request.setAttribute("fmfilter", specialFilters);

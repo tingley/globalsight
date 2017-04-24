@@ -91,6 +91,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         FILTER_NAMES.add("Portable Object Filter");
         FILTER_NAMES.add("Base Text Filter");
         FILTER_NAMES.add("QA Filter");
+        FILTER_NAMES.add("SID Filter");
+        FILTER_NAMES.add("Global Exclusions");
 
         KNOWNFORMATIDS.add("|4|10|11|");
         KNOWNFORMATIDS.add("|5|");
@@ -106,6 +108,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         KNOWNFORMATIDS.add("|42|");
         KNOWNFORMATIDS.add("|0|");
         KNOWNFORMATIDS.add("|0|");
+        KNOWNFORMATIDS.add("");
+        KNOWNFORMATIDS.add("");
 
         FILTER_TABLE_NAMES.add("java_properties_filter");
         FILTER_TABLE_NAMES.add("java_script_filter");
@@ -121,6 +125,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         FILTER_TABLE_NAMES.add("po_filter");
         FILTER_TABLE_NAMES.add("base_filter");
         FILTER_TABLE_NAMES.add("qa_filter");
+        FILTER_TABLE_NAMES.add("sid_filter");
+        FILTER_TABLE_NAMES.add("global_exclusion_filter");
 
         FILTER_DESCRIPTION.add("The filter for java properties files.");
         FILTER_DESCRIPTION.add("The filter for java script files.");
@@ -136,6 +142,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         FILTER_DESCRIPTION.add("The filter for Portable Object files.");
         FILTER_DESCRIPTION.add("The filter to handle extracted text.");
         FILTER_DESCRIPTION.add("The filter to handle QA checks.");
+        FILTER_DESCRIPTION.add("The filter for String IDs.");
+        FILTER_DESCRIPTION.add("The filter to handle extracted text.");
     }
 
     public void beforeAction(HttpServletRequest request, HttpServletResponse response)

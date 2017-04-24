@@ -46,6 +46,7 @@ import org.xml.sax.SAXException;
 
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.SortUtil;
 
 /**
@@ -79,6 +80,8 @@ public class XmlFilterConfigParser implements XmlFilterConstants
     private String m_isCheckWellFormed = null;
     private String m_isGerateLangInfo = null;
     private int m_entityExportMode = -1;
+    private String m_sidFilterId = null;
+    private String sidPrecedence = null;
 
     public XmlFilterConfigParser(XMLRuleFilter xmlFilter)
     {
@@ -99,11 +102,12 @@ public class XmlFilterConfigParser implements XmlFilterConstants
     public static String toXml(String exWhiteSpaceChars, int phConsolidation, int phTrimMode,
             int nonasciiAs, int wsHandleMode, int emptyTagFormat, int entityHandleMode,
             String elementPostFilter, String elementPostFilterId, String cdataPostFilter,
-            String cdataPostFilterId, String sidTagName, String sidAttrName,
+            String cdataPostFilterId, 
             String isCheckWellFormed, String isGerateLangInfo, JSONArray preserveWsTags,
             JSONArray embTags, JSONArray transAttrTags, JSONArray contentInclTags,
             JSONArray cdataPostfilterTags, JSONArray entities, JSONArray processIns,
-            JSONArray internalTag, JSONArray srcCmtXmlComment, JSONArray srcCmtXmlTag)
+            JSONArray internalTag, JSONArray srcCmtXmlComment, JSONArray srcCmtXmlTag, String sidFilterId, 
+            String sidFilterPrecedence)
             throws Exception
     {
         StringBuffer sb = new StringBuffer();
@@ -141,12 +145,17 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         sb.append("<").append(NODE_CDATA_POST_FILTER_ID).append(">");
         sb.append(cdataPostFilterId);
         sb.append("</").append(NODE_CDATA_POST_FILTER_ID).append(">");
-        sb.append("<").append(NODE_SID_TAG_NAME).append(">");
-        sb.append(sidTagName);
-        sb.append("</").append(NODE_SID_TAG_NAME).append(">");
-        sb.append("<").append(NODE_SID_ATTR_NAME).append(">");
-        sb.append(sidAttrName);
-        sb.append("</").append(NODE_SID_ATTR_NAME).append(">");
+        
+        if (sidFilterId != null)
+        {
+            sb.append("<").append(NODE_SID_FILTER_ID).append(">");
+            sb.append(sidFilterId);
+            sb.append("</").append(NODE_SID_FILTER_ID).append(">");
+        }
+        
+        sb.append("<").append(NODE_SID_FILTER_PRECEDENCE).append(">");
+        sb.append(sidFilterPrecedence);
+        sb.append("</").append(NODE_SID_FILTER_PRECEDENCE).append(">");
         sb.append("<").append(NODE_IS_CHECK_WELL_FORMED).append(">");
         sb.append(isCheckWellFormed);
         sb.append("</").append(NODE_IS_CHECK_WELL_FORMED).append(">");
@@ -267,6 +276,64 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         }
 
         return m_extendedWhiteSpaceChars;
+    }
+    
+    public String getSidPrecedence()
+    {
+        if (sidPrecedence == null)
+        {
+            String result = getSingleElementValue(NODE_SID_FILTER_PRECEDENCE);
+            sidPrecedence = (result == null ? "xml" : result);
+        }
+        
+        return sidPrecedence;
+    }
+    
+    public String getSidFilterId()
+    {
+        // for old data.
+        String sidTag = getSidTagName();
+        String sidAttr = getSidAttrName();
+        if (sidTag.length() > 0 && sidAttr.length() > 0)
+        {
+            long companyId = m_xmlFilter.getCompanyId();
+            SidFilter sf = new SidFilter();
+            sf.setCompanyId(companyId);
+            String namePre = "XML SID Filter ";
+            int i = 1;
+            String name = namePre + i;
+            while (sf.checkExistsNew(name, companyId)){
+                i++;
+                name = namePre + i;
+            }
+            
+            String json = "[{\"itemid\":1,\"enable\":true,\"xpath\":\"//" + sidTag + "/@" + sidAttr + "\",\"priority\":\"1\"}]";
+            sf.setConfigXml(json);
+            sf.setFilterName(name);
+            sf.setType(1);
+            HibernateUtil.saveOrUpdate(sf);
+            
+            String oldXml = this.m_configXml;
+            String newXml = oldXml.replaceAll("<sidTagName>.*?</sidTagName><sidAttrName>.*?</sidAttrName>", "<sidFilterId>" + sf.getId() + "</sidFilterId>");
+            m_configXml = newXml;
+            m_xmlFilter.setConfigXml(newXml);
+            
+            HibernateUtil.saveOrUpdate(m_xmlFilter);
+            return Long.toString(sf.getId());
+        }
+        
+        if (m_sidFilterId == null)
+        {
+            String result = getSingleElementValue(NODE_SID_FILTER_ID);
+            m_sidFilterId = (result == null ? "-1" : result);
+            
+            if ("null".equalsIgnoreCase(m_sidFilterId))
+            {
+                m_sidFilterId = "-1";
+            }
+        }
+        
+        return m_sidFilterId;
     }
 
     public int getPhConsolidationMode()

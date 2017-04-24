@@ -12,7 +12,7 @@
 			type="string" not-null="true" unique="false" />
 		<property name="filterDescription" length="4000"
 			column="FILTER_DESCRIPTION" type="string" not-null="false" unique="false" />
-		<property name="enableSidSupport" column="ENABLE_SID_SUPPORT"
+		<property name="supportSid" column="ENABLE_SID_SUPPORT"
 			type="yes_no" not-null="false" />
 		<property name="elementPostFilterId" column="ELEMENT_POST_FILTER_ID" type="long"
 			not-null="false" unique="false" />
@@ -20,5 +20,9 @@
             not-null="false" />
 		<property name="baseFilterId" column="BASE_FILTER_ID" type="long"
 			not-null="false" unique="false" />
+		 
+		 <many-to-one name="sidFilter" column="SID_FILTER_ID"
+            class="com.globalsight.cxe.entity.filterconfiguration.SidFilter"
+            not-null="true" lazy="false" />   	
 	</class>
 </hibernate-mapping>

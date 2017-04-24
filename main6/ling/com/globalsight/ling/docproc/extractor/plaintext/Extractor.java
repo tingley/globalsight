@@ -36,10 +36,12 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleBase;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleSid;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.ling.common.PTEscapeSequence;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DocumentElement;
@@ -50,8 +52,12 @@ import com.globalsight.ling.docproc.LineString;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.SkeletonElement;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * <p>
@@ -252,7 +258,29 @@ public class Extractor extends AbstractExtractor implements
                 PlainTextFilterParser parser = new PlainTextFilterParser(pf);
                 parser.parserXml();
                 m_customTextRules = parser.getCustomTextRules();
-                m_customSidRules = parser.getCustomTextRuleSids();
+                m_customSidRules = new ArrayList<>();
+                long sidFilterId = parser.getSidFilterId();
+                if (sidFilterId > 0)
+                {
+                    SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
+                    if (sf != null && sf.getType() == 2)
+                    {
+                        String config = sf.getConfigXml();
+                        JSONArray items = JSONArray.fromObject(config);
+                        for (int i = 0; i < items.size(); i++)
+                        {
+                            JSONObject ob = (JSONObject) items.get(i);
+                            if (!ob.getBoolean("enable"))
+                                continue;
+                            
+                            CustomTextRuleSid r = new CustomTextRuleSid(ob.getString("startString"), ob.getBoolean("startIsRegEx"),
+                                    ob.getString("startOccurrence"), ob.getString("finishString"), ob.getBoolean("finishIsRegEx"),
+                                    ob.getString("finishOccurrence"), ob.getString("priority"));
+
+                            m_customSidRules.add(r);
+                        }
+                    }
+                }
                 m_elementPostFilter = parser.getElementPostFilter();
                 if (m_elementPostFilter != null)
                 {
@@ -400,7 +428,11 @@ public class Extractor extends AbstractExtractor implements
                             }
                             if (s1 != null && s1.length() > 0)
                             {
-                                if (m_elementPostFilter != null)
+                                if (getOutput().isUnextractSid(sid))
+                                {
+                                    getOutput().addSkeleton(s1);
+                                }
+                                else if (m_elementPostFilter != null)
                                 {
                                     gotoPostFilter(s1, sid);
                                 }

@@ -21,7 +21,8 @@ allFilterDialogIds[12] = "baseFilterDialog";
 allFilterDialogIds[13] = "fmFilterDialog";
 allFilterDialogIds[14] = "plaintextFilterDialog";
 allFilterDialogIds[15] = "qaFilterDialog";
-allFilterDialogIds[16] = "jsonFilterDialog"
+allFilterDialogIds[16] = "jsonFilterDialog";
+allFilterDialogIds[17] = "sidFilterDialog";
 var isBaseFilterSelectChanged = false;
 
 //For HTML
@@ -60,6 +61,8 @@ function loadFilterConfigurations()
 	specialFiltersMap["office2010_filter"] = new MSOffice2010Filter();
 	specialFiltersMap["po_filter"] = new POFilter();
 	specialFiltersMap["base_filter"] = new BaseFilter();
+	specialFiltersMap["sid_filter"] = new SidFilter();
+	specialFiltersMap["global_exclusion_filter"] = new GlobalExclusionFilter();
 	specialFiltersMap["frame_maker_filter"] = new FMFilter();
 	specialFiltersMap["plain_text_filter"] = new PlainTextFilter();
 	specialFiltersMap["qa_filter"] = new QAFilter();

@@ -48,6 +48,8 @@ import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterSid;
 import com.globalsight.cxe.entity.filterconfiguration.InternalText;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
@@ -200,7 +202,10 @@ public class XmlExtractor extends AbstractExtractor
     private final String ATTRIBUTE_PRESERVE_CLOSED_TAG = "GS_XML_ATTRIBUTE_PRESERVE_CLOSED_TAG";
 
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
+    private ArrayList<GlobalExclusionFilterSid> allGlobalExclusionFilterSids = null;
 
+    private String sidPrecedence = "xml";
+    
     //
     // Constructors
     //
@@ -321,7 +326,7 @@ public class XmlExtractor extends AbstractExtractor
             // get rule map for the document
             m_ruleMap = m_rules.buildRulesWithFilter(document, m_xmlFilterHelper.getXmlFilterTags(),
                     mainFormat);
-
+            sidPrecedence = m_xmlFilterHelper.getSidPrecedence();
             for (ExtractRule rule : rules)
             {
                 rule.buildRule(document, m_ruleMap);
@@ -329,7 +334,6 @@ public class XmlExtractor extends AbstractExtractor
 
             m_useEmptyTag = m_rules.usesEmptyTag();
             m_useEmptyTag = m_xmlFilterHelper.usesEmptyTag();
-
             // traverse the DOM tree
             domNodeVisitor(document, false, true, false);
         }
@@ -2035,7 +2039,18 @@ public class XmlExtractor extends AbstractExtractor
     {
         if (sid != null && element instanceof TranslatableElement)
         {
-            ((TranslatableElement) element).setSid(sid);
+            TranslatableElement e = (TranslatableElement) element;
+            if (e.getSid() != null && e.getSid().length() > 0)
+            {
+                if ("xml".equalsIgnoreCase(sidPrecedence))
+                {
+                    ((TranslatableElement) element).setSid(sid);
+                }
+            }
+            else
+            {
+                ((TranslatableElement) element).setSid(sid);
+            }
         }
         m_admin.reset(null);
         getOutput().addDocumentElement(element, true);
@@ -2145,6 +2160,40 @@ public class XmlExtractor extends AbstractExtractor
             m_switchExtractionSid = null;
         }
     }
+    
+    private boolean isUnextractSid(String sid)
+    {
+        if (sid == null)
+            return false;
+        
+        int n = sid.lastIndexOf("\n");
+        if (n > 0)
+        {
+            sid = sid.substring(n);
+        }
+        
+        sid = sid.trim();
+        if (sid.length() == 0)
+            return false;
+        
+        if (allGlobalExclusionFilterSids == null)
+            allGlobalExclusionFilterSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters();
+        
+        for (GlobalExclusionFilterSid f : allGlobalExclusionFilterSids)
+        {
+            if (!f.isSidIsRegEx() && f.getSid().equals(sid))
+            {
+                return true;
+            }
+            
+            if (f.isSidIsRegEx() && sid.matches(f.getSid()))
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     /**
      * Flushes text collected for another Extractor by calling the Extractor on
@@ -2166,7 +2215,7 @@ public class XmlExtractor extends AbstractExtractor
         }
 
         if (m_xmlFilterHelper.isBlankOrExblank(m_switchExtractionBuffer)
-                || isEntityOrSpaceOnly(m_switchExtractionBuffer))
+                || isEntityOrSpaceOnly(m_switchExtractionBuffer) || isUnextractSid(sid))
         {
             outputSkeleton(m_switchExtractionBuffer);
         }

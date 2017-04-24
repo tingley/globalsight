@@ -16,11 +16,14 @@
  */
 package com.globalsight.ling.docproc;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterSid;
 import com.globalsight.ling.common.XmlEntities;
 
 /**
@@ -39,6 +42,8 @@ public class Output
     private String m_currentDataFormat = null;
     private boolean m_currentAttributesSet = false;
 
+    private ArrayList<GlobalExclusionFilterSid> allGlobalExclusionFilterSids = null;
+    
     /**
      * Output constructor comment.
      */
@@ -307,6 +312,12 @@ public class Output
     private void addTrans(String p_strChunk, boolean p_bTmx, String sid,
             Map xliffTransPart, boolean isPreserveWS, String dataType)
     {
+        if (isUnextractSid(sid))
+        {
+            addSkel(p_strChunk, p_bTmx);
+            return;
+        }
+        
         String chunk;
 
         if (p_bTmx)
@@ -611,4 +622,31 @@ public class Output
             m_diplomatAttributes.setTargetLanguage(targetLanguage);
     }
 
+    public boolean isUnextractSid(String sid)
+    {
+        if (sid == null)
+            return false;
+        
+        sid = sid.trim();
+        if (sid.length() == 0)
+            return false;
+        
+        if (allGlobalExclusionFilterSids == null)
+            allGlobalExclusionFilterSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters();
+        
+        for (GlobalExclusionFilterSid f : allGlobalExclusionFilterSids)
+        {
+            if (!f.isSidIsRegEx() && f.getSid().equals(sid))
+            {
+                return true;
+            }
+            
+            if (f.isSidIsRegEx() && sid.matches(f.getSid()))
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }

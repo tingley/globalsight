@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,6 +52,7 @@ public class JavaPropertiesFilter implements Filter
     private long secondFilterId = -2;
     private String secondFilterTableName = null;
     private long companyId;
+    private SidFilter sidFilter = null;
     private String internalText = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><propertiesInternalText><items><content>\\\\{[^{]*?\\\\}</content><isRegex>true</isRegex></items></propertiesInternalText>";
 
     public long getId()
@@ -65,6 +67,9 @@ public class JavaPropertiesFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        // for old data
+        getEnableSidSupport();
+        
         long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id,
                 getFilterTableName());
         StringBuilder sb = new StringBuilder();
@@ -80,7 +85,7 @@ public class JavaPropertiesFilter implements Filter
         sb.append("\"filterDescription\":").append("\"")
                 .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
-        sb.append("\"enableSidSupport\":").append(enableSidSupport).append(",");
+        sb.append("\"sidFilterId\":").append(sidFilter == null ? -1 : sidFilter.getId()).append(",");
         sb.append("\"enableUnicodeEscape\":").append(enableUnicodeEscape)
                 .append(",");
         sb.append("\"enablePreserveSpaces\":").append(enablePreserveSpaces)
@@ -121,15 +126,67 @@ public class JavaPropertiesFilter implements Filter
     {
         this.filterDescription = filterDescription;
     }
+    
+    public boolean isSupportSid()
+    {
+        return enableSidSupport;
+    }
+    
+    public void setSupportSid(boolean enableSidSupport)
+    {
+        this.enableSidSupport = enableSidSupport;
+    }
 
     public boolean getEnableSidSupport()
     {
-        return enableSidSupport;
+        if (enableSidSupport == true)
+        {
+            if (this.getSidFilter() != null)
+                return true;
+            
+            String hql = "from SidFilter s where s.type = 3 and companyId = ?";
+            SidFilter s = (SidFilter) HibernateUtil.getFirst(hql, companyId);
+            if (s == null)
+            {
+                s = new SidFilter();
+                s.setCompanyId(companyId);
+                s.setType(3);
+                String namePre = "Java Properties SID Filter ";
+                int i = 1;
+                String name = namePre + i;
+                while (s.checkExistsNew(name, companyId)){
+                    i++;
+                    name = namePre + i;
+                }
+                
+                s.setFilterName(name);
+                HibernateUtil.saveOrUpdate(s);
+            }
+            
+            this.setSidFilter(s);
+            this.enableSidSupport = false;
+            HibernateUtil.saveOrUpdate(s);
+            try
+            {
+                HibernateUtil.saveOrUpdate(this);
+            }
+            catch (HibernateException e)
+            {
+                // ignore the error. the name may be null if the filter is importing.
+            }
+        }
+        
+        return this.getSidFilter() != null;
     }
 
     public void setEnableSidSupport(boolean enableSidSupport)
     {
         this.enableSidSupport = enableSidSupport;
+        if (enableSidSupport)
+        {
+            //for old data.
+            getEnableSidSupport();
+        }
     }
 
     public boolean getEnableUnicodeEscape()
@@ -261,5 +318,15 @@ public class JavaPropertiesFilter implements Filter
         }
 
         return null;
+    }
+
+    public SidFilter getSidFilter()
+    {
+        return sidFilter;
+    }
+
+    public void setSidFilter(SidFilter sidFilter)
+    {
+        this.sidFilter = sidFilter;
     }
 }

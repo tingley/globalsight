@@ -21,8 +21,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.globalsight.everest.util.comparator.Priorityable;
-
 public class CustomTextRuleSid implements CustomTextRuleBase
 {
     private String startString = null;
@@ -31,6 +29,7 @@ public class CustomTextRuleSid implements CustomTextRuleBase
     private String finishString = null;
     private boolean finishIsRegEx = false;
     private String finishOccurrence = null;
+    private int priority = 1;
 
     public CustomTextRuleSid()
     {
@@ -38,7 +37,7 @@ public class CustomTextRuleSid implements CustomTextRuleBase
 
     public CustomTextRuleSid(String startString, boolean startIsRegEx,
             String startOccurrence, String finishString, boolean finishIsRegEx,
-            String finishOccurrence)
+            String finishOccurrence, String priority)
     {
         this.startString = startString;
         this.startIsRegEx = startIsRegEx;
@@ -47,6 +46,10 @@ public class CustomTextRuleSid implements CustomTextRuleBase
         this.finishString = finishString;
         this.finishIsRegEx = finishIsRegEx;
         this.finishOccurrence = finishOccurrence;
+        if (priority != null)
+        {
+            this.priority = Integer.parseInt(priority);
+        }
     }
 
     public String getStartString()
@@ -155,7 +158,7 @@ public class CustomTextRuleSid implements CustomTextRuleBase
         }
 
         CustomTextRuleSid ee = new CustomTextRuleSid(startString, startIsRegEx,
-                startOccurrence, finishString, finishIsRegEx, finishOccurrence);
+                startOccurrence, finishString, finishIsRegEx, finishOccurrence, null);
 
         return ee;
     }
@@ -169,5 +172,15 @@ public class CustomTextRuleSid implements CustomTextRuleBase
     public boolean getIsMultiline()
     {
         return false;
+    }
+
+    public int getPriority()
+    {
+        return priority;
+    }
+
+    public void setPriority(int priority)
+    {
+        this.priority = priority;
     }
 }

@@ -44,6 +44,8 @@ public interface XmlFilterConstants
     public static final String NODE_SRCCMT_XMLCOMMENT = "srcCmtXmlComment";
     public static final String NODE_SRCCMT_XMLTAG = "srcCmtXmlTag";
     public static final String NODE_ENTITY_HANDLE_MODE = "entityHandleMode";
+    public static final String NODE_SID_FILTER_ID = "sidFilterId";
+    public static final String NODE_SID_FILTER_PRECEDENCE = "sidFilterPrecedence";
 
     public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</" + NODE_ROOT + ">";
 

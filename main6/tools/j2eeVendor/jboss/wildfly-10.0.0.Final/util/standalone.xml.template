@@ -148,6 +148,15 @@
                 <append value="true"/>
                 <encoding value="UTF-8" />
             </periodic-rotating-file-handler>
+            <periodic-rotating-file-handler name="blaiseConnector" autoflush="true">
+                <formatter>
+                    <pattern-formatter pattern="%d;[%t];%-5p;%c;%m%n"/>
+                </formatter>
+                <file relative-to="jboss.server.log.dir" path="../../../../logs/blaiseConnector.log"/>
+                <suffix value=".yyyyMMdd"/>
+                <append value="true"/>
+                <encoding value="UTF-8" />
+            </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="TermAuditLog" autoflush="true">
                 <formatter>
                     <pattern-formatter pattern="%m%n"/>
@@ -219,6 +228,12 @@
                 <level name="ALL"/>
                 <handlers>
                     <handler name="restWebservices"/>
+                </handlers>
+            </logger>
+            <logger category="com.globalsight.connector.blaise.util.BlaiseHelper.entry" use-parent-handlers="false">
+                <level name="INFO"/>
+                <handlers>
+                    <handler name="blaiseConnector"/>
                 </handlers>
             </logger>
             <logger category="TermAuditLog" use-parent-handlers="false">

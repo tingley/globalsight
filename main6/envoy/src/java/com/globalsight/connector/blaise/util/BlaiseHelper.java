@@ -95,6 +95,9 @@ import com.globalsight.util.StringUtil;
 public class BlaiseHelper
 {
     static private final Logger logger = Logger.getLogger(BlaiseHelper.class);
+    // GBS-4748, blaiseConnectorLogger
+    static private final Logger blaiseConnectorLogger = Logger
+            .getLogger(BlaiseHelper.class.getName() + ".entry");
 
     private BlaiseConnector blc = null;
     private TranslationAgencyClient client = null;
@@ -898,8 +901,11 @@ public class BlaiseHelper
             TranslationAgencyClient client = getTranslationClient();
             if (client == null)
             {
-                logger.error(
-                        "TranslationAgencyClient is null, entry cannot be uploaded: " + entryId);
+                logger.error("TranslationAgencyClient is null, entry cannot be uploaded. EntryId: "
+                        + entryId + ", jobId: " + jobId + ", fileName: " + file.getName());
+                blaiseConnectorLogger
+                        .error("TranslationAgencyClient is null, entry cannot be uploaded. EntryId: "
+                                + entryId + ", jobId: " + jobId + ", fileName: " + file.getName());
                 return;
             }
 
@@ -915,14 +921,20 @@ public class BlaiseHelper
 
             InputStream is = new FileInputStream(file);
             client.uploadXliff(entryId, is);
-            logger.info("Blaise file is uploaded successfully for entryId: " + entryId);
+            logger.info("Blaise file is uploaded successfully for entryId: " + entryId + ", jobId: "
+                    + jobId + ", fileName: " + file.getName());
+            blaiseConnectorLogger.info("Blaise file is uploaded successfully for entryId: "
+                    + entryId + ", jobId: " + jobId + ", fileName: " + file.getName());
 
             updateUploadXliffSuccess(jobId, entryId);
         }
         catch (Exception e)
         {
             updateUploadXliffFail(jobId, entryId);
-            logger.error("Error when uploadXliff for job:" + jobId, e);
+            logger.error("Error when uploadXliff for entryId: " + entryId + ", jobId: " + jobId
+                    + ", fileName: " + file.getName(), e);
+            blaiseConnectorLogger.error("Error when uploadXliff for entryId: " + entryId
+                    + ", jobId: " + jobId + ", fileName: " + file.getName(), e);
         }
     }
 
@@ -948,11 +960,11 @@ public class BlaiseHelper
         }
     }
 
-    public void complete(long id, long jobId)
+    public void complete(long entryId, long jobId)
     {
         try
         {
-            if (!isEntryExisted(id))
+            if (!isEntryExisted(entryId))
             {
                 return;
             }
@@ -960,19 +972,28 @@ public class BlaiseHelper
             TranslationAgencyClient client = getTranslationClient();
             if (client == null)
             {
-                logger.error("TranslationAgencyClient is null, entry cannot be completed: " + id);
+                logger.error("TranslationAgencyClient is null, entry cannot be completed. EntryId: "
+                        + entryId + ", jobId: " + jobId);
+                blaiseConnectorLogger
+                        .error("TranslationAgencyClient is null, entry cannot be completed. EntryId: "
+                                + entryId + ", jobId: " + jobId);
                 return;
             }
 
-            client.complete(id);
-            logger.info("Blaise entry is completed successfully: " + id);
+            client.complete(entryId);
+            logger.info("Blaise entry is completed successfully. EntryId: " + entryId + ", jobId: "
+                    + jobId);
+            blaiseConnectorLogger.info("Blaise entry is completed successfully. EntryId: " + entryId
+                    + ", jobId: " + jobId);
 
-            updateCompleteSuccess(jobId, id);
+            updateCompleteSuccess(jobId, entryId);
         }
         catch (Exception e)
         {
-            updateCompleteFail(jobId, id);
-            logger.error("Failed to complete entry for job: " + jobId, e);
+            updateCompleteFail(jobId, entryId);
+            logger.error("Failed to complete entry " + entryId + " for job: " + jobId, e);
+            blaiseConnectorLogger
+                    .error("Failed to complete entry " + entryId + " for job: " + jobId, e);
         }
     }
 
@@ -1008,7 +1029,9 @@ public class BlaiseHelper
         List<TranslationInboxEntryVo> entries = listInboxByIds(ids, command);
         if (entries == null || entries.size() == 0)
         {
-            logger.warn("Entry " + id + " is not existed already, cannot operate on it.");
+            logger.warn("Entry " + id + " does not exist already, cannot operate on it.");
+            blaiseConnectorLogger
+                    .warn("Entry " + id + " does not exist already, cannot operate on it.");
             return false;
         }
 
@@ -1152,19 +1175,25 @@ public class BlaiseHelper
         catch (UnknownHostException e)
         {
             logger.error("Incorrect URL: " + blc.getUrl(), e);
+            blaiseConnectorLogger.error("Incorrect URL: " + blc.getUrl(), e);
         }
         catch (SecurityException e)
         {
             logger.error("Incorrect username or password: " + blc.getUsername() + "/"
                     + blc.getPassword(), e);
+            blaiseConnectorLogger.error("Incorrect username or password: " + blc.getUsername() + "/"
+                    + blc.getPassword(), e);
         }
         catch (IncompatibleVersionException e)
         {
             logger.error("Incorrect client core version: " + blc.getClientCoreVersion(), e);
+            blaiseConnectorLogger
+                    .error("Incorrect client core version: " + blc.getClientCoreVersion(), e);
         }
         catch (Exception e)
         {
             logger.error("Fail to get Blaise translation client: ", e);
+            blaiseConnectorLogger.error("Fail to get Blaise translation client: ", e);
         }
 
         return client;
@@ -1242,6 +1271,8 @@ public class BlaiseHelper
      *            -- TranslationInboxEntryVo
      * @param falconTargetValue
      *            -- value of job attribute "Falcon Target Value".
+     * @param targetLocale
+     *            -- targetLocale from GS.
      * @return String -- job name
      */
     public static String getHarlyJobName(TranslationInboxEntryVo entry, String falconTargetValue)
@@ -1264,7 +1295,7 @@ public class BlaiseHelper
             falconTargetValue = falconTargetValue.substring(0, 55);
         }
         String jobName = BlaiseConstants.HARLEY + "_" + falconTargetValue + "_"
-                + entries.get(0).getSourceLocaleAsString();
+                + entries.get(0).getTargetLocaleAsString();
 
         return handleSpecialChars(jobName);
     }

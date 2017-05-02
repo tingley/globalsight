@@ -134,7 +134,6 @@ public class InstallUtil
 		properties.putAll(InstallValues.getProperties());
 
         properties.put("Jboss_JNDI_prefix", "topic/");
-        properties.put("ldap_user_password", encodeMD5(properties.getProperty("ldap_password")));
         properties.put("super_admin_password", encodeMD5(properties.getProperty("system4_admin_password")));
         
         String pop3Server = "";

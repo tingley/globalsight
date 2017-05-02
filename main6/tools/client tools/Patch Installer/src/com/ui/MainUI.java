@@ -146,7 +146,7 @@ public class MainUI implements DataListener, ProcessListener {
 		frmGlobalsightPatchInstaller
 				.setFont(new Font("Calibri", Font.PLAIN, 12));
 		frmGlobalsightPatchInstaller
-				.setTitle("GlobalSight Patch Installer - Version: 8.6.4");
+				.setTitle("GlobalSight Patch Installer - Version: 8.7.4");
 		frmGlobalsightPatchInstaller
 				.setIconImage(Toolkit.getDefaultToolkit().getImage(
 						MainUI.class.getResource("/gif/GlobalSight_Icon.jpg")));

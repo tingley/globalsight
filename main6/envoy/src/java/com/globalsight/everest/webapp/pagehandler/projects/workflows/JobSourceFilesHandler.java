@@ -41,7 +41,9 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
@@ -74,21 +76,19 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.zip.ZipIt;
 import com.sun.jndi.toolkit.url.UrlUtil;
 
-public class JobSourceFilesHandler extends PageHandler implements
-        UserParamNames
+public class JobSourceFilesHandler extends PageHandler implements UserParamNames
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(JobSourceFilesHandler.class);
+    private static final Logger CATEGORY = Logger.getLogger(JobSourceFilesHandler.class);
 
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            RemoteException, EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, RemoteException, EnvoyServletException
     {
         String action = p_request.getParameter("action");
         JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
@@ -98,35 +98,32 @@ public class JobSourceFilesHandler extends PageHandler implements
             downloadSourcePages(p_request, p_response, job);
             return;
         }
-        
-        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
-                p_response, p_context, job);
+
+        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request, p_response, p_context,
+                job);
         if (!isOk)
         {
             return;
         }
         packJobSourceFilesInfoView(job, p_request);
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
-    private void packJobSourceFilesInfoView(Job job,
-            HttpServletRequest p_request)
+    private void packJobSourceFilesInfoView(Job job, HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         sessionMgr.removeElement("sourcePageIdList");
+        // GBS-4749
+        p_request.setAttribute("isBlaiseJob", job.isBlaiseJob());
         p_request.setAttribute("addCheckBox", getAddCheckBox(p_request));
-        p_request.setAttribute("cancelledWorkflow",
-                getCancelledWorkflowExist(job));
+        p_request.setAttribute("cancelledWorkflow", getCancelledWorkflowExist(job));
         boolean atLeastOneError = false;
 
         List<SourcePage> sourcePages = (List<SourcePage>) job.getSourcePages();
-        List<UpdatedSourcePage> uSourcdPages = UpdateSourcePageManager
-                .getAllUpdatedSourcePage(job);
-        List<AddingSourcePage> aSourcdPages = AddingSourcePageManager
-                .getAllAddingSourcePage(job);
+        List<UpdatedSourcePage> uSourcdPages = UpdateSourcePageManager.getAllUpdatedSourcePage(job);
+        List<AddingSourcePage> aSourcdPages = AddingSourcePageManager.getAllAddingSourcePage(job);
 
         for (SourcePage sourcePage : sourcePages)
         {
@@ -141,12 +138,12 @@ public class JobSourceFilesHandler extends PageHandler implements
         // also filters them according to the search params
         List<Long> sourcePageIdList = new ArrayList<Long>();
         sourcePages = filterPagesByName(p_request, session, sourcePages);
-		for (Iterator fi = sourcePages.iterator(); fi.hasNext();)
-		{
-			SourcePage page = (SourcePage) fi.next();
-			sourcePageIdList.add(page.getId());
-		}
-		sessionMgr.setAttribute("sourcePageIdList", sourcePageIdList);
+        for (Iterator fi = sourcePages.iterator(); fi.hasNext();)
+        {
+            SourcePage page = (SourcePage) fi.next();
+            sourcePageIdList.add(page.getId());
+        }
+        sessionMgr.setAttribute("sourcePageIdList", sourcePageIdList);
         sortPages(p_request, session, sourcePages);
 
         aSourcdPages = filterPagesByName(p_request, session, aSourcdPages);
@@ -172,8 +169,8 @@ public class JobSourceFilesHandler extends PageHandler implements
                 String unextractedFileName = sourcePage.getUnextractedFile().getName();
                 if (unextractedFileName != null)
                 {
-                    String fileExtension = unextractedFileName.substring(
-                            unextractedFileName.lastIndexOf('.') + 1).toLowerCase();
+                    String fileExtension = unextractedFileName
+                            .substring(unextractedFileName.lastIndexOf('.') + 1).toLowerCase();
                     if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
                     {
                         jobSourcePageDisplay.setImageFile(true);
@@ -181,6 +178,39 @@ public class JobSourceFilesHandler extends PageHandler implements
                     else
                     {
                         jobSourcePageDisplay.setImageFile(false);
+                    }
+                }
+            }
+            // GBS-4749
+            if (job.isBlaiseJob())
+            {
+                BlaiseConnectorJob bcj = BlaiseManager
+                        .getBlaiseConnectorJobByJobIdEntryId(job.getId(), sourcePage.getId());
+                if (bcj != null)
+                {
+                    jobSourcePageDisplay.setBlaiseStateUploadComplete(bcj.getUploadXliffState(),
+                            bcj.getCompleteState());
+                }
+                else
+                {
+                    // for blaise job, the file path should be
+                    // sourceLocale\jobId\blaiseEntryId\...
+                    // see
+                    // CreateBlaiseJobThread.retrieveRealFileFromBlaiseServer().
+                    // as the original design was not record the blaise entry id
+                    // separately, here we need to fetch out it specially
+                    long blaiseEntryId = BlaiseManager
+                            .fetchBlaiseEntryIdFromExternalPageId(sourcePage.getExternalPageId());
+                    jobSourcePageDisplay.setBlaiseEntryId(blaiseEntryId);
+                    bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(job.getId(),
+                            blaiseEntryId);
+                    if (bcj != null)
+                    {
+                        jobSourcePageDisplay.setBlaiseStateUploadComplete(bcj.getUploadXliffState(),
+                                bcj.getCompleteState());
+                        // update existing blaise job with source page id
+                        bcj.setSourcePageId(sourcePage.getId());
+                        HibernateUtil.saveOrUpdate(bcj);
                     }
                 }
             }
@@ -192,18 +222,17 @@ public class JobSourceFilesHandler extends PageHandler implements
             }
         }
         Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
-        Map<Long,String> targetLocaleMap = new HashMap<Long,String>();
+        Map<Long, String> targetLocaleMap = new HashMap<Long, String>();
         List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
-		for (Workflow workflow : workflows)
-		{
-			targetLocaleMap.put(workflow.getTargetLocale().getId(), workflow
-					.getTargetLocale().getDisplayName(uiLocale));
-		}
-		p_request.setAttribute("targetLocaleMap", targetLocaleMap);
+        for (Workflow workflow : workflows)
+        {
+            targetLocaleMap.put(workflow.getTargetLocale().getId(),
+                    workflow.getTargetLocale().getDisplayName(uiLocale));
+        }
+        p_request.setAttribute("targetLocaleMap", targetLocaleMap);
         p_request.setAttribute("shortOrFullPageNameDisplay",
                 getShortOrFullPageNameDisplay(session));
-        p_request.setAttribute("JobSourcePageDisplayList",
-                jobSourcePageDisplayList);
+        p_request.setAttribute("JobSourcePageDisplayList", jobSourcePageDisplayList);
 
         // package jobAddingSourcePageList
         p_request.setAttribute("JobAddingSourcePageList", aSourcdPages);
@@ -213,146 +242,129 @@ public class JobSourceFilesHandler extends PageHandler implements
         p_request.setAttribute("atLeastOneError", atLeastOneError);
         p_request.setAttribute("sourcePagesSize", sourcePages.size());
         p_request.setAttribute("canModifyWordCount", canModifyWordCount(job));
-        p_request.setAttribute("wordCountOverridenAtAll",
-                job.isWordCountOverriden());
+        p_request.setAttribute("wordCountOverridenAtAll", job.isWordCountOverriden());
 
-        p_request.setAttribute("allowEditSourcePage",
-                JobWorkflowsHandler.s_isGxmlEditorEnabled);
-        p_request.setAttribute("canEditSourcePage",
-                getCanEditSourcePage(job, session));
+        p_request.setAttribute("allowEditSourcePage", JobWorkflowsHandler.s_isGxmlEditorEnabled);
+        p_request.setAttribute("canEditSourcePage", getCanEditSourcePage(job, session));
     }
 
     /**
      * Filter the pages by their name. Compare against the filter string.
      */
-    protected List filterPagesByName(HttpServletRequest p_request,
-            HttpSession p_session, List p_pages)
-	{
-		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_PARAM,
-				p_request.getParameter(JobManagementHandler.PAGE_SEARCH_PARAM));
-		p_request
-				.setAttribute(
-						JobManagementHandler.PAGE_SEARCH_LOCALE,
-						p_request
-								.getParameter(JobManagementHandler.PAGE_SEARCH_LOCALE));
-		p_request.setAttribute(JobManagementHandler.PAGE_TARGET_LOCAL,
-				p_request.getParameter(JobManagementHandler.PAGE_TARGET_LOCAL));
+    protected List filterPagesByName(HttpServletRequest p_request, HttpSession p_session,
+            List p_pages)
+    {
+        p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_PARAM,
+                p_request.getParameter(JobManagementHandler.PAGE_SEARCH_PARAM));
+        p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE,
+                p_request.getParameter(JobManagementHandler.PAGE_SEARCH_LOCALE));
+        p_request.setAttribute(JobManagementHandler.PAGE_TARGET_LOCAL,
+                p_request.getParameter(JobManagementHandler.PAGE_TARGET_LOCAL));
 
-		String thisFileSearch = (String) p_request
-				.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
-		String thisSearchText = (String) p_request
-				.getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
-		try
-		{
-			if (thisSearchText != null && !"".equals(thisSearchText))
-			{
-				thisSearchText = URLDecoder.decode(thisSearchText, "UTF-8");
-			}
-		}
-		catch (UnsupportedEncodingException e1)
-		{
-			throw new EnvoyServletException(e1);
-		}
-		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
-				thisSearchText);
-		String thisSearchLocale = (String) p_request
-				.getAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE);
-		String targetLocaleId = (String) p_request
-				.getAttribute(JobManagementHandler.PAGE_TARGET_LOCAL);
+        String thisFileSearch = (String) p_request
+                .getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+        String thisSearchText = (String) p_request
+                .getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+        try
+        {
+            if (thisSearchText != null && !"".equals(thisSearchText))
+            {
+                thisSearchText = URLDecoder.decode(thisSearchText, "UTF-8");
+            }
+        }
+        catch (UnsupportedEncodingException e1)
+        {
+            throw new EnvoyServletException(e1);
+        }
+        p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT, thisSearchText);
+        String thisSearchLocale = (String) p_request
+                .getAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE);
+        String targetLocaleId = (String) p_request
+                .getAttribute(JobManagementHandler.PAGE_TARGET_LOCAL);
 
-		if (thisSearchText != null && !"".equals(thisSearchText) && thisSearchLocale != null)
-		{
-			ArrayList newPages = new ArrayList();
-			SessionManager sessionMgr = (SessionManager) p_session
-					.getAttribute(WebAppConstants.SESSION_MANAGER);
-			Job job = (Job) sessionMgr
-					.getAttribute(WebAppConstants.WORK_OBJECT);
-			String tuTableName = null;
-			String tuvTableName = null;
-			try
-			{
-				tuTableName = BigTableUtil.getTuTableJobDataInByJobId(job
-						.getId());
-				tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(job
-						.getId());
-			}
-			catch (Exception e)
-			{
-				throw new EnvoyServletException(e);
-			}
+        if (thisSearchText != null && !"".equals(thisSearchText) && thisSearchLocale != null)
+        {
+            ArrayList newPages = new ArrayList();
+            SessionManager sessionMgr = (SessionManager) p_session
+                    .getAttribute(WebAppConstants.SESSION_MANAGER);
+            Job job = (Job) sessionMgr.getAttribute(WebAppConstants.WORK_OBJECT);
+            String tuTableName = null;
+            String tuvTableName = null;
+            try
+            {
+                tuTableName = BigTableUtil.getTuTableJobDataInByJobId(job.getId());
+                tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(job.getId());
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+            }
 
-			long pageId = -1;
-			long localeId = -1;
-			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
-			{
-				SourcePage page = (SourcePage) fi.next();
-				if (thisSearchLocale.equals("sourceLocale"))
-				{
-					pageId = page.getId();
-					localeId = page.getLocaleId();
-				}
-				else if (thisSearchLocale.equals("targetLocale"))
-				{
-					if (targetLocaleId != null)
-					{
-						StringBuffer localeIdStrBuffer = new StringBuffer();
-						localeId = Long.parseLong(targetLocaleId);
-						Set<TargetPage> targetSet = page.getTargetPages();
-						for (Iterator tg = targetSet.iterator(); tg.hasNext();)
-						{
-							TargetPage target = (TargetPage) tg.next();
-							if (target.getLocaleId() == localeId)
-							{
-								localeIdStrBuffer.append(target.getId())
-										.append(",");
-							}
-						}
-						if (localeIdStrBuffer.toString().endsWith(","))
-						{
-							String str = localeIdStrBuffer.toString()
-									.substring(
-											0,
-											localeIdStrBuffer.toString()
-													.lastIndexOf(","));
-							pageId = Long.parseLong(str);
-						}
-					}
-				}
-				boolean check = TaskHelper.checkPageContainText(tuTableName,
-						tuvTableName, thisSearchLocale, thisSearchText, pageId,
-						localeId);
+            long pageId = -1;
+            long localeId = -1;
+            for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+            {
+                SourcePage page = (SourcePage) fi.next();
+                if (thisSearchLocale.equals("sourceLocale"))
+                {
+                    pageId = page.getId();
+                    localeId = page.getLocaleId();
+                }
+                else if (thisSearchLocale.equals("targetLocale"))
+                {
+                    if (targetLocaleId != null)
+                    {
+                        StringBuffer localeIdStrBuffer = new StringBuffer();
+                        localeId = Long.parseLong(targetLocaleId);
+                        Set<TargetPage> targetSet = page.getTargetPages();
+                        for (Iterator tg = targetSet.iterator(); tg.hasNext();)
+                        {
+                            TargetPage target = (TargetPage) tg.next();
+                            if (target.getLocaleId() == localeId)
+                            {
+                                localeIdStrBuffer.append(target.getId()).append(",");
+                            }
+                        }
+                        if (localeIdStrBuffer.toString().endsWith(","))
+                        {
+                            String str = localeIdStrBuffer.toString().substring(0,
+                                    localeIdStrBuffer.toString().lastIndexOf(","));
+                            pageId = Long.parseLong(str);
+                        }
+                    }
+                }
+                boolean check = TaskHelper.checkPageContainText(tuTableName, tuvTableName,
+                        thisSearchLocale, thisSearchText, pageId, localeId);
 
-				if (check)
-					newPages.add(page);
-			}
-			return newPages;
-		}
+                if (check)
+                    newPages.add(page);
+            }
+            return newPages;
+        }
 
-		if (thisFileSearch != null)
-		{
-			ArrayList filteredFiles = new ArrayList();
-			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
-			{
-				Page p = (Page) fi.next();
-				if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
-				{
-					filteredFiles.add(p);
-				}
-			}
-			return filteredFiles;
-		}
-		// just return all - no filter
-		return p_pages;
-	}
+        if (thisFileSearch != null)
+        {
+            ArrayList filteredFiles = new ArrayList();
+            for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+            {
+                Page p = (Page) fi.next();
+                if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
+                {
+                    filteredFiles.add(p);
+                }
+            }
+            return filteredFiles;
+        }
+        // just return all - no filter
+        return p_pages;
+    }
 
-    protected void sortPages(HttpServletRequest p_request,
-            HttpSession p_session, List p_pages)
+    protected void sortPages(HttpServletRequest p_request, HttpSession p_session, List p_pages)
     {
         // first get job comparator from session
         PageComparator comparator = getPageComparator(p_session);
 
-        String criteria = p_request
-                .getParameter(JobManagementHandler.PAGE_SORT_PARAM);
+        String criteria = p_request.getParameter(JobManagementHandler.PAGE_SORT_PARAM);
         if (criteria != null)
         {
             int sortCriteria = Integer.parseInt(criteria);
@@ -382,8 +394,7 @@ public class JobSourceFilesHandler extends PageHandler implements
         if (comparator == null)
         {
             comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID);
-            p_session.setAttribute(JobManagementHandler.PAGE_COMPARATOR,
-                    comparator);
+            p_session.setAttribute(JobManagementHandler.PAGE_COMPARATOR, comparator);
         }
 
         return comparator;
@@ -392,8 +403,7 @@ public class JobSourceFilesHandler extends PageHandler implements
     private boolean getAddCheckBox(HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
-        PermissionSet userPerms = (PermissionSet) session
-                .getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet userPerms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
         return userPerms.getPermissionFor(Permission.EDIT_SOURCE_FILES)
                 || userPerms.getPermissionFor(Permission.DELETE_SOURCE_FILES);
     }
@@ -418,13 +428,13 @@ public class JobSourceFilesHandler extends PageHandler implements
         if (sourcePage.getPrimaryFileType() == PrimaryFile.UNEXTRACTED_FILE)
         {
             UnextractedFile uf = (UnextractedFile) sourcePage.getPrimaryFile();
-            pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +  uf.getStoragePath().replace("\\", "/");
+            pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING
+                    + uf.getStoragePath().replace("\\", "/");
         }
         else
         {
-            pageUrl = "&" + WebAppConstants.SOURCE_PAGE_ID + "="
-                    + sourcePage.getId() + "&" + WebAppConstants.JOB_ID + "="
-                    + job.getJobId();
+            pageUrl = "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + sourcePage.getId() + "&"
+                    + WebAppConstants.JOB_ID + "=" + job.getJobId();
         }
         return pageUrl;
     }
@@ -446,8 +456,8 @@ public class JobSourceFilesHandler extends PageHandler implements
                     .getName();
             // If source file is XLZ,here show the XLZ file profile name
             // instead of the XLF file profile name.
-            boolean isXlzReferFP = getFileProfilePersistenceManager().isXlzReferenceXlfFileProfile(
-                    currentRetString);
+            boolean isXlzReferFP = getFileProfilePersistenceManager()
+                    .isXlzReferenceXlfFileProfile(currentRetString);
             if (isXlzReferFP)
             {
                 currentRetString = currentRetString.substring(0, currentRetString.length() - 4);
@@ -460,8 +470,7 @@ public class JobSourceFilesHandler extends PageHandler implements
         return currentRetString;
     }
 
-    private FileProfilePersistenceManager getFileProfilePersistenceManager()
-            throws Exception
+    private FileProfilePersistenceManager getFileProfilePersistenceManager() throws Exception
     {
         return ServerProxy.getFileProfilePersistenceManager();
     }
@@ -492,22 +501,19 @@ public class JobSourceFilesHandler extends PageHandler implements
         boolean canModify = job.getState().equals(Job.DISPATCHED)
                 || job.getState().equals(Job.PENDING)
                 || job.getState().equals(Job.READY_TO_BE_DISPATCHED)
-                || job.getState().equals(Job.BATCHRESERVED)
-                || job.getState().equals(Job.LOCALIZED);
+                || job.getState().equals(Job.BATCHRESERVED) || job.getState().equals(Job.LOCALIZED);
         return canModify;
     }
 
     private boolean getCanEditSourcePage(Job job, HttpSession session)
     {
         boolean canEditSourcePage = false;
-        PermissionSet perms = (PermissionSet) session
-                .getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
         canEditSourcePage = perms.getPermissionFor(Permission.SOURCE_PAGE_EDIT);
 
         if (JobWorkflowsHandler.s_isGxmlEditorEnabled)
         {
-            canEditSourcePage = perms
-                    .getPermissionFor(Permission.SOURCE_PAGE_EDIT);
+            canEditSourcePage = perms.getPermissionFor(Permission.SOURCE_PAGE_EDIT);
 
             // Can only edit pending or dispatched jobs...
             if (!Job.READY_TO_BE_DISPATCHED.equals(job.getState())
@@ -535,20 +541,18 @@ public class JobSourceFilesHandler extends PageHandler implements
         return canEditSourcePage;
     }
 
-    private void downloadSourcePages(HttpServletRequest p_request,
-            HttpServletResponse p_response, Job p_job) throws IOException
+    private void downloadSourcePages(HttpServletRequest p_request, HttpServletResponse p_response,
+            Job p_job) throws IOException
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         ResourceBundle bundle = getBundle(session);
 
         List sourcePages = (List) p_job.getSourcePages();
 
         Iterator it = sourcePages.iterator();
-        String m_cxeDocsDir = SystemConfiguration.getInstance()
-                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR,
-                		String.valueOf(p_job.getCompanyId()));
+        String m_cxeDocsDir = SystemConfiguration.getInstance().getStringParameter(
+                SystemConfigParamNames.CXE_DOCS_DIR, String.valueOf(p_job.getCompanyId()));
         ArrayList<String> fileNames = new ArrayList<String>();
         ArrayList<String> filePaths = new ArrayList<String>();
         Map<String, String> mapOfNamePath = new HashMap<String, String>();
@@ -563,8 +567,7 @@ public class JobSourceFilesHandler extends PageHandler implements
 
             String pageName = sourcePage.getDisplayPageName();
 
-            StringBuffer sourceSb = new StringBuffer().append(m_cxeDocsDir)
-                    .append("/");
+            StringBuffer sourceSb = new StringBuffer().append(m_cxeDocsDir).append("/");
             String externalPageId = sourcePage.getExternalPageId();
             externalPageId = externalPageId.replace("\\", "/");
 
@@ -595,14 +598,12 @@ public class JobSourceFilesHandler extends PageHandler implements
             entryNamesMap = ZipIt.getEntryNamesMap(filePaths);
             for (int i = 0; i < fileNames.size(); i++)
             {
-                filePaths.set(i,
-                        entryNamesMap.get(mapOfNamePath.get(fileNames.get(i))));
+                filePaths.set(i, entryNamesMap.get(mapOfNamePath.get(fileNames.get(i))));
             }
             addSourcePages(m_zipper, fileNames, filePaths, zipFileName);
             m_zipper.closeZipFile();
             CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
-            commentFilesDownload.sendFileToClient(p_request, p_response,
-                    jobName + ".zip", tmpFile);
+            commentFilesDownload.sendFileToClient(p_request, p_response, jobName + ".zip", tmpFile);
         }
         finally
         {
@@ -610,8 +611,8 @@ public class JobSourceFilesHandler extends PageHandler implements
         }
     }
 
-    private void addSourcePages(JobPackageZipper m_zipper,
-            List<String> fileNames, List<String> filePaths, String zipFileName)
+    private void addSourcePages(JobPackageZipper m_zipper, List<String> fileNames,
+            List<String> filePaths, String zipFileName)
     {
         for (int i = 0; i < fileNames.size(); i++)
         {
@@ -626,8 +627,7 @@ public class JobSourceFilesHandler extends PageHandler implements
                     File[] files = dir.listFiles();
                     for (File f : files)
                     {
-                        if (file.getName().equals(
-                                entity.decodeStringBasic(f.getName())))
+                        if (file.getName().equals(entity.decodeStringBasic(f.getName())))
                         {
                             file = f;
                             break;
@@ -649,8 +649,7 @@ public class JobSourceFilesHandler extends PageHandler implements
                 }
                 catch (IOException ex)
                 {
-                    CATEGORY.warn("cannot write comment file: " + file
-                            + " to zip stream.", ex);
+                    CATEGORY.warn("cannot write comment file: " + file + " to zip stream.", ex);
                 }
                 finally
                 {
@@ -663,8 +662,7 @@ public class JobSourceFilesHandler extends PageHandler implements
                     }
                     catch (IOException e)
                     {
-                        CATEGORY.warn("cannot close comment file: " + file
-                                + " to zip stream.", e);
+                        CATEGORY.warn("cannot close comment file: " + file + " to zip stream.", e);
                     }
                 }
             }

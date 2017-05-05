@@ -39,8 +39,10 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.cxe.adapter.adobe.InddTuMappingHelper;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -119,8 +121,7 @@ import com.globalsight.util.system.ConfigException;
 public class ExtractedFileImporter extends FileImporter
 {
     static private Boolean s_autoReplaceTerms = setTermLeverageOptions();
-    private static Logger c_logger = Logger
-            .getLogger(ExtractedFileImporter.class.getName());
+    private static Logger c_logger = Logger.getLogger(ExtractedFileImporter.class.getName());
     private static XmlEntities m_xmlDecoder = new XmlEntities();
     private static Pattern p_fileProfileId = Pattern
             .compile("<fileProfileId>([\\d\\D]*)</fileProfileId>");
@@ -163,14 +164,13 @@ public class ExtractedFileImporter extends FileImporter
         {
             long time_PERFORMANCE = System.currentTimeMillis();
             sourcePage = createSourcePage(p_request, jobId);
-            pages.put(sourcePage.getGlobalSightLocale().getIdAsLong(),
-                    sourcePage);
+            pages.put(sourcePage.getGlobalSightLocale().getIdAsLong(), sourcePage);
 
             if (c_logger.isDebugEnabled())
             {
                 c_logger.debug("Performance:: Creating source page time = "
-                        + +(System.currentTimeMillis() - time_PERFORMANCE)
-                        + " " + p_request.getExternalPageId());
+                        + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
+                        + p_request.getExternalPageId());
             }
 
             if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
@@ -181,7 +181,7 @@ public class ExtractedFileImporter extends FileImporter
                 List unimport = p_request.getUnimportTargetLocales();
                 // List unActive = profile.getUnActiveLocales();
                 targetLocales.removeAll(unimport);
-                
+
                 if (PassoloUtil.isPassoloFile(sourcePage))
                 {
                     String path = sourcePage.getExternalPageId();
@@ -190,16 +190,16 @@ public class ExtractedFileImporter extends FileImporter
 
                     for (int i = targetLocales.size() - 1; i >= 0; i--)
                     {
-                        GlobalSightLocale targetLocale = (GlobalSightLocale) targetLocales
-                                .get(i);
+                        GlobalSightLocale targetLocale = (GlobalSightLocale) targetLocales.get(i);
                         if (!targetLocale.toString().equals(locale))
                         {
                             targetLocales.remove(i);
                         }
                     }
                 }
-                
-                // For issue that can't create job with MT if the option "Ignore TM Matches for MT:" is selected.
+
+                // For issue that can't create job with MT if the option "Ignore
+                // TM Matches for MT:" is selected.
                 boolean leveragePage = false;
                 for (GlobalSightLocale trgLocale : targetLocales)
                 {
@@ -214,11 +214,10 @@ public class ExtractedFileImporter extends FileImporter
                         }
                     }
                 }
-               
+
                 if (leveragePage)
                 {
-                    c_logger.info("TM leveraging for page: "
-                            + p_request.getExternalPageId());
+                    c_logger.info("TM leveraging for page: " + p_request.getExternalPageId());
                     time_PERFORMANCE = System.currentTimeMillis();
 
                     exactMatchedSegments = leveragePage(p_request, sourcePage, jobId);
@@ -231,39 +230,35 @@ public class ExtractedFileImporter extends FileImporter
                     }
                 }
 
-                c_logger.info("Term leveraging for page: "
-                        + p_request.getExternalPageId());
+                c_logger.info("Term leveraging for page: " + p_request.getExternalPageId());
                 time_PERFORMANCE = System.currentTimeMillis();
 
-                TermLeverageResult termMatches = leverageTermsForPage(
-                        p_request, sourcePage, jobId);
+                TermLeverageResult termMatches = leverageTermsForPage(p_request, sourcePage, jobId);
 
                 if (c_logger.isDebugEnabled())
                 {
                     c_logger.debug("Performance:: Term leveraging time = "
-                            + +(System.currentTimeMillis() - time_PERFORMANCE)
-                            + " " + p_request.getExternalPageId());
+                            + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
+                            + p_request.getExternalPageId());
                 }
 
-                c_logger.info("Creating target pages for page: "
-                        + p_request.getExternalPageId());
+                c_logger.info("Creating target pages for page: " + p_request.getExternalPageId());
                 time_PERFORMANCE = System.currentTimeMillis();
 
-                targetPages = importTargetPages(p_request, sourcePage,
-                        termMatches, exactMatchedSegments);
+                targetPages = importTargetPages(p_request, sourcePage, termMatches,
+                        exactMatchedSegments);
 
                 for (Iterator it = targetPages.iterator(); it.hasNext();)
                 {
                     TargetPage tp = (TargetPage) it.next();
                     pages.put(tp.getGlobalSightLocale().getIdAsLong(), tp);
                 }
-                pages = removeUnActiveWorkflowTargetPages(pages,
-                        p_request.getL10nProfile());
+                pages = removeUnActiveWorkflowTargetPages(pages, p_request.getL10nProfile());
                 if (c_logger.isDebugEnabled())
                 {
                     c_logger.debug("Performance:: Creating target pages time = "
-                            + +(System.currentTimeMillis() - time_PERFORMANCE)
-                            + " " + p_request.getExternalPageId());
+                            + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
+                            + p_request.getExternalPageId());
                 }
             }
 
@@ -295,11 +290,8 @@ public class ExtractedFileImporter extends FileImporter
 
                 // set the entire request to a failure since all target pages
                 // failed
-                setExceptionInRequest(
-                        p_request,
-                        new FileImportException(
-                                FileImportException.MSG_FAILED_IMPORT_ALL_TARGETS_ACTIVE,
-                                null, null));
+                setExceptionInRequest(p_request, new FileImportException(
+                        FileImportException.MSG_FAILED_IMPORT_ALL_TARGETS_ACTIVE, null, null));
 
                 peo.notifyImportFailEvent(sourcePage, targetPages);
             }
@@ -322,16 +314,16 @@ public class ExtractedFileImporter extends FileImporter
             String[] args =
             { Long.toString(p_request.getId()), p_request.getExternalPageId() };
 
-            exception = new FileImportException(
-                    FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args, ge);
+            exception = new FileImportException(FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args,
+                    ge);
         }
         catch (RemoteException re)
         {
             String[] args =
             { Long.toString(p_request.getId()), p_request.getExternalPageId() };
 
-            exception = new FileImportException(
-                    FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args, re);
+            exception = new FileImportException(FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args,
+                    re);
         }
         catch (Throwable ex)
         {
@@ -339,8 +331,7 @@ public class ExtractedFileImporter extends FileImporter
             String[] args =
             { Long.toString(p_request.getId()), p_request.getExternalPageId() };
 
-            exception = new FileImportException(
-                    FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args,
+            exception = new FileImportException(FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args,
                     new Exception(ex.toString()));
         }
 
@@ -348,9 +339,7 @@ public class ExtractedFileImporter extends FileImporter
         {
             try
             {
-                c_logger.error(
-                        "Import failed for page "
-                                + p_request.getExternalPageId() + "\n",
+                c_logger.error("Import failed for page " + p_request.getExternalPageId() + "\n",
                         exception);
 
                 setExceptionInRequest(p_request, exception);
@@ -366,14 +355,13 @@ public class ExtractedFileImporter extends FileImporter
         }
         else
         {
-            c_logger.info("Done importing page: "
-                    + p_request.getExternalPageId());
+            c_logger.info("Done importing page: " + p_request.getExternalPageId());
 
             if (c_logger.isDebugEnabled())
             {
                 c_logger.debug("Performance:: import time = "
-                        + (System.currentTimeMillis() - start_PERFORMANCE)
-                        + " " + p_request.getExternalPageId());
+                        + (System.currentTimeMillis() - start_PERFORMANCE) + " "
+                        + p_request.getExternalPageId());
             }
         }
 
@@ -384,8 +372,7 @@ public class ExtractedFileImporter extends FileImporter
     // Private Methods
     //
 
-    private HashMap removeUnActiveWorkflowTargetPages(HashMap pages,
-            L10nProfile profile)
+    private HashMap removeUnActiveWorkflowTargetPages(HashMap pages, L10nProfile profile)
     {
         List<Long> ids = profile.getUnActivelocaleIds();
         HashMap newPages = pages;
@@ -399,8 +386,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Creates the source page.
      */
-    private SourcePage createSourcePage(Request p_request, long jobId)
-            throws FileImportException
+    private SourcePage createSourcePage(Request p_request, long jobId) throws FileImportException
     {
         SourcePage page = null;
         String dataType = p_request.getDataSourceType();
@@ -408,12 +394,38 @@ public class ExtractedFileImporter extends FileImporter
         // There is no "db" dataSourceType in running at all(legacy code).
         if (dataType.equals("db"))
         {
-            throw new FileImportException(new Exception(
-                    "Request type 'db' is not supported any longer."));
+            throw new FileImportException(
+                    new Exception("Request type 'db' is not supported any longer."));
         }
         else
         {
             page = createPageFromGxml(p_request, jobId);
+        }
+        // GBS-4749, add source_page_id to "connector_blaise_job" table if the
+        // page is from a blaise entry
+        Job job = null;
+        try
+        {
+            job = ServerProxy.getJobHandler().getJobById(jobId);
+        }
+        catch (Exception e)
+        {
+            // ignore
+        }
+        if (page != null && job != null)
+        {
+            if (job.isBlaiseJob())
+            {
+                long blaiseEntryId = BlaiseManager
+                        .fetchBlaiseEntryIdFromExternalPageId(page.getExternalPageId());
+                BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
+                        blaiseEntryId);
+                if (bcj != null)
+                {
+                    bcj.setSourcePageId(page.getId());
+                    HibernateUtil.saveOrUpdate(bcj);
+                }
+            }
         }
 
         return page;
@@ -422,8 +434,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Creates Page, Leverage Groups, Tus and Tuvs
      */
-    private SourcePage createPageFromGxml(Request p_request, long jobId)
-            throws FileImportException
+    private SourcePage createPageFromGxml(Request p_request, long jobId) throws FileImportException
     {
         long companyId = p_request.getCompanyId();
 
@@ -460,8 +471,7 @@ public class ExtractedFileImporter extends FileImporter
             {
                 Tuv tuv = srcTuvs.get(0);
                 String generateFrom = tuv.getTu(jobId).getGenerateFrom();
-                boolean isWSXlf = TuImpl.FROM_WORLDSERVER
-                        .equalsIgnoreCase(generateFrom);
+                boolean isWSXlf = TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(generateFrom);
                 // World Server XLF segments DO NOT need this as WS XLF need
                 // keep WC original info.
                 if (!isWSXlf)
@@ -474,15 +484,13 @@ public class ExtractedFileImporter extends FileImporter
             setTuTuvIds(srcPage, jobId);
 
             // Generate templates
-            List<PageTemplate> templates = generateTemplates(srcPage,
-                    gxmlRootElement, tus);
+            List<PageTemplate> templates = generateTemplates(srcPage, gxmlRootElement, tus);
 
             // Save source page, leverage group and page template.
             HibernateUtil.save(srcPage);
 
             // Save TU, TUV and related data.
-            srcPage = SegmentTuTuvPersistence.saveTuTuvAndRelatedData(srcPage,
-                    jobId);
+            srcPage = SegmentTuTuvPersistence.saveTuTuvAndRelatedData(srcPage, jobId);
 
             // Save templatePart data.
             for (PageTemplate pTemplate : templates)
@@ -498,8 +506,8 @@ public class ExtractedFileImporter extends FileImporter
                 {
                     if (tu.getInddPageNum() != 0)
                     {
-                        InddTuMappingHelper.saveMapping(jobId, srcPageId,
-                                tu.getId(), companyId, tu.getInddPageNum());
+                        InddTuMappingHelper.saveMapping(jobId, srcPageId, tu.getId(), companyId,
+                                tu.getInddPageNum());
                     }
                 }
             }
@@ -509,10 +517,8 @@ public class ExtractedFileImporter extends FileImporter
             c_logger.error("Exception when creating TUVs in page import.", e);
             String[] args = new String[1];
             args[0] = Long.toString(p_request.getId());
-            setExceptionInRequest(p_request,
-                    new FileImportException(
-                            FileImportException.MSG_FAILED_TO_ITERATE_GXML_DOC,
-                            args, e));
+            setExceptionInRequest(p_request, new FileImportException(
+                    FileImportException.MSG_FAILED_TO_ITERATE_GXML_DOC, args, e));
         }
         finally
         {
@@ -520,8 +526,7 @@ public class ExtractedFileImporter extends FileImporter
             esf.clearTemplateMap();
         }
 
-        c_logger.info("Source page is created successfully for : "
-                + p_request.getExternalPageId());
+        c_logger.info("Source page is created successfully for : " + p_request.getExternalPageId());
 
         return srcPage;
     }
@@ -535,8 +540,8 @@ public class ExtractedFileImporter extends FileImporter
      * @return SourcePage The page for importing.
      * @throws FileImportException
      */
-    private SourcePage createPage(Request p_request, GxmlRootElement p_element,
-            long jobId) throws FileImportException
+    private SourcePage createPage(Request p_request, GxmlRootElement p_element, long jobId)
+            throws FileImportException
     {
         SourcePage srcPage = null;
         PageManager pm = getPageManager();
@@ -558,31 +563,28 @@ public class ExtractedFileImporter extends FileImporter
 
         try
         {
-            srcPage = pm.getPageWithExtractedFileForImport(p_request, p_request
-                    .getL10nProfile().getSourceLocale(), pageDataType,
-                    wordCount, containsGsTags, gxmlVersion);
+            srcPage = pm.getPageWithExtractedFileForImport(p_request,
+                    p_request.getL10nProfile().getSourceLocale(), pageDataType, wordCount,
+                    containsGsTags, gxmlVersion);
         }
         catch (PageException pe)
         {
             if (srcPage == null)
             {
-                c_logger.error("Couldn't get/create the page for importing.",
-                        pe);
+                c_logger.error("Couldn't get/create the page for importing.", pe);
                 String[] args = new String[2];
                 args[0] = Long.toString(p_request.getId());
                 args[1] = p_request.getExternalPageId();
-                throw new FileImportException(
-                        FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args, pe);
+                throw new FileImportException(FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args,
+                        pe);
             }
             else
             {
-                c_logger.error("Exception when adding the page to "
-                        + "the request.", pe);
+                c_logger.error("Exception when adding the page to " + "the request.", pe);
                 String[] args = new String[2];
                 args[0] = Long.toString(p_request.getId());
                 args[1] = srcPage.getExternalPageId();
-                throw new FileImportException(
-                        FileImportException.MSG_FAILED_TO_ADD_PAGE_TO_REQUEST,
+                throw new FileImportException(FileImportException.MSG_FAILED_TO_ADD_PAGE_TO_REQUEST,
                         args, pe);
             }
         }
@@ -597,8 +599,7 @@ public class ExtractedFileImporter extends FileImporter
      * @return GxmlRootElement - the root of the DOM tree.
      * @throws FileImportException
      */
-    private GxmlRootElement parseGxml(Request p_request)
-            throws FileImportException
+    private GxmlRootElement parseGxml(Request p_request) throws FileImportException
     {
         GxmlRootElement gxmlRootElement = null;
         GxmlFragmentReader reader = null;
@@ -627,8 +628,7 @@ public class ExtractedFileImporter extends FileImporter
         {
             if (reader != null)
             {
-                GxmlFragmentReaderPool.instance()
-                        .freeGxmlFragmentReader(reader);
+                GxmlFragmentReaderPool.instance().freeGxmlFragmentReader(reader);
             }
         }
 
@@ -639,14 +639,12 @@ public class ExtractedFileImporter extends FileImporter
      * This method adds several attributes of the source page's extracted file
      * such as base href. This method also creates a LeverageGroup.
      */
-    private void setAttributesOfExtractedFile(Request p_request,
-            ExtractedSourceFile p_file, GxmlRootElement p_rootElement)
-            throws FileImportException
+    private void setAttributesOfExtractedFile(Request p_request, ExtractedSourceFile p_file,
+            GxmlRootElement p_rootElement) throws FileImportException
     {
         try
         {
-            if (p_request.getBaseHref() != null
-                    && p_request.getBaseHref().length() > 0)
+            if (p_request.getBaseHref() != null && p_request.getBaseHref().length() > 0)
             {
                 p_file.setExternalBaseHref(p_request.getBaseHref());
             }
@@ -671,22 +669,20 @@ public class ExtractedFileImporter extends FileImporter
      * @return java.util.List
      */
     private ArrayList<Tu> createTUs(Request p_request, SourcePage p_page,
-            GxmlRootElement p_GxmlRootElement, long jobId)
-            throws FileImportException
+            GxmlRootElement p_GxmlRootElement, long jobId) throws FileImportException
     {
         LeverageGroup lg = getLeverageGroupForPage(p_page);
         long tmId = getTMId(p_request);
         GlobalSightLocale sourceLocale = getSourceLocale(p_request);
 
-        return createTUs_1(p_request, p_page, lg, tmId, sourceLocale,
-                p_GxmlRootElement, new ArrayList<Tu>(), jobId);
+        return createTUs_1(p_request, p_page, lg, tmId, sourceLocale, p_GxmlRootElement,
+                new ArrayList<Tu>(), jobId);
     }
 
     private LeverageGroup getLeverageGroupForPage(SourcePage p_page)
     {
         // assume this is an extracted page
-        return getExtractedSourceFile(p_page).getLeverageGroups().iterator()
-                .next();
+        return getExtractedSourceFile(p_page).getLeverageGroups().iterator().next();
     }
 
     private long getTMId(Request p_request)
@@ -694,10 +690,9 @@ public class ExtractedFileImporter extends FileImporter
         return p_request.getL10nProfile().getMainTmId();
     }
 
-    private ArrayList<Tu> createTUs_1(Request p_request, SourcePage p_page,
-            LeverageGroup p_lg, long p_tmId, GlobalSightLocale p_sourceLocale,
-            GxmlElement p_GxmlElement, ArrayList<Tu> p_tuList, long jobId)
-            throws FileImportException
+    private ArrayList<Tu> createTUs_1(Request p_request, SourcePage p_page, LeverageGroup p_lg,
+            long p_tmId, GlobalSightLocale p_sourceLocale, GxmlElement p_GxmlElement,
+            ArrayList<Tu> p_tuList, long jobId) throws FileImportException
     {
         if (p_GxmlElement == null)
         {
@@ -712,8 +707,7 @@ public class ExtractedFileImporter extends FileImporter
 
         try
         {
-            pageDataType = p_GxmlElement
-                    .getAttribute(GxmlNames.GXMLROOT_DATATYPE);
+            pageDataType = p_GxmlElement.getAttribute(GxmlNames.GXMLROOT_DATATYPE);
 
             if (IFormatNames.FORMAT_PASSOLO.equals(pageDataType))
                 supportSid = true;
@@ -721,8 +715,8 @@ public class ExtractedFileImporter extends FileImporter
             if (m.find())
             {
                 String fId = m.group(1);
-                FileProfileImpl fileProfile = HibernateUtil.get(
-                        FileProfileImpl.class, Long.parseLong(fId), false);
+                FileProfileImpl fileProfile = HibernateUtil.get(FileProfileImpl.class,
+                        Long.parseLong(fId), false);
                 supportSid = fileProfile.supportsSid();
                 isJavaProperties = "javaprop".equals(pageDataType);
             }
@@ -743,8 +737,7 @@ public class ExtractedFileImporter extends FileImporter
         {
             String xliffTargetLang = p_GxmlElement
                     .getAttribute(DiplomatNames.Attribute.TARGETLANGUAGE);
-            attributeMap.put(XliffHelper.MARK_XLIFF_TARGET_LANG,
-                    xliffTargetLang);
+            attributeMap.put(XliffHelper.MARK_XLIFF_TARGET_LANG, xliffTargetLang);
             tuc.setAttribute(attributeMap);
         }
 
@@ -756,8 +749,7 @@ public class ExtractedFileImporter extends FileImporter
             switch (elem.getType())
             {
                 case GxmlElement.LOCALIZABLE: // 3
-                    tu = createLocalizableSegment(elem, p_request, p_page,
-                            p_sourceLocale, p_tmId);
+                    tu = createLocalizableSegment(elem, p_request, p_page, p_sourceLocale, p_tmId);
                     p_lg.addTu(tu);
                     p_tuList.add(tu);
                     break;
@@ -769,23 +761,21 @@ public class ExtractedFileImporter extends FileImporter
 
                     if (xliffpart != null)
                     {
-                        isCreateTu = tuc.transProcess(p_request, xliffpart,
-                                elem, p_lg, p_tuList, p_sourceLocale, jobId);
+                        isCreateTu = tuc.transProcess(p_request, xliffpart, elem, p_lg, p_tuList,
+                                p_sourceLocale, jobId);
                     }
 
                     if (isCreateTu)
                     {
                         int inddPageNumInt = 0;
-                        String inddPageNum = elem
-                                .getAttribute(DiplomatNames.Attribute.INDDPAGENUM);
+                        String inddPageNum = elem.getAttribute(DiplomatNames.Attribute.INDDPAGENUM);
                         if (inddPageNum != null)
                         {
                             inddPageNumInt = Integer.parseInt(inddPageNum);
                         }
 
-                        ArrayList<Tu> tus = createTranslatableSegments(elem,
-                                p_request, p_page, p_sourceLocale, p_tmId,
-                                pageDataType);
+                        ArrayList<Tu> tus = createTranslatableSegments(elem, p_request, p_page,
+                                p_sourceLocale, p_tmId, pageDataType);
 
                         for (int j = 0, maxj = tus.size(); j < maxj; j++)
                         {
@@ -807,8 +797,7 @@ public class ExtractedFileImporter extends FileImporter
                                 else
                                 {
                                     // passolo
-                                    String resName = elem
-                                            .getAttribute("resname");
+                                    String resName = elem.getAttribute("resname");
                                     if (resName != null)
                                         tuv.setSid(resName);
                                 }
@@ -821,8 +810,8 @@ public class ExtractedFileImporter extends FileImporter
                     break;
 
                 case GxmlElement.GS: // 23
-                    p_tuList = createTUs_1(p_request, p_page, p_lg, p_tmId,
-                            p_sourceLocale, elem, p_tuList, jobId);
+                    p_tuList = createTUs_1(p_request, p_page, p_lg, p_tmId, p_sourceLocale, elem,
+                            p_tuList, jobId);
                     break;
 
                 default: // other
@@ -839,13 +828,11 @@ public class ExtractedFileImporter extends FileImporter
                                     int index = skeleton.lastIndexOf("\n");
                                     if (index > -1)
                                     {
-                                        skeleton = skeleton
-                                                .substring(index + 1);
+                                        skeleton = skeleton.substring(index + 1);
                                     }
 
                                     // remove "="
-                                    skeleton = skeleton.substring(0,
-                                            skeleton.length() - 1);
+                                    skeleton = skeleton.substring(0, skeleton.length() - 1);
                                     sid = skeleton.trim();
                                 }
                             }
@@ -861,8 +848,7 @@ public class ExtractedFileImporter extends FileImporter
                         String trgLang = null;
                         if ("1.2".equals(xliffVersion))
                         {
-                            trgLang = XliffHelper
-                                    .getXliff12TargetLanguage(skeleton);
+                            trgLang = XliffHelper.getXliff12TargetLanguage(skeleton);
 
                             if (skeleton.indexOf("tool") > -1
                                     && skeleton.indexOf("worldserver") > -1)
@@ -880,15 +866,12 @@ public class ExtractedFileImporter extends FileImporter
                         }
                         else if ("2.0".equals(xliffVersion))
                         {
-                            trgLang = XliffHelper
-                                    .getXliff20TargetLanguage(skeleton);
+                            trgLang = XliffHelper.getXliff20TargetLanguage(skeleton);
                         }
 
                         if (trgLang != null)
                         {
-                            attributeMap
-                                    .put(XliffHelper.MARK_XLIFF_TARGET_LANG,
-                                            trgLang);
+                            attributeMap.put(XliffHelper.MARK_XLIFF_TARGET_LANG, trgLang);
                         }
 
                         tuc.setAttribute(attributeMap);
@@ -906,15 +889,15 @@ public class ExtractedFileImporter extends FileImporter
      * 
      * @return java.util.List
      */
-    private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus,
-            long jobId) throws Exception
+    private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus, long jobId)
+            throws Exception
     {
         ArrayList<Tuv> srcTuvs = new ArrayList<Tuv>(p_tus.size());
         long sourceLocaleId = getSourceLocale(p_request).getId();
         int order = 1;
 
-        long sourceTmId = p_request.getL10nProfile()
-                .getTranslationMemoryProfile().getProjectTmIdForSave();
+        long sourceTmId = p_request.getL10nProfile().getTranslationMemoryProfile()
+                .getProjectTmIdForSave();
         ProjectHandler projectHandler = ServerProxy.getProjectHandler();
         Tm tm = projectHandler.getProjectTMById(sourceTmId, false);
         String sourceTmName = null;
@@ -923,12 +906,9 @@ public class ExtractedFileImporter extends FileImporter
             sourceTmName = tm.getName();
         }
 
-        String sourceProjectName = p_request.getL10nProfile().getProject()
-                .getName();
-        String projectManagerId = p_request.getL10nProfile().getProject()
-                .getProjectManagerId();
-        String creationId = projectManagerId == null ? Tmx.DEFAULT_USER
-                : projectManagerId;
+        String sourceProjectName = p_request.getL10nProfile().getProject().getName();
+        String projectManagerId = p_request.getL10nProfile().getProject().getProjectManagerId();
+        String creationId = projectManagerId == null ? Tmx.DEFAULT_USER : projectManagerId;
         for (int i = 0, max = p_tus.size(); i < max; i++)
         {
             Tu tu = p_tus.get(i);
@@ -955,8 +935,7 @@ public class ExtractedFileImporter extends FileImporter
      * This method calculates the exact match keys for Source Tuvs by delegating
      * to the IndexerLocal component.
      */
-    private void setExactMatchKeysForSrcTUVs(List<Tuv> p_srcTuvs)
-            throws FileImportException
+    private void setExactMatchKeysForSrcTUVs(List<Tuv> p_srcTuvs) throws FileImportException
     {
         try
         {
@@ -972,16 +951,13 @@ public class ExtractedFileImporter extends FileImporter
      * Creates TUs and TUVs for the segments that are localizable in the element
      * passed in.
      */
-    private Tu createLocalizableSegment(GxmlElement p_elem, Request p_request,
-            SourcePage p_page, GlobalSightLocale p_sourceLocale, long p_tmId)
-            throws FileImportException
+    private Tu createLocalizableSegment(GxmlElement p_elem, Request p_request, SourcePage p_page,
+            GlobalSightLocale p_sourceLocale, long p_tmId) throws FileImportException
     {
         TuvManager tm = getTuvManager();
 
-        Integer tuvWordCount = p_elem
-                .getAttributeAsInteger(GxmlNames.LOCALIZABLE_WORDCOUNT);
-        long pid = Long.parseLong(p_elem
-                .getAttribute(GxmlNames.LOCALIZABLE_BLOCKID));
+        Integer tuvWordCount = p_elem.getAttributeAsInteger(GxmlNames.LOCALIZABLE_WORDCOUNT);
+        long pid = Long.parseLong(p_elem.getAttribute(GxmlNames.LOCALIZABLE_BLOCKID));
 
         String tuDataType = p_elem.getAttribute(GxmlNames.LOCALIZABLE_DATATYPE);
 
@@ -997,8 +973,8 @@ public class ExtractedFileImporter extends FileImporter
             }
         }
 
-        Vector excludedTypes = p_request.getL10nProfile()
-                .getTranslationMemoryProfile().getJobExcludeTuTypes();
+        Vector excludedTypes = p_request.getL10nProfile().getTranslationMemoryProfile()
+                .getJobExcludeTuTypes();
 
         Tu tu = null;
 
@@ -1025,8 +1001,7 @@ public class ExtractedFileImporter extends FileImporter
                 tuvWordCount = null;
             }
 
-            Tuv tuv = tm.createTuv(
-                    tuvWordCount == null ? 0 : tuvWordCount.intValue(),
+            Tuv tuv = tm.createTuv(tuvWordCount == null ? 0 : tuvWordCount.intValue(),
                     p_sourceLocale, p_page);
 
             // Can't use tuv.setGxmlElement(p_elem) unless TuvImpl is fixed
@@ -1035,13 +1010,10 @@ public class ExtractedFileImporter extends FileImporter
         }
         catch (Exception te)
         {
-            c_logger.error(
-                    "TuvException when creating TU and TUV."
-                            + Long.toString(p_tmId), te);
+            c_logger.error("TuvException when creating TU and TUV." + Long.toString(p_tmId), te);
             String[] args = new String[1];
             args[0] = Long.toString(p_request.getId());
-            throw new FileImportException(
-                    FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV, args,
+            throw new FileImportException(FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV, args,
                     te);
         }
 
@@ -1052,27 +1024,24 @@ public class ExtractedFileImporter extends FileImporter
      * Creates TUs and TUVs for the segments that are translatable in the
      * segment passed in.
      */
-    private ArrayList<Tu> createTranslatableSegments(GxmlElement p_elem,
-            Request p_request, SourcePage p_page,
-            GlobalSightLocale p_sourceLocale, long p_tmId, String p_pageDataType)
+    private ArrayList<Tu> createTranslatableSegments(GxmlElement p_elem, Request p_request,
+            SourcePage p_page, GlobalSightLocale p_sourceLocale, long p_tmId, String p_pageDataType)
             throws FileImportException
     {
         long jobId = p_page.getJobId();
         TuvManager tm = getTuvManager();
         ArrayList<Tu> tuList = new ArrayList<Tu>();
 
-        Vector excludedTypes = p_request.getL10nProfile()
-                .getTranslationMemoryProfile().getJobExcludeTuTypes();
+        Vector excludedTypes = p_request.getL10nProfile().getTranslationMemoryProfile()
+                .getJobExcludeTuTypes();
         String translate = p_elem.getAttribute("translate");
         String xliffMrkId = p_elem.getAttribute("xliffSegSourceMrkId");
         String xliffMrkIndex = p_elem.getAttribute("xliffSegSourceMrkIndex");
-        long pid = Long.parseLong(p_elem
-                .getAttribute(GxmlNames.TRANSLATABLE_BLOCKID));
+        long pid = Long.parseLong(p_elem.getAttribute(GxmlNames.TRANSLATABLE_BLOCKID));
 
         TuType tuType = getTuType(p_elem, p_request);
 
-        String tuDataType = p_elem
-                .getAttribute(GxmlNames.TRANSLATABLE_DATATYPE);
+        String tuDataType = p_elem.getAttribute(GxmlNames.TRANSLATABLE_DATATYPE);
         if (tuDataType == null || tuDataType.length() == 0)
         {
             GxmlElement diplomat = GxmlElement.getGxmlRootElement(p_elem);
@@ -1094,15 +1063,13 @@ public class ExtractedFileImporter extends FileImporter
                 {
                     tu.setTranslate(translate);
                 }
-                Integer segWordCount = seg
-                        .getAttributeAsInteger(GxmlNames.SEGMENT_WORDCOUNT);
+                Integer segWordCount = seg.getAttributeAsInteger(GxmlNames.SEGMENT_WORDCOUNT);
                 if (excludedTypes.contains(tuType.getName()))
                 {
                     segWordCount = null;
                 }
                 // For Idiom World Server XLF, should keep its word-count info.
-                String wordCountFromWs = p_elem
-                        .getAttribute(Extractor.IWS_WORDCOUNT);
+                String wordCountFromWs = p_elem.getAttribute(Extractor.IWS_WORDCOUNT);
                 if (wordCountFromWs != null)
                 {
                     try
@@ -1116,25 +1083,21 @@ public class ExtractedFileImporter extends FileImporter
                     }
                 }
 
-                Tuv tuv = tm.createTuv(
-                        segWordCount == null ? 0 : segWordCount.intValue(),
+                Tuv tuv = tm.createTuv(segWordCount == null ? 0 : segWordCount.intValue(),
                         p_sourceLocale, p_page);
                 tuv.setTu(tu);
 
                 String fileName = p_page.getExternalPageId();
                 String oriGxml = seg.toGxml(p_pageDataType);
-                if (WordExtractor.useNewExtractor(""
-                        + p_request.getDataSourceId()))
+                if (WordExtractor.useNewExtractor("" + p_request.getDataSourceId()))
                 {
                     Office2Optimizer op = new Office2Optimizer();
-                    op.setGxml((TuvImpl) tuv, oriGxml, tuDataType, fileName,
-                            p_pageDataType, jobId);
+                    op.setGxml((TuvImpl) tuv, oriGxml, tuDataType, fileName, p_pageDataType, jobId);
                 }
                 else
                 {
                     OptimizeUtil op = new OptimizeUtil();
-                    op.setGxml((TuvImpl) tuv, oriGxml, tuDataType, fileName,
-                            p_pageDataType, jobId);
+                    op.setGxml((TuvImpl) tuv, oriGxml, tuDataType, fileName, p_pageDataType, jobId);
                 }
 
                 tuv.setSid(p_elem.getAttribute("sid"));
@@ -1153,8 +1116,7 @@ public class ExtractedFileImporter extends FileImporter
                 }
                 String[] args = new String[1];
                 args[0] = Long.toString(p_request.getId());
-                throw new FileImportException(
-                        FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV,
+                throw new FileImportException(FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV,
                         args, te);
             }
         }
@@ -1189,8 +1151,7 @@ public class ExtractedFileImporter extends FileImporter
             {
                 String[] args = new String[1];
                 args[0] = Long.toString(p_request.getId());
-                throw new FileImportException(
-                        FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV,
+                throw new FileImportException(FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV,
                         args, te2);
             }
         }
@@ -1210,9 +1171,8 @@ public class ExtractedFileImporter extends FileImporter
      * Creates the templates for the source page/extracted file that has been
      * created from Gxml.
      */
-    private List<PageTemplate> generateTemplates(SourcePage p_page,
-            GxmlRootElement p_doc, List<Tu> p_tuList)
-            throws FileImportException
+    private List<PageTemplate> generateTemplates(SourcePage p_page, GxmlRootElement p_doc,
+            List<Tu> p_tuList) throws FileImportException
     {
         List<PageTemplate> templates = new ArrayList<PageTemplate>();
 
@@ -1250,9 +1210,8 @@ public class ExtractedFileImporter extends FileImporter
      * Creates the target pages associated with the source page and the target
      * locales specified in the L10nProfile as part of the request.
      */
-    private Collection importTargetPages(Request p_request,
-            SourcePage p_sourcePage, TermLeverageResult p_termMatches,
-            ExactMatchedSegments p_exactMatchedSegments)
+    private Collection importTargetPages(Request p_request, SourcePage p_sourcePage,
+            TermLeverageResult p_termMatches, ExactMatchedSegments p_exactMatchedSegments)
             throws FileImportException
     {
         Collection targetPages = new ArrayList();
@@ -1285,8 +1244,7 @@ public class ExtractedFileImporter extends FileImporter
 
             for (int i = targetLocales.size() - 1; i >= 0; i--)
             {
-                GlobalSightLocale targetLocale = (GlobalSightLocale) targetLocales
-                        .get(i);
+                GlobalSightLocale targetLocale = (GlobalSightLocale) targetLocales.get(i);
                 if (!targetLocale.toString().equals(locale))
                 {
                     targetLocales.remove(i);
@@ -1301,40 +1259,33 @@ public class ExtractedFileImporter extends FileImporter
         {
             if (targetLocales.size() > 0)
             {
-                targetPages = getPageManager()
-                        .createTargetPagesWithExtractedFile(p_sourcePage,
-                                targetLocales, p_termMatches,
-                                useLeveragedSegments, useLeveragedTerms,
-                                p_exactMatchedSegments);
+                targetPages = getPageManager().createTargetPagesWithExtractedFile(p_sourcePage,
+                        targetLocales, p_termMatches, useLeveragedSegments, useLeveragedTerms,
+                        p_exactMatchedSegments);
             }
             if (activeLocaleInfo.size() > 0)
             {
                 Hashtable targetLocaleErrors = createFailedTargetErrorMessages(activeLocaleInfo);
                 failedTargetPages = getPageManager()
-                        .createFailedTargetPagesWithExtractedFile(p_sourcePage,
-                                targetLocaleErrors);
+                        .createFailedTargetPagesWithExtractedFile(p_sourcePage, targetLocaleErrors);
             }
         }
         catch (Exception e)
         {
-            c_logger.error("Exception occurred when trying to "
-                    + "create target pages.", e);
+            c_logger.error("Exception occurred when trying to " + "create target pages.", e);
             String[] args = new String[2];
             args[0] = Long.toString(p_sourcePage.getId());
             args[1] = Long.toString(p_request.getId());
-            throw new FileImportException(
-                    FileImportException.MSG_FAIL_TO_CREATE_TARGET_PAGES, args,
+            throw new FileImportException(FileImportException.MSG_FAIL_TO_CREATE_TARGET_PAGES, args,
                     e);
         }
         catch (Throwable e)
         {
-            c_logger.error("Exception occurred when trying to "
-                    + "create target pages.", e);
+            c_logger.error("Exception occurred when trying to " + "create target pages.", e);
             String[] args = new String[2];
             args[0] = Long.toString(p_sourcePage.getId());
             args[1] = Long.toString(p_request.getId());
-            throw new FileImportException(
-                    FileImportException.MSG_FAIL_TO_CREATE_TARGET_PAGES, args,
+            throw new FileImportException(FileImportException.MSG_FAIL_TO_CREATE_TARGET_PAGES, args,
                     new Exception(e.toString()));
         }
 
@@ -1346,8 +1297,9 @@ public class ExtractedFileImporter extends FileImporter
 
         return targetPages;
     }
-    
-    private  List<GlobalSightLocale> getIgnoreTargetLocale(Set<GlobalSightLocale> locales, SourcePage sourcePage)
+
+    private List<GlobalSightLocale> getIgnoreTargetLocale(Set<GlobalSightLocale> locales,
+            SourcePage sourcePage)
     {
         List<GlobalSightLocale> ignoreTargetLocale = new ArrayList<GlobalSightLocale>();
         for (GlobalSightLocale trgLocale : locales)
@@ -1359,26 +1311,24 @@ public class ExtractedFileImporter extends FileImporter
                 ignoreTargetLocale.add(trgLocale);
             }
         }
-        
+
         return ignoreTargetLocale;
     }
 
-    private LeverageDataCenter createLeverageDataCenter(Request p_request,
-            SourcePage p_sourcePage, long jobId) throws Exception
+    private LeverageDataCenter createLeverageDataCenter(Request p_request, SourcePage p_sourcePage,
+            long jobId) throws Exception
     {
         L10nProfile l10nProfile = p_request.getL10nProfile();
-        LeveragingLocales leveragingLocales = l10nProfile
-                .getLeveragingLocales();
+        LeveragingLocales leveragingLocales = l10nProfile.getLeveragingLocales();
 
         // remove the ACTIVE targets from the leveraging locales
         // since they shouldn't be leveraged against
         Set targets = p_request.getActiveTargets().keySet();
         for (Iterator it = targets.iterator(); it.hasNext();)
         {
-            leveragingLocales.removeLeveragingLocales((GlobalSightLocale) it
-                    .next());
+            leveragingLocales.removeLeveragingLocales((GlobalSightLocale) it.next());
         }
-        
+
         GlobalSightLocale[] jobLocales = p_request.getTargetLocalesToImport();
         LeveragingLocales newLeveragingLocales = new LeveragingLocales();
         for (int i = 0; i < jobLocales.length; i++)
@@ -1387,13 +1337,11 @@ public class ExtractedFileImporter extends FileImporter
                     .getLeveragingLocales(jobLocales[i]);
             Set<GlobalSightLocale> newLevLocales = new HashSet<GlobalSightLocale>();
             newLevLocales.addAll(levLocales);
-            newLeveragingLocales.setLeveragingLocale(jobLocales[i],
-                    newLevLocales);
+            newLeveragingLocales.setLeveragingLocale(jobLocales[i], newLevLocales);
         }
 
-        TranslationMemoryProfile tmProfile = l10nProfile
-                .getTranslationMemoryProfile();
-        
+        TranslationMemoryProfile tmProfile = l10nProfile.getTranslationMemoryProfile();
+
         List<GlobalSightLocale> ignoreTargetLocale = getIgnoreTargetLocale(
                 newLeveragingLocales.getAllTargetLocales(), p_sourcePage);
         for (GlobalSightLocale trgLocale : ignoreTargetLocale)
@@ -1401,12 +1349,10 @@ public class ExtractedFileImporter extends FileImporter
             newLeveragingLocales.removeLeveragingLocales(trgLocale);
         }
 
-        LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
-                newLeveragingLocales);
+        LeverageOptions leverageOptions = new LeverageOptions(tmProfile, newLeveragingLocales);
 
         TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
-        return tmCoreManager.createLeverageDataCenterForPage(p_sourcePage,
-                leverageOptions, jobId);
+        return tmCoreManager.createLeverageDataCenterForPage(p_sourcePage, leverageOptions, jobId);
     }
 
     private boolean isReimport(SourcePage p_sourcePage) throws Exception
@@ -1415,8 +1361,8 @@ public class ExtractedFileImporter extends FileImporter
 
         if (p_sourcePage.getPreviousPageId() > 0)
         {
-            SourcePage prevPage = ServerProxy.getPageManager().getSourcePage(
-                    p_sourcePage.getPreviousPageId());
+            SourcePage prevPage = ServerProxy.getPageManager()
+                    .getSourcePage(p_sourcePage.getPreviousPageId());
 
             if (prevPage != null)
             {
@@ -1428,8 +1374,8 @@ public class ExtractedFileImporter extends FileImporter
                 // proper criteria for reimport is found.
                 // Currently assuming that the following works...
                 if (currentState.equals(PageState.IMPORTING)
-                        && (prevState.equals(PageState.NOT_LOCALIZED) || prevState
-                                .equals(PageState.LOCALIZED)))
+                        && (prevState.equals(PageState.NOT_LOCALIZED)
+                                || prevState.equals(PageState.LOCALIZED)))
                 {
                     reimport = true;
                 }
@@ -1443,15 +1389,15 @@ public class ExtractedFileImporter extends FileImporter
      * Leverages the source page with all the targets specified in the
      * L10nProfile.
      */
-    private ExactMatchedSegments leveragePage(Request p_request,
-            SourcePage p_sourcePage, long jobId) throws FileImportException
+    private ExactMatchedSegments leveragePage(Request p_request, SourcePage p_sourcePage,
+            long jobId) throws FileImportException
     {
         ExactMatchedSegments exactMatchedSegments = null;
 
         try
         {
-            LeverageDataCenter leverageDataCenter = createLeverageDataCenter(
-                    p_request, p_sourcePage, jobId);
+            LeverageDataCenter leverageDataCenter = createLeverageDataCenter(p_request,
+                    p_sourcePage, jobId);
 
             if (isReimport(p_sourcePage))
             {
@@ -1470,9 +1416,8 @@ public class ExtractedFileImporter extends FileImporter
             try
             {
                 conn = DbUtil.getConnection();
-                LingServerProxy.getLeverageMatchLingManager()
-                        .saveLeverageResults(conn, p_sourcePage,
-                                leverageDataCenter);
+                LingServerProxy.getLeverageMatchLingManager().saveLeverageResults(conn,
+                        p_sourcePage, leverageDataCenter);
             }
             finally
             {
@@ -1489,8 +1434,7 @@ public class ExtractedFileImporter extends FileImporter
             String[] args = new String[2];
             args[0] = Long.toString(p_sourcePage.getId());
             args[1] = Long.toString(p_request.getId());
-            throw new FileImportException(
-                    FileImportException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE,
+            throw new FileImportException(FileImportException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE,
                     args, e);
         }
         catch (Throwable e)
@@ -1500,8 +1444,7 @@ public class ExtractedFileImporter extends FileImporter
             String[] args = new String[2];
             args[0] = Long.toString(p_sourcePage.getId());
             args[1] = Long.toString(p_request.getId());
-            throw new FileImportException(
-                    FileImportException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE,
+            throw new FileImportException(FileImportException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE,
                     args, new Exception(e.toString()));
         }
 
@@ -1511,21 +1454,19 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Leverages the source page from Translation_unit_variant table
      */
-    private void leveragePageFromTuv(Request p_request,
-            SourcePage p_sourcePage, LeverageDataCenter p_leverageDataCenter)
-            throws Exception
+    private void leveragePageFromTuv(Request p_request, SourcePage p_sourcePage,
+            LeverageDataCenter p_leverageDataCenter) throws Exception
     {
         c_logger.info("Starting leverage from tuv table");
 
         L10nProfile profile = p_request.getL10nProfile();
         LeveragingLocales leveragingLocales = profile.getLeveragingLocales();
-        TargetLocaleLgIdsMapper localeLgIdMap = getPageManager()
-                .getLocaleLgIdMapForReimportPage(p_sourcePage,
-                        leveragingLocales.getAllTargetLocales());
+        TargetLocaleLgIdsMapper localeLgIdMap = getPageManager().getLocaleLgIdMapForReimportPage(
+                p_sourcePage, leveragingLocales.getAllTargetLocales());
 
         Leverager lev = LingServerProxy.getLeverager();
-        lev.leverageForReimport(p_sourcePage, localeLgIdMap,
-                profile.getSourceLocale(), p_leverageDataCenter);
+        lev.leverageForReimport(p_sourcePage, localeLgIdMap, profile.getSourceLocale(),
+                p_leverageDataCenter);
 
         c_logger.info("Finished leveraging successfuly from tuv table");
     }
@@ -1537,23 +1478,20 @@ public class ExtractedFileImporter extends FileImporter
      * @return collection of TermLeverageMatch objects, grouped by source tuv
      *         id, or null when the database does not exist or an error happens.
      */
-    private TermLeverageResult leverageTermsForPage(Request p_request,
-            SourcePage p_sourcePage, long jobId)
+    private TermLeverageResult leverageTermsForPage(Request p_request, SourcePage p_sourcePage,
+            long jobId)
     {
         TermLeverageResult result = null;
         String project = p_request.getL10nProfile().getProject().getName();
-        String termbaseName = p_request.getL10nProfile().getProject()
-                .getTermbaseName();
+        String termbaseName = p_request.getL10nProfile().getProject().getTermbaseName();
 
         ArrayList sourceTuvs = getSourceTranslatableTuvs(p_sourcePage, jobId);
 
-        if (sourceTuvs.size() > 0 && termbaseName != null
-                && termbaseName.length() > 0)
+        if (sourceTuvs.size() > 0 && termbaseName != null && termbaseName.length() > 0)
         {
             try
             {
-                TermLeverageOptions options = getTermLeverageOptions(p_request,
-                        termbaseName);
+                TermLeverageOptions options = getTermLeverageOptions(p_request, termbaseName);
 
                 if (c_logger.isDebugEnabled())
                 {
@@ -1562,22 +1500,19 @@ public class ExtractedFileImporter extends FileImporter
 
                 if (options == null)
                 {
-                    c_logger.warn("Project " + project
-                            + " refers to unknown termbase `" + termbaseName
-                            + "'. Term leverage skipped.");
+                    c_logger.warn("Project " + project + " refers to unknown termbase `"
+                            + termbaseName + "'. Term leverage skipped.");
                 }
                 else if (options.getAllTargetPageLocales().size() == 0
                         || options.getSourcePageLangNames().size() == 0)
                 {
-                    c_logger.warn("No specified locale found in termbase. "
-                            + "Term leverage skipped.");
+                    c_logger.warn(
+                            "No specified locale found in termbase. " + "Term leverage skipped.");
                 }
                 else
                 {
-                    result = ServerProxy
-                            .getTermLeverageManager()
-                            .leverageTerms(sourceTuvs, options,
-                                    String.valueOf(p_sourcePage.getCompanyId()));
+                    result = ServerProxy.getTermLeverageManager().leverageTerms(sourceTuvs, options,
+                            String.valueOf(p_sourcePage.getCompanyId()));
                 }
             }
             catch (Exception e)
@@ -1599,16 +1534,14 @@ public class ExtractedFileImporter extends FileImporter
      * Retrieves all translatable source TUVs in the source page by iterating
      * through the page's leverage groups and TUs.
      */
-    private ArrayList<Tuv> getSourceTranslatableTuvs(SourcePage p_sourcePage,
-            long p_jobId)
+    private ArrayList<Tuv> getSourceTranslatableTuvs(SourcePage p_sourcePage, long p_jobId)
     {
         ArrayList<Tuv> result = new ArrayList<Tuv>();
 
-        List<LeverageGroup> leverageGroups = getExtractedSourceFile(
-                p_sourcePage).getLeverageGroups();
+        List<LeverageGroup> leverageGroups = getExtractedSourceFile(p_sourcePage)
+                .getLeverageGroups();
         long sourceLocaleId = p_sourcePage.getLocaleId();
-        for (Iterator<LeverageGroup> it = leverageGroups.iterator(); it
-                .hasNext();)
+        for (Iterator<LeverageGroup> it = leverageGroups.iterator(); it.hasNext();)
         {
             Collection<Tu> tus = it.next().getTus();
             for (Tu tu : tus)
@@ -1626,13 +1559,12 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Populates a term leverage options object.
      */
-    private TermLeverageOptions getTermLeverageOptions(Request p_request,
-            String p_termbaseName) throws GeneralException
+    private TermLeverageOptions getTermLeverageOptions(Request p_request, String p_termbaseName)
+            throws GeneralException
     {
         TermLeverageOptions options = null;
 
-        Locale sourceLocale = p_request.getL10nProfile().getSourceLocale()
-                .getLocale();
+        Locale sourceLocale = p_request.getL10nProfile().getSourceLocale().getLocale();
 
         // get only the inactive target locales - all the active targets
         // should not be leveraged against
@@ -1664,14 +1596,12 @@ public class ExtractedFileImporter extends FileImporter
             // fuzzy threshold set by object constructor - use defaults.
             // options.setFuzzyThreshold(50);
 
-            ITermbase termbase = manager.connect(p_termbaseName,
-                    ITermbase.SYSTEM_USER, "",
+            ITermbase termbase = manager.connect(p_termbaseName, ITermbase.SYSTEM_USER, "",
                     String.valueOf(p_request.getCompanyId()));
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
-            List sourceLangNames = termbase.getLanguagesByLocale(sourceLocale
-                    .toString());
+            List sourceLangNames = termbase.getLanguagesByLocale(sourceLocale.toString());
 
             for (int i = 0, max = sourceLangNames.size(); i < max; i++)
             {
@@ -1683,10 +1613,8 @@ public class ExtractedFileImporter extends FileImporter
             // add target locales and lang names
             for (Iterator tli = targetGsLocales.iterator(); tli.hasNext();)
             {
-                Locale targetLocale = ((GlobalSightLocale) tli.next())
-                        .getLocale();
-                List targetLangNames = termbase
-                        .getLanguagesByLocale(targetLocale.toString());
+                Locale targetLocale = ((GlobalSightLocale) tli.next()).getLocale();
+                List targetLangNames = termbase.getLanguagesByLocale(targetLocale.toString());
 
                 Iterator it = targetLangNames.iterator();
                 while (it.hasNext())
@@ -1749,8 +1677,7 @@ public class ExtractedFileImporter extends FileImporter
         catch (GeneralException ge)
         {
             c_logger.error("Couldn't find the TuvManager", ge);
-            throw new FileImportException(
-                    FileImportException.MSG_FAILED_TO_FIND_TUV_MANAGER, null,
+            throw new FileImportException(FileImportException.MSG_FAILED_TO_FIND_TUV_MANAGER, null,
                     ge);
         }
 
@@ -1770,8 +1697,7 @@ public class ExtractedFileImporter extends FileImporter
      * first base tag is used.
      * </p>
      */
-    private void setInternalBaseHref(ExtractedFile p_file,
-            GxmlRootElement p_rootElement)
+    private void setInternalBaseHref(ExtractedFile p_file, GxmlRootElement p_rootElement)
     {
         String base = null;
         List elements = p_rootElement.getChildElements();
@@ -1839,15 +1765,13 @@ public class ExtractedFileImporter extends FileImporter
      * @exception IOException
      * @return String
      */
-    public static String readXmlFromFile(String p_gxmlFileName)
-            throws IOException
+    public static String readXmlFromFile(String p_gxmlFileName) throws IOException
     {
         File f = new File(p_gxmlFileName);
         int len = (int) f.length();
         StringBuffer gxml = new StringBuffer(len);
         char buf[] = new char[32768];
-        InputStreamReader reader = new InputStreamReader(
-                new FileInputStream(f), "UTF8");
+        InputStreamReader reader = new InputStreamReader(new FileInputStream(f), "UTF8");
         int n = -1;
 
         do
@@ -1867,13 +1791,12 @@ public class ExtractedFileImporter extends FileImporter
      * This method calculates the word count for the page based on the included
      * TUVs (ignoring the excluded TUVs).
      */
-    private void updateWordCountForPage(Request p_request, SourcePage p_page,
-            ArrayList p_srcTuvs)
+    private void updateWordCountForPage(Request p_request, SourcePage p_page, ArrayList p_srcTuvs)
     {
         int totalWordCount = 0;
 
-        Vector excludedTypes = p_request.getL10nProfile()
-                .getTranslationMemoryProfile().getJobExcludeTuTypes();
+        Vector excludedTypes = p_request.getL10nProfile().getTranslationMemoryProfile()
+                .getJobExcludeTuTypes();
 
         for (int i = 0, imax = p_srcTuvs.size(); i < imax; i++)
         {
@@ -1894,8 +1817,7 @@ public class ExtractedFileImporter extends FileImporter
 
                 if (!excludedTypes.contains(type))
                 {
-                    int subCount = Integer.parseInt(sub
-                            .getAttribute(GxmlNames.SUB_WORDCOUNT));
+                    int subCount = Integer.parseInt(sub.getAttribute(GxmlNames.SUB_WORDCOUNT));
                     wordCount += subCount;
                 }
             }
@@ -1909,12 +1831,10 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Gets the original page word count as calculated by the extractor.
      */
-    private int getPageWordCount(GxmlRootElement p_element)
-            throws FileImportException
+    private int getPageWordCount(GxmlRootElement p_element) throws FileImportException
     {
         int wordCount = 0;
-        String wordCountAttr = p_element
-                .getAttribute(GxmlNames.GXMLROOT_WORDCOUNT);
+        String wordCountAttr = p_element.getAttribute(GxmlNames.GXMLROOT_WORDCOUNT);
 
         if (wordCountAttr != null)
         {
@@ -1936,8 +1856,7 @@ public class ExtractedFileImporter extends FileImporter
         return p_element.getAttribute(GxmlNames.GXMLROOT_VERSION);
     }
 
-    private Hashtable createFailedTargetErrorMessages(
-            Hashtable p_targetLocaleInfo)
+    private Hashtable createFailedTargetErrorMessages(Hashtable p_targetLocaleInfo)
     {
         Hashtable targetLocaleErrors = new Hashtable(p_targetLocaleInfo.size());
 
@@ -1950,8 +1869,7 @@ public class ExtractedFileImporter extends FileImporter
             args[0] = Long.toString(j.getId());
             args[1] = j.getJobName();
             GeneralException ge = new FileImportException(
-                    FileImportException.MSG_FAILED_TO_IMPORT_ACTIVE_TARGET_PAGE,
-                    args, null);
+                    FileImportException.MSG_FAILED_TO_IMPORT_ACTIVE_TARGET_PAGE, args, null);
 
             targetLocaleErrors.put(target, ge);
         }
@@ -1975,8 +1893,7 @@ public class ExtractedFileImporter extends FileImporter
             return;
         }
 
-        List<LeverageGroup> lgList = p_sourcePage.getExtractedFile()
-                .getLeverageGroups();
+        List<LeverageGroup> lgList = p_sourcePage.getExtractedFile().getLeverageGroups();
         for (LeverageGroup lg : lgList)
         {
             Collection<Tu> tus = lg.getTus(false);
@@ -1992,8 +1909,7 @@ public class ExtractedFileImporter extends FileImporter
                 allTuvs.addAll(tu.getTuvs(false, p_jobId));
 
                 // Set tuId into its own Tuvs
-                for (Iterator tuvIter = tu.getTuvs(false, p_jobId).iterator(); tuvIter
-                        .hasNext();)
+                for (Iterator tuvIter = tu.getTuvs(false, p_jobId).iterator(); tuvIter.hasNext();)
                 {
                     TuvImpl tuv = (TuvImpl) tuvIter.next();
                     tuv.setTuId(tu.getId());
@@ -2001,8 +1917,7 @@ public class ExtractedFileImporter extends FileImporter
                 // Set tuId into its RemovedTags
                 if (tu.hasRemovedTags())
                 {
-                    for (Iterator tagIt1 = tu.getRemovedTags().iterator(); tagIt1
-                            .hasNext();)
+                    for (Iterator tagIt1 = tu.getRemovedTags().iterator(); tagIt1.hasNext();)
                     {
                         RemovedTag rt = (RemovedTag) tagIt1.next();
                         rt.setTuId(tu.getId());
@@ -2031,8 +1946,7 @@ public class ExtractedFileImporter extends FileImporter
                 Set<XliffAlt> xlfAlts = tuv.getXliffAlt(false);
                 if (xlfAlts != null && xlfAlts.size() > 0)
                 {
-                    for (Iterator<XliffAlt> xlfAltIter = xlfAlts.iterator(); xlfAltIter
-                            .hasNext();)
+                    for (Iterator<XliffAlt> xlfAltIter = xlfAlts.iterator(); xlfAltIter.hasNext();)
                     {
                         XliffAlt alt = (XliffAlt) xlfAltIter.next();
                         alt.setTuvId(tuv.getId());

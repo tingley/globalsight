@@ -16,23 +16,29 @@
  */
 package com.globalsight.connector.blaise.util;
 
+import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import org.apache.log4j.Logger;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.*;
 
 public class BlaiseManager
 {
-	private static final Logger logger = Logger.getLogger(BlaiseManager.class);
+    private static final Logger logger = Logger.getLogger(BlaiseManager.class);
 
     /**
      * Return all Blaise connectors.
@@ -55,7 +61,7 @@ public class BlaiseManager
     }
 
     /**
-     * Gets all  Blaise server connectors
+     * Gets all Blaise server connectors
      */
     public static List<?> getConnectors()
     {
@@ -125,11 +131,12 @@ public class BlaiseManager
     @SuppressWarnings("unchecked")
     public static List<BlaiseConnectorJob> getBlaiseConnectorJobByJobId(long jobId)
     {
-    	String hql = "from BlaiseConnectorJob bcj where bcj.jobId = " + jobId;
+        String hql = "from BlaiseConnectorJob bcj where bcj.jobId = " + jobId;
         return (List<BlaiseConnectorJob>) HibernateUtil.search(hql);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     public static BlaiseConnectorJob getBlaiseConnectorJobByJobIdEntryId(long jobId, long entryId)
     {
         String hql = "from BlaiseConnectorJob bcj where bcj.jobId = :jobId and bcj.blaiseEntryId = :blaiseEntryId";
@@ -139,30 +146,40 @@ public class BlaiseManager
         return (BlaiseConnectorJob) HibernateUtil.getFirst(hql, map);
     }
 
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
+    public static BlaiseConnectorJob getBlaiseConnectorJobByJobIdSourcePageId(long jobId,
+            long sourcePageId)
+    {
+        String hql = "from BlaiseConnectorJob bcj where bcj.jobId = :jobId and bcj.sourcePageId = :sourcePageId";
+        Map map = new HashMap();
+        map.put("jobId", jobId);
+        map.put("sourcePageId", sourcePageId);
+        return (BlaiseConnectorJob) HibernateUtil.getFirst(hql, map);
+    }
+
     public static Map<Long, List<Long>> getEntryId2JobIdsMap(List<Long> entryIds,
             long blaiseConnectorId) throws Exception
     {
-		Map<Long, List<Long>> entryId2JobIdsMap = new HashMap<Long, List<Long>>();
-		if (entryIds == null || entryIds.size() == 0)
-			return entryId2JobIdsMap;
+        Map<Long, List<Long>> entryId2JobIdsMap = new HashMap<Long, List<Long>>();
+        if (entryIds == null || entryIds.size() == 0)
+            return entryId2JobIdsMap;
 
-		String idStr = listToString(entryIds);
+        String idStr = listToString(entryIds);
 
-		Connection conn = null;
+        Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-		try
-		{
-			conn = DbUtil.getConnection();
-			String sql = "SELECT BLAISE_ENTRY_ID, JOB_ID "
-					+ " FROM connector_blaise_job "
-					+ " WHERE BLAISE_CONNECTOR_ID = ? "
-					+ " AND BLAISE_ENTRY_ID IN (" + idStr + ")"
-					+ " ORDER BY BLAISE_ENTRY_ID, JOB_ID";
+        try
+        {
+            conn = DbUtil.getConnection();
+            String sql = "SELECT BLAISE_ENTRY_ID, JOB_ID " + " FROM connector_blaise_job "
+                    + " WHERE BLAISE_CONNECTOR_ID = ? " + " AND BLAISE_ENTRY_ID IN (" + idStr + ")"
+                    + " ORDER BY BLAISE_ENTRY_ID, JOB_ID";
 
-			ps = conn.prepareStatement(sql);
-			ps.setLong(1, blaiseConnectorId);
-			rs = ps.executeQuery();
+            ps = conn.prepareStatement(sql);
+            ps.setLong(1, blaiseConnectorId);
+            rs = ps.executeQuery();
             while (rs.next())
             {
                 long entryId = rs.getLong(1);
@@ -188,26 +205,50 @@ public class BlaiseManager
             DbUtil.silentReturnConnection(conn);
         }
 
-		return entryId2JobIdsMap;
+        return entryId2JobIdsMap;
     }
 
-	public static String listToString(Set<Long> ids)
-	{
-		List<Long> idList = new ArrayList<Long>();
-		idList.addAll(ids);
-		return listToString(idList);
-	}
+    public static String listToString(Set<Long> ids)
+    {
+        List<Long> idList = new ArrayList<Long>();
+        idList.addAll(ids);
+        return listToString(idList);
+    }
 
-	public static String listToString(List<Long> ids)
-	{
-		if (ids == null || ids.size() == 0)
-			return "";
+    public static String listToString(List<Long> ids)
+    {
+        if (ids == null || ids.size() == 0)
+            return "";
 
-		StringBuilder result = new StringBuilder();
-		for (Long id : ids)
-		{
-			result.append(id).append(",");
-		}
-		return result.substring(0, result.length() - 1);
-	}
+        StringBuilder result = new StringBuilder();
+        for (Long id : ids)
+        {
+            result.append(id).append(",");
+        }
+        return result.substring(0, result.length() - 1);
+    }
+
+    /**
+     * Gets the blaise entry id from the source page file path.
+     * 
+     * @since GBS-4749
+     * 
+     */
+    public static long fetchBlaiseEntryIdFromExternalPageId(String externalPageId)
+    {
+        long blaiseEntryId = -1;
+        try
+        {
+            int startIndex = externalPageId.indexOf(File.separator);
+            startIndex = externalPageId.indexOf(File.separator, startIndex + 1);
+            int endIndex = externalPageId.indexOf(File.separator, startIndex + 1);
+            String id = externalPageId.substring(startIndex + 1, endIndex);
+            blaiseEntryId = Long.parseLong(id);
+        }
+        catch (Exception e)
+        {
+            blaiseEntryId = -1;
+        }
+        return blaiseEntryId;
+    }
 }

@@ -562,14 +562,15 @@ public class BlaiseHelper
     {
         String result = "";
         Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
         try
         {
             conn = DbUtil.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt
-                    .executeQuery("select attribute_id, attribute_value, attribute_type from "
-                            + "connector_blaise_attributes where connector_id=" + blcId + " and "
-                            + "blaise_job_type='" + blaiseJobType + "'");
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select attribute_id, attribute_value, attribute_type from "
+                    + "connector_blaise_attributes where connector_id=" + blcId + " and "
+                    + "blaise_job_type='" + blaiseJobType + "'");
             StringBuilder data = new StringBuilder();
             long attrId;
             String attrValue;
@@ -606,16 +607,9 @@ public class BlaiseHelper
         }
         finally
         {
-            if (conn != null)
-            {
-                try
-                {
-                    DbUtil.returnConnection(conn);
-                }
-                catch (Exception e)
-                {
-                }
-            }
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
         return result;
     }
@@ -893,7 +887,7 @@ public class BlaiseHelper
     {
         try
         {
-            if (!isEntryExisted(entryId))
+            if (!entryExists(entryId, jobId, true))
             {
                 return;
             }
@@ -901,11 +895,11 @@ public class BlaiseHelper
             TranslationAgencyClient client = getTranslationClient();
             if (client == null)
             {
-                logger.error("TranslationAgencyClient is null, entry cannot be uploaded. EntryId: "
-                        + entryId + ", jobId: " + jobId + ", fileName: " + file.getName());
+                logger.error("TranslationAgencyClient is null, entry cannot be uploaded. Entry "
+                        + entryId + ", job " + jobId + ", file " + file.getName());
                 blaiseConnectorLogger
-                        .error("TranslationAgencyClient is null, entry cannot be uploaded. EntryId: "
-                                + entryId + ", jobId: " + jobId + ", fileName: " + file.getName());
+                        .error("TranslationAgencyClient is null, entry cannot be uploaded. Entry "
+                                + entryId + ", job " + jobId + ", file " + file.getName());
                 return;
             }
 
@@ -920,21 +914,27 @@ public class BlaiseHelper
             FileUtil.writeFile(file, content, BlaiseConstants.ENCODING);
 
             InputStream is = new FileInputStream(file);
+            logger.info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
+            blaiseConnectorLogger
+                    .info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
             client.uploadXliff(entryId, is);
-            logger.info("Blaise file is uploaded successfully for entryId: " + entryId + ", jobId: "
-                    + jobId + ", fileName: " + file.getName());
-            blaiseConnectorLogger.info("Blaise file is uploaded successfully for entryId: "
-                    + entryId + ", jobId: " + jobId + ", fileName: " + file.getName());
+            logger.info("Blaise file is uploaded successfully for entry " + entryId + ", job "
+                    + jobId + ", file " + file.getName());
+            blaiseConnectorLogger.info("Blaise file is uploaded successfully for entry " + entryId
+                    + ", job " + jobId + ", file " + file.getName());
 
             updateUploadXliffSuccess(jobId, entryId);
         }
         catch (Exception e)
         {
+            logger.info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
+            blaiseConnectorLogger
+                    .info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
             updateUploadXliffFail(jobId, entryId);
-            logger.error("Error when uploadXliff for entryId: " + entryId + ", jobId: " + jobId
-                    + ", fileName: " + file.getName(), e);
-            blaiseConnectorLogger.error("Error when uploadXliff for entryId: " + entryId
-                    + ", jobId: " + jobId + ", fileName: " + file.getName(), e);
+            logger.error("Error when uploadXliff for entry " + entryId + ", job " + jobId
+                    + ", file " + file.getName(), e);
+            blaiseConnectorLogger.error("Error when uploadXliff for entry " + entryId + ", job "
+                    + jobId + ", file " + file.getName(), e);
         }
     }
 
@@ -964,7 +964,7 @@ public class BlaiseHelper
     {
         try
         {
-            if (!isEntryExisted(entryId))
+            if (!entryExists(entryId, jobId, false))
             {
                 return;
             }
@@ -972,24 +972,28 @@ public class BlaiseHelper
             TranslationAgencyClient client = getTranslationClient();
             if (client == null)
             {
-                logger.error("TranslationAgencyClient is null, entry cannot be completed. EntryId: "
-                        + entryId + ", jobId: " + jobId);
+                logger.error("TranslationAgencyClient is null, entry cannot be completed. Entry "
+                        + entryId + ", job " + jobId);
                 blaiseConnectorLogger
-                        .error("TranslationAgencyClient is null, entry cannot be completed. EntryId: "
-                                + entryId + ", jobId: " + jobId);
+                        .error("TranslationAgencyClient is null, entry cannot be completed. Entry "
+                                + entryId + ", job " + jobId);
                 return;
             }
 
+            logger.info("Called complete() for entry " + entryId + ", job " + jobId);
+            blaiseConnectorLogger.info("Called complete() for entry " + entryId + ", job " + jobId);
             client.complete(entryId);
-            logger.info("Blaise entry is completed successfully. EntryId: " + entryId + ", jobId: "
-                    + jobId);
-            blaiseConnectorLogger.info("Blaise entry is completed successfully. EntryId: " + entryId
-                    + ", jobId: " + jobId);
+            logger.info(
+                    "Blaise entry is completed successfully. Entry " + entryId + ", job " + jobId);
+            blaiseConnectorLogger.info(
+                    "Blaise entry is completed successfully. Entry " + entryId + ", job " + jobId);
 
             updateCompleteSuccess(jobId, entryId);
         }
         catch (Exception e)
         {
+            logger.info("Called complete() for entry " + entryId + ", job " + jobId);
+            blaiseConnectorLogger.info("Called complete() for entry " + entryId + ", job " + jobId);
             updateCompleteFail(jobId, entryId);
             logger.error("Failed to complete entry " + entryId + " for job: " + jobId, e);
             blaiseConnectorLogger
@@ -1019,19 +1023,32 @@ public class BlaiseHelper
         }
     }
 
-    public boolean isEntryExisted(long id)
+    private boolean entryExists(long entryId, long jobId, boolean isUpload)
     {
         Set<Long> ids = new HashSet<Long>();
-        ids.add(id);
+        ids.add(entryId);
 
         TranslationPageCommand command = initTranslationPageCommand(1, 100, null, null, null, null,
                 null, 0, false);
         List<TranslationInboxEntryVo> entries = listInboxByIds(ids, command);
         if (entries == null || entries.size() == 0)
         {
-            logger.warn("Entry " + id + " does not exist already, cannot operate on it.");
-            blaiseConnectorLogger
-                    .warn("Entry " + id + " does not exist already, cannot operate on it.");
+            if (isUpload)
+            {
+                logger.warn("Can not upload the entry as it does not exist any more. Entry "
+                        + entryId + ", job " + jobId);
+                blaiseConnectorLogger
+                        .warn("Can not upload the entry as it does not exist any more. Entry "
+                                + entryId + ", job " + jobId);
+            }
+            else
+            {
+                logger.warn("Can not complete the entry as it does not exist any more. Entry "
+                        + entryId + ", job " + jobId);
+                blaiseConnectorLogger
+                        .warn("Can not complete the entry as it does not exist any more. Entry "
+                                + entryId + ", job " + jobId);
+            }
             return false;
         }
 
@@ -1493,11 +1510,13 @@ public class BlaiseHelper
     {
         List<BlaiseConnectorAttribute> data = new ArrayList<>();
         Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
         try
         {
             conn = DbUtil.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(
                     "select * from connector_blaise_attributes where " + "connector_id=" + blcId);
             BlaiseConnectorAttribute attr = null;
             while (rs.next())
@@ -1511,7 +1530,6 @@ public class BlaiseHelper
                 attr.setBlaiseJobType(rs.getString("blaise_job_type"));
                 data.add(attr);
             }
-            stmt.close();
         }
         catch (Exception e)
         {
@@ -1519,14 +1537,9 @@ public class BlaiseHelper
         }
         finally
         {
-            if (conn != null)
-                try
-                {
-                    DbUtil.returnConnection(conn);
-                }
-                catch (Exception e)
-                {
-                }
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
         return data;
     }
@@ -1536,15 +1549,17 @@ public class BlaiseHelper
         if (attributes == null || attributes.size() == 0)
             return;
         Connection conn = null;
+        Statement stmt = null;
+        PreparedStatement pstmt = null;
         try
         {
             conn = DbUtil.getConnection();
             conn.setAutoCommit(false);
-            Statement stmt = conn.createStatement();
+            stmt = conn.createStatement();
             stmt.execute("delete from connector_blaise_attributes where connector_id="
                     + attributes.get(0).getBlaiseConnectorId());
 
-            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO "
+            pstmt = conn.prepareStatement("INSERT INTO "
                     + "connector_blaise_attributes (Connector_ID,Attribute_ID,Attribute_Value,"
                     + "Attribute_Type,Blaise_job_type) values (?, ?, ?, ?, ?)");
             for (BlaiseConnectorAttribute attribute : attributes)
@@ -1572,16 +1587,9 @@ public class BlaiseHelper
         }
         finally
         {
-            if (conn != null)
-            {
-                try
-                {
-                    DbUtil.returnConnection(conn);
-                }
-                catch (Exception e)
-                {
-                }
-            }
+            DbUtil.silentClose(pstmt);
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
     }
 

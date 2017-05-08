@@ -289,6 +289,33 @@ function editfileprofile(param)
 	<table class="standardText" cellpadding="3" cellspacing="0" style="width:900px;border:solid 1px slategray;">
 		<thead class="scroll">
 			<tr class="tableHeadingBasic" valign="bottom" width="100%">
+				<c:choose>
+				<c:when test="${isBlaiseJob}">
+				<td class="scroll" style="padding-left: 0px; padding-top: 2px; padding-bottom: 2px;width:50%;height:30px;text-align:left;">
+					<c:if test="${addCheckBox}"><input type="checkbox"  name="selectAll" id="selectAll" onclick="selectAll()"/></c:if>
+					<a class="sortHREFWhite" href="<%=jobSourceFilesURL%>&pageSearchParam=${pageSearchParam}&pageSort=0"><%=bundle.getString("lb_primary_source_files")%>
+						<%=pageNameSortArrow%>
+					</a>
+				</td>
+				<td class="scroll" style="padding:2 0;width:12%;text-align:left;white-space:nowrap"  >
+					<%=bundle.getString("lb_file_profile")%>
+				</td>
+				<td class="scroll" style="padding:2 0;width:5%;text-align:center;white-space:nowrap">
+					<a class="sortHREFWhite" href="<%=jobSourceFilesURL%>&pageSearchParam=${pageSearchParam}&pageSort=2"><%=bundle.getString("lb_source_word_count")%>
+						<%=wordCountSortArrow%>
+					</a>
+				</td>
+				<td class="scroll" style="padding:2 0;width:3%;text-align:center;white-space:nowrap">
+					<%=bundle.getString("lb_source")%>
+				</td>
+				<td class="scroll" style="padding:2 0;width:15%;text-align:center;white-space:nowrap">
+					<%=bundle.getString("lb_blaise_entry_id")%>
+				</td>
+				<td class="scroll" style="padding:2 0;width:15%;text-align:center;white-space:nowrap">
+					<%=bundle.getString("lb_blaise_state_upload_complete")%>
+				</td>
+				</c:when>
+				<c:otherwise>
 				<td class="scroll" style="padding-left: 0px; padding-top: 2px; padding-bottom: 2px;width:60%;height:30px;text-align:left;">
 					<c:if test="${addCheckBox}"><input type="checkbox"  name="selectAll" id="selectAll" onclick="selectAll()"/></c:if>
 					<a class="sortHREFWhite" href="<%=jobSourceFilesURL%>&pageSearchParam=${pageSearchParam}&pageSort=0"><%=bundle.getString("lb_primary_source_files")%>
@@ -306,6 +333,8 @@ function editfileprofile(param)
 				<td class="scroll" style="padding:2 0;width:8%;text-align:center;white-space:nowrap">
 					<%=bundle.getString("lb_source")%>
 				</td>
+				</c:otherwise>
+				</c:choose>
 			</tr>
 	    </thead>
 	    <tbody id="sourceFilesTbody">
@@ -386,6 +415,10 @@ function editfileprofile(param)
 					<td style="text-align:center">
 						<a href="${item.sourceLink}" target="_blank"><%=bundle.getString("lb_click_to_view")%></a>
 					</td>
+					<c:if test="${isBlaiseJob}">
+					<td style="text-align:center">${item.blaiseEntryId}</td>
+					<td style="text-align:center">${item.blaiseStateUploadComplete}</td>
+					</c:if>
 		    	</tr>
 		    </c:forEach>
 		    
@@ -460,10 +493,20 @@ function editfileprofile(param)
 	    		</td>
 	    	</tr>
 		</amb:permission>
+		<c:choose>
+		<c:when test="${isBlaiseJob}">
+		<tr style="padding:3 0;">
+			<td height="1" bgcolor="000000" colspan="6" style="padding:0;">
+			</td>
+		</tr>
+		</c:when>
+		<c:otherwise>
 		<tr style="padding:3 0;">
 			<td height="1" bgcolor="000000" colspan="4" style="padding:0;">
 			</td>
 		</tr>
+		</c:otherwise>
+		</c:choose>
 		<tr valign="top">
 			<td style="word-wrap: break-word;word-break:break-all;padding:0 3px">
 				<%=bundle.getString("lb_source_word_count_total")%>

@@ -20,47 +20,48 @@ import com.globalsight.everest.persistence.PersistentObject;
 
 public class BlaiseConnectorJob extends PersistentObject
 {
-	private static final long serialVersionUID = -933803792285804414L;
+    private static final long serialVersionUID = -933803792285804414L;
 
-	// Available values for "uploadXliffState" and "completeState".
-	public static String FAIL = "fail";
-	public static String SUCCEED = "succeed";
+    // Available values for "uploadXliffState" and "completeState".
+    public static String FAIL = "fail";
+    public static String SUCCEED = "succeed";
 
-	private long blaiseConnectorId;
-	private long blaiseEntryId;
+    private long blaiseConnectorId;
+    private long blaiseEntryId;
     private long jobId;
     private String uploadXliffState;
     private String completeState;
+    private long sourcePageId;
 
     public long getBlaiseConnectorId()
-	{
-		return blaiseConnectorId;
-	}
+    {
+        return blaiseConnectorId;
+    }
 
-	public void setBlaiseConnectorId(long blaiseConnectorId)
-	{
-		this.blaiseConnectorId = blaiseConnectorId;
-	}
+    public void setBlaiseConnectorId(long blaiseConnectorId)
+    {
+        this.blaiseConnectorId = blaiseConnectorId;
+    }
 
-	public long getBlaiseEntryId()
-	{
-		return blaiseEntryId;
-	}
+    public long getBlaiseEntryId()
+    {
+        return blaiseEntryId;
+    }
 
-	public void setBlaiseEntryId(long blaiseEntryId)
-	{
-		this.blaiseEntryId = blaiseEntryId;
-	}
+    public void setBlaiseEntryId(long blaiseEntryId)
+    {
+        this.blaiseEntryId = blaiseEntryId;
+    }
 
-	public void setJobId(long jobId)
-	{
-		this.jobId = jobId;
-	}
-	
-	public long getJobId()
-	{
-		return jobId;
-	}
+    public void setJobId(long jobId)
+    {
+        this.jobId = jobId;
+    }
+
+    public long getJobId()
+    {
+        return jobId;
+    }
 
     public String getUploadXliffState()
     {
@@ -80,5 +81,15 @@ public class BlaiseConnectorJob extends PersistentObject
     public void setCompleteState(String completeState)
     {
         this.completeState = completeState;
+    }
+
+    public long getSourcePageId()
+    {
+        return sourcePageId;
+    }
+
+    public void setSourcePageId(long sourcePageId)
+    {
+        this.sourcePageId = sourcePageId;
     }
 }

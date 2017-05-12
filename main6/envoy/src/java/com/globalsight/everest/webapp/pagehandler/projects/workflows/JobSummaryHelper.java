@@ -78,7 +78,7 @@ public class JobSummaryHelper
     private static final Logger CATEGORY = Logger.getLogger(JobSummaryHelper.class);
     protected static boolean s_isCostingEnabled = false;
     protected static boolean s_isRevenueEnabled = false;
-    
+
     static
     {
         try
@@ -89,10 +89,11 @@ public class JobSummaryHelper
         }
         catch (Throwable e)
         {
-            CATEGORY.error("JobSummaryHelper::invokeJobControlPage(): " + "Problem getting costing parameter from database.", e);
+            CATEGORY.error("JobSummaryHelper::invokeJobControlPage(): "
+                    + "Problem getting costing parameter from database.", e);
         }
     }
-    
+
     public boolean packJobSummaryInfoView(HttpServletRequest p_request,
             HttpServletResponse p_response, ServletContext p_context, Job job)
             throws EnvoyServletException, ServletException, IOException
@@ -102,13 +103,13 @@ public class JobSummaryHelper
             jobNotFound(p_request, p_response, p_context, job);
             return false;
         }
-		
+
         // check user permission for this job
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(PageHandler.SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(PageHandler.USER);
-        
+
         // 1. user can not be null
         if (user == null)
         {
@@ -127,58 +128,53 @@ public class JobSummaryHelper
                 return false;
             }
         }
-        
+
         packJobSummaryInfoView(p_request, job);
-        
+
         return true;
     }
-    
+
     private void packJobSummaryInfoView(HttpServletRequest p_request, Job job)
             throws EnvoyServletException
     {
-		HttpSession session = p_request.getSession(false);
-		List<Integer> priorityList = new ArrayList<Integer>();
-		priorityList.add(1);
-		priorityList.add(2);
-		priorityList.add(3);
-		priorityList.add(4);
-		priorityList.add(5);
-	
-		SessionManager sessionMgr = (SessionManager) session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-		Locale uiLocale = (Locale) session
-				.getAttribute(WebAppConstants.UILOCALE);
+        HttpSession session = p_request.getSession(false);
+        List<Integer> priorityList = new ArrayList<Integer>();
+        priorityList.add(1);
+        priorityList.add(2);
+        priorityList.add(3);
+        priorityList.add(4);
+        priorityList.add(5);
 
-		p_request.setAttribute("priorityList", priorityList);
-		p_request.setAttribute("Job", job);
-		p_request.setAttribute("jobId", job.getJobId());
-		p_request.setAttribute("dateCreated",
-				getDateCreated(session, uiLocale, job));
-		p_request.setAttribute("jobInitiator", getInitiatorUserName(job));
-		p_request.setAttribute("srcLocale", job.getSourceLocale()
-				.getDisplayName(uiLocale));
-		p_request.setAttribute("openSegmentCommentsCount",
-				getOpenSegmentCommentsCount(job, session));
-		p_request.setAttribute("closedSegmentCommentsCount",
-				getClosedSegmentCommentsCount(job, session));
-		p_request.setAttribute("isFinshedJob", isFinishedJob(job));
-		p_request.setAttribute("isCostingEnabled", s_isCostingEnabled);
-		p_request.setAttribute("jobCostsTabPermission",
-				getJobCostsTabPermission(session));
-		p_request.setAttribute("isPreviewPDF",
-				PreviewPDFHelper.isEnablePreviewPDF(job));
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
 
-		// Number of languages
+        p_request.setAttribute("priorityList", priorityList);
+        p_request.setAttribute("Job", job);
+        p_request.setAttribute("jobId", job.getJobId());
+        p_request.setAttribute("dateCreated", getDateCreated(session, uiLocale, job));
+        p_request.setAttribute("jobInitiator", getInitiatorUserName(job));
+        p_request.setAttribute("srcLocale", job.getSourceLocale().getDisplayName(uiLocale));
+        p_request.setAttribute("openSegmentCommentsCount",
+                getOpenSegmentCommentsCount(job, session));
+        p_request.setAttribute("closedSegmentCommentsCount",
+                getClosedSegmentCommentsCount(job, session));
+        p_request.setAttribute("isFinshedJob", isFinishedJob(job));
+        p_request.setAttribute("isCostingEnabled", s_isCostingEnabled);
+        p_request.setAttribute("jobCostsTabPermission", getJobCostsTabPermission(session));
+        p_request.setAttribute("isPreviewPDF", PreviewPDFHelper.isEnablePreviewPDF(job));
+
+        // Number of languages
         p_request.setAttribute("numberLanguages", job.getWorkflows().size());
         // total source wordcount
         List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
         int totalWord = 0;
-        if(workflows.size() > 0)
+        if (workflows.size() > 0)
         {
             totalWord = workflows.get(0).getTotalWordCount();
         }
         p_request.setAttribute("sourceWordCount", totalWord);
-        // Set extra info for PPTX and DOCX files (GBS-3373) 
+        // Set extra info for PPTX and DOCX files (GBS-3373)
         setPptxDocxInfo(job, p_request);
 
         if (job.isBlaiseJob())
@@ -192,9 +188,8 @@ public class JobSummaryHelper
         }
 
         // Edit Source page word counts and edit costs page needed
-		sessionMgr.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET,
-				job.getJobName());
-	}
+        sessionMgr.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET, job.getJobName());
+    }
 
     private void setPptxDocxInfo(Job job, HttpServletRequest p_request)
     {
@@ -210,37 +205,35 @@ public class JobSummaryHelper
         String eventFlowXml = null;
         List<SourcePage> sourcePages = (List<SourcePage>) job.getSourcePages();
         for (SourcePage sourcePage : sourcePages)
-		{
-			// m_externalPageId
-			externalPageId = sourcePage.getExternalPageId();
-			if (externalPageId.toLowerCase().endsWith("docx")
-					|| externalPageId.toLowerCase().endsWith("pptx"))
-			{
-				eventFlowXml = sourcePage.getRequest().getEventFlowXml();
-				String safeBaseFilename = getOffice2010SafeBaseFileName(eventFlowXml);
-				if (StringUtil.isNotEmpty(safeBaseFilename)
-						&& !handledSafeBaseFiles.contains(safeBaseFilename))
-				{
-					if (externalPageId.toLowerCase().endsWith("docx"))
-					{
-						numPagesDocx += getPageCount(safeBaseFilename,
-								soureLocale, "docx");
-						countDocx++;
-					}
-					else if (externalPageId.toLowerCase().endsWith("pptx"))
-					{
-						numPagesPptx += getPageCount(safeBaseFilename,
-								soureLocale, "pptx");
-						countPptx++;
-					}
-				}
+        {
+            // m_externalPageId
+            externalPageId = sourcePage.getExternalPageId();
+            if (externalPageId.toLowerCase().endsWith("docx")
+                    || externalPageId.toLowerCase().endsWith("pptx"))
+            {
+                eventFlowXml = sourcePage.getRequest().getEventFlowXml();
+                String safeBaseFilename = getOffice2010SafeBaseFileName(eventFlowXml);
+                if (StringUtil.isNotEmpty(safeBaseFilename)
+                        && !handledSafeBaseFiles.contains(safeBaseFilename))
+                {
+                    if (externalPageId.toLowerCase().endsWith("docx"))
+                    {
+                        numPagesDocx += getPageCount(safeBaseFilename, soureLocale, "docx");
+                        countDocx++;
+                    }
+                    else if (externalPageId.toLowerCase().endsWith("pptx"))
+                    {
+                        numPagesPptx += getPageCount(safeBaseFilename, soureLocale, "pptx");
+                        countPptx++;
+                    }
+                }
 
-				if (StringUtil.isNotEmpty(safeBaseFilename))
-				{
-					handledSafeBaseFiles.add(safeBaseFilename);
-				}
-			}
-		}
+                if (StringUtil.isNotEmpty(safeBaseFilename))
+                {
+                    handledSafeBaseFiles.add(safeBaseFilename);
+                }
+            }
+        }
 
         p_request.setAttribute("numPagesDocx", numPagesDocx);
         p_request.setAttribute("numPagesPptx", numPagesPptx);
@@ -254,22 +247,20 @@ public class JobSummaryHelper
         String safeBaseFileName = null;
         try
         {
-			if (StringUtil.isNotEmpty(eventFlowXml))
-			{
-				evenFlowXmlParser.parse(eventFlowXml);
-				Element category = evenFlowXmlParser
-						.getCategory("OfficeXmlAdapter");
-				if (category != null)
-				{
-					String[] safeBaseFileNames = evenFlowXmlParser
-							.getCategoryDaValue(category, "safeBaseFileName");
-					if (safeBaseFileNames != null
-							&& safeBaseFileNames.length == 1)
-					{
-						safeBaseFileName = safeBaseFileNames[0];
-					}
-				}
-			}
+            if (StringUtil.isNotEmpty(eventFlowXml))
+            {
+                evenFlowXmlParser.parse(eventFlowXml);
+                Element category = evenFlowXmlParser.getCategory("OfficeXmlAdapter");
+                if (category != null)
+                {
+                    String[] safeBaseFileNames = evenFlowXmlParser.getCategoryDaValue(category,
+                            "safeBaseFileName");
+                    if (safeBaseFileNames != null && safeBaseFileNames.length == 1)
+                    {
+                        safeBaseFileName = safeBaseFileNames[0];
+                    }
+                }
+            }
         }
         catch (Exception ignore)
         {
@@ -281,35 +272,34 @@ public class JobSummaryHelper
 
     /**
      * Docx and pptx files to get a number of pages
+     * 
      * @param map
      * @param job
-     * */
-    public int getPageCount(String safeBaseFilename, String soureLocale,
-            String fileType)
+     */
+    public int getPageCount(String safeBaseFilename, String soureLocale, String fileType)
     {
-        File appXmlFile = getOffice2010AppXmlFile(safeBaseFilename, soureLocale,fileType);
+        File appXmlFile = getOffice2010AppXmlFile(safeBaseFilename, soureLocale, fileType);
 
         String appXmlFileContent = readOffice2010AppXmlFile(appXmlFile);
 
         return getInfoFromAppXml(appXmlFileContent, fileType);
     }
 
-	/**
-	 * Get the "app.xml" file object.
-	 * @param safeBaseFileName
-	 * @param soureLocale
-	 * @return File
-	 */
-    private File getOffice2010AppXmlFile(String safeBaseFileName,
-            String soureLocale,String fileType)
+    /**
+     * Get the "app.xml" file object.
+     * 
+     * @param safeBaseFileName
+     * @param soureLocale
+     * @return File
+     */
+    private File getOffice2010AppXmlFile(String safeBaseFileName, String soureLocale,
+            String fileType)
     {
         StringBuffer soureLocalePath = new StringBuffer();
         // Get the storage dir for company base on the parameter p_companyId
-        soureLocalePath
-                .append(AmbFileStoragePathUtils.getFileStorageDirPath(1))
-                .append(File.separator).append("OfficeXml-Conv")
-                .append(File.separator).append(soureLocale)
-                .append(File.separator);
+        soureLocalePath.append(AmbFileStoragePathUtils.getFileStorageDirPath(1))
+                .append(File.separator).append("OfficeXml-Conv").append(File.separator)
+                .append(soureLocale).append(File.separator);
 
         StringBuffer appXmlPath = new StringBuffer();
         StringBuilder path = new StringBuilder();
@@ -318,11 +308,11 @@ public class JobSummaryHelper
         path.append(".");
         if ("docx".equals(fileType))
         {
-           path.append(OfficeXmlHelper.OFFICE_DOCX);
+            path.append(OfficeXmlHelper.OFFICE_DOCX);
         }
         else if ("pptx".equals(fileType))
         {
-           path.append(OfficeXmlHelper.OFFICE_PPTX);
+            path.append(OfficeXmlHelper.OFFICE_PPTX);
         }
         File file = new File(path.toString());
         if (file.exists() && file.isDirectory())
@@ -334,8 +324,8 @@ public class JobSummaryHelper
             return null;
         }
 
-        appXmlPath.append(File.separator).append("docProps")
-                .append(File.separator).append("app.xml");
+        appXmlPath.append(File.separator).append("docProps").append(File.separator)
+                .append("app.xml");
         File appXmlFile = new File(appXmlPath.toString());
         if (appXmlFile.exists() && appXmlFile.isFile())
             return appXmlFile;
@@ -345,23 +335,22 @@ public class JobSummaryHelper
 
     private String readOffice2010AppXmlFile(File appXmlFile)
     {
-		if (appXmlFile == null || !appXmlFile.exists()
-				|| appXmlFile.isDirectory())
-			return null;
+        if (appXmlFile == null || !appXmlFile.exists() || appXmlFile.isDirectory())
+            return null;
 
         StringBuffer appXml = new StringBuffer();
         BufferedReader reader = null;
         try
         {
             reader = new BufferedReader(new FileReader(appXmlFile));
-			if (reader != null)
-			{
-				String tempString = null;
-				while ((tempString = reader.readLine()) != null)
-				{
-					appXml.append(tempString);
-				}
-			}
+            if (reader != null)
+            {
+                String tempString = null;
+                while ((tempString = reader.readLine()) != null)
+                {
+                    appXml.append(tempString);
+                }
+            }
             reader.close();
         }
         catch (Exception e)
@@ -375,41 +364,37 @@ public class JobSummaryHelper
     private int getInfoFromAppXml(String appXml, String fileType)
     {
         try
-		{
-			if (StringUtil.isEmpty(appXml))
-				return 0;
-			StringReader sr = new StringReader(appXml);
-			InputSource is = new InputSource(sr);
-			DOMParser parser = new DOMParser();
-			String numStr = null;
-			parser.setFeature("http://xml.org/sax/features/validation", false);
-			parser.parse(is);
-			Element rootElement = parser.getDocument().getDocumentElement();
-			if (fileType.equals("pptx"))
-			{
-				NodeList slidesNodeList = rootElement
-						.getElementsByTagName("Slides");
-				if (slidesNodeList != null && slidesNodeList.getLength() > 0)
-				{
-					numStr = slidesNodeList.item(0).getFirstChild()
-							.getNodeValue();
-				}
-			}
-			else if (fileType.equals("docx"))
-			{
-				NodeList pagesNodeList = rootElement
-						.getElementsByTagName("Pages");
-				if (pagesNodeList != null && pagesNodeList.getLength() > 0)
-				{
-					numStr = pagesNodeList.item(0).getFirstChild()
-							.getNodeValue();
-				}
-			}
-			if (StringUtil.isNotEmpty(numStr))
-			{
-				return Integer.parseInt(numStr);
-			}
-		}
+        {
+            if (StringUtil.isEmpty(appXml))
+                return 0;
+            StringReader sr = new StringReader(appXml);
+            InputSource is = new InputSource(sr);
+            DOMParser parser = new DOMParser();
+            String numStr = null;
+            parser.setFeature("http://xml.org/sax/features/validation", false);
+            parser.parse(is);
+            Element rootElement = parser.getDocument().getDocumentElement();
+            if (fileType.equals("pptx"))
+            {
+                NodeList slidesNodeList = rootElement.getElementsByTagName("Slides");
+                if (slidesNodeList != null && slidesNodeList.getLength() > 0)
+                {
+                    numStr = slidesNodeList.item(0).getFirstChild().getNodeValue();
+                }
+            }
+            else if (fileType.equals("docx"))
+            {
+                NodeList pagesNodeList = rootElement.getElementsByTagName("Pages");
+                if (pagesNodeList != null && pagesNodeList.getLength() > 0)
+                {
+                    numStr = pagesNodeList.item(0).getFirstChild().getNodeValue();
+                }
+            }
+            if (StringUtil.isNotEmpty(numStr))
+            {
+                return Integer.parseInt(numStr);
+            }
+        }
         catch (Exception e)
         {
             CATEGORY.error(e);
@@ -417,24 +402,24 @@ public class JobSummaryHelper
 
         return 0;
     }
-	
+
     public Job getJobByRequest(HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        Job job = WorkflowHandlerHelper.getJobById(getJobId(p_request,
-                sessionMgr));
+        Job job = WorkflowHandlerHelper.getJobById(getJobId(p_request, sessionMgr));
 
         // Comment Page will retrieve it,but I don't know it's reason since now.
         TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT, job);
         return job;
     }
-    
+
     private String getDateCreated(HttpSession session, Locale uiLocale, Job job)
     {
         TimeZone timeZone = (TimeZone) session.getAttribute(WebAppConstants.USER_TIME_ZONE);
-        String dateCreated = DateHelper.getFormattedDateAndTime(job.getCreateDate(),uiLocale, timeZone);
+        String dateCreated = DateHelper.getFormattedDateAndTime(job.getCreateDate(), uiLocale,
+                timeZone);
         return dateCreated;
     }
 
@@ -447,9 +432,9 @@ public class JobSummaryHelper
         }
         return initiator.getUserName();
     }
-    
-    public void jobNotFound(HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context, Job job)
+
+    public void jobNotFound(HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context, Job job)
             throws ServletException, IOException, EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
@@ -460,8 +445,7 @@ public class JobSummaryHelper
         String jobname = null;
         if (job == null)
         {
-            jobname = Long.toString(getJobId(p_request,
-                    sessionMgr));
+            jobname = Long.toString(getJobId(p_request, sessionMgr));
         }
         else
         {
@@ -473,34 +457,39 @@ public class JobSummaryHelper
             CookieUtil.removeMRU(p_request, p_response, session,
                     job.getId() + ":" + job.getJobName(), cookieName, JobSearchConstants.MRU_JOBS);
         }
-        p_request.setAttribute("badresults", bundle.getString("lb_job") + " "
-                + jobname + " " + bundle.getString("msg_cannot_be_found"));
+        p_request.setAttribute("badresults", bundle.getString("lb_job") + " " + jobname + " "
+                + bundle.getString("msg_cannot_be_found"));
         // forward to the jsp page.
-        sessionMgr.setMyjobsAttribute("badresults", bundle.getString("lb_job") + " "
-                + jobname + " " + bundle.getString("msg_cannot_be_found"));
-        String targetState = (String)sessionMgr.getMyjobsAttribute("lastState");
-        if(Job.PENDING.equals(targetState))
-        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=jobsPending&searchType=stateOnly");
-        else if(Job.READY_TO_BE_DISPATCHED.equals(targetState))
-        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=jobsReady&searchType=stateOnly");
-        else if(Job.DISPATCHED.equals(targetState))
-        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=jobsInProgress&searchType=stateOnly");
-        else if(Job.LOCALIZED.equals(targetState))
-        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=jobsLocalized&searchType=stateOnly");
-        else if(Job.EXPORTED.equals(targetState))
-        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=jobsExported&searchType=stateOnly");
-        else if(Job.ARCHIVED.equals(targetState))
-        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=jobsArchived&searchType=stateOnly");
+        sessionMgr.setMyjobsAttribute("badresults", bundle.getString("lb_job") + " " + jobname + " "
+                + bundle.getString("msg_cannot_be_found"));
+        String targetState = (String) sessionMgr.getMyjobsAttribute("lastState");
+        if (Job.PENDING.equals(targetState))
+            p_response.sendRedirect(
+                    "/globalsight/ControlServlet?activityName=jobsPending&searchType=stateOnly");
+        else if (Job.READY_TO_BE_DISPATCHED.equals(targetState))
+            p_response.sendRedirect(
+                    "/globalsight/ControlServlet?activityName=jobsReady&searchType=stateOnly");
+        else if (Job.DISPATCHED.equals(targetState))
+            p_response.sendRedirect(
+                    "/globalsight/ControlServlet?activityName=jobsInProgress&searchType=stateOnly");
+        else if (Job.LOCALIZED.equals(targetState))
+            p_response.sendRedirect(
+                    "/globalsight/ControlServlet?activityName=jobsLocalized&searchType=stateOnly");
+        else if (Job.EXPORTED.equals(targetState))
+            p_response.sendRedirect(
+                    "/globalsight/ControlServlet?activityName=jobsExported&searchType=stateOnly");
+        else if (Job.ARCHIVED.equals(targetState))
+            p_response.sendRedirect(
+                    "/globalsight/ControlServlet?activityName=jobsArchived&searchType=stateOnly");
         else
-        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=jobsAll&searchType=stateOnly");
+            p_response.sendRedirect(
+                    "/globalsight/ControlServlet?activityName=jobsAll&searchType=stateOnly");
     }
-    
-    
+
     /**
      * Returns the id of the job that an action is being performed on.
      */
-    protected long getJobId(HttpServletRequest p_request,
-            SessionManager p_sessionMgr)
+    protected long getJobId(HttpServletRequest p_request, SessionManager p_sessionMgr)
     {
         long jobId = 0;
         // Get the jobId from the sessionMgr if it's not in the request.
@@ -535,8 +524,9 @@ public class JobSummaryHelper
         }
         return jobId;
     }
-    
-    private int getOpenSegmentCommentsCount(Job job,HttpSession session){
+
+    private int getOpenSegmentCommentsCount(Job job, HttpSession session)
+    {
         int openSegmentCount = 0;
         List<String> oStates = new ArrayList<String>();
         oStates.add(Issue.STATUS_OPEN);
@@ -545,17 +535,18 @@ public class JobSummaryHelper
         openSegmentCount = getSegmentCommentsCount(job, session, oStates);
         return openSegmentCount;
     }
-    
-    private int getClosedSegmentCommentsCount(Job job,HttpSession session){
+
+    private int getClosedSegmentCommentsCount(Job job, HttpSession session)
+    {
         int closedSegmentCount = 0;
         List<String> cStates = new ArrayList<String>();
         cStates.add(Issue.STATUS_CLOSED);
         closedSegmentCount = getSegmentCommentsCount(job, session, cStates);
         return closedSegmentCount;
     }
-    
-    private int getSegmentCommentsCount(Job job, HttpSession session,
-            List<String> states) throws EnvoyServletException
+
+    private int getSegmentCommentsCount(Job job, HttpSession session, List<String> states)
+            throws EnvoyServletException
     {
         Set<Long> targetPageIds = getTargetPageIdsByJob(job.getId());
         if (targetPageIds.size() == 0)
@@ -566,8 +557,8 @@ public class JobSummaryHelper
         try
         {
             CommentManager manager = ServerProxy.getCommentManager();
-            return manager.getIssueCount(Issue.TYPE_SEGMENT,
-                    new ArrayList<Long>(targetPageIds), states);
+            return manager.getIssueCount(Issue.TYPE_SEGMENT, new ArrayList<Long>(targetPageIds),
+                    states);
         }
         catch (Exception ex)
         {
@@ -587,10 +578,9 @@ public class JobSummaryHelper
         try
         {
             String sql = "SELECT DISTINCT tp.ID FROM target_page tp, workflow wf "
-                        + " WHERE wf.IFLOW_INSTANCE_ID = tp.WORKFLOW_IFLOW_INSTANCE_ID "
-                        + " AND wf.STATE != 'CANCELLED' "
-                        + " AND tp.STATE != 'IMPORT_FAIL' "
-                        + " AND wf.JOB_ID = ?";
+                    + " WHERE wf.IFLOW_INSTANCE_ID = tp.WORKFLOW_IFLOW_INSTANCE_ID "
+                    + " AND wf.STATE != 'CANCELLED' " + " AND tp.STATE != 'IMPORT_FAIL' "
+                    + " AND wf.JOB_ID = ?";
             con = DbUtil.getConnection();
             ps = con.prepareStatement(sql);
             ps.setLong(1, jobId);
@@ -603,7 +593,7 @@ public class JobSummaryHelper
         }
         catch (Exception e)
         {
-            
+
         }
         finally
         {
@@ -617,34 +607,33 @@ public class JobSummaryHelper
 
     private boolean isFinishedJob(Job job)
     {
-        if (Job.EXPORTED.equals(job.getState()) || 
-           Job.EXPORT_FAIL.equals(job.getState()) ||
-           Job.LOCALIZED.equals(job.getState()) || 
-           Job.ARCHIVED.equals(job.getState()))
+        if (Job.EXPORTED.equals(job.getState()) || Job.EXPORT_FAIL.equals(job.getState())
+                || Job.LOCALIZED.equals(job.getState()) || Job.ARCHIVED.equals(job.getState()))
         {
             return true;
         }
-        else 
+        else
         {
             return false;
         }
     }
-    
-    private boolean getJobCostsTabPermission(HttpSession session){
+
+    private boolean getJobCostsTabPermission(HttpSession session)
+    {
         PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
         boolean jobCostingView = perms.getPermissionFor(Permission.JOB_COSTING_VIEW);
         boolean jobQuoteSend = perms.getPermissionFor(Permission.JOB_QUOTE_SEND);
         boolean jobQuotePonumberView = perms.getPermissionFor(Permission.JOB_QUOTE_PONUMBER_VIEW);
         boolean jobQuoteApprove = perms.getPermissionFor(Permission.JOB_QUOTE_APPROVE);
         boolean jobQuoteStatusView = perms.getPermissionFor(Permission.JOB_QUOTE_STATUS_VIEW);
-        
-        return jobCostingView || jobQuoteSend || jobQuotePonumberView || jobQuoteApprove || jobQuoteStatusView;
+
+        return jobCostingView || jobQuoteSend || jobQuotePonumberView || jobQuoteApprove
+                || jobQuoteStatusView;
     }
 
     /**
-     * 1. One fail, all fail;
-     * 2. One null, all null;
-     * 3. All succeed, then succeed;
+     * 1. One fail, all fail; 2. One null, all null; 3. All succeed, then
+     * succeed;
      */
     private String decideBlaiseUploadState(List<BlaiseConnectorJob> blaiseJobEntries)
     {
@@ -672,7 +661,8 @@ public class JobSummaryHelper
     {
         for (BlaiseConnectorJob bcj : blaiseJobEntries)
         {
-            if (BlaiseConnectorJob.FAIL.equalsIgnoreCase(bcj.getUploadXliffState()))
+            String state = bcj.getUploadXliffState();
+            if (state != null && state.startsWith(BlaiseConnectorJob.FAIL))
             {
                 return true;
             }
@@ -694,9 +684,8 @@ public class JobSummaryHelper
     }
 
     /**
-     * 1. One fail, all fail;
-     * 2. One null, all null;
-     * 3. All succeed, then succeed;
+     * 1. One fail, all fail; 2. One null, all null; 3. All succeed, then
+     * succeed;
      */
     private String decideBlaiseCompleteState(List<BlaiseConnectorJob> blaiseJobEntries)
     {
@@ -724,7 +713,8 @@ public class JobSummaryHelper
     {
         for (BlaiseConnectorJob bcj : blaiseJobEntries)
         {
-            if (BlaiseConnectorJob.FAIL.equalsIgnoreCase(bcj.getCompleteState()))
+            String state = bcj.getCompleteState();
+            if (state != null && state.startsWith(BlaiseConnectorJob.FAIL))
             {
                 return true;
             }

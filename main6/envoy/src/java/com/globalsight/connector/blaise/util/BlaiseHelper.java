@@ -111,6 +111,8 @@ public class BlaiseHelper
     public static final SortedMap<String, String> relatedObjectClassName2Type = new TreeMap<String, String>();
     public static final SortedMap<String, String> type2RelatedObjectClassName = new TreeMap<String, String>();
 
+    private static Object LOCKER = new Object();
+
     static
     {
         java.util.Locale javaLocale = null;
@@ -885,145 +887,172 @@ public class BlaiseHelper
 
     public void uploadXliff(long entryId, File file, long jobId)
     {
-        try
+        synchronized (LOCKER)
         {
-            if (!entryExists(entryId, jobId, true))
+            try
             {
-                return;
-            }
+                if (!entryExists(entryId, jobId))
+                {
+                    logger.info("Blaise entry: " + entryId + ", job " + jobId
+                            + " is already closed. Set upload state to '"
+                            + BlaiseConnectorJob.SUCCEED_CLOSED + "'");
+                    blaiseConnectorLogger.info("Blaise entry: " + entryId + ", job " + jobId
+                            + " is already closed. Set upload state to '"
+                            + BlaiseConnectorJob.SUCCEED_CLOSED + "'");
+                    updateUploadXliffState(jobId, entryId, BlaiseConnectorJob.SUCCEED_CLOSED);
+                    return;
+                }
 
-            TranslationAgencyClient client = getTranslationClient();
-            if (client == null)
-            {
-                logger.error("TranslationAgencyClient is null, entry cannot be uploaded. Entry "
-                        + entryId + ", job " + jobId + ", file " + file.getName());
+                TranslationAgencyClient client = getTranslationClient();
+                if (client == null)
+                {
+                    logger.error("TranslationAgencyClient is null, entry cannot be uploaded. Entry "
+                            + entryId + ", job " + jobId + ", file " + file.getName());
+                    blaiseConnectorLogger
+                            .error("TranslationAgencyClient is null, entry cannot be uploaded. Entry "
+                                    + entryId + ", job " + jobId + ", file " + file.getName());
+                    return;
+                }
+
+                // A simple replace to "cheat" Blaise API
+                String content = FileUtil.readFile(file, BlaiseConstants.ENCODING);
+                content = StringUtil.replace(content, "<target state=\"new\"",
+                        "<target state=\"translated\"");
+                content = StringUtil.replace(content, "<target state=\"needs-review-translation\"",
+                        "<target state=\"translated\"");
+                content = StringUtil.replace(content, "<target state=\"needs-i10n\"",
+                        "<target state=\"translated\"");
+                FileUtil.writeFile(file, content, BlaiseConstants.ENCODING);
+
+                InputStream is = new FileInputStream(file);
+                logger.info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
                 blaiseConnectorLogger
-                        .error("TranslationAgencyClient is null, entry cannot be uploaded. Entry "
-                                + entryId + ", job " + jobId + ", file " + file.getName());
-                return;
+                        .info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
+                client.uploadXliff(entryId, is);
+                logger.info("Blaise file is uploaded successfully for entry " + entryId + ", job "
+                        + jobId + ", file " + file.getName());
+                blaiseConnectorLogger.info("Blaise file is uploaded successfully for entry "
+                        + entryId + ", job " + jobId + ", file " + file.getName());
+
+                updateUploadXliffSuccess(jobId, entryId);
             }
-
-            // A simple replace to "cheat" Blaise API
-            String content = FileUtil.readFile(file, BlaiseConstants.ENCODING);
-            content = StringUtil.replace(content, "<target state=\"new\"",
-                    "<target state=\"translated\"");
-            content = StringUtil.replace(content, "<target state=\"needs-review-translation\"",
-                    "<target state=\"translated\"");
-            content = StringUtil.replace(content, "<target state=\"needs-i10n\"",
-                    "<target state=\"translated\"");
-            FileUtil.writeFile(file, content, BlaiseConstants.ENCODING);
-
-            InputStream is = new FileInputStream(file);
-            logger.info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
-            blaiseConnectorLogger
-                    .info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
-            client.uploadXliff(entryId, is);
-            logger.info("Blaise file is uploaded successfully for entry " + entryId + ", job "
-                    + jobId + ", file " + file.getName());
-            blaiseConnectorLogger.info("Blaise file is uploaded successfully for entry " + entryId
-                    + ", job " + jobId + ", file " + file.getName());
-
-            updateUploadXliffSuccess(jobId, entryId);
+            catch (Exception e)
+            {
+                String errorMsg = e.toString();
+                if (errorMsg.contains("Unexpected response status: 500"))
+                {
+                    updateUploadXliffState(jobId, entryId, BlaiseConnectorJob.FAIL_500);
+                }
+                else if (errorMsg.contains("com.cognitran.core.service.ValidationException"))
+                {
+                    updateUploadXliffState(jobId, entryId, BlaiseConnectorJob.FAIL_VALIDATION);
+                }
+                else
+                {
+                    updateUploadXliffFail(jobId, entryId);
+                }
+                logger.error("Error when uploadXliff for entry " + entryId + ", job " + jobId
+                        + ", file " + file.getName(), e);
+                blaiseConnectorLogger.error("Error when uploadXliff for entry " + entryId + ", job "
+                        + jobId + ", file " + file.getName(), e);
+            }
         }
-        catch (Exception e)
+    }
+
+    private void updateUploadXliffState(long jobId, long blaiseEntryId, String state)
+    {
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
+                blaiseEntryId);
+        if (bcj != null)
         {
-            logger.info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
-            blaiseConnectorLogger
-                    .info("Called uploadXliff() for entry " + entryId + ", job " + jobId);
-            updateUploadXliffFail(jobId, entryId);
-            logger.error("Error when uploadXliff for entry " + entryId + ", job " + jobId
-                    + ", file " + file.getName(), e);
-            blaiseConnectorLogger.error("Error when uploadXliff for entry " + entryId + ", job "
-                    + jobId + ", file " + file.getName(), e);
+            bcj.setUploadXliffState(state);
+            HibernateUtil.saveOrUpdate(bcj);
         }
     }
 
     private void updateUploadXliffSuccess(long jobId, long blaiseEntryId)
     {
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
-                blaiseEntryId);
-        if (bcj != null)
-        {
-            bcj.setUploadXliffState(BlaiseConnectorJob.SUCCEED);
-            HibernateUtil.saveOrUpdate(bcj);
-        }
+        updateUploadXliffState(jobId, blaiseEntryId, BlaiseConnectorJob.SUCCEED);
     }
 
     private void updateUploadXliffFail(long jobId, long blaiseEntryId)
     {
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
-                blaiseEntryId);
-        if (bcj != null)
-        {
-            bcj.setUploadXliffState(BlaiseConnectorJob.FAIL);
-            HibernateUtil.saveOrUpdate(bcj);
-        }
+        updateUploadXliffState(jobId, blaiseEntryId, BlaiseConnectorJob.FAIL);
     }
 
     public void complete(long entryId, long jobId)
     {
-        try
+        synchronized (LOCKER)
         {
-            if (!entryExists(entryId, jobId, false))
+            try
             {
-                return;
-            }
+                if (!entryExists(entryId, jobId))
+                {
+                    logger.info("Blaise entry: " + entryId + ", job " + jobId
+                            + " is already closed. Set complete state to '"
+                            + BlaiseConnectorJob.SUCCEED_CLOSED + "'");
+                    blaiseConnectorLogger.info("Blaise entry: " + entryId + ", job " + jobId
+                            + " is already closed. Set complete state to '"
+                            + BlaiseConnectorJob.SUCCEED_CLOSED + "'");
+                    updateCompleteState(jobId, entryId, BlaiseConnectorJob.SUCCEED_CLOSED);
+                    return;
+                }
 
-            TranslationAgencyClient client = getTranslationClient();
-            if (client == null)
-            {
-                logger.error("TranslationAgencyClient is null, entry cannot be completed. Entry "
-                        + entryId + ", job " + jobId);
+                TranslationAgencyClient client = getTranslationClient();
+                if (client == null)
+                {
+                    logger.error(
+                            "TranslationAgencyClient is null, entry cannot be completed. Entry "
+                                    + entryId + ", job " + jobId);
+                    blaiseConnectorLogger
+                            .error("TranslationAgencyClient is null, entry cannot be completed. Entry "
+                                    + entryId + ", job " + jobId);
+                    return;
+                }
+
+                logger.info("Called complete() for entry " + entryId + ", job " + jobId);
                 blaiseConnectorLogger
-                        .error("TranslationAgencyClient is null, entry cannot be completed. Entry "
-                                + entryId + ", job " + jobId);
-                return;
+                        .info("Called complete() for entry " + entryId + ", job " + jobId);
+                client.complete(entryId);
+                logger.info("Blaise entry is completed successfully. Entry " + entryId + ", job "
+                        + jobId);
+                blaiseConnectorLogger.info("Blaise entry is completed successfully. Entry "
+                        + entryId + ", job " + jobId);
+
+                updateCompleteSuccess(jobId, entryId);
             }
-
-            logger.info("Called complete() for entry " + entryId + ", job " + jobId);
-            blaiseConnectorLogger.info("Called complete() for entry " + entryId + ", job " + jobId);
-            client.complete(entryId);
-            logger.info(
-                    "Blaise entry is completed successfully. Entry " + entryId + ", job " + jobId);
-            blaiseConnectorLogger.info(
-                    "Blaise entry is completed successfully. Entry " + entryId + ", job " + jobId);
-
-            updateCompleteSuccess(jobId, entryId);
+            catch (Exception e)
+            {
+                updateCompleteFail(jobId, entryId);
+                logger.error("Failed to complete entry " + entryId + " for job: " + jobId, e);
+                blaiseConnectorLogger
+                        .error("Failed to complete entry " + entryId + " for job: " + jobId, e);
+            }
         }
-        catch (Exception e)
+    }
+
+    private void updateCompleteState(long jobId, long blaiseEntryId, String state)
+    {
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
+                blaiseEntryId);
+        if (bcj != null)
         {
-            logger.info("Called complete() for entry " + entryId + ", job " + jobId);
-            blaiseConnectorLogger.info("Called complete() for entry " + entryId + ", job " + jobId);
-            updateCompleteFail(jobId, entryId);
-            logger.error("Failed to complete entry " + entryId + " for job: " + jobId, e);
-            blaiseConnectorLogger
-                    .error("Failed to complete entry " + entryId + " for job: " + jobId, e);
+            bcj.setCompleteState(state);
+            HibernateUtil.saveOrUpdate(bcj);
         }
     }
 
     private void updateCompleteSuccess(long jobId, long blaiseEntryId)
     {
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
-                blaiseEntryId);
-        if (bcj != null)
-        {
-            bcj.setCompleteState(BlaiseConnectorJob.SUCCEED);
-            HibernateUtil.saveOrUpdate(bcj);
-        }
+        updateCompleteState(jobId, blaiseEntryId, BlaiseConnectorJob.SUCCEED);
     }
 
     private void updateCompleteFail(long jobId, long blaiseEntryId)
     {
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
-                blaiseEntryId);
-        if (bcj != null)
-        {
-            bcj.setCompleteState(BlaiseConnectorJob.FAIL);
-            HibernateUtil.saveOrUpdate(bcj);
-        }
+        updateCompleteState(jobId, blaiseEntryId, BlaiseConnectorJob.FAIL);
     }
 
-    private boolean entryExists(long entryId, long jobId, boolean isUpload)
+    private boolean entryExists(long entryId, long jobId)
     {
         Set<Long> ids = new HashSet<Long>();
         ids.add(entryId);
@@ -1033,22 +1062,6 @@ public class BlaiseHelper
         List<TranslationInboxEntryVo> entries = listInboxByIds(ids, command);
         if (entries == null || entries.size() == 0)
         {
-            if (isUpload)
-            {
-                logger.warn("Can not upload the entry as it does not exist any more. Entry "
-                        + entryId + ", job " + jobId);
-                blaiseConnectorLogger
-                        .warn("Can not upload the entry as it does not exist any more. Entry "
-                                + entryId + ", job " + jobId);
-            }
-            else
-            {
-                logger.warn("Can not complete the entry as it does not exist any more. Entry "
-                        + entryId + ", job " + jobId);
-                blaiseConnectorLogger
-                        .warn("Can not complete the entry as it does not exist any more. Entry "
-                                + entryId + ", job " + jobId);
-            }
             return false;
         }
 

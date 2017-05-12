@@ -16,9 +16,9 @@
 			length="20" type="long" not-null="false" />
 		<property name="jobId" column="JOB_ID" length="20" type="long"
 			not-null="false" />
-		<property name="uploadXliffState" length="20" column="UPLOAD_XLF_STATE"
+		<property name="uploadXliffState" length="100" column="UPLOAD_XLF_STATE"
 			type="string" not-null="false" unique="false" />
-		<property name="completeState" length="20" column="COMPLETE_STATE"
+		<property name="completeState" length="100" column="COMPLETE_STATE"
 			type="string" not-null="false" unique="false" />
 		<property name="sourcePageId" column="SOURCE_PAGE_ID" length="20"
 			type="long" not-null="false" />

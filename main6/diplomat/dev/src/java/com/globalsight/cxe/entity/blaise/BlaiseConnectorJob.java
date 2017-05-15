@@ -24,7 +24,10 @@ public class BlaiseConnectorJob extends PersistentObject
 
     // Available values for "uploadXliffState" and "completeState".
     public static String FAIL = "fail";
+    public static String FAIL_VALIDATION = "fail(validation)";
+    public static String FAIL_500 = "fail(error 500)";
     public static String SUCCEED = "succeed";
+    public static String SUCCEED_CLOSED = "succeed(already closed)";
 
     private long blaiseConnectorId;
     private long blaiseEntryId;

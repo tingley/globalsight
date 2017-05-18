@@ -22,6 +22,10 @@
 			type="string" not-null="false" unique="false" />
 		<property name="sourcePageId" column="SOURCE_PAGE_ID" length="20"
 			type="long" not-null="false" />
+		<property name="uploadExceptionAsString" column="UPLOAD_EXCEPTION_XML"
+			type="string" not-null="false" />
+		<property name="completeExceptionAsString" column="COMPLETE_EXCEPTION_XML"
+			type="string" not-null="false" />
 	</class>
 
 </hibernate-mapping>

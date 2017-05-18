@@ -17,10 +17,6 @@
 
 package com.globalsight.util;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.util.resourcebundle.SystemResourceBundle;
-import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import java.io.CharArrayWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -35,7 +31,7 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
+import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.SAXParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -45,6 +41,10 @@ import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
+
+import com.globalsight.util.resourcebundle.ResourceBundleConstants;
+import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
 
 /**
  * <p>
@@ -57,8 +57,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @see "envoy/doc/Design/ErrorMessage.doc"
  */
 
-public class GeneralException extends RuntimeException implements
-        GeneralExceptionConstants
+public class GeneralException extends RuntimeException implements GeneralExceptionConstants
 {
     /**
      * 
@@ -114,9 +113,6 @@ public class GeneralException extends RuntimeException implements
      */
     private Exception m_originalException = null;
 
-    // Use String member which is Serializable to transfer via JMS
-    private String m_originalMessage = null;
-
     /**
      * Message key in the error message property file.
      */
@@ -128,19 +124,16 @@ public class GeneralException extends RuntimeException implements
      */
     private String m_propertyFileName = null;
 
-    private static final String GENERAL_EXCEPTION_QNAME = "com.globalsight.util.GeneralException";
-
     private static final String RESOURCE_PACKAGE_NAME = "com.globalsight.resources.messages.";
 
     // element name of serialized xml
-    private static final String GENERAL_EXCEPTION = "GeneralException";
-    private static final String JAVA_EXCEPTION = "JavaException";
-    private static final String ORIGINALMESSAGE = "originalMessage";
+    public static final String GENERAL_EXCEPTION = "GeneralException";
+    public static final String ORIGINAL_EXCEPTION = "OriginalException";
     private static final String KEY = "key";
     private static final String ARGS = "args";
     private static final String ARG = "arg";
     private static final String MESSAGEFILE = "messageFile";
-    private static final String STACKTRACE = "stackTrace";
+    public static final String STACKTRACE = "stackTrace";
     private static final String MESSAGE = "message";
 
     // Message resource cache
@@ -198,8 +191,7 @@ public class GeneralException extends RuntimeException implements
      * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
-    public GeneralException(int p_componentId, int p_exceptionId,
-            Exception p_originalException)
+    public GeneralException(int p_componentId, int p_exceptionId, Exception p_originalException)
     {
         this(p_componentId, p_exceptionId, DEFAULT_MSG_ID, p_originalException);
     }
@@ -219,8 +211,7 @@ public class GeneralException extends RuntimeException implements
      * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
-    public GeneralException(int p_componentId, int p_exceptionId,
-            String p_message)
+    public GeneralException(int p_componentId, int p_exceptionId, String p_message)
     {
         super(p_message);
         m_errorMessage = p_message;
@@ -247,8 +238,8 @@ public class GeneralException extends RuntimeException implements
      * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
-    public GeneralException(int p_componentId, int p_exceptionId,
-            String p_message, Exception p_originalException)
+    public GeneralException(int p_componentId, int p_exceptionId, String p_message,
+            Exception p_originalException)
     {
         super(p_message);
         m_errorMessage = p_message;
@@ -273,8 +264,7 @@ public class GeneralException extends RuntimeException implements
      * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
-    public GeneralException(int p_componentId, int p_exceptionId,
-            int p_messageId)
+    public GeneralException(int p_componentId, int p_exceptionId, int p_messageId)
     {
         this(p_componentId, p_exceptionId, p_messageId, null);
     }
@@ -296,11 +286,10 @@ public class GeneralException extends RuntimeException implements
      * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
-    public GeneralException(int p_componentId, int p_exceptionId,
-            int p_messageId, Exception p_originalException)
+    public GeneralException(int p_componentId, int p_exceptionId, int p_messageId,
+            Exception p_originalException)
     {
-        this(p_componentId, p_exceptionId, p_messageId, null,
-                p_originalException);
+        this(p_componentId, p_exceptionId, p_messageId, null, p_originalException);
     }
 
     /**
@@ -326,9 +315,8 @@ public class GeneralException extends RuntimeException implements
      * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
-    public GeneralException(int p_componentId, int p_exceptionId,
-            int p_messageId, String[] p_messageArguments,
-            Exception p_originalException)
+    public GeneralException(int p_componentId, int p_exceptionId, int p_messageId,
+            String[] p_messageArguments, Exception p_originalException)
     {
         super();
 
@@ -337,38 +325,25 @@ public class GeneralException extends RuntimeException implements
         m_messageId = p_messageId;
         m_messageArguments = p_messageArguments;
         m_originalException = p_originalException;
-        if (p_originalException != null)
-        {
-            m_originalMessage = p_originalException.getMessage();
-        }
 
         if (m_messageId != DEFAULT_MSG_ID)
         {
-            ResourceBundle resourceBundle = SystemResourceBundle.getInstance()
-                    .getResourceBundle(
-                            ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
-                            Locale.getDefault());
+            ResourceBundle resourceBundle = SystemResourceBundle.getInstance().getResourceBundle(
+                    ResourceBundleConstants.EXCEPTION_RESOURCE_NAME, Locale.getDefault());
 
             if (resourceBundle == null)
             {
                 m_errorMessage = "ResourceBundle not found: "
-                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
-                        + " "
-                        + Locale.getDefault().toString()
-                        + " "
-                        + Integer.toString(m_messageId)
-                        + " "
-                        + (m_messageArguments != null ? m_messageArguments
-                                .toString() : "null");
+                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME + " "
+                        + Locale.getDefault().toString() + " " + Integer.toString(m_messageId) + " "
+                        + (m_messageArguments != null ? m_messageArguments.toString() : "null");
             }
             else
             {
-                m_errorMessage = resourceBundle.getString(Integer
-                        .toString(m_messageId));
+                m_errorMessage = resourceBundle.getString(Integer.toString(m_messageId));
                 if (m_messageArguments != null)
                 {
-                    m_errorMessage = MessageFormat.format(m_errorMessage,
-                            m_messageArguments);
+                    m_errorMessage = MessageFormat.format(m_errorMessage, m_messageArguments);
                 }
             }
         }
@@ -510,8 +485,8 @@ public class GeneralException extends RuntimeException implements
      */
     public GeneralException(String p_message)
     {
-        this(GeneralExceptionConstants.EX_GENERAL,
-                GeneralExceptionConstants.COMP_FOUNDATION, p_message);
+        this(GeneralExceptionConstants.EX_GENERAL, GeneralExceptionConstants.COMP_FOUNDATION,
+                p_message);
     }
 
     /**
@@ -525,14 +500,13 @@ public class GeneralException extends RuntimeException implements
      */
     public GeneralException(String p_message, Exception p_originalException)
     {
-        this(GeneralExceptionConstants.EX_GENERAL,
-                GeneralExceptionConstants.COMP_FOUNDATION, p_message,
-                p_originalException);
+        this(GeneralExceptionConstants.EX_GENERAL, GeneralExceptionConstants.COMP_FOUNDATION,
+                p_message, p_originalException);
     }
 
     public String getOriginalMessage()
     {
-        return m_originalMessage;
+        return m_originalException != null ? m_originalException.toString() : null;
     }
 
     public Logger getLogger()
@@ -761,16 +735,12 @@ public class GeneralException extends RuntimeException implements
      *            Property file base name. If the property file is
      *            LingMessage.properties, the parameter should be "LingMessage".
      */
-    protected GeneralException(String p_messageKey,
-            String[] p_messageArguments, Exception p_originalException,
-            String p_propertyFileName)
+    protected GeneralException(String p_messageKey, String[] p_messageArguments,
+            Exception p_originalException, String p_propertyFileName)
     {
-        if (p_originalException != null)
-        {
-            m_originalMessage = p_originalException.getMessage();
-        }
         m_messageKey = p_messageKey;
         m_messageArguments = p_messageArguments;
+        m_originalException = p_originalException;
         m_propertyFileName = p_propertyFileName;
     }
 
@@ -791,25 +761,17 @@ public class GeneralException extends RuntimeException implements
         if (m_messageId != DEFAULT_MSG_ID)
         {
             ResourceBundle resourceBundle = SystemResourceBundle.getInstance()
-                    .getResourceBundle(
-                            ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
-                            p_uiLocale);
+                    .getResourceBundle(ResourceBundleConstants.EXCEPTION_RESOURCE_NAME, p_uiLocale);
 
             if (resourceBundle == null)
             {
                 return "ResourceBundle not found: "
-                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
-                        + " "
-                        + p_uiLocale.toString()
-                        + " "
-                        + Integer.toString(m_messageId)
-                        + " "
-                        + (m_messageArguments != null ? m_messageArguments
-                                .toString() : "null");
+                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME + " "
+                        + p_uiLocale.toString() + " " + Integer.toString(m_messageId) + " "
+                        + (m_messageArguments != null ? m_messageArguments.toString() : "null");
             }
 
-            String value = resourceBundle.getString(Integer
-                    .toString(m_messageId));
+            String value = resourceBundle.getString(Integer.toString(m_messageId));
 
             if (m_messageArguments != null)
             {
@@ -834,8 +796,7 @@ public class GeneralException extends RuntimeException implements
                 message += "\n";
             }
 
-            message += ((GeneralException) m_originalException)
-                    .getMessage(p_uiLocale);
+            message += ((GeneralException) m_originalException).getMessage(p_uiLocale);
         }
         else if (m_originalException != null)
         {
@@ -892,8 +853,7 @@ public class GeneralException extends RuntimeException implements
         if (m_originalException instanceof GeneralException)
         {
             res.append('\n');
-            res.append(((GeneralException) m_originalException)
-                    .getStackTraceString());
+            res.append(((GeneralException) m_originalException).getStackTraceString());
         }
         else if (m_originalException != null)
         {
@@ -919,21 +879,21 @@ public class GeneralException extends RuntimeException implements
      * 
      * <p>
      * <!ELEMENT GeneralException (key?, args?, messageFile, stackTrace,
-     * (GeneralException | JavaException)?) > <!ELEMENT key (#PCDATA) >
+     * (GeneralException | OriginalException)?) > <!ELEMENT key (#PCDATA) >
      * <!ELEMENT args (arg+) > <!ELEMENT arg (#PCDATA) > <!ELEMENT messageFile
-     * (#PCDATA) > <!ELEMENT stackTrace (#PCDATA) > <!ELEMENT JavaException
+     * (#PCDATA) > <!ELEMENT stackTrace (#PCDATA) > <!ELEMENT OriginalException
      * (message, stackTrace) > <!ELEMENT message (#PCDATA) >
      * 
      * <!-- for javadoc -->
      * 
      * <pre>
-     * &lt;!ELEMENT GeneralException (key?, args?, messageFile, stackTrace, (GeneralException | JavaException)?) &gt;
+     * &lt;!ELEMENT GeneralException (key?, args?, messageFile, stackTrace, (GeneralException | OriginalException)?) &gt;
      * &lt;!ELEMENT key (#PCDATA) &gt;
      * &lt;!ELEMENT args (arg+) &gt;
      * &lt;!ELEMENT arg (#PCDATA) &gt;
      * &lt;!ELEMENT messageFile (#PCDATA) &gt;
      * &lt;!ELEMENT stackTrace (#PCDATA) &gt;
-     * &lt;!ELEMENT JavaException (message, stackTrace) &gt;
+     * &lt;!ELEMENT OriginalException (message, stackTrace) &gt;
      * &lt;!ELEMENT message (#PCDATA) &gt;
      * </pre>
      * 
@@ -948,7 +908,7 @@ public class GeneralException extends RuntimeException implements
         {
             // generate DOM
             Document doc = new DocumentImpl();
-            root = writeGeneralExceptionElement(doc);
+            root = writeGeneralExceptionElement(doc, false);
             doc.appendChild(root);
 
             // Serialize DOM
@@ -965,8 +925,7 @@ public class GeneralException extends RuntimeException implements
         }
         catch (Exception e)
         {
-            String message = (root != null ? root.toString() : "null root")
-                    + e.getMessage();
+            String message = (root != null ? root.toString() : "null root") + e.getMessage();
             getLogger().error(message, e);
             return message;
         }
@@ -995,8 +954,8 @@ public class GeneralException extends RuntimeException implements
      *            Serialized exception
      * @return Re-created GeneralException.
      */
-    public final static GeneralException deserialize(
-            String p_serializedException) throws GeneralException
+    public final static GeneralException deserialize(String p_serializedException)
+            throws GeneralException
     {
         // TODO
         // The parser should be a validating parser
@@ -1007,8 +966,7 @@ public class GeneralException extends RuntimeException implements
 
         try
         {
-            parser.parse(new InputSource(
-                    new StringReader(p_serializedException)));
+            parser.parse(new InputSource(new StringReader(p_serializedException)));
         }
         catch (Exception e)
         {
@@ -1029,9 +987,9 @@ public class GeneralException extends RuntimeException implements
      */
     public String getMessage()
     {
-        if (m_originalMessage != null)
+        if (m_originalException != null)
         {
-            return m_originalMessage;
+            return m_originalException.toString();
         }
         // Old stuff. Should be removed once the old code is cleaned up.
         if (m_errorMessage != null)
@@ -1083,11 +1041,9 @@ public class GeneralException extends RuntimeException implements
             return m_originalException;
         }
 
-        if (GeneralException.class.isAssignableFrom(m_originalException
-                .getClass()))
+        if (GeneralException.class.isAssignableFrom(m_originalException.getClass()))
         {
-            return ((GeneralException) m_originalException)
-                    .containsNestedException(p_class);
+            return ((GeneralException) m_originalException).containsNestedException(p_class);
         }
 
         return null;
@@ -1116,8 +1072,7 @@ public class GeneralException extends RuntimeException implements
             return m_originalException;
         }
 
-        if (m_originalException.getClass().isAssignableFrom(
-                GeneralException.class))
+        if (m_originalException.getClass().isAssignableFrom(GeneralException.class))
         {
             return ((GeneralException) m_originalException)
                     .containsNestedExceptionIsAssignableFrom(p_class);
@@ -1183,8 +1138,7 @@ public class GeneralException extends RuntimeException implements
     }
 
     // get a resource and cash it
-    private ResourceBundle getResource(String p_propertyFileName,
-            Locale p_uiLocale)
+    private ResourceBundle getResource(String p_propertyFileName, Locale p_uiLocale)
     {
         String key = p_propertyFileName + "_" + p_uiLocale.getDisplayName();
         ResourceBundle resource = null;
@@ -1193,15 +1147,13 @@ public class GeneralException extends RuntimeException implements
         {
             try
             {
-                resource = PropertyResourceBundle.getBundle(
-                        RESOURCE_PACKAGE_NAME + p_propertyFileName, p_uiLocale);
+                resource = PropertyResourceBundle
+                        .getBundle(RESOURCE_PACKAGE_NAME + p_propertyFileName, p_uiLocale);
             }
             catch (MissingResourceException e)
             {
-                getLogger().error(
-                        e.getMessage() + " " + RESOURCE_PACKAGE_NAME + " "
-                                + p_propertyFileName + " "
-                                + p_uiLocale.toString(), e);
+                getLogger().error(e.getMessage() + " " + RESOURCE_PACKAGE_NAME + " "
+                        + p_propertyFileName + " " + p_uiLocale.toString(), e);
                 return null;
             }
 
@@ -1213,18 +1165,12 @@ public class GeneralException extends RuntimeException implements
     }
 
     // write GE_instance element
-    private Node writeGeneralExceptionElement(Document doc) throws Exception
+    private Node writeGeneralExceptionElement(Document doc, boolean isOriginalException)
+            throws Exception
     {
-        // <GeneralException>
-        Element root = doc.createElement(GENERAL_EXCEPTION);
-
-        // <originalMessage>
-        if (m_originalMessage != null)
-        {
-            Element originalMessage = doc.createElement(ORIGINALMESSAGE);
-            originalMessage.appendChild(doc.createTextNode(m_originalMessage));
-            root.appendChild(originalMessage);
-        }
+        // <GeneralException> | <OriginalException>
+        Element root = isOriginalException ? doc.createElement(ORIGINAL_EXCEPTION)
+                : doc.createElement(GENERAL_EXCEPTION);
 
         // <key>
         if (m_messageKey != null)
@@ -1262,25 +1208,25 @@ public class GeneralException extends RuntimeException implements
         // Call writeGeneralExceptionElement recursively
         if (m_originalException instanceof GeneralException)
         {
-            Node node = ((GeneralException) m_originalException)
-                    .writeGeneralExceptionElement(doc);
+            Node node = ((GeneralException) m_originalException).writeGeneralExceptionElement(doc,
+                    true);
             root.appendChild(node);
         }
         else if (m_originalException != null)
         {
-            // <JavaException>
-            Element instance = doc.createElement(JAVA_EXCEPTION);
+            // <OriginalException>
+            Element instance = doc.createElement(ORIGINAL_EXCEPTION);
 
             // <message>
             Element message = doc.createElement(MESSAGE);
-            String java_exception = m_originalException.toString();
-            message.appendChild(doc.createTextNode(java_exception));
+            String oriException = m_originalException.toString();
+            message.appendChild(doc.createTextNode(oriException));
             instance.appendChild(message);
 
             // <stackTrace>
             stackTrace = doc.createElement(STACKTRACE);
-            String trace_string = getStackTraceString(m_originalException);
-            stackTrace.appendChild(doc.createTextNode(trace_string));
+            String traceString = getStackTraceString(m_originalException);
+            stackTrace.appendChild(doc.createTextNode(traceString));
             instance.appendChild(stackTrace);
 
             root.appendChild(instance);
@@ -1300,25 +1246,17 @@ public class GeneralException extends RuntimeException implements
         if (m_messageId != DEFAULT_MSG_ID)
         {
             ResourceBundle resourceBundle = SystemResourceBundle.getInstance()
-                    .getResourceBundle(
-                            ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
-                            p_uiLocale);
+                    .getResourceBundle(ResourceBundleConstants.EXCEPTION_RESOURCE_NAME, p_uiLocale);
 
             if (resourceBundle == null)
             {
                 return "ResourceBundle not found: "
-                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
-                        + " "
-                        + p_uiLocale.toString()
-                        + " "
-                        + Integer.toString(m_messageId)
-                        + " "
-                        + (m_messageArguments != null ? m_messageArguments
-                                .toString() : "null");
+                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME + " "
+                        + p_uiLocale.toString() + " " + Integer.toString(m_messageId) + " "
+                        + (m_messageArguments != null ? m_messageArguments.toString() : "null");
             }
 
-            String value = resourceBundle.getString(Integer
-                    .toString(m_messageId));
+            String value = resourceBundle.getString(Integer.toString(m_messageId));
 
             if (m_messageArguments != null)
             {
@@ -1349,8 +1287,7 @@ public class GeneralException extends RuntimeException implements
                     // Call getTopLevelMessage recursively until
                     // a message is specified or have gone through
                     // all the exceptions
-                    message = ((GeneralException) nextException)
-                            .getTopLevelMessage(p_uiLocale);
+                    message = ((GeneralException) nextException).getTopLevelMessage(p_uiLocale);
                 }
                 else
                 {
@@ -1375,20 +1312,13 @@ public class GeneralException extends RuntimeException implements
             String propertyFileName = getPropertyFileName();
 
             // get the resource
-            ResourceBundle resourceBundle = getResource(propertyFileName,
-                    p_uiLocale);
+            ResourceBundle resourceBundle = getResource(propertyFileName, p_uiLocale);
 
             if (resourceBundle == null)
             {
-                return "ResourceBundle not found: "
-                        + propertyFileName
-                        + " "
-                        + p_uiLocale.toString()
-                        + " "
-                        + m_messageKey.toString()
-                        + " "
-                        + (m_messageArguments != null ? m_messageArguments
-                                .toString() : "null");
+                return "ResourceBundle not found: " + propertyFileName + " " + p_uiLocale.toString()
+                        + " " + m_messageKey.toString() + " "
+                        + (m_messageArguments != null ? m_messageArguments.toString() : "null");
             }
 
             String value;
@@ -1405,8 +1335,8 @@ public class GeneralException extends RuntimeException implements
             }
             catch (MissingResourceException ex)
             {
-                value = "Key " + m_messageKey + " in resource file "
-                        + propertyFileName + " is missing.";
+                value = "Key " + m_messageKey + " in resource file " + propertyFileName
+                        + " is missing.";
             }
 
             message = value;
@@ -1424,15 +1354,11 @@ public class GeneralException extends RuntimeException implements
             // try to get the message of the original exception
             if (m_originalException != null)
             {
-                String origMessage = m_originalException.getMessage();
+                String origMessage = m_originalException.toString();
                 if (origMessage != null && origMessage.length() > 0)
                 {
                     message = origMessage;
                 }
-            }
-            else if (m_originalMessage != null)
-            {
-                message = m_originalMessage;
             }
             else
             {
@@ -1473,10 +1399,9 @@ public class GeneralException extends RuntimeException implements
         private List argList = null;
 
         /** Start element. */
-        public void startElement(String uri, String local, String raw,
-                Attributes attrs)
+        public void startElement(String uri, String local, String raw, Attributes attrs)
         {
-            if (raw.equals(GENERAL_EXCEPTION) || raw.equals(JAVA_EXCEPTION))
+            if (raw.equals(GENERAL_EXCEPTION) || raw.equals(ORIGINAL_EXCEPTION))
             {
                 // create a root or nested exception
                 GeneralException ge = new GeneralException((Exception) null);
@@ -1501,11 +1426,7 @@ public class GeneralException extends RuntimeException implements
         /** End element. */
         public void endElement(String uri, String local, String raw)
         {
-            if (raw.equals(ORIGINALMESSAGE))
-            {
-                m_current.m_originalMessage = text;
-            }
-            else if (raw.equals(KEY))
+            if (raw.equals(KEY))
             {
                 m_current.m_messageKey = text;
             }
@@ -1525,8 +1446,7 @@ public class GeneralException extends RuntimeException implements
             {
                 // see the cool trick in Javadoc on
                 // Collenction#toArray(Object[])
-                m_current.m_messageArguments = (String[]) argList
-                        .toArray(new String[0]);
+                m_current.m_messageArguments = (String[]) argList.toArray(new String[0]);
             }
             else if (raw.equals(ARG))
             {

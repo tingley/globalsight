@@ -16,16 +16,20 @@
  */
 package com.globalsight.cxe.entity.blaise;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 
 public class BlaiseConnectorJob extends PersistentObject
 {
     private static final long serialVersionUID = -933803792285804414L;
 
+    private static Logger logger = Logger.getLogger(BlaiseConnectorJob.class);
+
     // Available values for "uploadXliffState" and "completeState".
     public static String FAIL = "fail";
-    public static String FAIL_VALIDATION = "fail(validation)";
-    public static String FAIL_500 = "fail(error 500)";
     public static String SUCCEED = "succeed";
     public static String SUCCEED_CLOSED = "succeed(already closed)";
 
@@ -34,7 +38,10 @@ public class BlaiseConnectorJob extends PersistentObject
     private long jobId;
     private String uploadXliffState;
     private String completeState;
+    // GBS-4749
     private long sourcePageId;
+    private GeneralException m_uploadException = null;
+    private GeneralException m_completeException = null;
 
     public long getBlaiseConnectorId()
     {
@@ -94,5 +101,95 @@ public class BlaiseConnectorJob extends PersistentObject
     public void setSourcePageId(long sourcePageId)
     {
         this.sourcePageId = sourcePageId;
+    }
+
+    public String getUploadExceptionAsString()
+    {
+        String uploadExpStr = null;
+        if (m_uploadException != null)
+        {
+            try
+            {
+                uploadExpStr = m_uploadException.serialize();
+            }
+            catch (GeneralException e)
+            {
+                logger.error("Failed to serialize the upload exception", e);
+            }
+        }
+        return uploadExpStr;
+    }
+
+    public void setUploadExceptionAsString(String p_uploadExceptionXml)
+    {
+        setUploadException(p_uploadExceptionXml);
+    }
+
+    public void setUploadException(GeneralException p_uploadException)
+    {
+        m_uploadException = p_uploadException;
+    }
+
+    public String getCompleteExceptionAsString()
+    {
+        String completeExpStr = null;
+        if (m_completeException != null)
+        {
+            try
+            {
+                completeExpStr = m_completeException.serialize();
+            }
+            catch (GeneralException e)
+            {
+                logger.error("Failed to serialize the complete exception", e);
+            }
+        }
+        return completeExpStr;
+    }
+
+    public void setCompleteExceptionAsString(String p_completeExceptionXml)
+    {
+        setCompleteException(p_completeExceptionXml);
+    }
+
+    public void setCompleteException(GeneralException p_completeException)
+    {
+        m_completeException = p_completeException;
+    }
+
+    private void setUploadException(String p_uploadExceptionXml)
+    {
+        if (StringUtil.isNotEmpty(p_uploadExceptionXml))
+        {
+            try
+            {
+                GeneralException uploadException = GeneralException
+                        .deserialize(p_uploadExceptionXml);
+
+                setUploadException(uploadException);
+            }
+            catch (GeneralException e)
+            {
+                logger.error("Failed to deserialize the upload exception xml", e);
+            }
+        }
+    }
+
+    private void setCompleteException(String p_completeExceptionXml)
+    {
+        if (StringUtil.isNotEmpty(p_completeExceptionXml))
+        {
+            try
+            {
+                GeneralException completeException = GeneralException
+                        .deserialize(p_completeExceptionXml);
+
+                setCompleteException(completeException);
+            }
+            catch (GeneralException e)
+            {
+                logger.error("Failed to deserialize the complete exception xml", e);
+            }
+        }
     }
 }

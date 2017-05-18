@@ -290,16 +290,14 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
     /**
      * If current job is a Blaise job, and it has been in EXPORTED state, invoke
      * Blaise API to complete it.
-     * 
-     * @param job
      */
     private void possibllyCompleteBlaiseEntry(JobImpl job)
     {
-        List<BlaiseConnectorJob> blaiseJobEntries =
-                BlaiseManager.getBlaiseConnectorJobByJobId(job.getJobId());
+        List<BlaiseConnectorJob> blaiseJobEntries = BlaiseManager
+                .getBlaiseConnectorJobByJobId(job.getJobId());
         if (blaiseJobEntries != null && blaiseJobEntries.size() > 0)
         {
-            long blaiseConnectorId = blaiseJobEntries.get(0).getBlaiseConnectorId(); 
+            long blaiseConnectorId = blaiseJobEntries.get(0).getBlaiseConnectorId();
             BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(blaiseConnectorId);
             if (blc == null)
                 return;
@@ -314,8 +312,6 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
                 }
                 catch (Exception ignore)
                 {
-                    s_logger.warn("Error when possiblly complete entry: " + bcj.getBlaiseEntryId()
-                            + ", " + ignore.getMessage());
                 }
             }
         }

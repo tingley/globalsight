@@ -548,7 +548,19 @@ function searchJob(fromRequest)
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.plannedCompletionDate}</TD>
         <amb:permission name="<%=Permission.BLAISE_CONNECTOR%>" >
         <TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >
-                ${jobVo.blaiseUploadState}/${jobVo.blaiseCompleteState}
+            <c:choose>
+		    <c:when  test="${jobVo.blaiseUploadState == 'fail'}">
+		    <span class="warningText">${jobVo.blaiseUploadState}</span>
+		    </c:when >
+		    <c:otherwise>${jobVo.blaiseUploadState}</c:otherwise>
+		    </c:choose>
+		    /
+		    <c:choose>
+		    <c:when  test="${jobVo.blaiseCompleteState == 'fail'}">
+		    <span class="warningText">${jobVo.blaiseCompleteState}</span>
+		    </c:when >
+		    <c:otherwise>${jobVo.blaiseCompleteState}</c:otherwise>
+		    </c:choose>
         </TD>
         </amb:permission>
     </TR>

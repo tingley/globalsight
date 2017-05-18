@@ -1,0 +1,4 @@
+#GBS-4749 Blaise Connector Improvements
+ALTER TABLE connector_blaise_job ADD COLUMN UPLOAD_EXCEPTION_XML TEXT;
+ALTER TABLE connector_blaise_job ADD COLUMN COMPLETE_EXCEPTION_XML TEXT;
+

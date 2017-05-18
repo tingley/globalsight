@@ -188,8 +188,11 @@ public class JobSourceFilesHandler extends PageHandler implements UserParamNames
                         .getBlaiseConnectorJobByJobIdEntryId(job.getId(), sourcePage.getId());
                 if (bcj != null)
                 {
-                    jobSourcePageDisplay.setBlaiseStateUploadComplete(bcj.getUploadXliffState(),
-                            bcj.getCompleteState());
+                    jobSourcePageDisplay.setBlaiseUploadState(bcj.getUploadXliffState());
+                    jobSourcePageDisplay.setBlaiseCompleteState(bcj.getCompleteState());
+                    jobSourcePageDisplay.setBlaiseUploadException(bcj.getUploadExceptionAsString());
+                    jobSourcePageDisplay
+                            .setBlaiseCompleteException(bcj.getCompleteExceptionAsString());
                 }
                 else
                 {
@@ -206,8 +209,12 @@ public class JobSourceFilesHandler extends PageHandler implements UserParamNames
                             blaiseEntryId);
                     if (bcj != null)
                     {
-                        jobSourcePageDisplay.setBlaiseStateUploadComplete(bcj.getUploadXliffState(),
-                                bcj.getCompleteState());
+                        jobSourcePageDisplay.setBlaiseUploadState(bcj.getUploadXliffState());
+                        jobSourcePageDisplay.setBlaiseCompleteState(bcj.getCompleteState());
+                        jobSourcePageDisplay
+                                .setBlaiseUploadException(bcj.getUploadExceptionAsString());
+                        jobSourcePageDisplay
+                                .setBlaiseCompleteException(bcj.getCompleteExceptionAsString());
                         // update existing blaise job with source page id
                         bcj.setSourcePageId(sourcePage.getId());
                         HibernateUtil.saveOrUpdate(bcj);

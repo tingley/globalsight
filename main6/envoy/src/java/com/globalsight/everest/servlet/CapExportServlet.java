@@ -60,16 +60,14 @@ import com.globalsight.util.GeneralException;
 
 /**
  * <P>
- * This servlet is responsible for the following export processes:
- * 1. Performing an action upon an export result received from CXE.
- * This is basically CXE's asynchronous response to export process and
- * CAP will only complete the export process based on the response type
- * sent from CXE (success or failure).
+ * This servlet is responsible for the following export processes: 1. Performing
+ * an action upon an export result received from CXE. This is basically CXE's
+ * asynchronous response to export process and CAP will only complete the export
+ * process based on the response type sent from CXE (success or failure).
  *
- * 2. Performing the process of dynamic preview.
- * The export process for preview is completed by sending a populated
- * Gxml to CXE, and then sending out the CXE's response for display
- * purposes.
+ * 2. Performing the process of dynamic preview. The export process for preview
+ * is completed by sending a populated Gxml to CXE, and then sending out the
+ * CXE's response for display purposes.
  * </P>
  */
 public class CapExportServlet extends HttpServlet
@@ -83,14 +81,16 @@ public class CapExportServlet extends HttpServlet
 
     private static String s_cxeServletUrl = null;
 
+    private static Object LOCKER = new Object();
 
     /**
      * A convenience method which can be overridden.
-     * @exception ServletException - Defines a general exception a
-     * servlet can throw when it encounters difficulty.
+     * 
+     * @exception ServletException
+     *                - Defines a general exception a servlet can throw when it
+     *                encounters difficulty.
      */
-    public void init()
-        throws ServletException
+    public void init() throws ServletException
     {
         super.init();
 
@@ -99,107 +99,112 @@ public class CapExportServlet extends HttpServlet
     }
 
     /**
-     * Called by the servlet container to indicate to a servlet that
-     * the servlet is being taken out of service.
+     * Called by the servlet container to indicate to a servlet that the servlet
+     * is being taken out of service.
      */
     public void destroy()
     {
         super.destroy();
     }
 
-
     /**
-     * <p>Process HTTP requests. Only processes the "POST" Method.</P>
+     * <p>
+     * Process HTTP requests. Only processes the "POST" Method.
+     * </P>
      *
-     * @param p_request The HttpServletRequest.
-     * @param p_response The HttpServletResponse.
-     * @exception IOException - Signals that an I/O related error has
-     * occured.
-     * @exception ServletException - Defines a general exception a
-     * servlet can throw when it encounters difficulty.
+     * @param p_request
+     *            The HttpServletRequest.
+     * @param p_response
+     *            The HttpServletResponse.
+     * @exception IOException
+     *                - Signals that an I/O related error has occured.
+     * @exception ServletException
+     *                - Defines a general exception a servlet can throw when it
+     *                encounters difficulty.
      */
-    public void doGet(HttpServletRequest p_request,
-        HttpServletResponse p_response)
-        throws IOException, ServletException
+    public void doGet(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws IOException, ServletException
     {
         doPost(p_request, p_response);
     }
 
-
     /**
      * @see HttpServlet#doPost(HttpServletRequest, HttpServletResponse).
      *
-     * <P>This POST action is responsible for two actions:</P>
+     *      <P>
+     *      This POST action is responsible for two actions:
+     *      </P>
      *
-     * 1. Page Export Result: Basically it's the asynchronous
-     * notification of CAP about the result of a page export.  Request
-     * contains a message id, response type (success/failure), and a
-     * response details upon a failure.  Note that the response
-     * details is a serialized GeneralException and is only send if
-     * the export process has failed.
+     *      1. Page Export Result: Basically it's the asynchronous notification
+     *      of CAP about the result of a page export. Request contains a message
+     *      id, response type (success/failure), and a response details upon a
+     *      failure. Note that the response details is a serialized
+     *      GeneralException and is only send if the export process has failed.
      *
-     * 2. Dynamic Preview: This is a request from CXE.  The request
-     * contains request type (i.e. preview), message id, Tuv ids, and
-     * UI locale.  The result of this process is a generated template
-     * which is populated with valid segments for the given tuv ids
-     * and a placeholder for the rest of tuvs.
+     *      2. Dynamic Preview: This is a request from CXE. The request contains
+     *      request type (i.e. preview), message id, Tuv ids, and UI locale. The
+     *      result of this process is a generated template which is populated
+     *      with valid segments for the given tuv ids and a placeholder for the
+     *      rest of tuvs.
      *
-     * </P>
-     * @param p_request The HttpServletRequest.
-     * @param p_response The HttpServletResponse.
-     * @exception IOException - Signals that an I/O related error has occurred.
-     * @exception ServletException - Defines a general exception a servlet can
-     * throw when it encounters difficulty.
+     *      </P>
+     * @param p_request
+     *            The HttpServletRequest.
+     * @param p_response
+     *            The HttpServletResponse.
+     * @exception IOException
+     *                - Signals that an I/O related error has occurred.
+     * @exception ServletException
+     *                - Defines a general exception a servlet can throw when it
+     *                encounters difficulty.
      */
-    public void doPost(HttpServletRequest p_request,
-        HttpServletResponse p_response)
-        throws IOException, ServletException
+    public void doPost(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws IOException, ServletException
     {
         boolean isLogging = c_logger.isDebugEnabled();
-        
+
         String companyName = UserUtil.getCurrentCompanyName(p_request);
         if (companyName != null)
         {
             CompanyThreadLocal.getInstance().setValue(companyName);
         }
-        
-        String requestType =
-            p_request.getParameter(ExportConstants.CXE_REQUEST_TYPE);
 
-        String dataSourceType =
-            p_request.getParameter(ExportConstants.DATA_SOURCE_TYPE);
+        String requestType = p_request.getParameter(ExportConstants.CXE_REQUEST_TYPE);
+
+        String dataSourceType = p_request.getParameter(ExportConstants.DATA_SOURCE_TYPE);
 
         // Note that message id is the Page Id (i.e. source page id,
         // target page id, or STF id).
-        String messageId =
-            p_request.getParameter(ExportConstants.MESSAGE_ID);
+        String messageId = p_request.getParameter(ExportConstants.MESSAGE_ID);
 
         if (isLogging)
         {
-            c_logger.debug("CapExportServlet.doPost(), requestType=" +
-                requestType + ", messageId=" + messageId);
+            c_logger.debug("CapExportServlet.doPost(), requestType=" + requestType + ", messageId="
+                    + messageId);
         }
 
-        Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+        Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, companyName);
         activityArgs.put(ExportConstants.CXE_REQUEST_TYPE, requestType);
         activityArgs.put(ExportConstants.DATA_SOURCE_TYPE, dataSourceType);
         activityArgs.put(ExportConstants.MESSAGE_ID, messageId);
-        ActivityLog.Start activityStart = ActivityLog.start(
-            CapExportServlet.class, "doPost", activityArgs);
+        ActivityLog.Start activityStart = ActivityLog.start(CapExportServlet.class, "doPost",
+                activityArgs);
         try
         {
             // if request is export for preview
             if (ExportConstants.PREVIEW.equals(requestType))
             {
-                c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForPreview()");
+                c_logger.debug(
+                        "CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForPreview()");
                 // Probably this is used only for db preview which had been
                 // removed in 8.7.3, so this will not be triggered probably.
                 exportForPreview(p_request, p_response, messageId);
             }
             else if (EXPORT_STATUS.equals(requestType))
             {
-                c_logger.debug("CapExportServlet.doPost(), EXPORT_STATUS, calling handlePageRequest()");
+                c_logger.debug(
+                        "CapExportServlet.doPost(), EXPORT_STATUS, calling handlePageRequest()");
                 handlePageRequest(p_request, p_response, messageId);
             }
             else if (PREVIEW_STATUS.equals(requestType))
@@ -213,27 +218,22 @@ public class CapExportServlet extends HttpServlet
         }
     }
 
-
-
     //
     // Local Methods
     //
 
     /**
-     * request is for a "dynamic preview".  Get a template based on
-     * the given tuvIds.
+     * request is for a "dynamic preview". Get a template based on the given
+     * tuvIds.
      */
-    private void exportForPreview(HttpServletRequest p_request,
-        HttpServletResponse p_response, String p_pageId)
-        throws ServletException
+    private void exportForPreview(HttpServletRequest p_request, HttpServletResponse p_response,
+            String p_pageId) throws ServletException
     {
         try
         {
             long id = 0;
-            String uiLocale = p_request.getParameter(
-                ExportConstants.UI_LOCALE);
-            String[] tuvIdValues =
-                p_request.getParameterValues(ExportConstants.TUV_ID);
+            String uiLocale = p_request.getParameter(ExportConstants.UI_LOCALE);
+            String[] tuvIdValues = p_request.getParameterValues(ExportConstants.TUV_ID);
             // Page Manager expects a List of tuvIds as Long objects
             int size = tuvIdValues.length;
             List<Long> tuvIds = new ArrayList<Long>();
@@ -250,11 +250,10 @@ public class CapExportServlet extends HttpServlet
             }
             catch (NumberFormatException ne)
             {
-                // value was not numeric.  Keep it 0
+                // value was not numeric. Keep it 0
             }
 
-            String line = ServerProxy.getPageManager().exportForPreview(
-                id, tuvIds, uiLocale);
+            String line = ServerProxy.getPageManager().exportForPreview(id, tuvIds, uiLocale);
 
             p_response.setContentType("text/html");
             PrintWriter out = p_response.getWriter();
@@ -263,16 +262,15 @@ public class CapExportServlet extends HttpServlet
 
             URLConnection conn = url.openConnection();
             conn.setDoOutput(true);
-            OutputStreamWriter wr = new OutputStreamWriter(
-                conn.getOutputStream(), ExportConstants.UTF8);
+            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(),
+                    ExportConstants.UTF8);
 
             wr.write(line);
             wr.flush();
             wr.close();
 
             // CXE's response...
-            BufferedReader rd = new BufferedReader(
-                new InputStreamReader(conn.getInputStream()));
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
             // CXE will only send a valid xml text for display...
             // (will go to proxy servlet.)
@@ -284,7 +282,7 @@ public class CapExportServlet extends HttpServlet
             rd.close();
             out.close();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             c_logger.error("CapExportServlet - exportForPreview problem.", e);
             throw new ServletException(e);
@@ -301,13 +299,10 @@ public class CapExportServlet extends HttpServlet
             SystemConfiguration sc = SystemConfiguration.getInstance();
 
             sb.append("http://");
-            sb.append(sc.getStringParameter(
-                SystemConfiguration.SERVER_HOST));
+            sb.append(sc.getStringParameter(SystemConfiguration.SERVER_HOST));
             sb.append(":");
-            sb.append(sc.getStringParameter(
-                SystemConfiguration.SERVER_PORT));
-            sb.append(sc.getStringParameter(
-                SystemConfiguration.CXE_SERVLET_URL));
+            sb.append(sc.getStringParameter(SystemConfiguration.SERVER_PORT));
+            sb.append(sc.getStringParameter(SystemConfiguration.CXE_SERVLET_URL));
         }
         catch (Exception e)
         {
@@ -318,32 +313,28 @@ public class CapExportServlet extends HttpServlet
     }
 
     /**
-     * Request is coming form CxeExportServlet (asynchronous response
-     * to an export).
+     * Request is coming form CxeExportServlet (asynchronous response to an
+     * export).
      */
-    private void handlePageRequest(HttpServletRequest p_request,
-        HttpServletResponse p_response, String p_pageId)
-        throws IOException, ServletException
+    private void handlePageRequest(HttpServletRequest p_request, HttpServletResponse p_response,
+            String p_pageId) throws IOException, ServletException
     {
         try
         {
-            String originalCxeRequestType = p_request.getParameter(
-                ExportConstants.ORIG_CXE_REQUEST_TYPE);
-    
+            String originalCxeRequestType = p_request
+                    .getParameter(ExportConstants.ORIG_CXE_REQUEST_TYPE);
+
             long pageId = Long.parseLong(p_pageId);
-            
-            String responseType = p_request.getParameter(
-                ExportConstants.RESPONSE_TYPE);
-    
-            if (originalCxeRequestType != null &&
-                originalCxeRequestType.equals(
-                    ExportConstants.EXPORT_FOR_UPDATE))
+
+            String responseType = p_request.getParameter(ExportConstants.RESPONSE_TYPE);
+
+            if (originalCxeRequestType != null
+                    && originalCxeRequestType.equals(ExportConstants.EXPORT_FOR_UPDATE))
             {
                 handleSourcePageRequest(pageId, p_request, responseType);
             }
-            else if (originalCxeRequestType != null && 
-                     originalCxeRequestType.equals(
-                         ExportConstants.EXPORT_STF))
+            else if (originalCxeRequestType != null
+                    && originalCxeRequestType.equals(ExportConstants.EXPORT_STF))
             {
                 handleStfRequest(pageId, p_request, responseType);
             }
@@ -357,7 +348,7 @@ public class CapExportServlet extends HttpServlet
         }
         catch (Exception ne)
         {
-            c_logger.error("CapExportServlet -  error in handlePageRequest()",ne);
+            c_logger.error("CapExportServlet -  error in handlePageRequest()", ne);
             throw new ServletException(ne);
         }
 
@@ -367,13 +358,12 @@ public class CapExportServlet extends HttpServlet
         outputToPageExport.close();
     }
 
-
     // process the source page export (export for update)
     private void handleSourcePageRequest(long pageId, HttpServletRequest p_request,
             String responseType) throws Exception
     {
         SourcePage sp = ServerProxy.getPageManager().getSourcePage(pageId);
-        
+
         if (responseType.equals(ExportConstants.FAILURE))
         {
             c_logger.error("NOTIFYING ABOUT FAILED EXPORT FOR UPDATE");
@@ -387,10 +377,9 @@ public class CapExportServlet extends HttpServlet
         }
     }
 
-
     // process the result of the exported secondary target file.
-    private void handleStfRequest(long p_pageId, HttpServletRequest p_request, String p_responseType)
-            throws Exception
+    private void handleStfRequest(long p_pageId, HttpServletRequest p_request,
+            String p_responseType) throws Exception
     {
 
         if (p_responseType.equals(ExportConstants.FAILURE))
@@ -408,8 +397,8 @@ public class CapExportServlet extends HttpServlet
             // current state is EXPORT_IN_PROGRESS
             if (stf.getState().equals(SecondaryTargetFileState.EXPORT_IN_PROGRESS))
             {
-                ServerProxy.getSecondaryTargetFileManager().notifyExportSuccessEvent(
-                        new Long(p_pageId));
+                ServerProxy.getSecondaryTargetFileManager()
+                        .notifyExportSuccessEvent(new Long(p_pageId));
             }
         }
     }
@@ -453,10 +442,12 @@ public class CapExportServlet extends HttpServlet
                 // step 1: required before step 2.
                 updateExportedSubState(TargetPage.EXPORTED_TM_UPDATING, tp.getId());
 
-                // step 2: update target page state >> workflow state possibly
-                // >> job state possibly; source page state
-                ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
-
+                synchronized (LOCKER)
+                {
+                    // step 2: update target page state >> workflow state
+                    // possibly >> job state
+                    ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
+                }
                 // step 3: populate TM in separate thread for current page.
                 PopulatingTmThread thread = new PopulatingTmThread(tp.getId());
                 Thread t = new MultiCompanySupportedThread(thread);
@@ -475,19 +466,20 @@ public class CapExportServlet extends HttpServlet
         ServerProxy.getWorkflowServer().advanceWorkFlowNotification(key, state);
     }
 
-    // Let the export event observer set the state of the exported page to either
+    // Let the export event observer set the state of the exported page to
+    // either
     // successful or failed.
     private void notifyPageExportComplete(HttpServletRequest p_request, String p_pageId)
-        throws Exception
+            throws Exception
     {
-        String exportBatchId = 
-            p_request.getParameter(ExportConstants.EXPORT_BATCH_ID);
+        String exportBatchId = p_request.getParameter(ExportConstants.EXPORT_BATCH_ID);
 
-        ExportEventObserverHelper.notifyPageExportComplete(
-            Long.parseLong(exportBatchId), p_pageId, p_request);
+        ExportEventObserverHelper.notifyPageExportComplete(Long.parseLong(exportBatchId), p_pageId,
+                p_request);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private void updateExportedSubState(int exportedSubState, Long targetPageId)
     {
         String sql = "UPDATE target_page SET EXPORTED_SUB_STATE = ? WHERE ID = ?";

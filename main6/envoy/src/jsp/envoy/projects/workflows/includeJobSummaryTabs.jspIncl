@@ -12,6 +12,13 @@
 	word-wrap: break-word;
 }
 
+.jobSummaryContentValueWarn {
+	display: inline-block;
+	width: 260px;
+	word-wrap: break-word;
+	color: red;
+}
+
 .jobSummaryContentRight {
 	border-left: 1px solid #DDD;
 }
@@ -246,10 +253,24 @@ function vilidateRename(){
 		</div>
 		<div>
 		    <c:if test="${blaiseUploadXliffState != null && blaiseUploadXliffState != ''}">
-				<span class="jobSummaryContentName">Blaise Upload Xliff State:</span><span class="jobSummaryContentValue">${blaiseUploadXliffState}</span>
+				<c:choose>
+					<c:when test="${blaiseUploadXliffState == 'fail'}">
+					  <span class="jobSummaryContentName"><%=bundle.getString("lb_blaise_upload_state")%>:</span><span class="jobSummaryContentValueWarn">${blaiseUploadXliffState}</span>
+					</c:when>
+					<c:otherwise>
+					  <span class="jobSummaryContentName"><%=bundle.getString("lb_blaise_upload_state")%>:</span><span class="jobSummaryContentValue">${blaiseUploadXliffState}</span>
+					</c:otherwise>
+				</c:choose>
 			</c:if>
 			<c:if test="${blaiseCompleteState != null && blaiseCompleteState != ''}">
-				<span class="jobSummaryContentName jobSummaryContentRight">Blaise Complete State:</span><span class="jobSummaryContentValue">${blaiseCompleteState}</span>			
+				<c:choose>
+					<c:when test="${blaiseCompleteState == 'fail'}">
+					  <span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_blaise_complete_state")%>:</span><span class="jobSummaryContentValueWarn">${blaiseCompleteState}</span>
+					</c:when>
+					<c:otherwise>
+					  <span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_blaise_complete_state")%>:</span><span class="jobSummaryContentValue">${blaiseCompleteState}</span>
+					</c:otherwise>
+				</c:choose>
 			</c:if>
 		</div>
 

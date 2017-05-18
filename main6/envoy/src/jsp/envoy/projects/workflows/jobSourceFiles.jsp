@@ -224,6 +224,48 @@ function editfileprofile(param)
 	pageSearchTextForm.action = "<%=editFileProfileURL%>&action=edit&&radioBtn="+ param;  
 	pageSearchTextForm.submit();   
 }
+
+function showBlaiseUploadException(blaiseEntryId)
+{
+	var uploadDivId = "blaiseUploadExceptionDiv" + blaiseEntryId;
+    var uploadDiv = document.getElementById(uploadDivId);
+    if (uploadDiv.style.display == "block")
+    {
+    	uploadDiv.style.display = "none";
+    } 
+    else 
+    {
+    	uploadDiv.style.display = "block";
+    }
+    // close complete error when clicking upload error
+    var completeDivId = "blaiseCompleteExceptionDiv" + blaiseEntryId;
+    var completeDiv = document.getElementById(completeDivId);
+    if (completeDiv.style.display == "block")
+    {
+    	completeDiv.style.display = "none";
+    } 
+}
+
+function showBlaiseCompleteException(blaiseEntryId)
+{
+	var completeDivId = "blaiseCompleteExceptionDiv" + blaiseEntryId;
+    var completeDiv = document.getElementById(completeDivId);
+    if (completeDiv.style.display == "block")
+    {
+    	completeDiv.style.display = "none";
+    } 
+    else 
+    {
+    	completeDiv.style.display = "block";
+    }
+    // close upload error when clicking complete error
+    var uploadDivId = "blaiseUploadExceptionDiv" + blaiseEntryId;
+    var uploadDiv = document.getElementById(uploadDivId);
+    if (uploadDiv.style.display == "block")
+    {
+    	uploadDiv.style.display = "none";
+    }
+}
 </script>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
@@ -308,10 +350,10 @@ function editfileprofile(param)
 				<td class="scroll" style="padding:2 0;width:3%;text-align:center;white-space:nowrap">
 					<%=bundle.getString("lb_source")%>
 				</td>
-				<td class="scroll" style="padding:2 0;width:15%;text-align:center;white-space:nowrap">
+				<td class="scroll" style="padding:2 0;width:10%;text-align:center;white-space:nowrap">
 					<%=bundle.getString("lb_blaise_entry_id")%>
 				</td>
-				<td class="scroll" style="padding:2 0;width:15%;text-align:center;white-space:nowrap">
+				<td class="scroll" style="padding:2 0;width:20%;text-align:center;white-space:nowrap">
 					<%=bundle.getString("lb_blaise_state_upload_complete")%>
 				</td>
 				</c:when>
@@ -417,9 +459,41 @@ function editfileprofile(param)
 					</td>
 					<c:if test="${isBlaiseJob}">
 					<td style="text-align:center">${item.blaiseEntryId}</td>
-					<td style="text-align:center">${item.blaiseStateUploadComplete}</td>
+					<td style="text-align:center">
+					<c:choose>
+					<c:when test="${item.blaiseUploadState == 'fail'}">
+					<a href="##" class="warningText" onclick="showBlaiseUploadException(${item.blaiseEntryId})">${item.blaiseUploadState}</a>
+					</c:when>
+					<c:otherwise>
+					${item.blaiseUploadState}
+					</c:otherwise>
+					</c:choose>
+					/
+					<c:choose>
+					<c:when test="${item.blaiseCompleteState == 'fail'}">
+					<a href="##" class="warningText" onclick="showBlaiseCompleteException(${item.blaiseEntryId})">${item.blaiseCompleteState}</a>
+					</c:when>
+					<c:otherwise>
+					${item.blaiseCompleteState}
+					</c:otherwise>
+					</c:choose>
+					</td>
 					</c:if>
 		    	</tr>
+		    	<c:if test="${isBlaiseJob}">
+		    	<c:if test="${item.blaiseUploadState == 'fail' || item.blaiseCompleteState == 'fail'}">
+		    	<tr>
+				<td colspan="6">
+				<DIV id ="blaiseUploadExceptionDiv${item.blaiseEntryId}" style="display:none;">
+				<TEXTAREA readonly class="standardText" style="width:100%;border-style:none;min-height:300px;">${item.blaiseUploadException}</TEXTAREA>
+				</DIV>
+				<DIV id ="blaiseCompleteExceptionDiv${item.blaiseEntryId}" style="display:none;">
+				<TEXTAREA readonly class="standardText" style="width:100%;border-style:none;min-height:300px;">${item.blaiseCompleteException}</TEXTAREA>
+				</DIV>
+			    </td>
+			    </tr>
+			    </c:if>
+				</c:if>
 		    </c:forEach>
 		    
 		   	<!-- AddingPages -->

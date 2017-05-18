@@ -15,7 +15,15 @@
  */
 package com.globalsight.everest.page;
 
-import jodd.util.StringUtil;
+import java.util.List;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 
 public class JobSourcePageDisplay
 {
@@ -29,7 +37,10 @@ public class JobSourcePageDisplay
     private long uiFileProfileId;
     // GBS-4749
     private long blaiseEntryId;
-    private String blaiseStateUploadComplete = "--/--";
+    private String blaiseUploadState = "--";
+    private String blaiseCompleteState = "--";
+    private String blaiseUploadException = "";
+    private String blaiseCompleteException = "";
 
     public JobSourcePageDisplay(SourcePage sourcePage)
     {
@@ -126,26 +137,89 @@ public class JobSourcePageDisplay
         this.blaiseEntryId = blaiseEntryId;
     }
 
-    public String getBlaiseStateUploadComplete()
+    public String getBlaiseUploadState()
     {
-        return blaiseStateUploadComplete;
+        return blaiseUploadState;
     }
 
-    public void setBlaiseStateUploadComplete(String blaiseStateUploadComplete)
+    public void setBlaiseUploadState(String blaiseUploadState)
     {
-        this.blaiseStateUploadComplete = blaiseStateUploadComplete;
+        if (StringUtil.isNotEmpty(blaiseUploadState))
+        {
+            this.blaiseUploadState = blaiseUploadState;
+        }
     }
 
-    public void setBlaiseStateUploadComplete(String blaiseUploadState, String blaiseCompleteState)
+    public String getBlaiseCompleteState()
     {
-        if (StringUtil.isEmpty(blaiseUploadState))
+        return blaiseCompleteState;
+    }
+
+    public void setBlaiseCompleteState(String blaiseCompleteState)
+    {
+        if (StringUtil.isNotEmpty(blaiseCompleteState))
         {
-            blaiseUploadState = "--";
+            this.blaiseCompleteState = blaiseCompleteState;
         }
-        if (StringUtil.isEmpty(blaiseCompleteState))
+    }
+
+    public String getBlaiseUploadException()
+    {
+        return blaiseUploadException;
+    }
+
+    public void setBlaiseUploadException(String blaiseUploadException)
+    {
+        if (StringUtil.isNotEmpty(blaiseUploadException))
         {
-            blaiseCompleteState = "--";
+            this.blaiseUploadException = getBlaiseStackTrace(blaiseUploadException);
         }
-        setBlaiseStateUploadComplete(blaiseUploadState + "/" + blaiseCompleteState);
+    }
+
+    public String getBlaiseCompleteException()
+    {
+        return blaiseCompleteException;
+    }
+
+    public void setBlaiseCompleteException(String blaiseCompleteException)
+    {
+        if (StringUtil.isNotEmpty(blaiseCompleteException))
+        {
+            this.blaiseCompleteException = getBlaiseStackTrace(blaiseCompleteException);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private String getBlaiseStackTrace(String exceptionXml)
+    {
+        String stackTrace = "";
+        if (StringUtil.isNotEmpty(exceptionXml))
+        {
+            try
+            {
+                Document document = DocumentHelper.parseText(exceptionXml);
+                Element root = document.getRootElement();
+                List<Element> originalExceptionNodes = root
+                        .elements(GeneralException.ORIGINAL_EXCEPTION);
+                if (originalExceptionNodes != null && originalExceptionNodes.size() > 0)
+                {
+                    List<Element> stackTraceNodes = originalExceptionNodes.get(0)
+                            .elements(GeneralException.STACKTRACE);
+                    if (stackTraceNodes != null && stackTraceNodes.size() > 0)
+                    {
+                        stackTrace = stackTraceNodes.get(0).getText();
+                        stackTrace = StringUtil.replace(stackTrace, "&gt;", ">");
+                        stackTrace = StringUtil.replace(stackTrace, "&lt;", "<");
+                        stackTrace = StringUtil.replace(stackTrace, "&#xd;", "");
+                        stackTrace = StringUtil.replace(stackTrace, "\\\"", "\"");
+                        stackTrace = StringUtil.replace(stackTrace, "\\r\\n", "");
+                    }
+                }
+            }
+            catch (DocumentException ignore)
+            {
+            }
+        }
+        return stackTrace;
     }
 }

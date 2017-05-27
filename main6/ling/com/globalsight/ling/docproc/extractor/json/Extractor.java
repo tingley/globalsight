@@ -7,6 +7,7 @@ package com.globalsight.ling.docproc.extractor.json;
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
@@ -18,7 +19,11 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterSid;
 import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
+import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.ling.common.PTEscapeSequence;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
@@ -32,6 +37,8 @@ import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.extractor.plaintext.PTTmxController;
 import com.globalsight.ling.docproc.extractor.plaintext.PTToken;
 import com.globalsight.ling.docproc.extractor.plaintext.Parser;
+import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 
 public class Extractor extends AbstractExtractor implements ExtractorExceptionConstants
@@ -49,7 +56,7 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
     private Output m_output = null;
     private Filter m_elementPostFilter = null;
     private String m_postFormat = null;
-
+    
     public Extractor()
     {
         super();
@@ -60,9 +67,54 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
         setMainFormat(ExtractorRegistry.FORMAT_JSON);
     }
 
+    private SidFilter getRootJsonSidFilter()
+    {
+        SidFilter rootJsonSidFilter = null;
+        Filter rootFilter = getRootFilter();
+        if (rootFilter != null && rootFilter instanceof XMLRuleFilter)
+        {
+            XMLRuleFilter xmlFilter = (XMLRuleFilter) rootFilter;
+            XmlFilterHelper xmlFilterHelper = new XmlFilterHelper(xmlFilter);
+            try
+            {
+                xmlFilterHelper.init();
+            }
+            catch (Exception e)
+            {
+                s_logger.error(e);
+                return rootJsonSidFilter;
+            }
+            
+            long sidFilterId = xmlFilterHelper.getXmlFilterTags().getSidFilterId();
+            long secondarySidFilter = Long.parseLong(xmlFilterHelper.getSecondarySidFilter());
+            
+            if (sidFilterId > 0)
+            {
+                SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
+                if (sf != null && sf.getType() == 4)
+                {
+                    rootJsonSidFilter = sf;
+                }
+            }
+            
+            if (rootJsonSidFilter == null && secondarySidFilter > 0)
+            {
+                SidFilter sf = HibernateUtil.get(SidFilter.class, secondarySidFilter);
+                if (sf != null)
+                {
+                    rootJsonSidFilter = sf;
+                }
+            }
+        }
+        
+        return rootJsonSidFilter;
+    }
+    
     public void extract() throws ExtractorException
     {
         this.setFormat();
+        
+        SidFilter rootJsonSidFilter = getRootJsonSidFilter();
 
         m_output = getOutput();
         try
@@ -81,6 +133,11 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
             if (jsonFilter != null)
             {
                 isEnableSidSupport = jsonFilter.isEnableSidSupport();
+                if (rootJsonSidFilter != null)
+                {
+                    isEnableSidSupport = true;
+                }
+                
                 elementPostFilterId = jsonFilter.getElementPostFilterId();
                 elementPostFilterTableName = jsonFilter.getElementPostFilterTableName();
                 if (elementPostFilterId >= 0 && elementPostFilterTableName != null)
@@ -92,6 +149,18 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
                         m_postFormat = FilterConstants.FILTER_TABLE_NAMES_FORMAT
                                 .get(m_elementPostFilter.getFilterTableName());
                     }
+                }
+                
+                SidFilter sidFilter = jsonFilter.getSidFilter();
+                if (sidFilter != null)
+                {
+                    ArrayList<GlobalExclusionFilterSid> exclusionSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sidFilter);
+                    
+                    if (rootJsonSidFilter != null)
+                    {
+                        exclusionSids.addAll(GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(rootJsonSidFilter));
+                    }
+                    m_output.setExclusionFilterSids(exclusionSids);
                 }
             }
             Reader reader = readInput();

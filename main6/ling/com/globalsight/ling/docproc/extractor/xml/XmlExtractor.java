@@ -53,6 +53,7 @@ import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterSid;
 import com.globalsight.cxe.entity.filterconfiguration.InternalText;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
 import com.globalsight.ling.common.HtmlEntities;
@@ -74,6 +75,7 @@ import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.xml.xmlrule.CommentRuleItem;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.SegmentUtil;
@@ -204,7 +206,8 @@ public class XmlExtractor extends AbstractExtractor
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
     private ArrayList<GlobalExclusionFilterSid> allGlobalExclusionFilterSids = null;
 
-    private String sidPrecedence = "xml";
+    private long sidFilterId = -1;
+    private long secondarySidFilter = -1;
     
     //
     // Constructors
@@ -326,7 +329,9 @@ public class XmlExtractor extends AbstractExtractor
             // get rule map for the document
             m_ruleMap = m_rules.buildRulesWithFilter(document, m_xmlFilterHelper.getXmlFilterTags(),
                     mainFormat);
-            sidPrecedence = m_xmlFilterHelper.getSidPrecedence();
+            
+            sidFilterId = m_xmlFilterHelper.getXmlFilterTags().getSidFilterId();
+            secondarySidFilter = Long.parseLong(m_xmlFilterHelper.getSecondarySidFilter());
             for (ExtractRule rule : rules)
             {
                 rule.buildRule(document, m_ruleMap);
@@ -2034,6 +2039,29 @@ public class XmlExtractor extends AbstractExtractor
         }
         m_admin.addContent(p_ToAdd);
     }
+    
+    private boolean isXmlSidFirst()
+    {
+        if (sidFilterId > 0)
+        {
+            SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
+            if (sf != null)
+            {
+                return sf.getType() == 1;
+            }
+        }
+        
+        if (secondarySidFilter > 0)
+        {
+            SidFilter sf = HibernateUtil.get(SidFilter.class, secondarySidFilter);
+            if (sf != null)
+            {
+                return sf.getType() == 1;
+            }
+        }
+        
+        return false;
+    }
 
     private void outputDocumentElement(DocumentElement element, String sid)
     {
@@ -2042,7 +2070,7 @@ public class XmlExtractor extends AbstractExtractor
             TranslatableElement e = (TranslatableElement) element;
             if (e.getSid() != null && e.getSid().length() > 0)
             {
-                if ("xml".equalsIgnoreCase(sidPrecedence))
+                if (isXmlSidFirst())
                 {
                     ((TranslatableElement) element).setSid(sid);
                 }
@@ -2177,7 +2205,27 @@ public class XmlExtractor extends AbstractExtractor
             return false;
         
         if (allGlobalExclusionFilterSids == null)
-            allGlobalExclusionFilterSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters();
+        {
+            allGlobalExclusionFilterSids = new ArrayList<>();
+            
+            if (sidFilterId > 0)
+            {
+                SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
+                if (sf != null)
+                {
+                    allGlobalExclusionFilterSids.addAll(GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sf));
+                }
+            }
+            
+            if (secondarySidFilter > 0)
+            {
+                SidFilter sf = HibernateUtil.get(SidFilter.class, secondarySidFilter);
+                if (sf != null)
+                {
+                    allGlobalExclusionFilterSids.addAll(GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sf));
+                }
+            }
+        }
         
         for (GlobalExclusionFilterSid f : allGlobalExclusionFilterSids)
         {
@@ -2260,7 +2308,7 @@ public class XmlExtractor extends AbstractExtractor
                 }
                 else
                 {
-                    output = switchExtractor(replaced, otherFormat, otherFilter);
+                    output = switchExtractor(replaced, otherFormat, null, otherFilter, true, this.getMainFilter());
                 }
                 Iterator it = output.documentElementIterator();
                 while (it.hasNext())

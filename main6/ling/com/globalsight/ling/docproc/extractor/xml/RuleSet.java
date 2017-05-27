@@ -139,13 +139,23 @@ public class RuleSet implements EntityResolver, ErrorHandler
             long sidFilterId = xmlFilterTags.getSidFilterId();
             if (sidFilterId > 0)
             {
-                SidFilter f = HibernateUtil.get(SidFilter.class, xmlFilterTags.getSidFilterId());
-                if (f != null)
+                SidFilter f = HibernateUtil.get(SidFilter.class, sidFilterId);
+                if (f != null && f.getType() == 1)
                 {
                     ruleMap = buildSidTags2(toBeExtracted, ruleMap,f);
                 }
             }
             
+            long secondarySidFilterId = xmlFilterTags.getSecondarySidFilterId();
+            if (secondarySidFilterId > 0)
+            {
+                SidFilter f = HibernateUtil.get(SidFilter.class, secondarySidFilterId);
+                if (f != null && f.getType() == 1)
+                {
+                    ruleMap = buildSidTags2(toBeExtracted, ruleMap,f);
+                }
+            }
+
             // comment this to translate filter data
             // if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(format))
             // {

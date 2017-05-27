@@ -663,6 +663,7 @@ public class FilterHelper
         List<Long> xmlIDList = new ArrayList<Long>();
         List<Long> baseIdList = new ArrayList<Long>();
         List<Long> sidIdList = new ArrayList<Long>();
+        List<Long> exclusionIdList = new ArrayList<Long>();
         for (SpecialFilterToDelete f : p_specialFilterToDeletes)
         {
             if (FilterConstants.HTML_TABLENAME.equals(f.getFilterTableName()))
@@ -684,6 +685,12 @@ public class FilterHelper
             {
                 sidIdList.add(f.getSpecialFilterId());
             }
+            else if (FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME.equals(f
+                    .getFilterTableName()))
+            {
+                exclusionIdList.add(f.getSpecialFilterId());
+            }
+            
         }
 
         // 2. Checks the filter list after separate.
@@ -703,6 +710,7 @@ public class FilterHelper
         checkXMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, xmlIDList,
                 p_removeInfo, p_companyId);
 
+        checkExclusionFilterIsUsedByFilter(exclusionIdList, p_removeInfo, p_companyId);
         checkSidFilterIsUsedByFilter(sidIdList, p_removeInfo, p_companyId);
         checkBaseFilterIsUsedByFiter(baseIdList, p_removeInfo, p_companyId);
     }
@@ -839,6 +847,28 @@ public class FilterHelper
         }
     }
     
+    public static void checkExclusionFilterIsUsedByFilter(List<Long> p_filteIDList, RemoveInfo p_removeInfo, Long p_companyId)
+    {
+        String hql = "from SidFilter where exclusionFilterId = ?";
+        for (Long hID : p_filteIDList)
+        {
+            List<SidFilter> js = (List<SidFilter>) HibernateUtil.search(hql, hID);
+            if (js.size() > 0)
+            {
+                for (SidFilter j : js)
+                {
+                    FilterInfos filterInfo = p_removeInfo.new FilterInfos(hID,
+                            FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME,
+                            Long.toString(j.getId()), FilterConstants.SID_TABLENAME);
+                    p_removeInfo.addUsedFilters(filterInfo);
+                    
+                    if (!p_removeInfo.isUsedByFilters())
+                        p_removeInfo.setUsedByFilters(true);
+                }
+            }
+        }
+    }
+    
     public static void checkSidFilterIsUsedByFilter(List<Long> p_filteIDList, RemoveInfo p_removeInfo, Long p_companyId)
     {
         String hql = "from XMLRuleFilter where companyId = ?";
@@ -856,7 +886,7 @@ public class FilterHelper
                 {
                     logger.error("configXml : " + f.getConfigXml(), e);
                 }
-                if (Long.parseLong(parser.getSidFilterId()) == hID)
+                if (Long.parseLong(parser.getSidFilterId()) == hID || Long.parseLong(parser.getSecondarySidFilter()) == hID)
                 {
                     if (!p_removeInfo.isUsedByFilters())
                         p_removeInfo.setUsedByFilters(true);

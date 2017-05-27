@@ -42,7 +42,7 @@ public class Output
     private String m_currentDataFormat = null;
     private boolean m_currentAttributesSet = false;
 
-    private ArrayList<GlobalExclusionFilterSid> allGlobalExclusionFilterSids = null;
+    private ArrayList<GlobalExclusionFilterSid> exclusionFilterSids = null;
     
     /**
      * Output constructor comment.
@@ -627,14 +627,14 @@ public class Output
         if (sid == null)
             return false;
         
+        if (exclusionFilterSids == null || exclusionFilterSids.size() == 0)
+            return false;
+        
         sid = sid.trim();
         if (sid.length() == 0)
             return false;
         
-        if (allGlobalExclusionFilterSids == null)
-            allGlobalExclusionFilterSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters();
-        
-        for (GlobalExclusionFilterSid f : allGlobalExclusionFilterSids)
+        for (GlobalExclusionFilterSid f : exclusionFilterSids)
         {
             if (!f.isSidIsRegEx() && f.getSid().equals(sid))
             {
@@ -648,5 +648,15 @@ public class Output
         }
         
         return false;
+    }
+
+    public ArrayList<GlobalExclusionFilterSid> getExclusionFilterSids()
+    {
+        return exclusionFilterSids;
+    }
+
+    public void setExclusionFilterSids(ArrayList<GlobalExclusionFilterSid> exclusionFilterSids)
+    {
+        this.exclusionFilterSids = exclusionFilterSids;
     }
 }

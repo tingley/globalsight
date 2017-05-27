@@ -259,13 +259,13 @@ XMLRuleFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	str.append("</tr>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td'>" + jsFilterNameSidFilter + "</td>");
-	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport(this.filter) + "</td>");
+	str.append("<td class='htmlFilter_left_td'>" + jsFilterNamePrimarySidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generatePrimarySidFilter(this.filter) + "</td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsSidFilterPrecedence + "</td>");
-	str.append("<td class='htmlFilter_right_td'>" + this.generateSidPrecedence(this.filter) + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSecondarySidFilter(this.filter) + "</td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
@@ -390,13 +390,13 @@ XMLRuleFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("</tr>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td'>" + jsFilterNameSidFilter + "</td>");
-	str.append("<td class='htmlFilter_right_td'>" + this.generateSidSupport() + "</td>");
+	str.append("<td class='htmlFilter_left_td'>" + jsFilterNamePrimarySidFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generatePrimarySidFilter() + "</td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsSidFilterPrecedence + "</td>");
-	str.append("<td class='htmlFilter_right_td'>" + this.generateSidPrecedence() + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateSecondarySidFilter() + "</td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
@@ -489,7 +489,7 @@ function saveXmlRuleFilter()
 	var cdataPostFilterId = (splitedCdataPostIdTable) ? splitedCdataPostIdTable[0] : "-1";
 	var cdataPostFilter = (splitedCdataPostIdTable) ? splitedCdataPostIdTable[1] : "-1";
 	var sidFilterId = $("#xmlSidFilter").val();
-	var sidFilterPrecedence = $("#xmlSidFilterPrecedence").val();
+	var sidFilterSecondarySidFilter = $("#xmlSidFilterPrecedence").val();
 	
 	// TODO use xml rule will be used after all function is added.
 	var useXmlRule = "true";
@@ -539,7 +539,7 @@ function saveXmlRuleFilter()
 		cdataPostFilter : cdataPostFilter,
 		cdataPostFilterId : cdataPostFilterId,
 		sidFilterId : sidFilterId,
-		sidFilterPrecedence : sidFilterPrecedence,
+		sidFilterSecondarySidFilter : sidFilterSecondarySidFilter,
 		isCheckWellFormed : isCheckWellFormed,
 		isGerateLangInfo : isGerateLangInfo,
 		preserveWsTags : preserveWsTags,
@@ -640,7 +640,7 @@ function updateXmlRuleFilterCallback(data)
 		xrFilter.sidSupportTagName = isFilterValidCallback.obj.sidSupportTagName;
 		xrFilter.sidSupportAttName = isFilterValidCallback.obj.sidSupportAttName;
 		xrFilter.sidFilterId = isFilterValidCallback.obj.sidFilterId;
-		xrFilter.sidFilterPrecedence = isFilterValidCallback.obj.sidFilterPrecedence;
+		xrFilter.sidFilterSecondarySidFilter = isFilterValidCallback.obj.sidFilterSecondarySidFilter;
 		xrFilter.isCheckWellFormed = isFilterValidCallback.obj.isCheckWellFormed;
 		xrFilter.isGerateLangInfo = isFilterValidCallback.obj.isGerateLangInfo;
 		xrFilter.entities = isFilterValidCallback.obj.entities;
@@ -690,7 +690,7 @@ function saveXmlRuleFilterCallback(data)
 		xrFilter.sidSupportTagName = isFilterValidCallback.obj.sidSupportTagName;
 		xrFilter.sidSupportAttName = isFilterValidCallback.obj.sidSupportAttName;
 		xrFilter.sidFilterId = isFilterValidCallback.obj.sidFilterId;
-		xrFilter.sidFilterPrecedence = isFilterValidCallback.obj.sidFilterPrecedence;
+		xrFilter.sidFilterSecondarySidFilter = isFilterValidCallback.obj.sidFilterSecondarySidFilter;
 		xrFilter.isCheckWellFormed = isFilterValidCallback.obj.isCheckWellFormed;
 		xrFilter.isGerateLangInfo = isFilterValidCallback.obj.isGerateLangInfo;
 		xrFilter.entities = isFilterValidCallback.obj.entities;
@@ -826,11 +826,12 @@ XMLRuleFilter.prototype.generateCdataPostFilter = function (filter)
 	return str.toString();
 }
 
-XMLRuleFilter.prototype.generateSidSupport = function (filter)
+XMLRuleFilter.prototype.generatePrimarySidFilter = function (filter)
 {	
-	var str = new StringBuffer("<select id='xmlSidFilter' style='width:150px;' class='xml_filter_select'>");
+	var str = new StringBuffer("<select id='xmlSidFilter' style='width:150px;' class='xml_filter_select' onchange='xmlFilter.updateSecondarySidFilter()'>");
 	str.append("<option value='-1'" + ((filter && filter.sidFilterId == "-1") ? " selected" : "") + ">Choose&nbsp;&nbsp;&nbsp;</option>");	
 	
+	//add xml sid filter.
 	var data = {
 		type : 1
 	}
@@ -842,17 +843,75 @@ XMLRuleFilter.prototype.generateSidSupport = function (filter)
 		var sf = eval("(" + sidFilters[i] + ")");
 		str.append("<option value='" + sf.id + "'" + ((filter && filter.sidFilterId == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
 	}
+	
+	//add json sid filter.
+	var data = {
+		type : 4
+	}
+	var sidFilters = getAjaxValue("getSidFilters", data);
+	if (sidFilters){
+		sidFilters = eval(sidFilters);
+	}
+	for (var i = 0; i <　sidFilters.length; i++){
+		var sf = eval("(" + sidFilters[i] + ")");
+		str.append("<option value='" + sf.id + "'" + ((filter && filter.sidFilterId == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
+	}
+	
 	str.append("</select>");
 	return str.toString();
 }
 
-XMLRuleFilter.prototype.generateSidPrecedence = function (filter)
-{	
-	var str = new StringBuffer("<select id='xmlSidFilterPrecedence' class='xml_filter_select'>");
-	str.append("<option value='xml'" + ((filter && filter.sidFilterPrecedence == "xml") ? " selected" : "") + ">XML SID</option>");	
-	str.append("<option value='json'" + ((filter && filter.sidFilterPrecedence == "json") ? " selected" : "") + ">JSON SID</option>");	
+XMLRuleFilter.prototype.generateSecondarySidFilter = function (filter)
+{
+	var sidFilterId = "-1";
+	
+	var str = new StringBuffer("<select id='xmlSidFilterPrecedence' style='width:150px;' class='xml_filter_select'>");
+	str.append("<option  value='-1'" + ((filter && filter.sidFilterSecondarySidFilter == "-1") ? " selected" : "") + ">Choose&nbsp;&nbsp;&nbsp;</option>");	
+	
+	if (filter){
+		sidFilterId = filter.sidFilterId;
+	}
+	
+	if (sidFilterId != "-1"){
+		var data = {
+		    primaryFilterId : sidFilterId
+		}
+		var sidFilters = getAjaxValue("getSecondarySidFilters", data);
+		if (sidFilters){
+			sidFilters = eval(sidFilters);
+		}
+		for (var i = 0; i <　sidFilters.length; i++){
+			var sf = eval("(" + sidFilters[i] + ")");
+			str.append("<option class='secondarySidFilterOption' value='" + sf.id + "'" + ((filter && filter.sidFilterSecondarySidFilter == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
+		}
+	}
+
 	str.append("</select>");
 	return str.toString();
+}
+
+XMLRuleFilter.prototype.updateSecondarySidFilter = function (filter)
+{
+	var selectedId = $("#xmlSidFilterPrecedence").val();
+	var xmlSidFilterId = $("#xmlSidFilter").val();
+	
+	$(".secondarySidFilterOption").remove();
+	
+	if (xmlSidFilterId != '-1'){
+		var xmlSidFilterPrecedence = $("#xmlSidFilterPrecedence");
+		
+		var data = {
+		    primaryFilterId : xmlSidFilterId
+		}
+		var sidFilters = getAjaxValue("getSecondarySidFilters", data);
+		if (sidFilters){
+			sidFilters = eval(sidFilters);
+		}
+		for (var i = 0; i <　sidFilters.length; i++){
+			var sf = eval("(" + sidFilters[i] + ")");
+			xmlSidFilterPrecedence.append("<option class='secondarySidFilterOption' value='" + sf.id + "'" + ((selectedId == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
+		}
+	}
 }
 
 XMLRuleFilter.prototype.generateCheckWellFormed = function (filter)

@@ -1181,6 +1181,15 @@ session="true" %>
                                         </td>
                                         <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
                                     </tr>
+                                    <tr>
+                                        <td class='specialFilter_dialog_label' VALIGN='bottom'><%= bundle.getString("lb_filter_global_exclusionfilter") %>:</td>
+                                        <td class='specialFilter_dialog_label desc' VALIGN='bottom'>
+                                            <select id="sidFilterExclusionfilter" name="sidFilterExclusionfilter">
+                                                <option value="-1"><%= bundle.getString("lb_choose") %></option>
+                                            </select>
+                                        </td>
+                                        <td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>
+                                    </tr>
                                 </table>
                                 
                                 <div id="div_sid_filter_type_1" class="sidTypeDivs" style="width:100%; margin-top: 15px; ">

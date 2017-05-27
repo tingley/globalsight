@@ -31,6 +31,7 @@ import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterSid;
 import com.globalsight.cxe.entity.filterconfiguration.InternalText;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
+import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
 import com.globalsight.ling.common.JPEscapeSequence;
 import com.globalsight.ling.common.JPMFEscapeSequence;
 import com.globalsight.ling.common.NativeEnDecoderException;
@@ -244,6 +245,10 @@ public class Extractor
         if (sid == null)
             return false;
         
+        SidFilter sidFilter = jpf.getSidFilter();
+        if (sidFilter == null)
+            return false;
+        
         int n = sid.lastIndexOf("\n");
         if (n > 0)
         {
@@ -252,10 +257,10 @@ public class Extractor
         
         sid = sid.trim();
         if (sid.length() == 0)
-            return false;
+            return false;                
         
         if (allGlobalExclusionFilterSids == null)
-            allGlobalExclusionFilterSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters();
+            allGlobalExclusionFilterSids = GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sidFilter);
         
         for (GlobalExclusionFilterSid f : allGlobalExclusionFilterSids)
         {

@@ -81,7 +81,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
     private String m_isGerateLangInfo = null;
     private int m_entityExportMode = -1;
     private String m_sidFilterId = null;
-    private String sidPrecedence = null;
+    private String secondarySidFilter = null;
 
     public XmlFilterConfigParser(XMLRuleFilter xmlFilter)
     {
@@ -107,7 +107,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             JSONArray embTags, JSONArray transAttrTags, JSONArray contentInclTags,
             JSONArray cdataPostfilterTags, JSONArray entities, JSONArray processIns,
             JSONArray internalTag, JSONArray srcCmtXmlComment, JSONArray srcCmtXmlTag, String sidFilterId, 
-            String sidFilterPrecedence)
+            String sidFilterSecondarySidFilter)
             throws Exception
     {
         StringBuffer sb = new StringBuffer();
@@ -153,9 +153,9 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             sb.append("</").append(NODE_SID_FILTER_ID).append(">");
         }
         
-        sb.append("<").append(NODE_SID_FILTER_PRECEDENCE).append(">");
-        sb.append(sidFilterPrecedence);
-        sb.append("</").append(NODE_SID_FILTER_PRECEDENCE).append(">");
+        sb.append("<").append(NODE_SID_FILTER_SECONDARY).append(">");
+        sb.append(sidFilterSecondarySidFilter);
+        sb.append("</").append(NODE_SID_FILTER_SECONDARY).append(">");
         sb.append("<").append(NODE_IS_CHECK_WELL_FORMED).append(">");
         sb.append(isCheckWellFormed);
         sb.append("</").append(NODE_IS_CHECK_WELL_FORMED).append(">");
@@ -278,15 +278,15 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         return m_extendedWhiteSpaceChars;
     }
     
-    public String getSidPrecedence()
+    public String getSecondarySidFilter()
     {
-        if (sidPrecedence == null)
+        if (secondarySidFilter == null)
         {
-            String result = getSingleElementValue(NODE_SID_FILTER_PRECEDENCE);
-            sidPrecedence = (result == null ? "xml" : result);
+            String result = getSingleElementValue(NODE_SID_FILTER_SECONDARY);
+            secondarySidFilter = (result == null ? "-1" : result);
         }
         
-        return sidPrecedence;
+        return secondarySidFilter;
     }
     
     public String getSidFilterId()

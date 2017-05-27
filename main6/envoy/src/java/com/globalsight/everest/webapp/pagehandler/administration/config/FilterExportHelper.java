@@ -237,9 +237,12 @@ public class FilterExportHelper implements ConfigConstants
             buffer.append("sid_filter.").append(sidsFilter.getId())
                     .append(".COMPANY_ID = ").append(sidsFilter.getCompanyId())
                     .append(NEW_LINE);
+            buffer.append("sid_filter.").append(sidsFilter.getId())
+                .append(".EXCLUSION_FILTER_ID = ").append(sidsFilter.getExclusionFilterId())
+                .append(NEW_LINE);
             buffer.append("##sid_filter.").append(sidsFilter.getId())
                     .append(".end").append(NEW_LINE).append(NEW_LINE);
-
+            
             writeToFile(propertyFile, buffer.toString().getBytes());
         }
     }
@@ -1273,8 +1276,7 @@ public class FilterExportHelper implements ConfigConstants
             if (javaPropertiesFilter.getSidFilter() != null)
             {
                 SidFilter f = javaPropertiesFilter.getSidFilter();
-                filterSet.add(f.getFilterTableName() + "."
-                        + f.getId());
+                addSidFilter(filterSet, f);
             }
         }
         else if (FilterConstants.JSON_TABLENAME.equalsIgnoreCase(filterTableName))
@@ -1301,8 +1303,17 @@ public class FilterExportHelper implements ConfigConstants
             if (jsonFilter.getSidFilter() != null)
             {
                 SidFilter f = jsonFilter.getSidFilter();
-                filterSet.add(f.getFilterTableName() + "."
-                        + f.getId());
+                addSidFilter(filterSet, f);
+            }
+        }
+        else if (FilterConstants.SID_TABLENAME.equalsIgnoreCase(filterTableName))
+        {
+            SidFilter sidFilter = (SidFilter) filter;
+            GlobalExclusionFilter exclusionFilter = sidFilter.getGlobalExclusionFilter();
+            if (exclusionFilter != null)
+            {
+                filterSet.add(exclusionFilter.getFilterTableName() + "."
+                        + exclusionFilter.getId());
             }
         }
         else if (filterTableName.equalsIgnoreCase(FilterConstants.PLAINTEXT_TABLENAME))
@@ -1315,8 +1326,7 @@ public class FilterExportHelper implements ConfigConstants
                 
                 if (parser.getSidFilterId() > 0)
                 {
-                    filterSet.add("sid_filter."
-                            + parser.getSidFilterId());
+                    addSidFilter(filterSet, parser.getSidFilterId());
                 }
                 
                 String postFilterTableName = parser.getElementPostFilterTableName();
@@ -1583,8 +1593,19 @@ public class FilterExportHelper implements ConfigConstants
                     
                     if (xmlFilterConfigParser.getSidFilterId() != null)
                     {
-                        filterSet.add("sid_filter."
-                                + xmlFilterConfigParser.getSidFilterId());
+                        String sidFilterId = xmlFilterConfigParser.getSidFilterId();
+                        if (sidFilterId != null)
+                        {
+                            long id = Long.parseLong(sidFilterId);
+                            addSidFilter(filterSet, id);
+                        }
+                    }
+                    
+                    if (xmlFilterConfigParser.getSecondarySidFilter() != null)
+                    {
+                        long id = Long.parseLong(xmlFilterConfigParser.getSecondarySidFilter());
+                        addSidFilter(filterSet, id);
+                        
                     }
                     
                     String postFilterTableName = xmlFilterConfigParser
@@ -1619,8 +1640,7 @@ public class FilterExportHelper implements ConfigConstants
                             if (jsonFilter.getSidFilter() != null)
                             {
                                 SidFilter f = jsonFilter.getSidFilter();
-                                filterSet.add(f.getFilterTableName() + "."
-                                        + f.getId());
+                                addSidFilter(filterSet, f);
                             }
 
                             if (jsoBFM != null)
@@ -1751,6 +1771,30 @@ public class FilterExportHelper implements ConfigConstants
                     + baseFilterMapping.getBaseFilterId());
         }
         return filterSet;
+    }
+    
+    public static void addSidFilter(Set<String> filterSet, long sidFilterId)
+    {
+        if (sidFilterId > 0)
+        {
+            SidFilter sidFilter = HibernateUtil.get(SidFilter.class, sidFilterId);
+            addSidFilter(filterSet, sidFilter);
+        }
+    }
+    
+    public static void addSidFilter(Set<String> filterSet, SidFilter sidFilter)
+    {
+        if (sidFilter != null)
+        {
+            filterSet.add("sid_filter." + sidFilter.getId());
+            
+            GlobalExclusionFilter exclusionFilter = sidFilter.getGlobalExclusionFilter();
+            if (exclusionFilter != null)
+            {
+                filterSet.add(exclusionFilter.getFilterTableName() + "."
+                        + exclusionFilter.getId());
+            }
+        }
     }
 
 

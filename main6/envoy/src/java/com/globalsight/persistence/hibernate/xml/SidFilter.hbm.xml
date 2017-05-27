@@ -16,5 +16,6 @@
 			not-null="true" unique="false" />
 		<property name="type" column="FILTER_TYPE" type="int"
 			not-null="true" unique="false" />
+		<property name="exclusionFilterId" column="EXCLUSION_FILTER_ID" type="long" />	
     </class>
 </hibernate-mapping>

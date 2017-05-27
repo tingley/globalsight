@@ -55,6 +55,7 @@ var jsFilterNameO2010 = "<%= bundle.getString("lb_filter_o2010Filter") %>";
 var jsFilterNamePO = "<%= bundle.getString("lb_filter_pofilter") %>";
 var jsFilterNameBase = "<%= bundle.getString("lb_filter_basefilter") %>";
 var jsFilterNameSidFilter = "<%= bundle.getString("lb_filter_sidfilter") %>";
+var jsFilterNamePrimarySidFilter = "<%= bundle.getString("lb_filter_sidfilter_Primary") %>";
 var jsFilterNameGlobalExclusionFilter = "<%= bundle.getString("lb_filter_global_exclusionfilter") %>";
 var jsFilterNameJsonFilter = "<%= bundle.getString("lb_filter_jsonfilter") %>";
 var jsPriority = "<%= bundle.getString("lb_priority") %>";

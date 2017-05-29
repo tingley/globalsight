@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1125,6 +1127,13 @@ public class AjaxService extends HttpServlet
             f = HibernateUtil.get(SidFilter.class, Long.parseLong(id));
         }
         
+        long exclusionFilterId = -1;
+        String exclusionFilterIdStr = request.getParameter("exclusionFilterId");
+        if (exclusionFilterIdStr != null)
+        {
+            exclusionFilterId = Long.parseLong(exclusionFilterIdStr);
+        }
+        
         String hql = "from SidFilter where filterName = ? and companyId = ?";
         List<SidFilter> fs = (List<SidFilter>) HibernateUtil.search(hql, filterName, companyId);
         for (SidFilter f1 : fs)
@@ -1142,6 +1151,7 @@ public class AjaxService extends HttpServlet
         f.setConfigXml(rule);
         f.setType(Integer.parseInt(request.getParameter("filterType")));
         f.setFilterDescription(request.getParameter("filterDesc").trim());
+        f.setExclusionFilterId(exclusionFilterId);
         HibernateUtil.saveOrUpdate(f);
         
         writer.write(f.getId() + "");
@@ -1263,7 +1273,7 @@ public class AjaxService extends HttpServlet
         String contentInclTags = request.getParameter("contentInclTags");
         String cdataPostfilterTags = request.getParameter("cdataPostfilterTags");
         String sidFilterId = request.getParameter("sidFilterId");
-        String sidFilterPrecedence = request.getParameter("sidFilterPrecedence");
+        String sidFilterSecondarySidFilter = request.getParameter("sidFilterSecondarySidFilter");
         String isCheckWellFormed = request.getParameter("isCheckWellFormed");
         String isGerateLangInfo = request.getParameter("isGerateLangInfo");
         String entities = request.getParameter("entities");
@@ -1315,7 +1325,7 @@ public class AjaxService extends HttpServlet
                     jsonArrayPreserveWsTags, jsonArrayEmbTags, jsonArrayTransAttrTags,
                     jsonArrayContentInclTags, jsonArrayCdataPostfilterTags, jsonArrayEntities,
                     jsonArrayProcessIns, jsonArrayInternalTag, jsonArraySrcCmtXmlComment,
-                    jsonArraySrcCmtXmlTag, sidFilterId, sidFilterPrecedence);
+                    jsonArraySrcCmtXmlTag, sidFilterId, sidFilterSecondarySidFilter);
         }
         catch (Exception e)
         {
@@ -1850,13 +1860,80 @@ public class AjaxService extends HttpServlet
         }
     }
     
+    private List<SidFilter> getSidFilters(int type)
+    {
+        String hql = "from SidFilter where companyId = ? and type = ?";
+        List<SidFilter> fs = (List<SidFilter>)HibernateUtil.search(hql, companyId, type);
+        Collections.sort(fs, new Comparator<SidFilter>()
+        {
+            @Override
+            public int compare(SidFilter arg0, SidFilter arg1)
+            {
+                return arg0.getFilterName().compareTo(arg1.getFilterName());
+            }
+        });
+        return fs;
+    }
+    
     public void getSidFilters()
     {
         int type =  Integer.parseInt(request.getParameter("type"));
-        String hql = "from SidFilter where companyId = ? and type = ?";
-        List<SidFilter> fs = (List<SidFilter>)HibernateUtil.search(hql, companyId, type);
+        List<SidFilter> fs = getSidFilters(type);
         JSONArray ob = new JSONArray();
         for (SidFilter f : fs)
+        {
+            ob.put(f.toJSON(companyId));
+        }
+        writer.write(ob.toString());
+    }
+    
+    public void getSecondarySidFilters()
+    {
+        SidFilter filter = null;
+        long primaryFilterId =  Long.parseLong(request.getParameter("primaryFilterId"));
+        if (primaryFilterId > 0)
+        {
+            filter = HibernateUtil.get(SidFilter.class, primaryFilterId);
+        }
+        
+        ArrayList<Integer> types = new ArrayList<>();
+        types.add(1);
+        types.add(4);
+        
+        List<SidFilter> fs = new ArrayList<>();
+        
+        for (Integer t : types)
+        {
+            if (filter == null || t != filter.getType())
+            {
+                fs.addAll(getSidFilters(t));
+            }
+        }
+        
+        JSONArray ob = new JSONArray();
+        for (SidFilter f : fs)
+        {
+            ob.put(f.toJSON(companyId));
+        }
+        writer.write(ob.toString());
+    }
+    
+    public void getExclusionFilters()
+    {
+        String hql = "from GlobalExclusionFilter where companyId = ?";
+        List<GlobalExclusionFilter> fs = (List<GlobalExclusionFilter>)HibernateUtil.search(hql, companyId);
+        
+        Collections.sort(fs, new Comparator<GlobalExclusionFilter>()
+        {
+            @Override
+            public int compare(GlobalExclusionFilter arg0, GlobalExclusionFilter arg1)
+            {
+                return arg0.getFilterName().compareTo(arg1.getFilterName());
+            }
+        });
+        
+        JSONArray ob = new JSONArray();
+        for (GlobalExclusionFilter f : fs)
         {
             ob.put(f.toJSON(companyId));
         }

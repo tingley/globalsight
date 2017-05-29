@@ -39,6 +39,7 @@ import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleSid;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
+import com.globalsight.cxe.entity.filterconfiguration.GlobalExclusionFilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.SidFilter;
@@ -279,6 +280,8 @@ public class Extractor extends AbstractExtractor implements
 
                             m_customSidRules.add(r);
                         }
+                        
+                        getOutput().setExclusionFilterSids(GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sf));
                     }
                 }
                 m_elementPostFilter = parser.getElementPostFilter();

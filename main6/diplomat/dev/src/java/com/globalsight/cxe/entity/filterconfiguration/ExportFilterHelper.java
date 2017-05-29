@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
+import com.globalsight.everest.webapp.pagehandler.administration.config.FilterExportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.ExportUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -247,8 +248,7 @@ public class ExportFilterHelper
                 if (javaPropertiesFilter.getSidFilter() != null)
                 {
                     SidFilter f = javaPropertiesFilter.getSidFilter();
-                    filterSet.add(f.getFilterTableName() + "."
-                            + f.getId());
+                    FilterExportHelper.addSidFilter(filterSet, f);
                 }
             }
             else if (FilterConstants.JSON_TABLENAME.equalsIgnoreCase(filterTableName))
@@ -275,8 +275,17 @@ public class ExportFilterHelper
                 if (jsonFilter.getSidFilter() != null)
                 {
                     SidFilter f = jsonFilter.getSidFilter();
-                    filterSet.add(f.getFilterTableName() + "."
-                            + f.getId());
+                    FilterExportHelper.addSidFilter(filterSet, f);
+                }
+            }
+            else if (FilterConstants.SID_TABLENAME.equalsIgnoreCase(filterTableName))
+            {
+                SidFilter sidFilter = (SidFilter) filter;
+                GlobalExclusionFilter exclusionFilter = sidFilter.getGlobalExclusionFilter();
+                if (exclusionFilter != null)
+                {
+                    filterSet.add(exclusionFilter.getFilterTableName() + "."
+                            + exclusionFilter.getId());
                 }
             }
             else if (filterTableName.equalsIgnoreCase(FilterConstants.PLAINTEXT_TABLENAME))
@@ -289,8 +298,7 @@ public class ExportFilterHelper
                     
                     if (parser.getSidFilterId() > 0)
                     {
-                        filterSet.add("sid_filter."
-                                + parser.getSidFilterId());
+                        FilterExportHelper.addSidFilter(filterSet, parser.getSidFilterId());
                     }
                     
                     String postFilterTableName = parser.getElementPostFilterTableName();
@@ -598,8 +606,7 @@ public class ExportFilterHelper
                                 if (jsonFilter.getSidFilter() != null)
                                 {
                                     SidFilter f = jsonFilter.getSidFilter();
-                                    filterSet.add(f.getFilterTableName() + "."
-                                            + f.getId());
+                                    FilterExportHelper.addSidFilter(filterSet, f);
                                 }
                                 
                                 BaseFilterMapping jsoBFM = checkInternalFilterIsUsedByFilter(
@@ -697,8 +704,17 @@ public class ExportFilterHelper
                         
                         if (xmlFilterConfigParser.getSidFilterId() != null)
                         {
-                            filterSet.add("sid_filter."
-                                    + xmlFilterConfigParser.getSidFilterId());
+                            String sidFilterId = xmlFilterConfigParser.getSidFilterId();
+                            if (sidFilterId != null)
+                            {
+                                FilterExportHelper.addSidFilter(filterSet, Long.parseLong(sidFilterId));
+                            }
+                        }
+                        
+                        if (xmlFilterConfigParser.getSecondarySidFilter() != null)
+                        {
+                            long id = Long.parseLong(xmlFilterConfigParser.getSecondarySidFilter());
+                            FilterExportHelper.addSidFilter(filterSet, id);
                         }
 
                         List<String> list = xmlFilterConfigParser.getPostFilterIdAndName();
@@ -1439,6 +1455,15 @@ public class ExportFilterHelper
             buffer.append("sid_filter.").append(sidsFilter.getId())
                     .append(".COMPANY_ID = ").append(sidsFilter.getCompanyId())
                     .append(NEW_LINE);
+            
+            if (sidsFilter.getGlobalExclusionFilter() != null)
+            {
+                buffer.append("sid_filter.").append(sidsFilter.getId())
+                .append(".EXCLUSION_FILTER_ID = ").append(sidsFilter.getExclusionFilterId())
+                .append(NEW_LINE);
+            }
+            
+            
             buffer.append("##sid_filter.").append(sidsFilter.getId())
                     .append(".end").append(NEW_LINE).append(NEW_LINE);
 

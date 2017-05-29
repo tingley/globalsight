@@ -103,6 +103,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
     private ExtractorRegistry m_ExtractorRegistry = null;
     private Filter m_mainFilter = null;
     private BaseFilter mainBaseFilter = null;
+    private Filter rootFilter = null;
     private boolean doSegBeforeInlText = true;
 
     private boolean m_preserveAllWhite = false;
@@ -670,6 +671,12 @@ public abstract class AbstractExtractor implements ExtractorInterface
     private Output switchExtractor(String to_translate, String dataFormat,
             String rules, Filter filter, boolean p_preserveAllWhite)
     {
+        return switchExtractor(to_translate, dataFormat, rules, filter, p_preserveAllWhite, null);
+    }
+    
+    public Output switchExtractor(String to_translate, String dataFormat,
+            String rules, Filter filter, boolean p_preserveAllWhite, Filter rootFilter)
+    {
 
         ExtractorRegistry reg = ExtractorRegistry.getObject();
 
@@ -710,6 +717,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
         ex.init(newInput, out);
         ex.setMainBaseFilter(this.getMainBaseFilter());
         ex.setPreserveAllWhite(p_preserveAllWhite);
+        ex.setRootFilter(rootFilter);
 
         if (filter != null)
         {
@@ -1042,5 +1050,15 @@ public abstract class AbstractExtractor implements ExtractorInterface
             }
         }
         return suffixBlank.toString();
+    }
+
+    public Filter getRootFilter()
+    {
+        return rootFilter;
+    }
+
+    public void setRootFilter(Filter rootFilter)
+    {
+        this.rootFilter = rootFilter;
     }
 }

@@ -540,11 +540,11 @@ public class XmlFilterHelper
         return getFormatForFilter(filterTableName);
     }
     
-    public String getSidPrecedence()
+    public String getSecondarySidFilter()
     {
         if (m_xmlFilterConfigParser == null)
-            return "xml";
-        return m_xmlFilterConfigParser.getSidPrecedence();
+            return "-1";
+        return m_xmlFilterConfigParser.getSecondarySidFilter();
     }
     
     public XmlFilterTags getXmlFilterTags()
@@ -598,7 +598,7 @@ public class XmlFilterHelper
                 tags.setSrcCmtXmlTag(srcCmtXmlTag);
                 
                 tags.setSidFilterId(Long.parseLong(m_xmlFilterConfigParser.getSidFilterId()));
-                tags.setSidPrecedence(m_xmlFilterConfigParser.getSidPrecedence());
+                tags.setSecondarySidFilterId(Long.parseLong(m_xmlFilterConfigParser.getSecondarySidFilter()));
             }
         }
 

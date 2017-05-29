@@ -46,6 +46,7 @@ public interface XmlFilterConstants
     public static final String NODE_ENTITY_HANDLE_MODE = "entityHandleMode";
     public static final String NODE_SID_FILTER_ID = "sidFilterId";
     public static final String NODE_SID_FILTER_PRECEDENCE = "sidFilterPrecedence";
+    public static final String NODE_SID_FILTER_SECONDARY = "sidFilterSecondarySidFilter";
 
     public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</" + NODE_ROOT + ">";
 

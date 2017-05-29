@@ -45,8 +45,10 @@ SidFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId
 		sidFilter.txtRules = eval(this.filter.jsonText);
 	}
 	
+	sidFilter.exclusionFilterId = this.filter.exclusionFilterId;
 	sidFilter.generateXmlDiv();
 	sidFilter.generateTxtDiv();
+	sidFilter.generateExclusionOptions();
 	sidFilter.changeType($(".sidFilterType"));
 	this.showDialog();
 	
@@ -85,6 +87,20 @@ SidFilter.prototype.generateXmlDiv = function()
 	}
 	
 	this.setPageValue(1);
+}
+
+SidFilter.prototype.generateExclusionOptions = function()
+{
+	$(".sidFilterExclusionOption").remove();
+	var sidFilterExclusionfilter = $("#sidFilterExclusionfilter")
+	var exclusionFilters = getAjaxValue("getExclusionFilters");
+	if (exclusionFilters){
+		exclusionFilters = eval(exclusionFilters);
+	}
+	for (var i = 0; i <　exclusionFilters.length; i++){
+		var sf = eval("(" + exclusionFilters[i] + ")");
+		sidFilterExclusionfilter.append("<option class='sidFilterExclusionOption' value='" + sf.id + "'" + ((sidFilter && sidFilter.exclusionFilterId == sf.id) ? " selected" : "") + ">" + sf.filterName + "</option>");	
+	}
 }
 
 SidFilter.prototype.generateTxtDiv = function()
@@ -137,6 +153,7 @@ SidFilter.prototype.generateDiv = function(topFilterId, color)
 	dialogObj.find(".sidFilterType").val("-1");
 	sidFilter.generateXmlDiv();
 	sidFilter.generateTxtDiv();
+	sidFilter.generateExclusionOptions();
 	this.showDialog();
 	saveSidFilter.edit = false;
 	saveSidFilter.topFilterId = topFilterId;
@@ -621,6 +638,7 @@ function saveSidFilter()
 		filterDesc : filterDesc,
 		companyId : companyId,
 		filterType : filterType,
+		exclusionFilterId : $("#sidFilterExclusionfilter").val(),
 		rule : rule
 	};
 	
@@ -654,6 +672,7 @@ function saveOrUpdateSidFilterCallback(data)
 			xrFilter.filterType = saveSidFilter.obj.filterType;
 			xrFilter.companyId = companyId;
 			xrFilter.jsonText = saveSidFilter.obj.rule;
+			xrFilter.exclusionFilterId = saveSidFilter.obj.exclusionFilterId;
 			
 			if (!saveSidFilter.filterId){
 				filter.specialFilters.push(xrFilter);
@@ -1066,4 +1085,26 @@ function encodeHtmlEntities(p_text)
 	}
     return p_text.replace(/&/g, "&amp;").replace(/</g, "&lt;").
         replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+}
+
+var ajaxReturnString;
+function getAjaxValue(method, data)
+{
+	$.ajax({
+		type : "POST",
+		url : 'AjaxService?action=' + method,
+		async : false,
+		cache : false,
+		dataType : 'text',
+		data : data,
+		success : function(data) {
+			ajaxReturnString = data;
+		},
+		error : function(request, error, status) {
+			ajaxReturnString = "";
+			alert(error);
+		}
+	});
+	
+	return ajaxReturnString;
 }

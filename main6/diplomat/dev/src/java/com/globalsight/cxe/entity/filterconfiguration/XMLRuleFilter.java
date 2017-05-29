@@ -244,7 +244,7 @@ public class XMLRuleFilter implements Filter
                 .append(isParsed ? parser.getSidAttrName() : "").append("\",");
         sb.append("\"sidFilterId\":").append("\"").append(isParsed ? parser.getSidFilterId() : "")
                 .append("\",");
-        sb.append("\"sidFilterPrecedence\":").append("\"").append(isParsed ? parser.getSidPrecedence() : "")
+        sb.append("\"sidFilterSecondarySidFilter\":").append("\"").append(isParsed ? parser.getSecondarySidFilter() : "")
                 .append("\",");
         sb.append("\"isCheckWellFormed\":").append(isParsed ? parser.isCheckWellFormed() : "false")
                 .append(",");

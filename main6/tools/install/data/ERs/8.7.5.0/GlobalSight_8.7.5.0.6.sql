@@ -1,0 +1,3 @@
+#GBS-4752 Consolidated SID filter updates
+ALTER TABLE sid_filter ADD COLUMN EXCLUSION_FILTER_ID BIGINT(20) DEFAULT -1;
+

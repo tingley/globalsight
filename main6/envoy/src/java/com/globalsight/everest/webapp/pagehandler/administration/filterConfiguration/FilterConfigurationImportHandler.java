@@ -324,6 +324,7 @@ public class FilterConfigurationImportHandler extends PageHandler
         private Map<Long, Long> poFilterIdMap = new HashMap<Long, Long>();
         private Map<Long, Long> jsonFilterIdMap = new HashMap<Long, Long>();
         private Map<Long, Long> sidFilterIdMap = new HashMap<Long, Long>();
+        private Map<Long, Long> exclusionSidFilterIdMap = new HashMap<Long, Long>();
 
         public DoImport(String sessionId, File uploadedFile, String companyId)
         {
@@ -608,6 +609,15 @@ public class FilterConfigurationImportHandler extends PageHandler
 
             try
             {
+                // stores "global_exclusion_filter" data
+                if (dataMap.containsKey(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME))
+                {
+                    i++;
+                    storeGlobalExclusionFilterFilterData(dataMap);
+                    this.cachePercentage(i, size);
+                    Thread.sleep(100);
+                }
+
                 // stores "sid_filter" data
                 if (dataMap.containsKey(FilterConstants.SID_TABLENAME))
                 {
@@ -771,15 +781,6 @@ public class FilterConfigurationImportHandler extends PageHandler
                     Thread.sleep(100);
                 }
                 
-                // stores "global_exclusion_filter" data
-                if (dataMap.containsKey(FilterConstants.GLOBAL_EXCLUSIONS_TABLENAME))
-                {
-                    i++;
-                    storeGlobalExclusionFilterFilterData(dataMap);
-                    this.cachePercentage(i, size);
-                    Thread.sleep(100);
-                }
-
                 addMessage("<b>Imported successfully !</b>");
             }
             catch (InterruptedException e)
@@ -869,6 +870,17 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // gets new filter name
                     String newFilterName = checkFilterNameExists(name, "SidFilter");
                     f.setFilterName(newFilterName);
+                    
+                    long efId = f.getExclusionFilterId();
+                    if (efId > 0)
+                    {
+                        Long newExclusionSidFilterId = exclusionSidFilterIdMap.get(efId);
+                        if (newExclusionSidFilterId != null)
+                        {
+                            f.setExclusionFilterId(newExclusionSidFilterId);
+                        }
+                    }
+                    
                     // stores data to database
                     HibernateUtil.save(f);
                     sidFilterIdMap.put(id, f.getId());
@@ -878,14 +890,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                     }
                     else
                     {
-                        addMessage("sid Filter name <b>" + name + "</b> already exists. <b>"
+                        addMessage("SID Filter name <b>" + name + "</b> already exists. <b>"
                                 + newFilterName + "</b> imported successfully.");
                     }
                 }
             }
             catch (Exception e)
             {
-                String msg = "Upload sid Filter data failed !";
+                String msg = "Upload SID Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
             }
@@ -902,26 +914,29 @@ public class FilterConfigurationImportHandler extends PageHandler
             {
                 for (GlobalExclusionFilter f : filterList)
                 {
+                    Long id = f.getId();
                     String name = f.getFilterName();
                     // gets new filter name
                     String newFilterName = checkFilterNameExists(name, "GlobalExclusionFilter");
                     f.setFilterName(newFilterName);
                     // stores data to database
                     HibernateUtil.save(f);
+                    exclusionSidFilterIdMap.put(id, f.getId());
+                    
                     if (name.equals(newFilterName))
                     {
                         addMessage("<b>" + newFilterName + "</b> imported successfully.");
                     }
                     else
                     {
-                        addMessage("Global Exclusion Filter name <b>" + name + "</b> already exists. <b>"
+                        addMessage("Filter Exclusion Filter name <b>" + name + "</b> already exists. <b>"
                                 + newFilterName + "</b> imported successfully.");
                     }
                 }
             }
             catch (Exception e)
             {
-                String msg = "Upload Global Exclusion Filter data failed !";
+                String msg = "Upload Filter Exclusion Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
             }
@@ -1105,6 +1120,22 @@ public class FilterConfigurationImportHandler extends PageHandler
                                 "sidFilterId", sidFilterId);
                         xmlRuleFilter.setConfigXml(newconfigXmlStr);
                     }
+                    
+                    String secondarySidFilter = xmlFilterConfigParser.getSecondarySidFilter();
+                    if (secondarySidFilter != null)
+                    {
+                        Long newSecondarySidFilter = sidFilterIdMap.get(Long
+                                .parseLong(secondarySidFilter));
+                        if (newSecondarySidFilter != null)
+                        {
+                            secondarySidFilter = String.valueOf(newSecondarySidFilter);
+                        }
+
+                        String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
+                                "sidFilterSecondarySidFilter", secondarySidFilter);
+                        xmlRuleFilter.setConfigXml(newconfigXmlStr);
+                    }
+                    
                     //xmlFilterConfigParser.getSidFilterId();
                     // elementPostFilterId
                     String postFilterTableName = xmlFilterConfigParser
@@ -2032,6 +2063,10 @@ public class FilterConfigurationImportHandler extends PageHandler
                 else if (keyField.equalsIgnoreCase("COMPANY_ID"))
                 {
                     sidFilter.setCompanyId(Long.parseLong(companyId));
+                }
+                else if (keyField.equalsIgnoreCase("EXCLUSION_FILTER_ID"))
+                {
+                    sidFilter.setExclusionFilterId(Long.parseLong(valueField));
                 }
             }
             return sidFilter;

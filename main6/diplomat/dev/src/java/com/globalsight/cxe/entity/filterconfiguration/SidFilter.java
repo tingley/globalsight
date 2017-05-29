@@ -38,6 +38,7 @@ public class SidFilter implements Filter
     private String configXml = "";
     private int type = 0;
     private long companyId;
+    private long exclusionFilterId = -1;
 
     @SuppressWarnings("unchecked")
     public ArrayList<Filter> getFilters(long companyId)
@@ -102,6 +103,8 @@ public class SidFilter implements Filter
                 .append(",");
         sb.append("\"filterType\":").append("\"").append(type).append("\"").append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
+        
+        sb.append("\"exclusionFilterId\":").append(exclusionFilterId).append(",");
         sb.append("\"jsonText\":")
                 .append("\"")
                 .append(FilterHelper.escape(configXml)).append("\",");
@@ -181,5 +184,23 @@ public class SidFilter implements Filter
     public void setType(int type)
     {
         this.type = type;
+    }
+
+    public long getExclusionFilterId()
+    {
+        return exclusionFilterId;
+    }
+
+    public void setExclusionFilterId(long exclusionFilterId)
+    {
+        this.exclusionFilterId = exclusionFilterId;
+    }
+    
+    public GlobalExclusionFilter getGlobalExclusionFilter()
+    {
+        if (exclusionFilterId < 0)
+            return null;
+        
+        return HibernateUtil.get(GlobalExclusionFilter.class, exclusionFilterId);
     }
 }

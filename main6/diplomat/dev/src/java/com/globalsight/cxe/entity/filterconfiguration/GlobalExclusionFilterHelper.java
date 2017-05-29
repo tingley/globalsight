@@ -30,7 +30,7 @@ public class GlobalExclusionFilterHelper
      * Gets all enabled global exclusion Filters with specified company id.
      * @param companyId
      */
-    public static  ArrayList<GlobalExclusionFilterSid> getAllEnabledGlobalExclusionFilters(long companyId)
+    public static ArrayList<GlobalExclusionFilterSid> getAllEnabledGlobalExclusionFilters(long companyId)
     {
         String hql = "from GlobalExclusionFilter f where f.companyId=" + companyId;
         ArrayList<GlobalExclusionFilter> filters = (ArrayList<GlobalExclusionFilter>) HibernateUtil.search(hql);
@@ -57,11 +57,38 @@ public class GlobalExclusionFilterHelper
      * Gets all enabled global exclusion Filters with specified company id.
      * @param companyId
      */
-    public static  ArrayList<GlobalExclusionFilterSid> getAllEnabledGlobalExclusionFilters()
+    public static ArrayList<GlobalExclusionFilterSid> getAllEnabledGlobalExclusionFilters()
     {
         String currentCompanyId = CompanyThreadLocal.getInstance()
                 .getValue();
         long companyId = Long.parseLong(currentCompanyId);
         return getAllEnabledGlobalExclusionFilters(companyId);
+    }
+    
+    /**
+     * Gets all enabled global exclusion Filters with specified company id.
+     * @param companyId
+     */
+    public static ArrayList<GlobalExclusionFilterSid> getAllEnabledGlobalExclusionFilters(SidFilter sidFilter)
+    {
+        ArrayList<GlobalExclusionFilterSid> sids = new ArrayList<>();
+        
+        GlobalExclusionFilter exclusionFilter = sidFilter.getGlobalExclusionFilter();
+        if (exclusionFilter != null)
+        {
+            String json = exclusionFilter.getConfigXml();
+            JSONArray items = JSONArray.fromObject(json);
+            for (int i = 0; i < items.size(); i++)
+            {
+                JSONObject ob = (JSONObject) items.get(i);
+                if (ob.getBoolean("enable"))
+                {
+                    GlobalExclusionFilterSid gob = new GlobalExclusionFilterSid(ob);
+                    sids.add(gob);
+                }
+            }
+        }
+        
+        return sids;
     }
 }

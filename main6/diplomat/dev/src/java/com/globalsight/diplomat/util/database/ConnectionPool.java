@@ -28,8 +28,8 @@ import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 
@@ -54,8 +54,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
  */
 public class ConnectionPool
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(ConnectionPool.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(ConnectionPool.class.getName());
 
     //
     // PRIVATE CONSTANTS
@@ -73,7 +72,7 @@ public class ConnectionPool
     private static final String PASSWORD = "password";
     private static final String PROFILE_NAME = "GSA";
     private static final String PROP_MAX_CONNECTIONS = "maxConnections";
-//    private static final String PROP_MIN_CONNECTIONS = "minConnections";
+    // private static final String PROP_MIN_CONNECTIONS = "minConnections";
     private static final String PROP_MAX_CONNECTION_WAIT_TIME = "maxConnectionWaitTime";
     private static final String PROP_USE_CONNECTION_POOL = "useConnectionPool";
     private static boolean s_doPooling = true;
@@ -84,11 +83,11 @@ public class ConnectionPool
     //
     // PRIVATE STATIC MEMBER VARIABLES
     //
-	private static ConcurrentMap<Long, ConnectionPool> m_pools = new ConcurrentHashMap<Long, ConnectionPool>();
+    private static ConcurrentMap<Long, ConnectionPool> m_pools = new ConcurrentHashMap<Long, ConnectionPool>();
     private static SystemConfiguration m_systemConfiguration;
     private static Properties s_props = new Properties();
 
-	private static final ConcurrentMap<Connection, ConnectionPool> m_connToPools = new ConcurrentHashMap<Connection, ConnectionPool>();
+    private static final ConcurrentMap<Connection, ConnectionPool> m_connToPools = new ConcurrentHashMap<Connection, ConnectionPool>();
 
     //
     // PRIVATE INSTANCE MEMBER VARIABLES
@@ -98,6 +97,9 @@ public class ConnectionPool
     private Vector<Connection> m_allocatedConns;
 
     private static Timer timer = new Timer(true);
+
+    private static int num = 0;
+
     //
     // STATIC INITIALIZER
     //
@@ -108,8 +110,8 @@ public class ConnectionPool
             InputStream is = ConnectionPool.class.getResourceAsStream(PROPERTIES);
             s_props.load(is);
             MAX_CONNECTIONS = Integer.parseInt(s_props.getProperty(PROP_MAX_CONNECTIONS));
-            MAX_CONNECTION_WAIT_TIME = Long.parseLong(s_props
-                    .getProperty(PROP_MAX_CONNECTION_WAIT_TIME));
+            MAX_CONNECTION_WAIT_TIME = Long
+                    .parseLong(s_props.getProperty(PROP_MAX_CONNECTION_WAIT_TIME));
             s_doPooling = Boolean.valueOf(s_props.getProperty(PROP_USE_CONNECTION_POOL))
                     .booleanValue();
             CATEGORY.info("Use Connection Pooling: " + s_doPooling);
@@ -229,21 +231,26 @@ public class ConnectionPool
      * @throws ConnectionPoolException
      *             if the profile cannot be loaded
      */
-    public static Connection getConnection(long p_profileId)
-            throws ConnectionPoolException
+    public static Connection getConnection(long p_profileId) throws ConnectionPoolException
     {
-    	if (useC3P0ConnectionPool)
-    	{
-        	return ConnectionPoolBridgeToC3P0.getInstance().getConnection();
-    	}
+        if (useC3P0ConnectionPool)
+        {
+            num++;
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Getting connection, current connection count: " + num);
+            }
 
-    	ConnectionPool pool = _getPool(p_profileId);
+            return ConnectionPoolBridgeToC3P0.getInstance().getConnection();
+        }
+
+        ConnectionPool pool = _getPool(p_profileId);
         Connection c = null;
         if (CATEGORY.isDebugEnabled())
         {
-            CATEGORY.debug("Getting connection for pool " + p_profileId
-                    + ". Free pool is " + pool.m_unallocatedConns.size()
-                    + " Used pool is " + pool.m_allocatedConns.size());
+            CATEGORY.debug("Getting connection for pool " + p_profileId + ". Free pool is "
+                    + pool.m_unallocatedConns.size() + " Used pool is "
+                    + pool.m_allocatedConns.size());
         }
 
         c = pool._getConnection();
@@ -254,17 +261,17 @@ public class ConnectionPool
         catch (SQLException e)
         {
             CATEGORY.error(e);
-            throw new ConnectionPoolException(
-                    "Unable to set autoCommit to true");
+            throw new ConnectionPoolException("Unable to set autoCommit to true");
         }
         if (CATEGORY.isDebugEnabled())
         {
             CATEGORY.debug("Got connection " + c.hashCode());
         }
 
-		if (c != null) {
-			m_connToPools.put(c, pool);
-		}
+        if (c != null)
+        {
+            m_connToPools.put(c, pool);
+        }
 
         return c;
     }
@@ -279,17 +286,21 @@ public class ConnectionPool
      * @throws ConnectionPoolException
      *             if the connection was not allocated by the ConnectionPool.
      */
-    public static void returnConnection(Connection p_connection)
-            throws ConnectionPoolException
+    public static void returnConnection(Connection p_connection) throws ConnectionPoolException
     {
-    	if (useC3P0ConnectionPool)
-    	{
-			ConnectionPoolBridgeToC3P0.getInstance().returnConnection(
-					p_connection);
-			return;
-    	}
+        if (useC3P0ConnectionPool)
+        {
+            num--;
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Returning connection, current connection count: " + num);
+            }
 
-    	if (CATEGORY.isDebugEnabled())
+            ConnectionPoolBridgeToC3P0.getInstance().returnConnection(p_connection);
+            return;
+        }
+
+        if (CATEGORY.isDebugEnabled())
         {
             CATEGORY.debug("Returning connection " + p_connection.hashCode());
         }
@@ -330,16 +341,20 @@ public class ConnectionPool
      */
     public static synchronized void terminate()
     {
-		if (useC3P0ConnectionPool) {
-			try {
-				ConnectionPoolBridgeToC3P0.getInstance().finalize();
-			} catch (Throwable e) {
-				CATEGORY.error(e);
-			}
-			return;
-		}
+        if (useC3P0ConnectionPool)
+        {
+            try
+            {
+                ConnectionPoolBridgeToC3P0.getInstance().finalize();
+            }
+            catch (Throwable e)
+            {
+                CATEGORY.error(e);
+            }
+            return;
+        }
 
-    	Iterator<ConnectionPool> it = m_pools.values().iterator();
+        Iterator<ConnectionPool> it = m_pools.values().iterator();
         while (it.hasNext())
         {
             ConnectionPool pool = (ConnectionPool) it.next();
@@ -352,16 +367,20 @@ public class ConnectionPool
 
     public static void terminate(long p_connectionProfileId)
     {
-		if (useC3P0ConnectionPool) {
-			try {
-				ConnectionPoolBridgeToC3P0.getInstance().finalize();
-			} catch (Throwable e) {
-				CATEGORY.error(e);
-			}
-			return;
-		}
+        if (useC3P0ConnectionPool)
+        {
+            try
+            {
+                ConnectionPoolBridgeToC3P0.getInstance().finalize();
+            }
+            catch (Throwable e)
+            {
+                CATEGORY.error(e);
+            }
+            return;
+        }
 
-    	ConnectionPool pool = __removePool(p_connectionProfileId);
+        ConnectionPool pool = __removePool(p_connectionProfileId);
 
         if (pool != null)
         {
@@ -377,8 +396,7 @@ public class ConnectionPool
      * Return the pool instance identified by the given profile id. If the
      * desired pool is not in the hash map, then it is created first.
      */
-    private static ConnectionPool _getPool(long p_profileId)
-            throws ConnectionPoolException
+    private static ConnectionPool _getPool(long p_profileId) throws ConnectionPoolException
     {
         ConnectionPool pool = (ConnectionPool) m_pools.get(p_profileId);
         if (pool == null)
@@ -405,8 +423,7 @@ public class ConnectionPool
      *
      * This method is called by the synchronized _getPool().
      */
-    private static ConnectionPool _createPool(long p_profileId)
-            throws ConnectionPoolException
+    private static ConnectionPool _createPool(long p_profileId) throws ConnectionPoolException
     {
         ConnectionProfile cp = null;
 
@@ -433,8 +450,7 @@ public class ConnectionPool
     /**
      * Return a new default connection profile based on the properties file.
      */
-    private static ConnectionProfile _defaultProfile()
-            throws ConnectionPoolException
+    private static ConnectionProfile _defaultProfile() throws ConnectionPoolException
     {
         ConnectionProfile cp = null;
 
@@ -450,8 +466,8 @@ public class ConnectionPool
         }
         catch (MissingResourceException e)
         {
-            throw new ConnectionPoolException(
-                    "Incomplete or missing property file " + PROPERTIES, e);
+            throw new ConnectionPoolException("Incomplete or missing property file " + PROPERTIES,
+                    e);
         }
 
         return cp;
@@ -461,8 +477,7 @@ public class ConnectionPool
      * Return a new default jdbc connection profile based on the settings in the
      * system configuration.
      */
-    private static ConnectionProfile _jdbcPoolProfile()
-            throws ConnectionPoolException
+    private static ConnectionProfile _jdbcPoolProfile() throws ConnectionPoolException
     {
         ConnectionProfile cp = null;
 
@@ -494,8 +509,7 @@ public class ConnectionPool
         }
         catch (Exception e)
         {
-            throw new ConnectionPoolException(
-                    "Unable to create JDBCPoolProfile", e);
+            throw new ConnectionPoolException("Unable to create JDBCPoolProfile", e);
         }
 
         return cp;
@@ -505,8 +519,7 @@ public class ConnectionPool
      * Return a new default jdbc connection profile based on the settings in the
      * system configuration.
      */
-    private static ConnectionProfile _importPoolProfile()
-            throws ConnectionPoolException
+    private static ConnectionProfile _importPoolProfile() throws ConnectionPoolException
     {
         ConnectionProfile cp = null;
 
@@ -538,16 +551,14 @@ public class ConnectionPool
         }
         catch (Exception e)
         {
-            throw new ConnectionPoolException(
-                    "Unable to create JDBCPoolProfile", e);
+            throw new ConnectionPoolException("Unable to create JDBCPoolProfile", e);
         }
 
         return cp;
     }
 
     /* Load the system configuration file */
-    private static synchronized SystemConfiguration _initConfig()
-            throws ConnectionPoolException
+    private static synchronized SystemConfiguration _initConfig() throws ConnectionPoolException
     {
         try
         {
@@ -558,8 +569,7 @@ public class ConnectionPool
         }
         catch (Exception e)
         {
-            throw new ConnectionPoolException(
-                    "Unable to initialize system configuration", e);
+            throw new ConnectionPoolException("Unable to initialize system configuration", e);
         }
 
         return m_systemConfiguration;
@@ -593,8 +603,7 @@ public class ConnectionPool
     /**
      * Return an instance of the Connection Pool with the given profile.
      */
-    private ConnectionPool(ConnectionProfile p_profile)
-            throws ConnectionPoolException
+    private ConnectionPool(ConnectionProfile p_profile) throws ConnectionPoolException
     {
         this();
 
@@ -606,8 +615,7 @@ public class ConnectionPool
         }
         catch (Exception e)
         {
-            throw new ConnectionPoolException("Unable to load driver "
-                    + p_profile.getDriver(), e);
+            throw new ConnectionPoolException("Unable to load driver " + p_profile.getDriver(), e);
         }
     }
 
@@ -641,8 +649,7 @@ public class ConnectionPool
                 }
                 catch (InterruptedException e1)
                 {
-                    throw new ConnectionPoolException(
-                            "Thead call wait() failed");
+                    throw new ConnectionPoolException("Thead call wait() failed");
                 }
             }
         }
@@ -698,7 +705,7 @@ public class ConnectionPool
 
         if (m_unallocatedConns.size() > 0)
         {
-        	// "remove" is thread safe
+            // "remove" is thread safe
             conn = (Connection) m_unallocatedConns.remove(0);
             try
             {
@@ -708,9 +715,9 @@ public class ConnectionPool
                 }
                 else
                 {
-                	try
+                    try
                     {
-                		__allocateConnection(conn);
+                        __allocateConnection(conn);
                     }
                     catch (Exception e)
                     {
@@ -730,15 +737,13 @@ public class ConnectionPool
         }
         else
         {
-            CATEGORY.info("Soft connection limit (" + MAX_CONNECTIONS
-                    + ") has been exceeded."
-                    + "  Update the number of database connections in "
-                    + PROPERTIES + ".properties.");
+            CATEGORY.info("Soft connection limit (" + MAX_CONNECTIONS + ") has been exceeded."
+                    + "  Update the number of database connections in " + PROPERTIES
+                    + ".properties.");
             // No more connections can be allocated. This is the soft
             // limit, the database server will have its own hard limit.
-            throw new ConnectionPoolException("Soft connection limit ("
-                    + MAX_CONNECTIONS + ") has been exceded."
-                    + "  Update the number of database connections in "
+            throw new ConnectionPoolException("Soft connection limit (" + MAX_CONNECTIONS
+                    + ") has been exceded." + "  Update the number of database connections in "
                     + PROPERTIES + ".properties.");
         }
 
@@ -752,7 +757,7 @@ public class ConnectionPool
      */
     private void __allocateConnection(Connection p_conn)
     {
-    	// "addElement" is thread safe
+        // "addElement" is thread safe
         m_allocatedConns.addElement(p_conn);
     }
 
@@ -763,7 +768,7 @@ public class ConnectionPool
      */
     private void __unallocateConnection(Connection p_conn)
     {
-    	// "addElement" is thread safe
+        // "addElement" is thread safe
         m_unallocatedConns.addElement(p_conn);
     }
 
@@ -774,7 +779,7 @@ public class ConnectionPool
      *
      * Called by the synchronized _findConnection().
      */
-	private Connection __createConnection() throws ConnectionPoolException
+    private Connection __createConnection() throws ConnectionPoolException
     {
         Connection conn = null;
         Properties props = new Properties();
@@ -785,8 +790,7 @@ public class ConnectionPool
         PreparedStatement ps = null;
         try
         {
-            Driver d = (Driver) Class.forName(m_connectionProfile.getDriver())
-                    .newInstance();
+            Driver d = (Driver) Class.forName(m_connectionProfile.getDriver()).newInstance();
             conn = d.connect(m_connectionProfile.getConnectionString(), props);
 
             // only add to the allocated pool if pooling is on
@@ -797,8 +801,7 @@ public class ConnectionPool
         }
         catch (Exception e)
         {
-            throw new ConnectionPoolException(
-                    "Unable to create new connection", e);
+            throw new ConnectionPoolException("Unable to create new connection", e);
         }
         finally
         {
@@ -825,12 +828,12 @@ public class ConnectionPool
      */
     private synchronized void __removeAllocatedConnection(Connection p_conn)
     {
-    	// "remove" is not thread safe
-    	m_allocatedConns.remove(p_conn);
+        // "remove" is not thread safe
+        m_allocatedConns.remove(p_conn);
 
-    	m_connToPools.remove(p_conn);
+        m_connToPools.remove(p_conn);
 
-    	notifyAll();
+        notifyAll();
     }
 
     /**
@@ -889,8 +892,7 @@ public class ConnectionPool
      */
     public synchronized void closeUnallocatedConnection(Connection conn)
     {
-        if (m_unallocatedConns.contains(conn)
-                && __totalConnections() > MIN_CONNECTIONS)
+        if (m_unallocatedConns.contains(conn) && __totalConnections() > MIN_CONNECTIONS)
         {
             m_unallocatedConns.remove(conn);
             __closeConnection(conn);

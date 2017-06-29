@@ -1719,11 +1719,13 @@ public class BlaiseHelper
     {
         List<Long> ids = new ArrayList<>();
         Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
         try
         {
             conn = DbUtil.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(
                     "select blaise_entry_id from connector_blaise_job where blaise_connector_id="
                             + blcId);
             while (rs.next())
@@ -1737,17 +1739,9 @@ public class BlaiseHelper
         }
         finally
         {
-            if (conn != null)
-            {
-                try
-                {
-                    DbUtil.returnConnection(conn);
-                }
-                catch (Exception e)
-                {
-                }
-            }
-
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
         return ids;
     }

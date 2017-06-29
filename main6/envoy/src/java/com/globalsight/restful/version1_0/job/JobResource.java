@@ -68,7 +68,6 @@ import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -93,6 +92,7 @@ import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.ling.common.URLEncoder;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.restful.RestResource;
 import com.globalsight.restful.RestWebServiceException;
@@ -136,19 +136,18 @@ public class JobResource extends RestResource
      * Get an unique job name.
      * 
      * @param p_companyID
-     *                  Company ID. Required.
-     * @param p_jobName 
-     *                  Job name. Required.
+     *            Company ID. Required.
+     * @param p_jobName
+     *            Job name. Required.
      * @return Return an unique job name in current system.
      * 
      */
     @GET
     @Path("/getUniqueJobName")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getUniqueJobName(
-            @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyID") String p_companyID,
-            @QueryParam("jobName") String p_jobName) throws RestWebServiceException
+    public Response getUniqueJobName(@HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyID") String p_companyID, @QueryParam("jobName") String p_jobName)
+            throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
@@ -201,12 +200,10 @@ public class JobResource extends RestResource
     @POST
     @Path("/sourceFiles")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadSourceFile(
-            @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyID") String p_companyID,
-            @QueryParam("jobName") String p_jobName,
-            @QueryParam("fileProfileId") String p_fileProfileId,
-            MultipartInput p_input) throws RestWebServiceException
+    public Response uploadSourceFile(@HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyID") String p_companyID, @QueryParam("jobName") String p_jobName,
+            @QueryParam("fileProfileId") String p_fileProfileId, MultipartInput p_input)
+            throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         boolean updateJobStateIfException = true;
@@ -234,8 +231,8 @@ public class JobResource extends RestResource
             {
                 throw new RestWebServiceException("Empty file profile id.");
             }
-            FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
-                    Long.parseLong(p_fileProfileId));
+            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                    .readFileProfile(Long.parseLong(p_fileProfileId));
             long l10nProfileId = fp.getL10nProfileId();
             BasicL10nProfile blp = HibernateUtil.get(BasicL10nProfile.class, l10nProfileId);
             String priority = String.valueOf(blp.getPriority());
@@ -308,55 +305,51 @@ public class JobResource extends RestResource
         return Response.status(200).entity("File is uploaded successfully for job: " + jobId)
                 .build();
     }
-    
+
     /**
      * Create a job
      * 
-     * @param p_companyID 
-     *                  Company ID. Required.
+     * @param p_companyID
+     *            Company ID. Required.
      * @param p_jobId
-     *                  Job id. Required.
+     *            Job id. Required.
      * @param p_filePaths
-     *                  String Path of files which are contained in job, split by "|". Required.
+     *            String Path of files which are contained in job, split by "|".
+     *            Required.
      * @param p_fileProfileIds
-     *                  String ID of file profiles, split by "|". Required.
+     *            String ID of file profiles, split by "|". Required.
      * @param p_targetLocales
-     *                  String Target locales which like to be translated. Optional.
+     *            String Target locales which like to be translated. Optional.
      * @param p_comment
-     *                  String Job comment. Optional.
+     *            String Job comment. Optional.
      * @param p_attributes
-     *                  String Attributes used to create job. Optional. Example: 
-     *            <attributes>
-     *                      <attributes xsi:type="fileJobAttributeVo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-     *                          <displayName>file_01</displayName>
-     *                          <fromSuperCompany>false</fromSuperCompany>
-     *                          <internalName>file_01</internalName>
-     *                          <required>false</required> 
-     *                          <type>file</type> 
-     *                      </attributes>
-     *                      <attributes xsi:type="textJobAttributeVo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-     *                          <displayName>file_02</displayName>
-     *                          <fromSuperCompany>false</fromSuperCompany>
-     *                          <internalName>file_02</internalName>
-     *                          <required>false</required> 
-     *                          <type>text</type> 
-     *                      </attributes>
-     *            </attributes>
+     *            String Attributes used to create job. Optional. Example:
+     *            <attributes> <attributes xsi:type="fileJobAttributeVo"
+     *            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *            <displayName>file_01</displayName>
+     *            <fromSuperCompany>false</fromSuperCompany>
+     *            <internalName>file_01</internalName>
+     *            <required>false</required> <type>file</type> </attributes>
+     *            <attributes xsi:type="textJobAttributeVo" xmlns:xsi=
+     *            "http://www.w3.org/2001/XMLSchema-instance"> <displayName>
+     *            file_02</displayName>
+     *            <fromSuperCompany>false</fromSuperCompany>
+     *            <internalName>file_02</internalName>
+     *            <required>false</required>
+     *            <type>text</type> </attributes> </attributes>
      * @return A "Create job success." message.
      * 
      */
     @POST
     @Path("/createJob")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createJob(
-            @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyID") String p_companyID,
-            @QueryParam("jobId") String p_jobId,
+    public Response createJob(@HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyID") String p_companyID, @QueryParam("jobId") String p_jobId,
             @QueryParam("filePaths") String p_filePaths,
             @QueryParam("fileProfileIds") String p_fileProfileIds,
             @QueryParam("targetLocales") String p_targetLocales,
-            @QueryParam("comment") String p_comment,
-            @QueryParam("attributes") String p_attributes) throws RestWebServiceException
+            @QueryParam("comment") String p_comment, @QueryParam("attributes") String p_attributes)
+            throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         boolean reCreate = false;
@@ -403,7 +396,7 @@ public class JobResource extends RestResource
                 String msg = "current jobId : " + p_jobId + " does not exist.";
                 throw new RestWebServiceException(msg);
             }
-            
+
             String msg = checkIfCreateJobCalled(CREATE_JOB, job.getId(), job.getJobName());
             if (msg != null)
             {
@@ -414,8 +407,8 @@ public class JobResource extends RestResource
 
             validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales, fileProfileIds,
                     filePaths, targetLocales, false);
-            Company company = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(p_companyID));
+            Company company = ServerProxy.getJobHandler()
+                    .getCompanyById(Long.parseLong(p_companyID));
             fppm = ServerProxy.getFileProfilePersistenceManager();
             for (int i = 0; i < filePaths.size(); i++)
             {
@@ -498,8 +491,8 @@ public class JobResource extends RestResource
             String uuId = ((JobImpl) job).getUuid();
             if (StringUtil.isNotEmptyAndNull(p_attributes))
             {
-                Attributes attributes = com.globalsight.cxe.util.XmlUtil.string2Object(
-                        Attributes.class, p_attributes);
+                Attributes attributes = com.globalsight.cxe.util.XmlUtil
+                        .string2Object(Attributes.class, p_attributes);
                 atts = (List<JobAttributeVo>) attributes.getAttributes();
 
                 List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
@@ -536,8 +529,8 @@ public class JobResource extends RestResource
                 FileProfile realProfile = (FileProfile) sProFiles.get(i);
                 String targetLocale = (String) stargetLocales.get(i);
                 String path = realFile.getPath();
-                String relativeName = path.substring(AmbFileStoragePathUtils.getCxeDocDir()
-                        .getPath().length() + 1);
+                String relativeName = path
+                        .substring(AmbFileStoragePathUtils.getCxeDocDir().getPath().length() + 1);
 
                 publishEventToCxe(String.valueOf(job.getJobId()), job.getJobName(), i + 1,
                         pageCount, 1, 1, relativeName, Long.toString(realProfile.getId()),
@@ -596,7 +589,7 @@ public class JobResource extends RestResource
 
         return Response.status(200).entity("Create job success.").build();
     }
-    
+
     /**
      * Upload ZIP source file to server side.
      * 
@@ -617,12 +610,10 @@ public class JobResource extends RestResource
     @POST
     @Path("/sourceFiles/zip")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadZipSourceFile(
-            @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyID") String p_companyID,
-            @QueryParam("jobName") String p_jobName,
-            @QueryParam("fileProfileIds") String p_fileProfileIds,
-            MultipartInput p_input) throws RestWebServiceException
+    public Response uploadZipSourceFile(@HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyID") String p_companyID, @QueryParam("jobName") String p_jobName,
+            @QueryParam("fileProfileIds") String p_fileProfileIds, MultipartInput p_input)
+            throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         boolean updateJobStateIfException = true;
@@ -638,7 +629,8 @@ public class JobResource extends RestResource
             restArgs.put("companyID", p_companyID);
             restArgs.put("jobName", p_jobName);
             restArgs.put("fileProfileIds", p_fileProfileIds);
-            restStart = RestWebServiceLog.start(JobResource.class, UPLOAD_ZIP_SOURCE_FILE, restArgs);
+            restStart = RestWebServiceLog.start(JobResource.class, UPLOAD_ZIP_SOURCE_FILE,
+                    restArgs);
             checkPermission(userName, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
             p_jobName = EditUtil.removeCRLF(p_jobName);
             String jobNameValidation = validateJobName(p_jobName);
@@ -655,37 +647,37 @@ public class JobResource extends RestResource
             List<Long> companyIds = new ArrayList<Long>();
             for (int i = 0; i < fileProfileIdArr.length; i++)
             {
-                FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
-                        Long.parseLong(fileProfileIdArr[i]));
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                        .readFileProfile(Long.parseLong(fileProfileIdArr[i]));
                 if (!l10nProfileIds.contains(fp.getL10nProfileId()))
                 {
                     l10nProfileIds.add(fp.getL10nProfileId());
                 }
-                
+
                 if (!companyIds.contains(fp.getCompanyId()))
                 {
                     companyIds.add(fp.getCompanyId());
                 }
             }
-            
+
             if (l10nProfileIds.size() > 1)
             {
                 String message = "The p_fileProfileIds parameter of the ID values from different localize profile.";
                 throw new RestWebServiceException(message);
             }
-            
+
             if (companyIds.size() > 1)
             {
                 String message = "The p_fileProfileIds parameter of the ID values from different company.";
                 throw new RestWebServiceException(message);
             }
-            
+
             long l10nProfileId = -1;
-            if(l10nProfileIds.size() == 1)
+            if (l10nProfileIds.size() == 1)
                 l10nProfileId = l10nProfileIds.get(0);
-            
+
             long companyIdFromFileProfile = -1;
-            if(companyIds.size() == 1)
+            if (companyIds.size() == 1)
                 companyIdFromFileProfile = companyIds.get(0);
 
             BasicL10nProfile blp = HibernateUtil.get(BasicL10nProfile.class, l10nProfileId);
@@ -696,8 +688,8 @@ public class JobResource extends RestResource
                 jobId = String.valueOf(job.getId());
             else
             {
-                job = JobCreationMonitor.initializeJob(p_jobName, user.getUserId(),
-                        l10nProfileId, priority, Job.UPLOADING);
+                job = JobCreationMonitor.initializeJob(p_jobName, user.getUserId(), l10nProfileId,
+                        priority, Job.UPLOADING);
                 jobId = String.valueOf(job.getId());
             }
 
@@ -729,7 +721,7 @@ public class JobResource extends RestResource
                 MultivaluedMap<String, String> header = inputPart.getHeaders();
                 String contentDisposition = header.getFirst("Content-Disposition");
                 String fileName = getFileNameFromHeaderInfo(contentDisposition);
-                
+
                 String extension = fileName.substring(fileName.lastIndexOf("."), fileName.length());
                 if (!"rar".equalsIgnoreCase(extension) && "zip".equalsIgnoreCase(extension)
                         && !"7z".equalsIgnoreCase(extension))
@@ -755,7 +747,8 @@ public class JobResource extends RestResource
                 JobCreationMonitor.updateJobState(Long.parseLong(jobId), Job.IMPORTFAILED);
             }
             logger.error(e);
-            throw new RestWebServiceException(makeErrorJson(UPLOAD_ZIP_SOURCE_FILE, e.getMessage()));
+            throw new RestWebServiceException(
+                    makeErrorJson(UPLOAD_ZIP_SOURCE_FILE, e.getMessage()));
         }
         finally
         {
@@ -796,28 +789,26 @@ public class JobResource extends RestResource
      *            <fromSuperCompany>false</fromSuperCompany>
      *            <internalName>file_01</internalName>
      *            <required>false</required> <type>file</type> </attributes>
-     *            <attributes xsi:type="textJobAttributeVo"
-     *            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-     *            <displayName>file_02</displayName>
+     *            <attributes xsi:type="textJobAttributeVo" xmlns:xsi=
+     *            "http://www.w3.org/2001/XMLSchema-instance"> <displayName>
+     *            file_02</displayName>
      *            <fromSuperCompany>false</fromSuperCompany>
      *            <internalName>file_02</internalName>
-     *            <required>false</required> <type>text</type> </attributes>
-     *            </attributes>
+     *            <required>false</required>
+     *            <type>text</type> </attributes> </attributes>
      * @return A "Create job success." message.
      * 
      */
     @POST
     @Path("/createJob/zip")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createJobForZipFile(
-            @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyID") String p_companyID,
-            @QueryParam("jobId") String p_jobId,
+    public Response createJobForZipFile(@HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyID") String p_companyID, @QueryParam("jobId") String p_jobId,
             @QueryParam("filePaths") String p_filePaths,
             @QueryParam("fileProfileIds") String p_fileProfileIds,
             @QueryParam("targetLocales") String p_targetLocales,
-            @QueryParam("comment") String p_comment,
-            @QueryParam("attributes") String p_attributes) throws RestWebServiceException
+            @QueryParam("comment") String p_comment, @QueryParam("attributes") String p_attributes)
+            throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         boolean reCreate = false;
@@ -830,7 +821,7 @@ public class JobResource extends RestResource
             Vector<String> realUploadFileList = new Vector<String>();
             Vector<String> extensionList = new Vector<String>();
             Vector<FileProfile> realFileProfiles = new Vector<FileProfile>();
-            String fpId = "",filename = "", zipFilename = "",zipDir = "",vTargetLocale = "";
+            String fpId = "", filename = "", zipFilename = "", zipDir = "", vTargetLocale = "";
             FileProfile checkFp = null, referenceFP = null;
             Vector fileProfiles = new Vector();
             Vector files = new Vector();
@@ -861,7 +852,7 @@ public class JobResource extends RestResource
                 String msg = "current jobId : " + p_jobId + " does not exist.";
                 throw new RestWebServiceException(msg);
             }
-            
+
             String msg = checkIfCreateJobCalled(CREATE_JOB, job.getId(), job.getJobName());
             if (msg != null)
             {
@@ -893,39 +884,39 @@ public class JobResource extends RestResource
                 {
                     if (CreateJobUtil.isZipFile(zipFile))
                     {
-                       addZipFile(realUploadFileList,extensionList,zipFile);
+                        addZipFile(realUploadFileList, extensionList, zipFile);
                     }
                     else if (CreateJobUtil.isRarFile(zipFile))
                     {
-                        addRarFile(realUploadFileList,extensionList,zipFile);
+                        addRarFile(realUploadFileList, extensionList, zipFile);
                     }
                     else if (CreateJobUtil.is7zFile(zipFile))
                     {
-                       addZip7zFile(realUploadFileList,extensionList,zipFile);
+                        addZip7zFile(realUploadFileList, extensionList, zipFile);
                     }
                 }
             }
-            
+
             if (realUploadFileList.size() == 0)
             {
                 String message = "Corresponding files were not found, please check the correctness of filePaths: "
                         + filePaths;
                 throw new RestWebServiceException(message);
             }
-            
-            Company company = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(p_companyID));
+
+            Company company = ServerProxy.getJobHandler()
+                    .getCompanyById(Long.parseLong(p_companyID));
             List<FileProfileImpl> fileProfileListOfCompany = new ArrayList<FileProfileImpl>();
             if (extensionList != null && extensionList.size() > 0)
             {
                 fileProfileListOfCompany = (List) ServerProxy.getFileProfilePersistenceManager()
                         .getFileProfilesByExtension(extensionList, Long.valueOf(company.getId()));
             }
-            
+
             for (String id : fileProfileIds)
             {
-                checkFp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
-                        Long.valueOf(id));
+                checkFp = ServerProxy.getFileProfilePersistenceManager()
+                        .readFileProfile(Long.valueOf(id));
                 if (!fileProfileListOfCompany.contains(checkFp))
                 {
                     String message = "Current file profile id: " + id
@@ -934,7 +925,7 @@ public class JobResource extends RestResource
                 }
                 realFileProfiles.add(checkFp);
             }
-            
+
             FileProfilePersistenceManager fppm = ServerProxy.getFileProfilePersistenceManager();
             for (int i = 0; i < realUploadFileList.size(); i++)
             {
@@ -945,8 +936,8 @@ public class JobResource extends RestResource
                 Vector<String> tempExtensionList = new Vector<String>();
                 tempExtensionList.add(fileExtension);
                 List<FileProfileImpl> fileProfileList = (List) ServerProxy
-                        .getFileProfilePersistenceManager().getFileProfilesByExtension(tempExtensionList,
-                                Long.valueOf(company.getId()));
+                        .getFileProfilePersistenceManager().getFileProfilesByExtension(
+                                tempExtensionList, Long.valueOf(company.getId()));
                 boolean isRightFileProfile = false;
                 for (FileProfile filePro : realFileProfiles)
                 {
@@ -965,12 +956,13 @@ public class JobResource extends RestResource
                             zipDir = realUploadFileList.get(i).substring(0,
                                     realUploadFileList.get(i).lastIndexOf("."));
                             zipFiles = ZipIt.unpackZipPackage(realUploadFileList.get(i), zipDir);
-                            // String relativePath = filename.substring(0,filename.lastIndexOf("."));
-                            
-                            String relativePath = zipDir
-                                    .substring(
-                                            (AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator)
-                                                    .length(), zipDir.length());
+                            // String relativePath =
+                            // filename.substring(0,filename.lastIndexOf("."));
+
+                            String relativePath = zipDir.substring(
+                                    (AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator)
+                                            .length(),
+                                    zipDir.length());
                             String tmp = "";
                             for (String f : zipFiles)
                             {
@@ -985,7 +977,9 @@ public class JobResource extends RestResource
                         else if (39 == filePro.getKnownFormatTypeId())
                         {
                             String tempFile = realUploadFileList.get(i)
-                                    .substring((AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator).length(),
+                                    .substring(
+                                            (AmbFileStoragePathUtils.getCxeDocDirPath()
+                                                    + File.separator).length(),
                                             realUploadFileList.get(i).length());
                             changeFileListByXliff(tempFile, vTargetLocale, filePro, fileProfiles,
                                     files, afterTargetLocales);
@@ -1019,8 +1013,8 @@ public class JobResource extends RestResource
             String uuId = ((JobImpl) job).getUuid();
             if (StringUtil.isNotEmptyAndNull(p_attributes))
             {
-                Attributes attributes = com.globalsight.cxe.util.XmlUtil.string2Object(
-                        Attributes.class, p_attributes);
+                Attributes attributes = com.globalsight.cxe.util.XmlUtil
+                        .string2Object(Attributes.class, p_attributes);
                 atts = (List<JobAttributeVo>) attributes.getAttributes();
 
                 List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
@@ -1057,8 +1051,8 @@ public class JobResource extends RestResource
                 FileProfile realProfile = (FileProfile) sProFiles.get(i);
                 String targetLocale = (String) stargetLocales.get(i);
                 String path = realFile.getPath();
-                String relativeName = path.substring(AmbFileStoragePathUtils.getCxeDocDir()
-                        .getPath().length() + 1);
+                String relativeName = path
+                        .substring(AmbFileStoragePathUtils.getCxeDocDir().getPath().length() + 1);
 
                 publishEventToCxe(String.valueOf(job.getJobId()), job.getJobName(), i + 1,
                         pageCount, 1, 1, relativeName, Long.toString(realProfile.getId()),
@@ -1117,14 +1111,14 @@ public class JobResource extends RestResource
 
         return Response.status(200).entity("Create job success.").build();
     }
-    
+
     /**
      * Get job status by job id.
      * 
      * @param p_companyID
-     *                  Company ID. Required.
+     *            Company ID. Required.
      * @param p_jobId
-     *                  Job id.  Required.
+     *            Job id. Required.
      * 
      * @return Return job status for JSON
      * 
@@ -1132,10 +1126,9 @@ public class JobResource extends RestResource
     @GET
     @Path("/{jobId}/status")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getJobStatus(
-            @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyID") String p_companyID,
-            @PathParam("jobId") String p_jobId) throws RestWebServiceException
+    public Response getJobStatus(@HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyID") String p_companyID, @PathParam("jobId") String p_jobId)
+            throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         Connection connection = null;
@@ -1183,6 +1176,10 @@ public class JobResource extends RestResource
         }
         finally
         {
+            DbUtil.silentClose(results);
+            DbUtil.silentClose(query);
+            DbUtil.silentReturnConnection(connection);
+
             if (restStart != null)
             {
                 restStart.end();
@@ -1194,9 +1191,9 @@ public class JobResource extends RestResource
      * Gets exported files in one zip by job ids
      * 
      * @param p_companyID
-     *                  Company ID. Required.
+     *            Company ID. Required.
      * @param p_jobIds
-     *                  Job ids. Required.
+     *            Job ids. Required.
      * 
      * @return Return all export files compressed.
      * 
@@ -1204,10 +1201,9 @@ public class JobResource extends RestResource
     @GET
     @Path("/{jobIds}/targetFiles")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getJobExportedFiles(
-            @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyID") String p_companyID,
-            @PathParam("jobIds") String p_jobIds) throws RestWebServiceException
+    public Response getJobExportedFiles(@HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyID") String p_companyID, @PathParam("jobIds") String p_jobIds)
+            throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
@@ -1218,13 +1214,12 @@ public class JobResource extends RestResource
             restArgs.put("loggedUserName", userName);
             restArgs.put("companyID", p_companyID);
             restArgs.put("jobIds", p_jobIds);
-            restStart = RestWebServiceLog.start(JobResource.class, GET_JOB_EXPORT_FILES,
-                    restArgs);
+            restStart = RestWebServiceLog.start(JobResource.class, GET_JOB_EXPORT_FILES, restArgs);
             checkPermission(userName, Permission.JOBS_VIEW);
             checkPermission(userName, Permission.JOBS_EXPORT);
             checkPermission(userName, Permission.JOBS_DOWNLOAD);
-            Company company = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(p_companyID));
+            Company company = ServerProxy.getJobHandler()
+                    .getCompanyById(Long.parseLong(p_companyID));
 
             String errorMsg = "";
             p_jobIds = p_jobIds.replace(" ", "");
@@ -1305,14 +1300,13 @@ public class JobResource extends RestResource
                     File zipfile = new File(zipFileDir, zipName);
                     zipfile.getParentFile().mkdirs();
 
-                    Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
-                            entryFiles, jobIds, locales, cxedocpath,
-                            String.valueOf(user.getUserId()));
+                    Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(entryFiles,
+                            jobIds, locales, cxedocpath, String.valueOf(user.getUserId()));
                     ZipIt.addEntriesToZipFile(zipfile, entryFileToFileNameMap, "");
 
                     ResponseBuilder response = Response.ok((Object) zipfile);
-                    response.header("Content-Disposition", "attachment; filename=\"" + zipName
-                            + "\"");
+                    response.header("Content-Disposition",
+                            "attachment; filename=\"" + zipName + "\"");
                     response.encoding("gzip");
                     return response.build();
                 }
@@ -1330,12 +1324,12 @@ public class JobResource extends RestResource
                 {
                     for (Workflow wfone : exportingwfs)
                     {
-                        exportJobFiles.addExportingJobs(wfone.getJob().getId(), wfone
-                                .getTargetLocale().toString());
+                        exportJobFiles.addExportingJobs(wfone.getJob().getId(),
+                                wfone.getTargetLocale().toString());
                     }
                     exportJobFiles.setMessage("");
                     exportJobFiles.setPath("");
-                    
+
                     return Response.ok().entity(exportJobFiles).build();
                 }
                 else if (jobFileList.size() == 0)
@@ -1348,8 +1342,7 @@ public class JobResource extends RestResource
         }
         catch (Exception e)
         {
-            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
-                    e.getMessage()));
+            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES, e.getMessage()));
         }
         finally
         {
@@ -1381,7 +1374,6 @@ public class JobResource extends RestResource
             results = query.executeQuery();
             if (results.next())
             {
-                releaseDBResource(results, query, connection);
                 return getJobName(p_jobName);
             }
             else
@@ -1395,10 +1387,12 @@ public class JobResource extends RestResource
         }
         finally
         {
-            releaseDBResource(results, query, connection);
+            DbUtil.silentClose(results);
+            DbUtil.silentClose(query);
+            DbUtil.silentReturnConnection(connection);
         }
     }
-    
+
     private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, Set<Long> jobIdSet,
             Set<String> locales, String cxeDocsDirPath, String userId)
     {
@@ -1424,8 +1418,8 @@ public class JobResource extends RestResource
                 for (String key : tempMap.keySet())
                 {
                     tempFile = new File(key);
-                    entryFileToFileNameMap.put(tempFile, jobId + File.separator + "passolo"
-                            + File.separator + tempMap.get(key));
+                    entryFileToFileNameMap.put(tempFile,
+                            jobId + File.separator + "passolo" + File.separator + tempMap.get(key));
                 }
             }
 
@@ -1568,8 +1562,9 @@ public class JobResource extends RestResource
                     for (String path : jobFileInOneJob.getPaths())
                     {
                         String[] pathlist = path.split("/");
-                        String entryfilepath = (AmbFileStoragePathUtils.getCxeDocDirPath(job
-                                .getCompanyId()) + "\\" + path).replace("/", "\\");
+                        String entryfilepath = (AmbFileStoragePathUtils
+                                .getCxeDocDirPath(job.getCompanyId()) + "\\" + path).replace("/",
+                                        "\\");
                         File entryfile = new File(entryfilepath);
                         if (entryfile.exists() && entryfile.isFile())
                         {
@@ -1584,8 +1579,7 @@ public class JobResource extends RestResource
         }
         catch (Exception e)
         {
-            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
-                    e.getMessage()));
+            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES, e.getMessage()));
         }
     }
 
@@ -1596,8 +1590,8 @@ public class JobResource extends RestResource
         // for new scripts on import/export
         if (path.contains("/PreProcessed_" + job.getId() + "_"))
         {
-            finalPath = path.replace(
-                    path.substring(path.lastIndexOf("/PreProcessed_" + job.getId() + "_"),
+            finalPath = path
+                    .replace(path.substring(path.lastIndexOf("/PreProcessed_" + job.getId() + "_"),
                             path.lastIndexOf("/")), "");
         }
         // compatible codes for old import/export
@@ -1643,10 +1637,9 @@ public class JobResource extends RestResource
 
     private void validateParameters(Job job, String p_filePaths, String p_fileProfileIds,
             String p_targetLocales, Vector<String> fileProfileIds, Vector<String> filePaths,
-            Vector<String> targetLocales, boolean isZipFileCreateJob)
-            throws RestWebServiceException
+            Vector<String> targetLocales, boolean isZipFileCreateJob) throws RestWebServiceException
     {
-       
+
         try
         {
             if (isZipFileCreateJob)
@@ -1678,7 +1671,8 @@ public class JobResource extends RestResource
             ArrayList<String> list = new ArrayList<String>();
             for (String id : fileProfileIds)
             {
-                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(id), false);
+                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(id),
+                        false);
                 if (fp == null)
                 {
                     list.add(id);
@@ -1758,10 +1752,9 @@ public class JobResource extends RestResource
         }
     }
 
-    private void publishEventToCxe(String p_jobId, String p_batchId, int p_pageNum,
-            int p_pageCount, int p_docPageNum, int p_docPageCount, String p_fileName,
-            String p_fileProfileId, String p_targetLocales, Integer p_exitValueByScript,
-            String p_priority) throws Exception
+    private void publishEventToCxe(String p_jobId, String p_batchId, int p_pageNum, int p_pageCount,
+            int p_docPageNum, int p_docPageCount, String p_fileName, String p_fileProfileId,
+            String p_targetLocales, Integer p_exitValueByScript, String p_priority) throws Exception
     {
         String key = p_batchId + p_fileName + p_pageNum;
         CxeProxy.setTargetLocales(key, p_targetLocales);
@@ -1811,11 +1804,11 @@ public class JobResource extends RestResource
             for (int i = 0; i < filesLength; i++)
             {
                 // en_us\webservice\test\test.txt (fileprofile_1)
-                sb.append(p_fileNames.get(i))
-                        .append("  (")
+                sb.append(p_fileNames.get(i)).append("  (")
                         .append(ServerProxy.getFileProfilePersistenceManager()
                                 .readFileProfile(Long.parseLong(p_fpIds.get(i).toString()))
-                                .getName()).append(")");
+                                .getName())
+                        .append(")");
                 if (i != filesLength - 1)
                     sb.append("\r\n");
             }
@@ -1853,8 +1846,9 @@ public class JobResource extends RestResource
                 User u = UserHandlerHelper.getUser(((Project) projects[i]).getProjectManagerId());
                 if (u == null)
                 {
-                    logger.error("Can not get project manager for DesktopIcon upload notification by project "
-                            + (Project) projects[i]);
+                    logger.error(
+                            "Can not get project manager for DesktopIcon upload notification by project "
+                                    + (Project) projects[i]);
                     return;
                 }
                 if (u.getUserId().equals(user.getUserId()))
@@ -1877,7 +1871,8 @@ public class JobResource extends RestResource
             {
                 if (add)
                 {
-                    logger.error("There was no GlobalSight project manager email address for DesktopIcon upload notification.");
+                    logger.error(
+                            "There was no GlobalSight project manager email address for DesktopIcon upload notification.");
                 }
 
                 return;
@@ -2243,53 +2238,6 @@ public class JobResource extends RestResource
         return null;
     }
 
-    /**
-     * Releases the resource created to DB operations
-     * 
-     * @param results
-     *            Resource for ResultSet object
-     * @param query
-     *            PreparedStatement object for querying
-     * @param connection
-     *            Database connection
-     */
-    private void releaseDBResource(ResultSet results, PreparedStatement query, Connection connection)
-    {
-        // close ResultSet
-        if (results != null)
-        {
-            try
-            {
-                results.close();
-            }
-            catch (Exception e)
-            {
-                logger.error("Closing ResultSet", e);
-            }
-        }
-        // close PreparedStatement
-        if (query != null)
-        {
-            try
-            {
-                query.close();
-            }
-            catch (Exception e)
-            {
-                logger.error("Closing query", e);
-            }
-        }
-        // close Connection
-        try
-        {
-            ConnectionPool.returnConnection(connection);
-        }
-        catch (ConnectionPoolException e)
-        {
-            logger.error("Closing Connection", e);
-        }
-    }
-
     private void writeResultToLogFile(String[] p_messageArguments)
     {
         StringBuffer sb = new StringBuffer();
@@ -2312,7 +2260,7 @@ public class JobResource extends RestResource
 
         logger.info(sb.toString());
     }
-    
+
     private boolean isSupportedZipFileFormat(File file)
     {
         String extension = CreateJobUtil.getFileExtension(file);
@@ -2323,7 +2271,7 @@ public class JobResource extends RestResource
         }
         return false;
     }
-    
+
     /**
      * Try to decompress "zip", "rar" or "7z" file to see if it can be
      * decompressed successfully.
@@ -2346,7 +2294,7 @@ public class JobResource extends RestResource
 
         return result;
     }
-    
+
     private void addZipFile(List<String> realUploadFileList, List<String> extensionList,
             File zipFile) throws Exception
     {
@@ -2394,7 +2342,7 @@ public class JobResource extends RestResource
             {
                 rarEntryName = header.getFileNameString();
             }
-            
+
             String fileExtension = rarEntryName.substring(rarEntryName.lastIndexOf(".") + 1);
             extensionList.add(fileExtension);
             String unzippedFileFullPath = rarFilePath
@@ -2429,5 +2377,5 @@ public class JobResource extends RestResource
             realUploadFileList.add(unzippedFileFullPath);
         }
     }
-    
+
 }

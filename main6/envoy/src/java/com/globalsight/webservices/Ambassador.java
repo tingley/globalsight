@@ -7258,10 +7258,14 @@ public class Ambassador extends AbstractWebService
 
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+        boolean newlyCreatedConn = false;
         try
         {
             if (connection == null)
+            {
                 connection = ConnectionPool.getConnection();
+                newlyCreatedConn = true;
+            }
 
             StringBuilder sql = new StringBuilder();
             java.sql.Timestamp tmp = null;
@@ -7295,7 +7299,12 @@ public class Ambassador extends AbstractWebService
         }
         finally
         {
+            ConnectionPool.silentClose(rs);
             ConnectionPool.silentClose(pstmt);
+            if (newlyCreatedConn)
+            {
+                DbUtil.silentReturnConnection(connection);
+            }
         }
 
         return availableDate;
@@ -9767,10 +9776,14 @@ public class Ambassador extends AbstractWebService
                 + "from project_tm where id = " + tmId;
         logger.info("getProjectTmName():sql: " + sql);
 
+        boolean newlyCreatedConn = false;
         try
         {
             if (connection == null)
+            {
                 connection = ConnectionPool.getConnection();
+                newlyCreatedConn = true;
+            }
 
             query = connection.prepareStatement(sql);
             results = query.executeQuery();
@@ -9803,6 +9816,10 @@ public class Ambassador extends AbstractWebService
         {
             ConnectionPool.silentClose(results);
             ConnectionPool.silentClose(query);
+            if (newlyCreatedConn)
+            {
+                DbUtil.silentReturnConnection(connection);
+            }
         }
 
         return tmName;
@@ -10856,11 +10873,15 @@ public class Ambassador extends AbstractWebService
 
         PreparedStatement query = null;
         ResultSet results = null;
+        boolean newlyCreatedConn = false;
 
         try
         {
             if (connection == null)
+            {
                 connection = ConnectionPool.getConnection();
+                newlyCreatedConn = true;
+            }
 
             StringBuffer sbSQL = new StringBuffer();
             sbSQL.append("SELECT DISTINCT NAME FROM TB_LANGUAGE " + " WHERE LOCALE LIKE '%" + lang
@@ -10885,6 +10906,10 @@ public class Ambassador extends AbstractWebService
         {
             ConnectionPool.silentClose(results);
             ConnectionPool.silentClose(query);
+            if (newlyCreatedConn)
+            {
+                DbUtil.silentReturnConnection(connection);
+            }
         }
 
         return langList;
@@ -11036,11 +11061,14 @@ public class Ambassador extends AbstractWebService
                 + " and lang_name = '" + p_sourceLangName + "' " + " and term = '" + p_sourceTerm
                 + "')";
 
-        logger.info("isExistInTermbase():sql: " + sql);
+        boolean newlyCreatedConn = false;
         try
         {
             if (connection == null)
+            {
                 connection = ConnectionPool.getConnection();
+                newlyCreatedConn = true;
+            }
 
             query = connection.prepareStatement(sql);
             results = query.executeQuery();
@@ -11073,6 +11101,10 @@ public class Ambassador extends AbstractWebService
         {
             ConnectionPool.silentClose(results);
             ConnectionPool.silentClose(query);
+            if (newlyCreatedConn)
+            {
+                DbUtil.silentReturnConnection(connection);
+            }
         }
 
         return isExist;

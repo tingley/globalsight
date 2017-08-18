@@ -67,11 +67,13 @@ public class BlaiseManager
     {
         ArrayList<BlaiseConnector> connectors = new ArrayList<>();
         Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
         try
         {
             conn = DbUtil.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from connector_blaise where is_active='Y'");
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select * from connector_blaise where is_active='Y'");
             BlaiseConnector connector;
             while (rs.next())
             {
@@ -109,16 +111,9 @@ public class BlaiseManager
         }
         finally
         {
-            if (conn != null)
-            {
-                try
-                {
-                    DbUtil.returnConnection(conn);
-                }
-                catch (Exception e)
-                {
-                }
-            }
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
         return connectors;
     }

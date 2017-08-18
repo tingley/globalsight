@@ -16,6 +16,18 @@
  */
 package com.globalsight.everest.util.system;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.PrintStream;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Statement;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
+
 import com.globalsight.connector.blaise.BlaiseAutoManager;
 import com.globalsight.connector.git.GitConnectorPushThread;
 import com.globalsight.cxe.adapter.filesystem.autoImport.AutomaticImportMonitor;
@@ -33,17 +45,6 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
-import org.apache.log4j.Logger;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.PrintStream;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.Statement;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Properties;
 
 /**
  * Used to be EnvoyWLServer. This is the main class that starts up all the RMI
@@ -74,9 +75,9 @@ public class AmbassadorServer
 
     // flag to avoid multiple restarts
     private static boolean s_isStarted = false;
-    
-    public static final String LUCENE_LOCK_DIR = System.getProperty(
-            "org.apache.lucene.lockDir", System.getProperty("java.io.tmpdir"));
+
+    public static final String LUCENE_LOCK_DIR = System.getProperty("org.apache.lucene.lockDir",
+            System.getProperty("java.io.tmpdir"));
 
     /**
      * Public way to get AmbassadorServer
@@ -97,16 +98,14 @@ public class AmbassadorServer
         {
             // set the log directory for the error files
             String logDirectory = SystemConfiguration.getInstance()
-                    .getStringParameter(
-                            SystemConfigParamNames.SYSTEM_LOGGING_DIRECTORY);
+                    .getStringParameter(SystemConfigParamNames.SYSTEM_LOGGING_DIRECTORY);
             // set the absolute path
             SYSTEM_LOG = logDirectory + SYSTEM_LOG;
         }
         catch (Exception e)
         {
-            CATEGORY.warn(
-                    "The log directory couldn't be found in the system configuration "
-                            + " for CAP logging purposes.", e);
+            CATEGORY.warn("The log directory couldn't be found in the system configuration "
+                    + " for CAP logging purposes.", e);
         }
     }
 
@@ -125,8 +124,7 @@ public class AmbassadorServer
      * This method is called by the appserver when it is stopped and Envoy is
      * running.
      */
-    public String shutdown(String p_name, Hashtable p_hashtable)
-            throws SystemShutdownException
+    public String shutdown(String p_name, Hashtable p_hashtable) throws SystemShutdownException
     {
         synchronized (s_isSystem4Accessible)
         {
@@ -149,8 +147,7 @@ public class AmbassadorServer
         }
         catch (SystemShutdownException sse)
         {
-            result = getClass().getName() + " shutdown failed due to "
-                    + sse.getLocalizedMessage();
+            result = getClass().getName() + " shutdown failed due to " + sse.getLocalizedMessage();
 
             CATEGORY.error("shutdown error", sse);
 
@@ -158,13 +155,11 @@ public class AmbassadorServer
         }
         catch (Exception e)
         {
-            result = getClass().getName() + " shutdown failed due to "
-                    + e.getLocalizedMessage();
+            result = getClass().getName() + " shutdown failed due to " + e.getLocalizedMessage();
 
             CATEGORY.error("shutdown error", e);
 
-            throw new SystemShutdownException(
-                    SystemStartupException.EX_FAILEDTOINITSERVER, e);
+            throw new SystemShutdownException(SystemStartupException.EX_FAILEDTOINITSERVER, e);
         }
         finally
         {
@@ -194,16 +189,8 @@ public class AmbassadorServer
         }
         finally
         {
-            try
-            {
-                if (stmt != null)
-                    stmt.close();
-                ConnectionPool.returnConnection(conn);
-            }
-            catch (Exception e2)
-            {
-            }
-
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -211,14 +198,14 @@ public class AmbassadorServer
      * This method is called by the app server when it is started and Envoy
      * should be started.
      */
-    public String startup(String p_name, Hashtable p_args)
-            throws SystemStartupException
+    public String startup(String p_name, Hashtable p_args) throws SystemStartupException
     {
         // avoid multiple calls to startup
         if (s_isStarted == true)
             return "Already started";
 
         String result = null;
+        Connection c = null;
         try
         {
             setStandardOutAndStandardError();
@@ -229,8 +216,7 @@ public class AmbassadorServer
             CATEGORY.info("GlobalSight is starting up. Disabling UI logins until System is ready.");
 
             // set the inetsoft sree.home
-            String sree_home = SystemConfiguration.getInstance()
-                    .getStringParameter("sree.home");
+            String sree_home = SystemConfiguration.getInstance().getStringParameter("sree.home");
             System.setProperty("sree.home", sree_home);
 
             boolean isNetegrity = Netegrity.isNetegrityEnabled();
@@ -241,8 +227,7 @@ public class AmbassadorServer
             // here.
             // cleanJmsMessages();
 
-            StringBuffer propString = new StringBuffer(
-                    "Java System Properties:\r\n");
+            StringBuffer propString = new StringBuffer("Java System Properties:\r\n");
             Properties props = System.getProperties();
             Enumeration e = props.propertyNames();
             while (e.hasMoreElements())
@@ -252,14 +237,12 @@ public class AmbassadorServer
                 propString.append(n).append("=").append(v).append("\r\n");
             }
             CATEGORY.info(propString.toString());
-            CATEGORY.info("Max number of database connections: "
-                    + ConnectionPool.getMaxConnections());
-            Connection c = ConnectionPool.getConnection();
+            CATEGORY.info(
+                    "Max number of database connections: " + ConnectionPool.getMaxConnections());
+            c = ConnectionPool.getConnection();
             DatabaseMetaData metaData = c.getMetaData();
             CATEGORY.info("JDBC driver version: " + metaData.getDriverVersion());
-            CATEGORY.info("MySql Database version: "
-                    + metaData.getDatabaseProductVersion());
-            ConnectionPool.returnConnection(c);
+            CATEGORY.info("MySql Database version: " + metaData.getDatabaseProductVersion());
 
             setupTM3ConversionToStop();
 
@@ -277,9 +260,9 @@ public class AmbassadorServer
             result = getClass().getName() + " started successfully";
 
             startCxeFileSystemAutomaticImport();
-            
+
             WorkflowExportingHelper.cleanTable();
-            
+
             GitConnectorPushThread runnable = new GitConnectorPushThread();
             Thread t = new MultiCompanySupportedThread(runnable);
             t.start();
@@ -294,19 +277,19 @@ public class AmbassadorServer
         catch (Exception e)
         {
             CATEGORY.error("Startup Error", e);
-            result = getClass().getName() + " startup failed due to "
-                    + e.getMessage();
-            throw new SystemStartupException(
-                    SystemStartupException.EX_FAILEDTOINITSERVER, e);
+            result = getClass().getName() + " startup failed due to " + e.getMessage();
+            throw new SystemStartupException(SystemStartupException.EX_FAILEDTOINITSERVER, e);
         }
         catch (Throwable t)
         {
             CATEGORY.error("Startup Error", t);
-            result = getClass().getName() + " startup failed due to "
-                    + t.getMessage();
-            throw new SystemStartupException(
-                    SystemStartupException.EX_FAILEDTOINITSERVER,
+            result = getClass().getName() + " startup failed due to " + t.getMessage();
+            throw new SystemStartupException(SystemStartupException.EX_FAILEDTOINITSERVER,
                     t.getMessage());
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(c);
         }
 
         try
@@ -317,10 +300,8 @@ public class AmbassadorServer
         catch (Exception e)
         {
             CATEGORY.error("Startup Error when doing migration", e);
-            result = getClass().getName() + " startup failed due to "
-                    + e.getMessage();
-            throw new SystemStartupException(
-                    SystemStartupException.EX_FAILEDTOINITSERVER, e);
+            result = getClass().getName() + " startup failed due to " + e.getMessage();
+            throw new SystemStartupException(SystemStartupException.EX_FAILEDTOINITSERVER, e);
         }
 
         synchronized (s_isSystem4Accessible)
@@ -340,9 +321,11 @@ public class AmbassadorServer
      */
     private void doMigration() throws Exception
     {
-        //MigrateObj[] objs = {new Migrate820InternalText(), new Migrate852UpgradeLucene()};
-        MigrateObj[] objs = {new Migrate820InternalText()};
-        
+        // MigrateObj[] objs = {new Migrate820InternalText(), new
+        // Migrate852UpgradeLucene()};
+        MigrateObj[] objs =
+        { new Migrate820InternalText() };
+
         for (int i = 0; i < objs.length; i++)
         {
             MigrateObj mobj = objs[i];
@@ -352,7 +335,6 @@ public class AmbassadorServer
             }
         }
     }
-
 
     /**
      * Sets System.out and System.err to write to GlobalSight.log.
@@ -393,8 +375,7 @@ public class AmbassadorServer
      * 
      * @throws SystemShutdownException
      */
-    private void stopCxeFileSystemAutomaticImport()
-            throws SystemShutdownException
+    private void stopCxeFileSystemAutomaticImport() throws SystemShutdownException
     {
         CATEGORY.info("Stopping file system auto import.");
         try
@@ -405,8 +386,7 @@ public class AmbassadorServer
         catch (Exception e)
         {
             CATEGORY.error("Failed to shutdown CXE auto import", e);
-            throw new SystemShutdownException(
-                    SystemShutdownException.EX_FAILEDTOINITSERVER, e);
+            throw new SystemShutdownException(SystemShutdownException.EX_FAILEDTOINITSERVER, e);
         }
     }
 
@@ -415,8 +395,7 @@ public class AmbassadorServer
      * 
      * @throws SystemStartupException
      */
-    private void startCxeFileSystemAutomaticImport()
-            throws SystemStartupException
+    private void startCxeFileSystemAutomaticImport() throws SystemStartupException
     {
         try
         {
@@ -428,8 +407,7 @@ public class AmbassadorServer
         catch (Exception e)
         {
             CATEGORY.error("Failed to startup CXE auto import", e);
-            throw new SystemStartupException(
-                    SystemStartupException.EX_FAILEDTOINITSERVER, e);
+            throw new SystemStartupException(SystemStartupException.EX_FAILEDTOINITSERVER, e);
         }
     }
 
@@ -445,14 +423,13 @@ public class AmbassadorServer
         {
             return;
         }
-        
+
         File[] tempFileList = tempDir.listFiles(new FileFilter()
         {
             public boolean accept(File pathname)
             {
                 return pathname.isFile()
-                        && FileUtils.getBaseName(pathname.getName()).endsWith(
-                                ".lock");
+                        && FileUtils.getBaseName(pathname.getName()).endsWith(".lock");
             }
         });
 

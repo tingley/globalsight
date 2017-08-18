@@ -16,6 +16,15 @@
     BufferedReader input = null;
     
     try {
+    	 File rootFile = new File(docRoot);
+   	     String rootPath = rootFile.getCanonicalPath();
+   	     String path = file.getCanonicalPath();
+   	   
+   	     if (!path.startsWith(rootPath)) {
+   	    	 out.print("Failed to get XSL file for reason: Bad pathname.");
+   	    	 return;
+   	     }
+    	
 	     input =  new BufferedReader(new FileReader(file));
 	     String line = null; 
 	     while (( line = input.readLine()) != null){

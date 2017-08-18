@@ -10,6 +10,7 @@ String id = request.getParameter("id");
 if (id == null || id.trim().equals(""))
 	id = "0";
 String root = RSSUtil.getStorageRoot();
+String rootPath = new File(root).getCanonicalPath();
 StringBuilder sb = new StringBuilder("<?xml version='1.0' encoding='UTF-8'?>");
 try {
 	File rootFile = null;
@@ -18,6 +19,16 @@ try {
 		sb.append("<tree id=\"0\">");
 	} else {
 		rootFile = new File(id);
+		String path = rootFile.getCanonicalPath();
+		if (!path.startsWith(rootPath)) {
+		  	response.setContentType("text/xml");
+			response.setCharacterEncoding("UTF-8");
+			response.setHeader("Cache-Control", "no-cache");
+			response.getWriter().write("<Error>Bad pathname.</Error>");
+			response.getWriter().close();
+		  	 return;
+	    }
+		
 		sb.append("<tree id=\"").append(id).append("\">");
 	}
 	String[] files = rootFile.list();

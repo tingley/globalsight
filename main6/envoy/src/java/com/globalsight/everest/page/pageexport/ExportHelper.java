@@ -109,6 +109,7 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.TranscoderException;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.docproc.CtrlCharConverter;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.merger.html.HtmlPreviewerHelper;
@@ -589,8 +590,20 @@ public class ExportHelper
                     {
                         pageTemplate.setXlfSrcAsTrg(p_exportParameters.getXlfSrcAsTrg());
                     }
-                    String page = populatePage(pageTemplate,
-                            getSegments(m_page.getGlobalSightLocale()), targetLocale, false, false,
+                    
+                    ArrayList segments = getSegments(this.m_page.getGlobalSightLocale());
+                    if (SourcePage.isJson(this.m_sourcePage))
+                    {
+                        for (int i = 0; i < segments.size(); ++i)
+                        {
+                            Tuv targetSegment = (Tuv) segments.get(i);
+                            String content = targetSegment.getGxml();
+                            content = formatJsonGxml(content);
+                            targetSegment.setGxml(content);
+                        }
+                    }
+                    
+                    String page = populatePage(pageTemplate, segments, targetLocale, false, false,
                             null);
                     if (isTabstrip)
                     {
@@ -683,6 +696,52 @@ public class ExportHelper
         }
     }
 
+    private String formatJsonGxml(String string)
+    {
+        string = CtrlCharConverter.convertToCtrl(string);
+        char c = '\0';
+
+        int len = string.length();
+        StringBuffer sb = new StringBuffer(len + 4);
+
+        for (int i = 0; i < len; ++i)
+        {
+            c = string.charAt(i);
+            switch (c)
+            {
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\f':
+                    sb.append("\\f");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+
+                default:
+                    if ((c < ' ') || (c >= '\u0080' && c < '\u00a0')
+                            || (c >= '\u2000' && c < '\u2100'))
+                    {
+                        String t = "000" + Integer.toHexString(c);
+                        sb.append("\\u" + t.substring(t.length() - 4));
+                    }
+                    else
+                    {
+                        sb.append(c);
+                    }
+            }
+        }
+
+        return sb.toString();
+    }
+    
     private String getSourceXml(String fullHtmlName)
     {
         BufferedReader br = null;

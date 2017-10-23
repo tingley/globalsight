@@ -120,6 +120,15 @@ public class SourcePage extends Page
             return false;
         }
     }
+    
+    public static boolean isJson(SourcePage p_sourcePage) throws Exception
+    {
+        long fileProfileId = p_sourcePage.getRequest().getDataSourceId();
+        KnownFormatType format = getFormatTypeByFpId(fileProfileId);
+
+        String name = format.getName();
+        return name.equals("JSON");
+    }
 
     public static KnownFormatType getFormatTypeByFpId(long fpId)
             throws FileProfileEntityException, RemoteException,

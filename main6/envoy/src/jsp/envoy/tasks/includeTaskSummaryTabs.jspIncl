@@ -229,8 +229,8 @@ function getScrollableDiv(p_html, p_dataArr) {
     return result;
 }
 
-var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
-var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
+var popTile=["No DQF Information has been saved.","There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
+var popDialogId=["dialog-DQFfileState","dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
 var popDiv="<div style='display:none' class='detailText'></div>";
 var popArray=new Array();
 var dialogParam={
@@ -291,13 +291,28 @@ var dialogParam3={
             }
         }
     };
+	
+	var dialogParam4={
+        modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+		buttons: [
+			{ text: "Apply Default DQF Values", click: function () {  $(this).dialog("close");document.location.replace($(this).prop("urlSent"));}},
+			{ text: "Cancel", click: function () { $(this).dialog("close");}}
+    ]
+    };
 
 $(function () {
     for(var i = 0; i < popDialogId.length; i++) {
 		var temp = $(popDiv).clone(true);
 		temp.attr("id",popDialogId[i]);
 		temp.attr("title",popTile[i]);
-		if(i < popDialogId.length - 3)
+		if(i < popDialogId.length - 4)
+		{
+			temp.dialog(dialogParam4);
+		}
+		else if(i < popDialogId.length - 3)
 		{
 			temp.dialog(dialogParam1);
 		}
@@ -389,13 +404,7 @@ function doFinished(urlSent)
         alert('Please score before finishing the activity.');
         return false;
     }
-
-    if("<%=needDQF%>" == 'true')
-    {
-        alert('Please fill in DQF information before finishing the activity.');
-        return false;
-    }
-
+	
     var checked = false;
     var selectedRadioBtn = null;
     if (DetailsForm.RadioBtn != null)
@@ -428,12 +437,13 @@ function doFinished(urlSent)
 
         urlSent = conditionUrls[selectedRadioBtn];
         taskCompleteUrl = urlSent;
+		
     }
     else
     {
         checked = true;
     }
-
+	
     if (!checked)
     {
         alert("<%= labelSelectionWarning %>");
@@ -441,6 +451,17 @@ function doFinished(urlSent)
     }
     else
     {
+		// GBS-4712 Default DQF Values
+		//Applying default value of fluency is "Flawless" and adequacy is "Everything"		
+		if("<%=needDQF%>" == 'true')
+		{       	
+			$("#dialog-DQFfileState").html("Please click Apply Default DQF Values to set Fluency to Flawless and Adequacy to Everything, save the Scorecard and complete the activity OR click Cancel to return to the activity and provide and save DQF information.");
+			$("#dialog-DQFfileState").prop("urlSent", urlSent+"&fluency_score=Flawless&adequacy_score=Everything");
+			$("#dialog-DQFfileState").dialog("open").height("auto");
+
+			return false;
+		}
+	
         var warningMessage = '';
         var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
         var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&taskId="+taskId+"&t=" + new Date();
@@ -823,7 +844,6 @@ function doUploadingCheck(urlSent)
 	                           String color = "#FFFFFF";
 	                           //select the first radio button by default
 	                           String checked = "";//"checked";
-	
 	                           for (int i=0; i < listSize; i++)
 	                           {
 	                              //String color = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";

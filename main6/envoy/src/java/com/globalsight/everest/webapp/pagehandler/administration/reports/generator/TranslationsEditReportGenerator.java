@@ -86,6 +86,7 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
+import com.globalsight.util.DQFInfoReport;
 import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -305,6 +306,11 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
             int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
                     SEGMENT_START_ROW);
+			 // GBS-4727 Create DQF Information sheet
+			if (isDQFEnabled) {
+				Sheet dqfInfoSheet = p_workbook.createSheet(m_bundle.getString("dqf_info_title"));
+				DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, m_bundle);
+			}
 
             ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW,
                     lastRow - 1, CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
@@ -343,7 +349,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
         if (isDQFEnabled)
         {
-            isStored = StringUtil.isNotEmpty(dqfComment);
+          //  isStored = StringUtil.isNotEmpty(dqfComment);
 
             // DQF enabled
             row = DQF_START_ROW;
@@ -353,7 +359,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
 
             cell = ExcelUtil.getCell(rowLine, 1);
-            if (isStored || needProtect)
+            if (needProtect)
             {
                 cell.setCellStyle(REPORT_STYLE.getLockedStyle());
             }
@@ -370,7 +376,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             cell.setCellValue(m_bundle.getString("lb_dqf_adequacy_only"));
             cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
             cell = ExcelUtil.getCell(rowLine, 1);
-            if (isStored || needProtect)
+            if (needProtect)
             {
                 cell.setCellStyle(REPORT_STYLE.getLockedStyle());
             }
@@ -386,7 +392,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             cell.setCellValue(m_bundle.getString("lb_comment"));
             cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
             cell = ExcelUtil.getCell(rowLine, 1);
-            if (isStored || needProtect)
+            if (needProtect)
             {
                 cell.setCellStyle(REPORT_STYLE.getLockedStyle());
             }

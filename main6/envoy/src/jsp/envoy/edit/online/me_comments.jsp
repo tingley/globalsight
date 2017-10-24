@@ -5,6 +5,7 @@
             com.globalsight.util.resourcebundle.SystemResourceBundle,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.GlobalSightLocale,
+            com.globalsight.util.StringUtil,
             com.globalsight.ling.common.Text,
             com.globalsight.everest.comment.Issue,
             com.globalsight.everest.comment.IssueHistory,
@@ -631,6 +632,21 @@ $(document).ready(function(){
     for (int i = 0, maxi = issues.size(); i < maxi; i++)
     {
       Issue issue = (Issue)issues.get(i);
+      
+      //Comment or category are not null then only display the comment section
+      List<IssueHistory> histories = issue.getHistory();
+      if (histories != null)
+      {
+        Set<String> comments = new HashSet<String>();
+        for (IssueHistory iHistory : histories)
+        {
+    	  if (StringUtil.isNotEmptyAndNull(iHistory.getComment()))
+    	  {
+    	     comments.add(iHistory.getComment());
+    	  }
+        }
+        if (comments.size() > 0 || StringUtil.isNotEmptyAndNull(issue.getCategory()))
+        {
 
       // Cell is align=right if the target language is bidi _or_ the
       // issue's title is bidi (assuming that the entire issue is a 
@@ -656,22 +672,29 @@ $(document).ready(function(){
         <%=EditUtil.encodeHtmlEntities(issue.getTitle())%>
       </DIV>
 <%
-      List histories = issue.getHistory();
       for (int j = 0, maxj = histories.size(); j < maxj; j++)
       {
-       IssueHistory history = (IssueHistory)histories.get(j);
+       IssueHistory history = histories.get(j);
        boolean b_commentRtl = Text.containsBidiChar(history.getComment());
        String commentAlign = b_commentRtl || b_issueRtl ? "right" : "left";
        String commentDir = b_commentRtl ? "RTL" : "LTR";
 %>
       <DIV style="width:100%" align="<%=commentAlign%>">
+
        	<SPAN class="commentBy">
         	<%=EditUtil.encodeHtmlEntities(UserUtil.getUserNameById(history.reportedBy()))%>
        	</SPAN>
       	<SPAN class="commentDate"><%=history.dateReported()%></SPAN>
+<%		if (StringUtil.isNotEmptyAndNull(history.getComment()))
+        {
+%>		
       	<DIV class="comment" dir="<%=commentDir%>">
+
         	<%=EditUtil.encodeHtmlEntities(history.getComment())%>
-      	</DIV>
+    	</DIV>
+<%		  } 
+%>
+      	
       </DIV>
 <%
      }
@@ -685,7 +708,9 @@ $(document).ready(function(){
     <TD><%=getPriorityLabel(bundle, issue)%></TD>
     <TD><%=getCategoryLabel(bundle, issue)%></TD>
   </TR>
-<% } %>
+<% } 
+ } 
+}%>
   </TBODY>
 </TABLE>
 </DIV>

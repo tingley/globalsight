@@ -80,6 +80,24 @@ $(function () {
     
     getHelpInfo();  //This option will also get task list too.
     checkForDownloadRequest();
+	// GBS-4712 Default DQF Values
+	var popDiv="<div style='display:none' class='dQFfileState'></div>";
+
+	var DQFValues={
+		modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+		buttons: [
+			{ text: "Apply Default DQF Values", click: function () {  $(this).dialog("close");document.location.replace($(this).prop("urlSent"));}},
+			{ text: "Cancel", click: function () { $(this).dialog("close");}}
+		]
+	};
+
+	var temp = $(popDiv);
+	temp.attr("id","dialog_DQFfileState");
+	temp.attr("title","No DQF Information has been saved.");
+	temp.dialog(DQFValues);
 });
 
 function initSortActions() {
@@ -518,9 +536,14 @@ function initButtonActions() {
             {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
-            if (data.isNeedDQFTaskId)
+			// show the pop up when missing DQF information.
+            if (data.isDQFFinishedTaskId)
             {
-            	alert("Below activities of jobs need be fill in DQF scores, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedDQFTaskId);
+				    // GBS-4712 Default DQF Values
+					$("#dialog_DQFfileState").html("Please click Apply Default DQF Values to set Fluency to Flawless and Adequacy to Everything, save the Scorecard and complete the activity OR click Cancel to return to the activity and provide and save DQF information.");
+					$("#dialog_DQFfileState").prop("urlSent", "ControlServlet?linkName=self&pageName=TK1A&state="+currentTaskState+"&taskAction=completeActivity&taskParam="+data.isDQFFinishedTaskId+"&random="+random+"&fluency_score=Flawless&adequacy_score=Everything");
+					$("#dialog_DQFfileState").dialog("open").height("auto");
+					
             }
             var reportUploadCheckConfirmInfo = "One or more activities you selected require uploading Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require uploading an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";

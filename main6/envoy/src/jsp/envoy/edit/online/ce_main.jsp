@@ -6,6 +6,7 @@
             com.globalsight.everest.edit.online.SegmentView,
             com.globalsight.util.edit.GxmlUtil,
             com.globalsight.everest.edit.online.CommentView,
+             com.globalsight.util.StringUtil,
             com.globalsight.everest.comment.Issue,
             com.globalsight.everest.comment.IssueHistory,
             com.globalsight.everest.comment.IssueOptions,
@@ -107,7 +108,7 @@ if (issue != null)
     {
         // User can edit the last comment he's entered
         b_edit = true;
-        cmtComment = last.getComment();
+		cmtComment = last.getComment() != null ? last.getComment() : "";
     }
 
     //user cannot edit the title unless he reported it
@@ -696,6 +697,8 @@ function doOnLoad()
        for (int j = 0, maxj = histories.size(); j < maxj; j++)
        {
          IssueHistory history = (IssueHistory)histories.get(j);
+		 if(StringUtil.isNotEmptyAndNull(history.getComment()))
+         {	
 %>
     <DIV>
     <SPAN class="commentBy"><%=EditUtil.encodeHtmlEntities(UserUtil.getUserNameById(history.reportedBy()))%></SPAN>
@@ -703,6 +706,7 @@ function doOnLoad()
     <DIV class="comment"><%=EditUtil.encodeHtmlEntities(history.getComment())%></DIV>
     </DIV>
 <%
+		 }
        }
      }
 %>

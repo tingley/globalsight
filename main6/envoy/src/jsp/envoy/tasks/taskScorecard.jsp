@@ -869,7 +869,8 @@ private static String toggleBgColor(int p_rowNumber)
     HashMap<String, Integer> scorecardMap = (HashMap<String,Integer>)sessionMgr.getAttribute("scorecard");
     List<Select> scorecardCategories = (List<Select>)sessionMgr.getAttribute("scorecardCategories");
     boolean isScored = (Boolean)sessionMgr.getAttribute("isScored");
-    boolean isDQFDone = (Boolean)sessionMgr.getAttribute("isDQFDone");
+    //GBS-4676 DQF values should remain editable until activity completion.
+    //boolean isDQFDone = (Boolean)sessionMgr.getAttribute("isDQFDone");
     int categoryNum = scorecardMap.keySet().size();
 
     String labelLeverageMT = bundle.getString("lb_leverage_mt");
@@ -1279,7 +1280,7 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
     </td>
     <td style="width:600px;text-align:left;">
         <% for (String s : fluencyCategories) { %>
-        <input type="radio" id="fluencyScore" name="fluencyScore" value="<%=s %>" <%=s.equals(fluencyScore) ? "checked" : "" %> <%=isDQFDone ? "disabled" : ""%>><%=s %></input>
+        <input type="radio" id="fluencyScore" name="fluencyScore" value="<%=s %>" <%=s.equals(fluencyScore) ? "checked" : "" %> ><%=s %></input>
         <% } %>
     </td>
 </tr>
@@ -1290,7 +1291,7 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
     </td>
     <td style="width:600px;text-align:left;">
         <% for (String s : adequacyCategories) { %>
-        <input type="radio" id="adequacyScore" name="adequacyScore" value="<%=s %>" <%=s.equals(adequacyScore) ? "checked" : "" %> <%=isDQFDone ? "disabled" : ""%>><%=s %></input>
+        <input type="radio" id="adequacyScore" name="adequacyScore" value="<%=s %>" <%=s.equals(adequacyScore) ? "checked" : "" %> ><%=s %></input>
         <% } %>
     </td>
 </tr>
@@ -1299,14 +1300,12 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
         <%=bundle.getString("lb_comment") %>
     </td>
     <td>
-        <textarea name="dqfComment" id="dqfComment" maxlength="495" style="resize: none;height:80px;width:80%;" <%=isDQFDone ? "disabled" : ""%>><%=dqfComment %></textarea>
+        <textarea name="dqfComment" id="dqfComment" maxlength="4000" style="resize: none;height:80px;width:80%;"><%=dqfComment %></textarea>
     </td>
 </tr>
 </table>
 <br>
-<% if (!isDQFDone) { %>
     <input type="button" id="saveDQFBtn" name="saveDQFBtn" value="<%=bundle.getString("lb_save") %>" onclick="saveDQF()" />
-<% } %>
 </form>
 <% } %>
 </div>

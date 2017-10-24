@@ -20,6 +20,8 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import com.globalsight.util.StringUtil;
+
 /**
  * Helper methods for dealing with text strings.
  */
@@ -513,17 +515,22 @@ public final class Text
      */
     final static public boolean containsBidiChar(String p_string)
     {
-        for (int i = 0, max = p_string.length(); i < max; i++)
-        {
-            char ch = p_string.charAt(i);
+    	//GBS-4686
+    	//from me_comment.jsp, p_string value is coming as null
+    	if (StringUtil.isEmptyAndNull(p_string)) {
+    		return false;
+    	}
+    	for (int i = 0, max = p_string.length(); i < max; i++)
+    	{
+    		char ch = p_string.charAt(i);
 
-            if (isBidiChar(ch))
-            {
-                return true;
-            }
-        }
+    		if (isBidiChar(ch))
+    		{
+    			return true;
+    		}
+    	}
 
-        return false;
+    	return false;
     }
 
     final static public boolean isBidiChar(char p_ch)

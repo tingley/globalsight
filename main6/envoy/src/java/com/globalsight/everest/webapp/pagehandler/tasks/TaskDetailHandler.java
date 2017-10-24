@@ -134,7 +134,6 @@ public class TaskDetailHandler extends PageHandler
     protected static boolean s_isCostingEnabled = false;
     protected static boolean s_isRevenueEnabled = false;
     protected static boolean s_isParagraphEditorEnabled = false;
-
     /**
      * Map<Long, Long>: taskID:percentage
      */
@@ -148,7 +147,6 @@ public class TaskDetailHandler extends PageHandler
             SystemConfiguration sc = SystemConfiguration.getInstance();
             s_isCostingEnabled = sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
             s_isRevenueEnabled = sc.getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED);
-
             s_isParagraphEditorEnabled = EditHelper.isParagraphEditorInstalled();
         }
         catch (Throwable e)
@@ -291,6 +289,7 @@ public class TaskDetailHandler extends PageHandler
             String[] trgPageIds = pageIds.split(",");
             for (String trgPageId : trgPageIds)
             {
+				// Approve TUVs by page id
                 SegmentTuvUtil.approveTuvByTargetPageId(Long.parseLong(trgPageId));
             }
             out.write("1");
@@ -351,7 +350,8 @@ public class TaskDetailHandler extends PageHandler
             String dqfComment = wf.getDQFComment();
             String fluencyScore = wf.getFluencyScore();
             String adequacyScore = wf.getAdequacyScore();
-            boolean isDQFDone = StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore);
+           //GBS-4676 DQF values should remain editable until activity completion.
+           // boolean isDQFDone = StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore);
 
             sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
             sessionMgr.setAttribute("scorecard", scorecardMap);
@@ -365,7 +365,8 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("dqfComment", dqfComment);
             sessionMgr.setAttribute("fluencyScore", fluencyScore);
             sessionMgr.setAttribute("adequacyScore", adequacyScore);
-            sessionMgr.setAttribute("isDQFDone", isDQFDone);
+            //GBS-4676 DQF values should remain editable until activity completion.
+            //sessionMgr.setAttribute("isDQFDone", isDQFDone);
             if (StringUtil.isEmpty(scorecardComment))
                 scorecardComment = "";
             sessionMgr.setAttribute("scorecardComment", scorecardComment);
@@ -443,14 +444,14 @@ public class TaskDetailHandler extends PageHandler
             int taskState = TaskHelper.getInt(taskStateParam, -10);
             Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
 
-            HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
+            /*HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
             long companyId = task.getCompanyId();
-            ResourceBundle bundle = PageHandler.getBundle(httpSession);
+            ResourceBundle bundle = PageHandler.getBundle(httpSession);*/
 
             // save
-            long workflowId = task.getWorkflow().getId();
+            /*long workflowId = task.getWorkflow().getId();
             long jobId = task.getJobId();
-            String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);
+            String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);*/
             String dqfComment = ServletUtil.get(p_request, "dqfComment");
             String fluencyScore = ServletUtil.get(p_request, "fluencyScore");
             String adequacyScore = ServletUtil.get(p_request, "adequacyScore");
@@ -462,7 +463,10 @@ public class TaskDetailHandler extends PageHandler
                 WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
                 workflowImpl.setFluencyScore(fluencyScore);
                 workflowImpl.setAdequacyScore(adequacyScore);
-                workflowImpl.setDQFComment(dqfComment);
+                //GBS-4710 
+    			//Max allowed characters is 4000 for DQF Comment field
+    			//If DQF Comment length is more than 4000 then split the value upto 4000 characters.
+                workflowImpl.setTrimmedDQFComment(dqfComment);
                 HibernateUtil.save(workflowImpl);
                 tx.commit();
             }
@@ -475,7 +479,8 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("dqfComment", dqfComment);
             sessionMgr.setAttribute("fluencyScore", fluencyScore);
             sessionMgr.setAttribute("adequacyScore", adequacyScore);
-            sessionMgr.setAttribute("isDQFDone", true);
+            //GBS-4676 DQF values should remain editable until activity completion.
+            //sessionMgr.setAttribute("isDQFDone", true);
 
             task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
             TaskHelper.storeObject(httpSession, WORK_OBJECT, task);

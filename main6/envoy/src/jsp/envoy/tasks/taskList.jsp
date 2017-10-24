@@ -218,7 +218,13 @@
     <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/taskList.css">
     <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
     <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+	<!-- GBS-4712 Default DQF Values -->
+	<link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
+
     <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+	<!-- GBS-4712 Default DQF Values -->
+	<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+
     <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
     <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
     <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -530,5 +536,6 @@
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <script src="/globalsight/includes/ieemu.js"></script>
 <script type="text/javascript" src="/globalsight/envoy/tasks/taskList.js"></script>
+
 <script src="/globalsight/includes/jquery.contextmenu.r2.packed.js"></script>
 </HTML>

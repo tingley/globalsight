@@ -81,6 +81,7 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
+import com.globalsight.util.DQFInfoReport;
 import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -387,6 +388,11 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             }
             // Insert Segment Data
             int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
+			 // GBS-4727 Create DQF Information sheet
+			if (isDQFEnabled) {
+				Sheet dqfInfoSheet = p_workbook.createSheet(m_bundle.getString("dqf_info_title"));
+				DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, m_bundle);
+			}
         }
     }
 

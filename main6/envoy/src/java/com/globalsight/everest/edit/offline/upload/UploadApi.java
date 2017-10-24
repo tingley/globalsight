@@ -186,6 +186,16 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private String dqfComment = null;
     private String scoreComment = null;
     private HashMap<String, Integer> scores = null;
+    private static ResourceBundle m_resource;
+	
+	static{
+		try {
+			// GBS-4710 
+			m_resource = ResourceBundle.getBundle(AmbassadorDwUpConstants.OFFLINE_CONFIG_PROPERTY);
+		} catch (Throwable e) {
+			CATEGORY.error("UploadApi: Problem getting message from properties file ", e);
+		}
+	}
 
     public OEMProcessStatus getStatus()
     {
@@ -892,6 +902,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String requiredComment = null;
         String commentStatus = null;
         String severity = null;
+        String failureType = null;
         boolean hasSegmentIdErro = false;
         boolean isNew = SEGMENT_START_ROW > 0;
 
@@ -899,21 +910,26 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         {
             // Handle DQF/Scorecard info
             WorkflowImpl workflow = (WorkflowImpl) task.getWorkflow();
-            String tmpDQFComment = workflow.getDQFComment();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-            if (StringUtil.isEmpty(workflow.getFluencyScore()) && DQF_START_ROW > 0)
+          //GBS-4676 allows updates for any no.of upload TER 
+            if (DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
                 adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
                 dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
+                
                 if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore))
                 {
                     workflow.setFluencyScore(fluencyScore);
                     workflow.setAdequacyScore(adequacyScore);
-                    if (StringUtil.isNotEmpty(dqfComment))
-                        workflow.setDQFComment(dqfComment);
+                    //GBS-4710 
+    				//Max allowed characters is 4000 for DQF Comment field
+    				//If DQF Comment length is more than 4000 then split the value upto 4000 
+                    //characters.
+                    //update dqf comment always either empty or not 
+                    workflow.setTrimmedDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
                 else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
@@ -1018,7 +1034,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             int x = j * m / row;
             updateProcess(n + x);
-
+            failureType = ExcelUtil.getCellValue(sheet, j, 5);
             if (isNew && DQF_START_ROW > 0)
             {
                 severity = ExcelUtil.getCellValue(sheet, j, 6);
@@ -1050,30 +1066,21 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 updatedText = EditUtil.removeU200F(updatedText);
 
             jobIds.add(jobIdText);
-            if (StringUtil.isNotEmpty(segmentId))
-            {
-                if (StringUtil.isNotEmpty(updatedText))
-                {
-                    segId2RequiredTranslation.put(segIdLong, updatedText);
-                }
-                if (StringUtil.isNotEmpty(comment))
-                {
-                    if (StringUtil.isNotEmpty(requiredComment))
-                    {
-                        segId2Comment.put(segIdLong, requiredComment);
-                    }
-                    segId2CommentStatus.put(segIdLong, commentStatus);
-                }
-                else
-                {
-                    if (StringUtil.isNotEmpty(requiredComment))
-                    {
-                        segId2Comment.put(segIdLong, requiredComment);
-                        segId2CommentStatus.put(segIdLong, "query");
-                    }
-                }
-                segId2Severity.put(segIdLong, severity);
-            }
+            //GBS-4686 DQF: warning does not show when comment field empty
+            //Removed not null conditions for comment and comment status i.e  
+            //Case 1: anyone of comment or category or severity values are entered then insert the values in db.
+            //Case 2: While second time uploading with empty values of Severity or Category Failure then also we update the values in db.
+			if (StringUtil.isNotEmpty(segmentId)) {
+				if (StringUtil.isNotEmpty(updatedText)) {
+					segId2RequiredTranslation.put(segIdLong, updatedText);
+				}
+				if (StringUtil.isNotEmpty(requiredComment)) {
+					segId2Comment.put(segIdLong, requiredComment);
+				}
+				segId2CommentStatus.put(segIdLong, commentStatus);
+				segId2Severity.put(segIdLong, severity);
+				segId2FailureType.put(segIdLong, failureType);
+			}
             else
             {
                 m_errWriter.addFileErrorMsg("Segment id is lost in row " + (j + 1) + "\r\n");
@@ -1315,26 +1322,30 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String failureType = null;
         String commentStatus = null;
         String severity = null;
-        String translatorComment;
+     //   String translatorComment;
 
         if (task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE))
         {
             // Handle DQF/Scorecard info
             WorkflowImpl workflow = (WorkflowImpl) task.getWorkflow();
-            String tmpDQFComment = workflow.getDQFComment();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-            if (StringUtil.isEmpty(workflow.getFluencyScore()) && DQF_START_ROW > 0)
+            //GBS-4676 allows updates for any no.of upload RCR 
+            if (DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
                 adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
                 dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
+                
                 if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore))
                 {
                     workflow.setFluencyScore(fluencyScore);
                     workflow.setAdequacyScore(adequacyScore);
-                    workflow.setDQFComment(dqfComment);
+                    // GBS-4710 
+        			//Max allowed characters is 4000 for DQF Comment field
+        			//If DQF Comment length is more than 4000 then split the value upto 4000 characters.
+                    workflow.setTrimmedDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
                 else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
@@ -1435,7 +1446,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (cancel)
                 return null;
 
-            translatorComment = ExcelUtil.getCellValue(sheet, k, 2);
+        //    translatorComment = ExcelUtil.getCellValue(sheet, k, 2);
             reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
             if (EditUtil.isRTLLocale(tLocale))
                 reviewerComment = EditUtil.removeU200F(reviewerComment);
@@ -1471,25 +1482,24 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             TuvImpl tuvImpl = (TuvImpl) tuv;
             TargetPage targetPage = tuvImpl.getTargetPage(curJobId);
             pageId = new String(String.valueOf(targetPage.getId()));
-
-            if (StringUtil.isNotEmpty(reviewerComment) ||
-                    (StringUtil.isNotEmpty(translatorComment) && StringUtil.isNotEmpty(commentStatus)))
+           //GBS-4686 DQF: warning does not show when comment field empty
+           //Removed not null conditions for comment and comment status i.e  
+           //Case 1: anyone of comment or category or severity values are entered then insert the values in db.
+           //Case 2: While second time uploading with empty values then also we update the values in db. 
+            if (segmentId != null && !segmentId.equals("") && pageId != null
+                    && !pageId.equals(""))
             {
-                if (segmentId != null && !segmentId.equals("") && pageId != null
-                        && !pageId.equals(""))
-                {
-                    segId2PageId.put(segIdLong, new Long(Long.parseLong(pageId)));
-                    segId2Comment.put(segIdLong, reviewerComment);
-                    segId2FailureType.put(segIdLong, failureType);
-                    segId2CommentStatus.put(segIdLong, commentStatus);
-                    segId2Severity.put(segIdLong, severity);
-                }
-                else
-                {
-                    m_errWriter.addFileErrorMsg(
-                            "Segment or Page id is lost in row " + (k + 1) + "\r\n");
-                    hasIdErro = true;
-                }
+				segId2PageId.put(segIdLong, new Long(Long.parseLong(pageId)));
+				segId2Comment.put(segIdLong, reviewerComment);
+				segId2CommentStatus.put(segIdLong, commentStatus);
+				segId2FailureType.put(segIdLong, failureType);
+				segId2Severity.put(segIdLong, severity);
+            }
+            else
+            {
+                m_errWriter.addFileErrorMsg(
+                        "Segment or Page id is lost in row " + (k + 1) + "\r\n");
+                hasIdErro = true;
             }
         }
 
@@ -1661,10 +1671,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     }
 
     // Updated comment status.
-    private void updateCommentStatus(Issue p_issue, String commentStatus, String severity)
+    private void updateCommentStatus(Issue p_issue, String commentStatus, String severity,String failureType)
     {
         IssueImpl issue = HibernateUtil.get(IssueImpl.class, p_issue.getId());
         issue.setStatus(commentStatus);
+        //GBS-4686  
+        //update default failure category and severity values when RCR upload for second time
+        issue.setCategory(failureType);
         issue.setSeverity(severity);
         HibernateUtil.update(issue);
     }
@@ -1768,15 +1781,20 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             existIssues = cachedIssues.get(targetPageId + "_" + tuId + "_" + tuvId + "_");
             if (existIssues == null || existIssues.size() == 0)
             {
-                failureType = failureTypeError ? "" : failureType;
-                commentStatus = commentStatusError ? Issue.STATUS_OPEN : commentStatus;
-                IssueImpl issue = new IssueImpl(Issue.TYPE_SEGMENT, tuvId, "Comment by LSO",
-                        Issue.PRI_MEDIUM, commentStatus, failureType.trim(), severity,
-                        p_user.getUserId(),
-                        comment, CommentHelper.makeLogicalKey(targetPageId, tuId, tuvId, 0));
-                issue.setShare(false);
-                issue.setOverwrite(false);
-                newIssues.add(issue);
+                // If any one of failureType or comment or severity or commentStatus values are not null then only insert the issue
+                if (StringUtil.isNotEmpty(failureType) || StringUtil.isNotEmpty(comment)
+                        || StringUtil.isNotEmpty(severity) || StringUtil.isNotEmpty(commentStatus))
+                {
+                    failureType = failureTypeError ? "" : failureType;
+                    commentStatus = commentStatusError ? Issue.STATUS_OPEN : commentStatus;
+                    IssueImpl issue = new IssueImpl(Issue.TYPE_SEGMENT, tuvId, "Comment by LSO",
+                            Issue.PRI_MEDIUM, commentStatus, failureType.trim(), severity,
+                            p_user.getUserId(), comment,
+                            CommentHelper.makeLogicalKey(targetPageId, tuId, tuvId, 0));
+                    issue.setShare(false);
+                    issue.setOverwrite(false);
+                    newIssues.add(issue);
+                }
             }
             else
             {
@@ -1811,7 +1829,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                             }
                             else
                             {
-                                updateCommentStatus(issue, commentStatus, severity);
+                            	//GBS-4686  
+                            	// To update failure category value added failureType as a parameter
+                                updateCommentStatus(issue, commentStatus, severity, failureType);
                             }
                         }
                         else

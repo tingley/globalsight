@@ -1314,8 +1314,11 @@ public class TaskListHandler extends PageHandler
                 isDisplayFull = false;
             }
 
+            WorkflowImpl workflowImpl = (WorkflowImpl) p_task.getWorkflow();
             // JSON Array for Pages included Un-translated Segments
-            if (proj.isCheckUnTranslatedSegments() && !p_task.isReviewOnly())
+            if (((workflowImpl.getUseMT() && proj.isCheckUnApprovedMTSegments())
+                    || (!workflowImpl.getUseMT() && proj.isCheckUnTranslatedSegments()))
+                    && !p_task.isReviewOnly())
             {
                 List<TargetPage> unTransTps = ServerProxy
                         .getPageManager()

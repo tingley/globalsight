@@ -897,6 +897,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     originalProject.isReviewReportIncludeCompactTags());
             clone.setAutoAcceptPMTask(originalProject.getAutoAcceptPMTask());
             clone.setCheckUnTranslatedSegments(originalProject.isCheckUnTranslatedSegments());
+            clone.setCheckUnApprovedMTSegments(originalProject.isCheckUnApprovedMTSegments());
             clone.setSaveTranslationsEditReport(originalProject.getSaveTranslationsEditReport());
             clone.setSaveReviewersCommentsReport(originalProject.getSaveReviewersCommentsReport());
             clone.setSaveOfflineFiles(originalProject.getSaveOfflineFiles());
@@ -2977,11 +2978,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         workflowTemplateInfo.setWorkflowType(p_origWorkflowTemplateInfo.getWorkflowType());
         workflowTemplateInfo
                 .setScorecardShowType(p_origWorkflowTemplateInfo.getScorecardShowType());
-        
+
         workflowTemplateInfo.setPerplexityKey(p_origWorkflowTemplateInfo.getPerplexityKey());
-        workflowTemplateInfo.setPerplexityService(p_origWorkflowTemplateInfo.getPerplexityService());
-        workflowTemplateInfo.setPerplexitySourceThreshold(p_origWorkflowTemplateInfo.getPerplexitySourceThreshold());
-        workflowTemplateInfo.setPerplexityTargetThreshold(p_origWorkflowTemplateInfo.getPerplexityTargetThreshold());
+        workflowTemplateInfo
+                .setPerplexityService(p_origWorkflowTemplateInfo.getPerplexityService());
+        workflowTemplateInfo.setPerplexitySourceThreshold(
+                p_origWorkflowTemplateInfo.getPerplexitySourceThreshold());
+        workflowTemplateInfo.setPerplexityTargetThreshold(
+                p_origWorkflowTemplateInfo.getPerplexityTargetThreshold());
         return workflowTemplateInfo;
     }
 
@@ -3189,8 +3193,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category
-                    .error("Unable to retrieve workflow templates for given source locale and project manager id "
+            c_category.error(
+                    "Unable to retrieve workflow templates for given source locale and project manager id "
                             + e);
             throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
                     e);
@@ -4033,7 +4037,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     ProjectHandlerException.MSG_FAILED_TO_REMOVE_WF_STATE_POST_PROFILE, args, pe);
         }
     }
-    
+
     /**
      * Gets All localization profiles by companyId.
      */
@@ -4077,7 +4081,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             return null;
         }
     }
-    
+
     /**
      * Gets WorkflowTemplateInfo by Name and companyId.
      */
@@ -4104,7 +4108,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             return null;
         }
     }
-    
+
     /**
      * Gets all projectTMs by companyId.
      */
@@ -4128,7 +4132,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             return null;
         }
     }
-    
+
     public List<WorkflowStatePosts> getWfStatePostProfileByCompanyId(long companyId)
     {
         List<WorkflowStatePosts> tmProfiles = new ArrayList<WorkflowStatePosts>();

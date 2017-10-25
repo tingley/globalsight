@@ -169,8 +169,8 @@ public class Tmx2Xliff20
                             }
                         }
 
-                        if (subStr.indexOf("</ph>") != -1
-                                && isInPhStack.size() > 0 && isInPhStack.peek())
+                        if (subStr.indexOf("</ph>") != -1 && isInPhStack.size() > 0
+                                && isInPhStack.peek())
                         {
                             isInPhStack.pop();
                         }
@@ -180,8 +180,7 @@ public class Tmx2Xliff20
                             tagStack.push("start");
                         }
 
-                        if (tagStack.size() > 0
-                                && subStr.indexOf("</it>") != -1)
+                        if (tagStack.size() > 0 && subStr.indexOf("</it>") != -1)
                         {
                             tagStack.pop();
                         }
@@ -200,8 +199,7 @@ public class Tmx2Xliff20
                         }
                         else
                         {
-                            if (extractedStack.size() > 0
-                                    && extractedStack.peek())
+                            if (extractedStack.size() > 0 && extractedStack.peek())
                             {
                                 if (subStr.indexOf("<bpt") != -1)
                                 {
@@ -217,14 +215,12 @@ public class Tmx2Xliff20
                                     extractedStack.pop();
                                 }
                             }
-                            if (tagStack.size() > 0
-                                    && subStr.indexOf("<ept") != -1)
+                            if (tagStack.size() > 0 && subStr.indexOf("<ept") != -1)
                             {
                                 tagStack.pop();
                             }
 
-                            if (tagStack.size() > 0
-                                    && subStr.indexOf("</ept") != -1)
+                            if (tagStack.size() > 0 && subStr.indexOf("</ept") != -1)
                             {
                                 tagStack.pop();
                             }
@@ -242,8 +238,7 @@ public class Tmx2Xliff20
 
                     if (start < end)
                     {
-                        boolean isInPh = (isInPhStack.size() > 0) ? isInPhStack
-                                .peek() : false;
+                        boolean isInPh = (isInPhStack.size() > 0) ? isInPhStack.peek() : false;
                         String subString = p_tmx.substring(start, end);
                         if (isInPh)
                         {
@@ -251,10 +246,9 @@ public class Tmx2Xliff20
                         }
                         else
                         {
-                            isExtracted = (extractedStack.size() > 0) ? extractedStack
-                                    .peek() : false;
-                            String tag = (tagStack.size() > 0) ? tagStack
-                                    .peek() : "start";
+                            isExtracted = (extractedStack.size() > 0) ? extractedStack.peek()
+                                    : false;
+                            String tag = (tagStack.size() > 0) ? tagStack.peek() : "start";
 
                             if (tagStack.size() == 0)
                             {
@@ -324,8 +318,7 @@ public class Tmx2Xliff20
      * 
      * @throws Exception
      */
-    private void processTag(String p_tmx, int p_min, int p_max)
-            throws Exception
+    private void processTag(String p_tmx, int p_min, int p_max) throws Exception
     {
         int i = eatWhitespaces(p_tmx, p_min + 1);
         char ch = p_tmx.charAt(i);
@@ -428,15 +421,13 @@ public class Tmx2Xliff20
         else if (bEmptyTag)
         {
             // An empty is rare, so we can construct temp strings.
-            handler.handleStartTag(tag, attributes,
-                    p_tmx.substring(p_min, i - 1) + ">");
+            handler.handleStartTag(tag, attributes, p_tmx.substring(p_min, i - 1) + ">");
 
             handler.handleEndTag(tag, "</" + tag + ">");
         }
         else
         {
-            handler.handleStartTag(tag, attributes,
-                    p_tmx.substring(p_min, p_max));
+            handler.handleStartTag(tag, attributes, p_tmx.substring(p_min, p_max));
 
             if ("sub".equals(tag))
             {
@@ -478,10 +469,10 @@ public class Tmx2Xliff20
         StringBuffer sb = new StringBuffer();
         File f = xliff2.getFile().get(0);
         List<Note> notes = f.getNotes().getNote();
-        
+
         // remove the first \r\n in note
         String note = notes.get(0).getContent().substring(1);
-        
+
         // remove content between # Activity Type and # Encoding
         int index = note.indexOf("# Activity Type:");
         int index2 = note.indexOf("# Encoding:");
@@ -489,7 +480,7 @@ public class Tmx2Xliff20
         {
             note = note.substring(0, index) + note.substring(index2);
         }
-        
+
         sb.append(note);
         sb.append("\r\n");
         List<Object> us = f.getUnitOrGroup();
@@ -515,11 +506,11 @@ public class Tmx2Xliff20
         sb.append("\r\n# END GlobalSight Download File");
         return sb.toString();
     }
-    
+
     private static Map<String, String> getSourceSubTypes(Segment seg)
     {
         Map<String, String> types = new HashMap<>();
-        
+
         Source s = seg.getSource();
         for (Object o : s.getContent())
         {
@@ -528,17 +519,17 @@ public class Tmx2Xliff20
                 addSubTypes((Pc) o, types);
             }
         }
-        
+
         return types;
     }
-    
+
     private static void addSubTypes(Pc pc, Map<String, String> types)
     {
         if (pc.getSubType() != null && pc.getSubType().length() > 0)
         {
             types.put(pc.getId(), pc.getSubType().trim());
         }
-        
+
         for (Object o : pc.getContent())
         {
             if (o instanceof Pc)
@@ -555,7 +546,8 @@ public class Tmx2Xliff20
      * @param cs
      * @param sb
      */
-    private static void getContentAsString(List<Object> cs, StringBuffer sb, Map<String, String> subTypes)
+    private static void getContentAsString(List<Object> cs, StringBuffer sb,
+            Map<String, String> subTypes)
     {
         for (Object o : cs)
         {
@@ -623,20 +615,20 @@ public class Tmx2Xliff20
     private static String getBptId(Properties p_hAttributes)
     {
         String id = p_hAttributes.getProperty("i");
-        
+
         if (id == null)
         {
             id = p_hAttributes.getProperty("id");
         }
-        
+
         if (id == null)
         {
             id = p_hAttributes.getProperty("x");
         }
-        
+
         return id;
     }
-    
+
     /**
      * Changes gxml tag to txt tag.
      * 
@@ -647,11 +639,11 @@ public class Tmx2Xliff20
      * @param p_strOriginalString
      * @return
      */
-    public static String getTag(String p_strTmxTagName,
-            Properties p_hAttributes, String p_strOriginalString, Map<String, String> ept2bpt, Map<String, String> ept2bpt2)
+    public static String getTag(String p_strTmxTagName, Properties p_hAttributes,
+            String p_strOriginalString, Map<String, String> ept2bpt, Map<String, String> ept2bpt2)
     {
         String i = Tmx2Xliff20Handler.getId(p_hAttributes);
-        
+
         if (p_strTmxTagName.equals("bpt"))
         {
             String type = p_hAttributes.getProperty("type");
@@ -665,10 +657,10 @@ public class Tmx2Xliff20
                     return type;
                 }
             }
-            
+
             String bId = getBptId(p_hAttributes);
             ept2bpt.put(bId, i);
-            
+
             return "g" + i;
         }
         else if (p_strTmxTagName.equals("ept"))
@@ -679,12 +671,12 @@ public class Tmx2Xliff20
                 ept2bpt.remove(i);
                 return "/g" + bId;
             }
-            
+
             if (ept2bpt2.containsKey(i))
             {
                 return "/" + ept2bpt2.remove(i);
             }
-            
+
             return "/g" + i;
         }
         else if (p_strTmxTagName.equals("ph"))
@@ -695,5 +687,57 @@ public class Tmx2Xliff20
         {
             return "x" + i;
         }
+    }
+
+    // GBS-4716
+    /**
+     * Convert String to Xliff Object and get the segment states and put in map
+     * 
+     * The method is used in offline upload.
+     * 
+     * @param content
+     * @return Map<String, String>
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getSegmentsStateAsMap(String content)
+    {
+        if (StringUtil.isEmptyAndNull(content))
+        {
+            return null;
+        }
+        content = content.substring(1);
+        // Convert string to Xliff object
+        Xliff xliff2 = XmlUtil.string2Object(Xliff.class, content);
+
+        // There is only one file tag so get the first value
+        File file = xliff2.getFile().get(0);
+        List<Object> unitOrgroupList = file.getUnitOrGroup();
+
+        if (unitOrgroupList.isEmpty())
+        {
+            return null;
+        }
+
+        Map<String, String> segmentsStateMap = new HashMap<String, String>();
+
+        // Get all the units
+        List<Unit> unitList = (List<Unit>) (Object) unitOrgroupList;
+        for (Unit unit : unitList)
+        {
+            // Get all the segments
+            List<Segment> segmentList = (List<Segment>) (Object) unit.getSegmentOrIgnorable();
+            for (Segment segment : segmentList)
+            {
+                // Get the segment state value
+                String segmentValue = null;
+                if (segment.getState() != null)
+                {
+                    segmentValue = segment.getState().value();
+                }
+                segmentsStateMap.put(segment.getId(), segmentValue);
+            }
+
+        }
+        return segmentsStateMap;
     }
 }

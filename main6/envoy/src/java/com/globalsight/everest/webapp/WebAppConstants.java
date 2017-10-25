@@ -15,6 +15,7 @@
  *
  */
 package com.globalsight.everest.webapp;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -173,7 +174,6 @@ public interface WebAppConstants
     public static final String POST_REVIEW_QA = "postReviewQA";
     public static final String TRANSLATION_VERIFICATION = "translationVerification";
     public static final String CHECK_UPLOAD_FILE_TYPE = "checkUploadFileType";
-
 
     public static final String UPLOAD_ACTION_UPLOAD_REPORT = "uploadReport";
     public static final String DOWNLOAD_ACTION_START_DOWNLOAD_TER = "downloadTER";
@@ -789,10 +789,10 @@ public interface WebAppConstants
     public static final String JOB_GROUP_SORT_COLUMN = "sortColumn";
     public static final String JOB_GROUP_SORT_ASCENDING = "sortAscending";
     public static final String JOB_GROUP_CHECK = "checkJobGroup";
-    
+
     public static final String TM_ACTION_DELETE_BAD_TUV = "deleteBadTuv";
-    public static final String TM_PARAM_DELETE_BAD_TUV_BYID  = "deleteBadTucById";
-    public static final String TM_PARAM_DELETE_BAD_TUV_BYSOURCE  = "deleteBadTucBySource";
+    public static final String TM_PARAM_DELETE_BAD_TUV_BYID = "deleteBadTucById";
+    public static final String TM_PARAM_DELETE_BAD_TUV_BYSOURCE = "deleteBadTucBySource";
     /*
      * Common actions in web UI
      */
@@ -803,8 +803,11 @@ public interface WebAppConstants
     public static final String ACTION_REMOVE = "remove";
     public static final String ACTION_CANCEL = "cancel";
 
-    public static final List<String> FILE_EXTENSION_LIST = Arrays.asList("bmp", "jpg", "png",
-            "gif", "jpeg", "jpe");
+    public static final List<String> FILE_EXTENSION_LIST = Arrays.asList("bmp", "jpg", "png", "gif",
+            "jpeg", "jpe");
     public static final List<String> OPEN_EDITOR_TYPE = Arrays.asList("postReviewEditor",
             "popupEditor");
+
+    // GBS-4716
+    public static final String MT_APPROVED = "mtApproved";
 }

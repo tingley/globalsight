@@ -306,7 +306,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
 
             // load the upload file
-            if ((errPage = loadListViewTextFile(p_reader, p_fileName, false)) != null)
+            if ((errPage = loadListViewTextFile(p_reader, p_fileName, false, null)) != null)
             {
                 CATEGORY.error("UploadApi.processPage(): " + "Unable to load the upload-file.");
 
@@ -880,8 +880,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     }
 
     private String loadTERReportData(Sheet sheet, Task task, GlobalSightLocale tLocale,
-            ResourceBundle bundle)
-            throws RemoteException
+            ResourceBundle bundle) throws RemoteException
     {
         int segmentStartRow = SEGMENT_START_ROW > 0 ? SEGMENT_START_ROW
                 : ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
@@ -932,7 +931,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     workflow.setTrimmedDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
-                else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
+                else if (StringUtil.isNotEmpty(fluencyScore)
+                        || StringUtil.isNotEmpty(adequacyScore))
                 {
                     // User does not fill in all DQF fields, report error
                     m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
@@ -976,7 +976,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     workflow.setScorecardComment(scoreComment);
                     isWorkflowChanged = true;
 
-                    for (Iterator<String> iterator = scores.keySet().iterator(); iterator.hasNext();)
+                    for (Iterator<String> iterator = scores.keySet().iterator(); iterator
+                            .hasNext();)
                     {
                         category = iterator.next();
                         value = scores.get(category);
@@ -1305,8 +1306,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             ResourceBundle bundle) throws RemoteException
     {
         boolean isNew = SEGMENT_START_ROW > 0;
-        int segmentStartRow = isNew ? SEGMENT_START_ROW
-                : 7;
+        int segmentStartRow = isNew ? SEGMENT_START_ROW : 7;
         Set<String> jobIds = new HashSet<String>();
 
         segId2Comment = new HashMap<Long, String>();
@@ -1348,7 +1348,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     workflow.setTrimmedDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
-                else if (StringUtil.isNotEmpty(fluencyScore) || StringUtil.isNotEmpty(adequacyScore))
+                else if (StringUtil.isNotEmpty(fluencyScore)
+                        || StringUtil.isNotEmpty(adequacyScore))
                 {
                     // User does not fill in all DQF fields, report error
                     m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
@@ -1392,7 +1393,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     workflow.setScorecardComment(scoreComment);
                     isWorkflowChanged = true;
 
-                    for (Iterator<String> iterator = scores.keySet().iterator(); iterator.hasNext();)
+                    for (Iterator<String> iterator = scores.keySet().iterator(); iterator
+                            .hasNext();)
                     {
                         category = iterator.next();
                         value = scores.get(category);
@@ -1980,10 +1982,23 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return localeId;
     }
 
+    /**
+     * To process offline upload Xliff2.0 file. segmentMap will have values for
+     * MT Segments and null for other Segment.
+     * 
+     * @param p_reader
+     * @param p_fileName
+     * @param p_user
+     * @param p_ownerTaskId
+     * @param p_excludedItemTypes
+     * @param segmentMap
+     *            key ->segment id value ->segment state
+     * @return String
+     */
     public String processXliff20(Reader p_reader, String p_fileName, User p_user,
-            long p_ownerTaskId, Collection p_excludedItemTypes)
+            long p_ownerTaskId, Collection p_excludedItemTypes, Map<String, String> segmentMap)
     {
-        loadListViewTextFile(p_reader, p_fileName, true);
+        loadListViewTextFile(p_reader, p_fileName, true, segmentMap);
 
         m_uploadPageData.setIsXliff20(true);
 
@@ -2494,7 +2509,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
      * @return if there are no errors, null is returned. If there are errors, a
      *         fully formed HTML error report page is returned.
      */
-    public String loadListViewTextFile(Reader p_reader, String p_fileName, boolean p_keepIssues)
+    public String loadListViewTextFile(Reader p_reader, String p_fileName, boolean p_keepIssues,
+            Map<String, String> segmentMap)
     {
         if (m_uploadPageData == null)
         {
@@ -2581,6 +2597,15 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             new_reader = new StringReader(content.toString());
 
             br.close();
+            
+            // GBS-4716
+            if (segmentMap != null && !segmentMap.isEmpty())
+            {
+                for (Map.Entry<String, String> entry : segmentMap.entrySet())
+                {
+                    m_uploadPageData.addXlfSegmentState(entry.getKey(), entry.getValue());
+                }
+            }
         }
         catch (Exception e)
         {
@@ -2815,7 +2840,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             p_reader = new StringReader(c);
         }
 
-        return loadListViewTextFile(p_reader, p_fileName, true);
+        return loadListViewTextFile(p_reader, p_fileName, true, null);
     }
 
     private boolean isValidUnextractedFileId(String p_unextractedTaskId, String p_unextractedFileId,

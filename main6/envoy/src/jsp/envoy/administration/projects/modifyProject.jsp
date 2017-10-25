@@ -96,6 +96,7 @@
     String reviewReportIncludeCompactTags = "";
     String autoAcceptPMTaskChecked = "";	
     String checkUnTransSeg = "";
+    String checkUnApprovedMTSeg = "";
     String saveTranslationsEditReport = "";
     String saveReviewersCommentsReport = "";
     String saveOfflineFiles = "";
@@ -135,6 +136,7 @@
         reviewReportIncludeCompactTags = project.isReviewReportIncludeCompactTags() ? "checked" : "";
         autoAcceptPMTaskChecked = project.getAutoAcceptPMTask()? "checked" : "";
         checkUnTransSeg = project.isCheckUnTranslatedSegments()? "checked" : "";
+        checkUnApprovedMTSeg = project.isCheckUnApprovedMTSegments()? "checked" : "";
         saveTranslationsEditReport = project.getSaveTranslationsEditReport() ? "checked" : "";
         saveReviewersCommentsReport = project.getSaveReviewersCommentsReport() ? "checked" : "";
         saveOfflineFiles = project.getSaveOfflineFiles() ? "checked" : "";
@@ -815,6 +817,11 @@ function changeSelectWidth(selected){
     <tr>
         <td><%=bundle.getString("lb_project_checkUnTransSeg")%>:</td>
         <td><INPUT TYPE=checkbox id="checkUnTransSeg" name="checkUnTransSeg" <%=checkUnTransSeg%> >
+        </td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_project_checkUnApprovedMTSeg")%>:</td>
+        <td><INPUT TYPE=checkbox id="checkUnApprovedMTSeg" name="checkUnApprovedMTSeg" <%=checkUnApprovedMTSeg%> >
         </td>
     </tr>
     <tr>

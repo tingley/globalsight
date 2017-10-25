@@ -32,7 +32,7 @@ public class SegmentFilter
 {
     public static final String KEY_SOURCE = "srcTuvs";
     public static final String KEY_TARGET = "trgTuvs";
-    
+
     /**
      * Do filter for Source TUV and Target TUV following the segment filter.
      * 
@@ -54,9 +54,8 @@ public class SegmentFilter
      *            - Target Page ID
      * @param p_jobId
      */
-    public static Map<String, List<Tuv>> operateForSegmentFilter(
-            PageCache p_pageCache, List<Tuv> p_sourceTuvs,
-            List<Tuv> p_targetTuvs, EditorState p_state,
+    public static Map<String, List<Tuv>> operateForSegmentFilter(PageCache p_pageCache,
+            List<Tuv> p_sourceTuvs, List<Tuv> p_targetTuvs, EditorState p_state,
             MatchTypeStatistics p_tuvMatchTypes, ArrayList<Issue> p_comments,
             Vector p_excludedItemTypes, long p_trgPageId, long p_jobId)
     {
@@ -70,19 +69,17 @@ public class SegmentFilter
             List<Tuv> srcTuvs = new ArrayList<Tuv>();
             List<Tuv> trgTuvs = new ArrayList<Tuv>();
             List<Tuv> excludeSrcTuvs = new ArrayList<Tuv>();
-            
-            operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_ICE,
-                    result, p_sourceTuvs, p_targetTuvs, p_state,
-                    p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
+
+            operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_ICE, result, p_sourceTuvs,
+                    p_targetTuvs, p_state, p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
                     p_jobId);
             excludeSrcTuvs = (List<Tuv>) result.get(KEY_SOURCE);
-            
-            operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_100,
-                    result, p_sourceTuvs, p_targetTuvs, p_state,
-                    p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
+
+            operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_100, result, p_sourceTuvs,
+                    p_targetTuvs, p_state, p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
                     p_jobId);
             excludeSrcTuvs.addAll((List<Tuv>) result.get(KEY_SOURCE));
-            
+
             for (int i = 0; i < p_sourceTuvs.size(); i++)
             {
                 Tuv srcTuv = p_sourceTuvs.get(i);
@@ -93,7 +90,7 @@ public class SegmentFilter
                     trgTuvs.add(trgTuv);
                 }
             }
-            
+
             result.put(KEY_SOURCE, srcTuvs);
             result.put(KEY_TARGET, trgTuvs);
         }
@@ -102,12 +99,11 @@ public class SegmentFilter
             List<Tuv> srcTuvs = new ArrayList<Tuv>();
             List<Tuv> trgTuvs = new ArrayList<Tuv>();
             List<Tuv> excludeSrcTuvs = new ArrayList<Tuv>();
-            operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_ICE,
-                    result, p_sourceTuvs, p_targetTuvs, p_state,
-                    p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
+            operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_ICE, result, p_sourceTuvs,
+                    p_targetTuvs, p_state, p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
                     p_jobId);
             excludeSrcTuvs = (List<Tuv>) result.get(KEY_SOURCE);
-            
+
             for (int i = 0; i < p_sourceTuvs.size(); i++)
             {
                 Tuv srcTuv = p_sourceTuvs.get(i);
@@ -118,20 +114,19 @@ public class SegmentFilter
                     trgTuvs.add(trgTuv);
                 }
             }
-            
+
             result.put(KEY_SOURCE, srcTuvs);
             result.put(KEY_TARGET, trgTuvs);
         }
         else
         {
-            operateForSegmentFilter(filterType, result, p_sourceTuvs,
-                    p_targetTuvs, p_state, p_tuvMatchTypes, p_comments,
-                    p_excludedItemTypes, p_trgPageId, p_jobId);
+            operateForSegmentFilter(filterType, result, p_sourceTuvs, p_targetTuvs, p_state,
+                    p_tuvMatchTypes, p_comments, p_excludedItemTypes, p_trgPageId, p_jobId);
         }
-        
+
         return result;
     }
-    
+
     /**
      * Do filter for Source TUV and Target TUV with the segment filter.
      * 
@@ -156,14 +151,13 @@ public class SegmentFilter
      * @param p_jobId
      */
     private static void operateForSegmentFilter(String p_segmentFilter,
-            Map<String, List<Tuv>> p_result, List<Tuv> p_sourceTuvs,
-            List<Tuv> p_targetTuvs, EditorState p_state,
-            MatchTypeStatistics p_tuvMatchTypes, ArrayList<Issue> p_comments,
+            Map<String, List<Tuv>> p_result, List<Tuv> p_sourceTuvs, List<Tuv> p_targetTuvs,
+            EditorState p_state, MatchTypeStatistics p_tuvMatchTypes, ArrayList<Issue> p_comments,
             Vector p_excludedItemTypes, long p_targetPageId, long p_jobId)
     {
         List<Tuv> srcTuvs = new ArrayList<Tuv>();
         List<Tuv> trgTuvs = new ArrayList<Tuv>();
-        
+
         List<String> commentKeys = null;
         if (p_segmentFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_COMMENTED)
                 && p_comments != null && p_comments.size() > 0)
@@ -174,45 +168,41 @@ public class SegmentFilter
                 commentKeys.add(issue.getLogicalKey());
             }
         }
-        
+
         for (int i = 0; i < p_sourceTuvs.size(); i++)
         {
             Tuv srcTuv = p_sourceTuvs.get(i);
             Tuv trgTuv = p_targetTuvs.get(i);
             Tu tu = trgTuv.getTu(p_jobId);
-            boolean isMatch = isMatchSegmentFilter(p_segmentFilter, srcTuv,
-                    trgTuv, tu, p_tuvMatchTypes, commentKeys,
-                    p_excludedItemTypes, i, p_sourceTuvs, p_targetTuvs,
-                    p_targetPageId, p_jobId);
+            boolean isMatch = isMatchSegmentFilter(p_segmentFilter, srcTuv, trgTuv, tu,
+                    p_tuvMatchTypes, commentKeys, p_excludedItemTypes, i, p_sourceTuvs,
+                    p_targetTuvs, p_targetPageId, p_jobId);
             if (isMatch)
             {
                 srcTuvs.add(srcTuv);
                 trgTuvs.add(trgTuv);
             }
         }
-        
+
         p_result.put(KEY_SOURCE, srcTuvs);
         p_result.put(KEY_TARGET, trgTuvs);
     }
-    
+
     // Check whether the TUV match the Segment Filter.
-    private static boolean isMatchSegmentFilter(String p_segFilter,
-            Tuv p_srcTuv, Tuv p_trgTuv, Tu p_tu,
-            MatchTypeStatistics p_tuvMatchTypes, List<String> p_commentKeys,
-            Vector p_excludedItemTypes, int p_index, List<Tuv> p_sourceTuvs,
-            List<Tuv> p_targetTuvs, long p_targetPageId, long p_jobId)
+    private static boolean isMatchSegmentFilter(String p_segFilter, Tuv p_srcTuv, Tuv p_trgTuv,
+            Tu p_tu, MatchTypeStatistics p_tuvMatchTypes, List<String> p_commentKeys,
+            Vector p_excludedItemTypes, int p_index, List<Tuv> p_sourceTuvs, List<Tuv> p_targetTuvs,
+            long p_targetPageId, long p_jobId)
     {
         if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_ICE))
         {
-            return LeverageUtil.isIncontextMatch(p_index, p_sourceTuvs,
-                    p_targetTuvs, p_tuvMatchTypes, p_excludedItemTypes,
-                    p_jobId);
+            return LeverageUtil.isIncontextMatch(p_index, p_sourceTuvs, p_targetTuvs,
+                    p_tuvMatchTypes, p_excludedItemTypes, p_jobId);
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_100))
         {
             boolean isExactMatch = false;
-            Collection<Types> types = 
-                    p_tuvMatchTypes.getLingManagerMatchType(p_srcTuv).values();
+            Collection<Types> types = p_tuvMatchTypes.getLingManagerMatchType(p_srcTuv).values();
             for (Types type : types)
             {
                 if (type != null
@@ -222,11 +212,9 @@ public class SegmentFilter
                     break;
                 }
             }
-            
-            return isExactMatch
-                    && !(LeverageUtil.isIncontextMatch(p_index, p_sourceTuvs,
-                            p_targetTuvs, p_tuvMatchTypes, p_excludedItemTypes,
-                            p_jobId));
+
+            return isExactMatch && !(LeverageUtil.isIncontextMatch(p_index, p_sourceTuvs,
+                    p_targetTuvs, p_tuvMatchTypes, p_excludedItemTypes, p_jobId));
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_REPEATED))
         {
@@ -280,8 +268,7 @@ public class SegmentFilter
         boolean isTranslated = false;
 
         TuvState trgState = p_trgTuv.getState();
-        if (TuvState.DO_NOT_TRANSLATE.equals(trgState)
-                || TuvState.LOCALIZED.equals(trgState)
+        if (TuvState.DO_NOT_TRANSLATE.equals(trgState) || TuvState.LOCALIZED.equals(trgState)
                 || TuvState.APPROVED.equals(trgState)
                 || TuvState.EXACT_MATCH_LOCALIZED.equals(trgState))
         {
@@ -289,8 +276,8 @@ public class SegmentFilter
         }
         else
         {
-            int state = p_tuvMatchTypes.getLingManagerMatchType(
-                    p_srcTuv.getId(), OnlineEditorManagerLocal.DUMMY_SUBID);
+            int state = p_tuvMatchTypes.getLingManagerMatchType(p_srcTuv.getId(),
+                    OnlineEditorManagerLocal.DUMMY_SUBID);
             if (state == LeverageMatchLingManager.EXACT
                     || state == LeverageMatchLingManager.UNVERIFIED)
             {
@@ -301,29 +288,61 @@ public class SegmentFilter
         return isTranslated;
     }
 
-    public static boolean haveCommentForSegment(List<String> p_commentKeys,
-            Tuv p_tuv, long p_targetPageId)
+    /**
+     * Judge if a target TUV can be treated as "translated".
+     * 
+     * @param p_srcTuv
+     * @param p_trgTuv
+     * @param p_tuvMatchTypes
+     * @return boolean
+     */
+    public static boolean isTreatAsTranslatedForMT(Tuv p_srcTuv, Tuv p_trgTuv,
+            MatchTypeStatistics p_tuvMatchTypes)
     {
-        if(p_commentKeys == null || p_commentKeys.size() == 0)
+        boolean isTranslated = false;
+
+        TuvState trgState = p_trgTuv.getState();
+        if (TuvState.APPROVED.equals(trgState))
+        {
+            isTranslated = true;
+        }
+        else
+        {
+            int state = p_tuvMatchTypes.getLingManagerMatchType(p_srcTuv.getId(),
+                    OnlineEditorManagerLocal.DUMMY_SUBID);
+            if (state == LeverageMatchLingManager.EXACT
+                    || state == LeverageMatchLingManager.UNVERIFIED)
+            {
+                isTranslated = true;
+            }
+        }
+
+        return isTranslated;
+    }
+
+    public static boolean haveCommentForSegment(List<String> p_commentKeys, Tuv p_tuv,
+            long p_targetPageId)
+    {
+        if (p_commentKeys == null || p_commentKeys.size() == 0)
             return false;
-        
+
         long tuId = p_tuv.getTuId();
         long tuvId = p_tuv.getId();
         String subId = "0";
         String key = CommentHelper.makeLogicalKey(p_targetPageId, tuId, tuvId, subId);
-        if(p_commentKeys.contains(key))
+        if (p_commentKeys.contains(key))
         {
             return true;
         }
-        
+
         List<GxmlElement> subs = p_tuv.getSubflowsAsGxmlElements();
-        if(subs!= null && subs.size() > 0)
+        if (subs != null && subs.size() > 0)
         {
-            for(GxmlElement sub : subs)
+            for (GxmlElement sub : subs)
             {
                 subId = sub.getAttribute(GxmlNames.SUB_ID);
                 key = CommentHelper.makeLogicalKey(p_targetPageId, tuId, tuvId, subId);
-                if(p_commentKeys.contains(key))
+                if (p_commentKeys.contains(key))
                 {
                     return true;
                 }
@@ -332,7 +351,7 @@ public class SegmentFilter
 
         return false;
     }
-    
+
     // Checks whether Segment Filter value is default value.
     public static boolean isFilterSegment(EditorState p_state)
     {
@@ -342,7 +361,7 @@ public class SegmentFilter
         {
             return false;
         }
-        
+
         return OnlineEditorConstants.SEGMENT_FILTERS_ALL.contains(segFilter);
     }
 

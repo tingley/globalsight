@@ -57,7 +57,7 @@ public class Tmx2Xliff20Handler
     private String id;
 
     private boolean isSource = true;
-    
+
     private PseudoData pseudoData = new PseudoData();
 
     /**
@@ -99,8 +99,8 @@ public class Tmx2Xliff20Handler
     public void handleEndTag(String strName, String strOriginalTag)
     {
         inTag = false;
-        if ("ept".endsWith(strName) || "ph".endsWith(strName)
-                || "it".endsWith(strName) || "mrk".endsWith(strName))
+        if ("ept".endsWith(strName) || "ph".endsWith(strName) || "it".endsWith(strName)
+                || "mrk".endsWith(strName))
         {
             elementStack.pop();
         }
@@ -113,13 +113,12 @@ public class Tmx2Xliff20Handler
      * @param hAttributes
      * @param strOriginalString
      */
-    private void startBpt(String strTmxTagName, Properties hAttributes,
-            String strOriginalString)
+    private void startBpt(String strTmxTagName, Properties hAttributes, String strOriginalString)
     {
         Pc pc = new Pc();
         id = getId(hAttributes);
         pc.setId(id);
-        
+
         String type = hAttributes.getProperty("type");
         if (type != null)
         {
@@ -160,8 +159,7 @@ public class Tmx2Xliff20Handler
      * @param hAttributes
      * @param strOriginalString
      */
-    private void startMrk(String strTmxTagName, Properties hAttributes,
-            String strOriginalString)
+    private void startMrk(String strTmxTagName, Properties hAttributes, String strOriginalString)
     {
         Pc pc = new Pc();
         id = getId(hAttributes);
@@ -218,26 +216,25 @@ public class Tmx2Xliff20Handler
      * @param hAttributes
      * @param strOriginalString
      */
-    private void startEpt(String strTmxTagName, Properties hAttributes,
-            String strOriginalString)
+    private void startEpt(String strTmxTagName, Properties hAttributes, String strOriginalString)
     {
         elementStack.peek();
     }
-    
+
     public static String getId(Properties hAttributes)
     {
         String id = hAttributes.getProperty("x");
-        
+
         if (id == null)
         {
             id = hAttributes.getProperty("i");
         }
-        
+
         if (id == null)
         {
             id = hAttributes.getProperty("id");
         }
-        
+
         return id;
     }
 
@@ -248,8 +245,7 @@ public class Tmx2Xliff20Handler
      * @param hAttributes
      * @param strOriginalString
      */
-    private void startPh(String strTmxTagName, Properties hAttributes,
-            String strOriginalString)
+    private void startPh(String strTmxTagName, Properties hAttributes, String strOriginalString)
     {
         Ph ph = new Ph();
         id = getId(hAttributes);
@@ -285,8 +281,7 @@ public class Tmx2Xliff20Handler
      * @param hAttributes
      * @param strOriginalString
      */
-    private void startIt(String strTmxTagName, Properties hAttributes,
-            String strOriginalString)
+    private void startIt(String strTmxTagName, Properties hAttributes, String strOriginalString)
     {
         id = getId(hAttributes);
 
@@ -455,6 +450,7 @@ public class Tmx2Xliff20Handler
 
     /**
      * Just handle as nomal text.
+     * 
      * @param substring
      */
     public void handleIsExtractedText(String substring)

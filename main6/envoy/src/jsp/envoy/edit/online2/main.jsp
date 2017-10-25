@@ -144,6 +144,7 @@ Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT
 String taskIdForUpdateLeverage = Long.toString(task.getId());
 ProjectImpl project = (ProjectImpl) task.getWorkflow().getJob().getProject();
 boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
+boolean isCheckUnApprovedMTSegments = project.isCheckUnApprovedMTSegments();
 boolean isSaveApprovedSegments =task.getWorkflow().getJob().getL10nProfile().getTranslationMemoryProfile().isSaveApprovedSegToProjectTM();
 int task_state = task.getState();
 String jobName=task.getJobName();
@@ -492,6 +493,12 @@ $(document).ready(function() {
 	if(!<%=isCheckUnTranslatedSegments || isSaveApprovedSegments%>){
 		$("#Approve").hide(); 
 	}
+	 
+	if(!<%=isCheckUnApprovedMTSegments%>){
+		$("#ApproveMT").hide(); 
+	}else{
+		$("#ApproveMT").show(); 
+	}
 	
 	treeLink=treeLink.replace(/</g,'\\');
 	initParam();	
@@ -569,17 +576,30 @@ function initUI(){
 
 function bindEvent(){
 	$("#Approve").click(function(e){
-        var s=$("#tree").getTSVs();
-        if(s !=null){
-        	taskPageIds=$.trim(s.join(" "));
-        	taskPageIds=taskPageIds.replace(/\s/g,',');
-        	requestUrl=approveUrl;
-        	buildData();
-        }
-        else
-        alert("No target page is selected!");
+ 		var s=$("#tree").getTSVs();
+	    if(s !=null){
+	    	taskPageIds=$.trim(s.join(" "));
+	    	taskPageIds=taskPageIds.replace(/\s/g,',');
+	    	requestUrl=approveUrl+"&mtApproved="+false;
+	    	buildData();
+	    }
+	    else
+	    alert("No target page is selected!");
     });
-
+	
+	$("#ApproveMT").click(function(e){
+		 
+	    var s=$("#tree").getTSVs();
+	    if(s !=null){
+	    	taskPageIds=$.trim(s.join(" "));
+	    	taskPageIds=taskPageIds.replace(/\s/g,',');
+	    	requestUrl=approveUrl+"&mtApproved="+true;
+	    	buildData();
+	    }
+	    else
+	    alert("No target page is selected!");
+	});
+	
      $("#contract").click(function(e){
      	 treeWidth=$("#treeContainer").width();
         $("#treeContainer").animate({ 
@@ -3228,7 +3248,8 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 
 <div id="treeContainer" class="treeContainer">
      <div style="margin-top:5px;">
-        <button id="Approve" class="tooltree">Approve</button>
+        <button id="Approve" class="tooltree">Approve Untranslated</button>
+        <button id="ApproveMT" class="tooltree">Approve MT</button>
     </div>
     <div id="tree" class="tooltree"></div>
 </div>

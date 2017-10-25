@@ -245,6 +245,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     // attribute value.
     private HashMap<String, String> tuId2XlfTrgStateMap = new HashMap<String, String>();
 
+    // For XLF translation kit, store its tuID to mtsegment target "state"
+    // attribute value.
+    private HashMap<String, String> tuId2XlfSegmentStateMap = new HashMap<String, String>();
+
     private static Pattern convertLfPattern = Pattern.compile("<ph[\\s].*?>[^<]*?</ph>");
 
     /**
@@ -337,12 +341,12 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     {
         return populateMT;
     }
-    
+
     public void setPopulateMT(boolean populateMT)
     {
         this.populateMT = populateMT;
     }
-    
+
     /**
      * Adds a OfflineSegmentData to the segment list.
      * 
@@ -1918,15 +1922,18 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
         {
             TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY;
         }
-        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE_100.equals(displayTMEditType))
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE_100
+                .equals(displayTMEditType))
         {
             TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_ICE_100;
         }
-        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE.equals(displayTMEditType))
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_ICE
+                .equals(displayTMEditType))
         {
             TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_ICE;
         }
-        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_100.equals(displayTMEditType))
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_PERPLEXITY_100
+                .equals(displayTMEditType))
         {
             TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_PERPLEXITY_100;
         }
@@ -2636,7 +2643,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                         sourceLocale = osd.getSourceTuv().getGlobalSightLocale().getLocaleCode();
                         targetLocale = osd.getTargetTuv().getGlobalSightLocale().getLocaleCode();
                     }
-                    
+
                     String translateTuString = null;
                     boolean isCreatedFromMT = false;
                     String[] translatedSrcTrgSegments = new String[2];
@@ -2661,7 +2668,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                     {
                         isAddTrasnlatedTU = false;
                     }
-                    
+
                     // Write TM matches into tmx.
                     StringBuffer exactAndFuzzy = new StringBuffer();
                     List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
@@ -2703,17 +2710,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                                 targetText = convertLf(targetText, p_tmxLevel);
                             }
 
-                           if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                            if (p_mode == TmxUtil.TMX_MODE_INC_ALL
                                     || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
                             {
-                               if (isSameAsLocalizedSegments(translatedSrcTrgSegments, sourceText,
-                                       targetText))
-                               {
-                                   isAddTrasnlatedTU = false;
-                               }
-                               
+                                if (isSameAsLocalizedSegments(translatedSrcTrgSegments, sourceText,
+                                        targetText))
+                                {
+                                    isAddTrasnlatedTU = false;
+                                }
+
                                 TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(sourceText,
                                         m_sourceLocaleName, null, null, null, null);
                                 TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(targetText,
@@ -2729,7 +2736,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
 
                         p_outputStream.write(exactAndFuzzy.toString());
                     }
-                    
 
                     if (isAddTrasnlatedTU)
                     {
@@ -3181,9 +3187,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     }
 
     /**
-     * Convert TMX tags to long format, sample:
-     * <bpt i="1" type="bold" x="1" /> to
-     * <bpt i="1" type="bold" x="1">&lt;b&gt;</bpt>
+     * Convert TMX tags to long format, sample: <bpt i="1" type="bold" x="1" />
+     * to <bpt i="1" type="bold" x="1">&lt;b&gt;</bpt>
      * 
      * @return
      */
@@ -3531,6 +3536,16 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     public String getXlfTargetState(String tuId)
     {
         return tuId2XlfTrgStateMap.get(tuId);
+    }
+
+    public void addXlfSegmentState(String tuId, String state)
+    {
+        tuId2XlfSegmentStateMap.put(tuId, state);
+    }
+
+    public String getXlfSegmentState(String tuId)
+    {
+        return tuId2XlfSegmentStateMap.get(tuId);
     }
 
     public void setPreserveSourceFolder(boolean preserveSourceFolder)

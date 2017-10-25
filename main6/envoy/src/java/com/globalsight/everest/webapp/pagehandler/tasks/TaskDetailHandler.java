@@ -281,6 +281,8 @@ public class TaskDetailHandler extends PageHandler
             String pageIds = p_request.getParameter(TASK_PAGE_IDS);
             if (StringUtils.isBlank(pageIds))
                 return;
+            
+            Boolean approvedMT = Boolean.parseBoolean(p_request.getParameter(MT_APPROVED));
 
             // for counting translated text issue
             PrintWriter out = p_response.getWriter();
@@ -290,7 +292,8 @@ public class TaskDetailHandler extends PageHandler
             for (String trgPageId : trgPageIds)
             {
 				// Approve TUVs by page id
-                SegmentTuvUtil.approveTuvByTargetPageId(Long.parseLong(trgPageId));
+                SegmentTuvUtil.approveTuvByTargetPageId(Long.parseLong(trgPageId), approvedMT,
+                        user.getUserName());
             }
             out.write("1");
             out.close();

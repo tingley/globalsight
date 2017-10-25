@@ -229,7 +229,10 @@ function getScrollableDiv(p_html, p_dataArr) {
     return result;
 }
 
-var popTile=["No DQF Information has been saved.","There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
+var mtApproved = '<%=project.isCheckUnApprovedMTSegments()%>';
+var isMtProfile = '<%=workflowImpl.getUseMT()%>';
+var dialogTitle = (mtApproved == 'true' && isMtProfile == 'true')?'Unapproved Segments':'Not 100% translated primary target files';
+var popTitle=["No DQF Information has been saved.",dialogTitle,"There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
 var popDialogId=["dialog-DQFfileState","dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
 var popDiv="<div style='display:none' class='detailText'></div>";
 var popArray=new Array();
@@ -307,7 +310,7 @@ $(function () {
     for(var i = 0; i < popDialogId.length; i++) {
 		var temp = $(popDiv).clone(true);
 		temp.attr("id",popDialogId[i]);
-		temp.attr("title",popTile[i]);
+		temp.attr("title",popTitle[i]);
 		if(i < popDialogId.length - 4)
 		{
 			temp.dialog(dialogParam4);

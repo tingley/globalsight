@@ -311,7 +311,8 @@ $(function () {
 		var temp = $(popDiv).clone(true);
 		temp.attr("id",popDialogId[i]);
 		temp.attr("title",popTitle[i]);
-		if(i < popDialogId.length - 4)
+		// GBS-4793 The Default DQF Values dialog should only display for review activities in workflows where DQF is enabled. 
+		if(i < popDialogId.length - 4 && ("<%=needDQF%>" == 'true'))
 		{
 			temp.dialog(dialogParam4);
 		}

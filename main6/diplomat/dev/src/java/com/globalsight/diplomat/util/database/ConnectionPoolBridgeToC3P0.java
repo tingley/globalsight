@@ -52,7 +52,8 @@ public class ConnectionPoolBridgeToC3P0
     private static String PREFERRED_TEST_QUERY="SELECT id FROM company WHERE id = 1;";
     private static boolean TEST_CONNECTION_ON_CHECKOUT=false;
     private static boolean TEST_CONNECTION_ON_CHECKIN=false;
-
+    private static boolean DEBUG_UNRETURNED_CONNECTION_STACK_TRACES=false;
+	private static int UNRETURNED_CONNECTION_TIMEOUT=0;
 
     private static final String CONNECTION_POOL_NAME = "ConnectionPoolBridgeToC3P0";
 
@@ -66,6 +67,8 @@ public class ConnectionPoolBridgeToC3P0
     private static final String PROP_ACQUIRE_RETRY_DELAY = "C3P0_acquireRetryDelay";
     private static final String PROP_TEST_CONNECTION_ON_CHECKOUT = "C3P0_testConnectionOnCheckout";
     private static final String PROP_TEST_CONNECTION_ON_CHECKIN = "C3P0_testConnecionOnCheckin";
+    private static final String PROP_DEBUG_UNRETURNED_CONNECTION_STACK_TRACES = "C3P0_debugUnreturnedConnectionStackTraces";
+    private static final String PROP_UNRETURNED_CONNECTION_TIMEOUT = "C3P0_unreturnedConnectionTimeout";
 
 
 
@@ -93,6 +96,8 @@ public class ConnectionPoolBridgeToC3P0
             TEST_CONNECTION_ON_CHECKOUT = Boolean.parseBoolean(s_props.getProperty(PROP_TEST_CONNECTION_ON_CHECKOUT));
             TEST_CONNECTION_ON_CHECKIN = Boolean.parseBoolean(s_props.getProperty(PROP_TEST_CONNECTION_ON_CHECKIN));
             PREFERRED_TEST_QUERY= new String(s_props.getProperty(PROP_PREFERRED_TEST_QUERY));
+            DEBUG_UNRETURNED_CONNECTION_STACK_TRACES = Boolean.parseBoolean(s_props.getProperty(PROP_DEBUG_UNRETURNED_CONNECTION_STACK_TRACES));
+		    UNRETURNED_CONNECTION_TIMEOUT=Integer.parseInt(s_props.getProperty(PROP_UNRETURNED_CONNECTION_TIMEOUT));
 
         }
         catch (Throwable e)
@@ -165,6 +170,10 @@ public class ConnectionPoolBridgeToC3P0
 		ds.setMaxConnectionAge(MAX_CONNECTION_AGE);
 
 		ds.setMaxIdleTimeExcessConnections(MAX_IDLE_TIME_EXCESS_CONNECTIONS);
+
+		ds.setUnreturnedConnectionTimeout(UNRETURNED_CONNECTION_TIMEOUT);
+		
+		ds.setDebugUnreturnedConnectionStackTraces(DEBUG_UNRETURNED_CONNECTION_STACK_TRACES);
 
         ds.setAutoCommitOnClose(true);
     }

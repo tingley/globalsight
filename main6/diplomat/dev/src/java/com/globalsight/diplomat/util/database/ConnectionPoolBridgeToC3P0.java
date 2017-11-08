@@ -66,7 +66,7 @@ public class ConnectionPoolBridgeToC3P0
     private static final String PROP_ACQUIRE_RETRY_ATTEMPTS = "C3P0_acquireRetryAttempts";
     private static final String PROP_ACQUIRE_RETRY_DELAY = "C3P0_acquireRetryDelay";
     private static final String PROP_TEST_CONNECTION_ON_CHECKOUT = "C3P0_testConnectionOnCheckout";
-    private static final String PROP_TEST_CONNECTION_ON_CHECKIN = "C3P0_testConnecionOnCheckin";
+    private static final String PROP_TEST_CONNECTION_ON_CHECKIN =  "C3P0_testConnectionOnCheckin";
     private static final String PROP_DEBUG_UNRETURNED_CONNECTION_STACK_TRACES = "C3P0_debugUnreturnedConnectionStackTraces";
     private static final String PROP_UNRETURNED_CONNECTION_TIMEOUT = "C3P0_unreturnedConnectionTimeout";
 

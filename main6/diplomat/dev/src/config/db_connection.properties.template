@@ -22,6 +22,8 @@ C3P0_maxIdleTime=0
 C3P0_idleConnectionTestPeriod=303
 C3P0_acquireRetryAttempts=302
 C3P0_acquireRetryDelay=1001
+C3P0_maxIdleTimeExcessConnections=0
+C3P0_maxConnectionAge=0
 C3P0_testConnectionOnCheckout=false
 C3P0_testConnecionOnCheckin=false
 C3P0_preferredTestQuery=SELECT id FROM company WHERE id = 1;

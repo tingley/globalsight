@@ -45,17 +45,22 @@ public class ConnectionPoolBridgeToC3P0
     private static int MAX_CONNECTIONS = 200;
     private static int MAX_IDLE_TIME = 1800; //default of 30 minutes
     private static int IDLE_CONNECTION_TEST_PERIOD=300;
+	private static int MAX_IDLE_TIME_EXCESS_CONNECTIONS=0;
+    private static int MAX_CONNECTION_AGE=0;
     private static int ACQUIRE_RETRY_ATTEMPTS=30;
     private static int ACQUIRE_RETRY_DELAY=1000;
     private static String PREFERRED_TEST_QUERY="SELECT id FROM company WHERE id = 1;";
     private static boolean TEST_CONNECTION_ON_CHECKOUT=false;
     private static boolean TEST_CONNECTION_ON_CHECKIN=false;
 
+
     private static final String CONNECTION_POOL_NAME = "ConnectionPoolBridgeToC3P0";
 
     private static final String PROP_MAX_CONNECTIONS = "maxConnections";
     private static final String PROP_MAX_IDLE_TIME = "C3P0_maxIdleTime";
     private static final String PROP_IDLE_CONNECTION_TEST_PERIOD = "C3P0_idleConnectionTestPeriod";
+    private static final String PROP_MAX_IDLE_TIME_EXCESS_CONNECTIONS = "C3P0_maxIdleTimeExcessConnections";
+    private static final String PROP_MAX_CONNECTION_AGE = "C3P0_maxConnectionAge";
     private static final String PROP_PREFERRED_TEST_QUERY = "C3P0_preferredTestQuery";
     private static final String PROP_ACQUIRE_RETRY_ATTEMPTS = "C3P0_acquireRetryAttempts";
     private static final String PROP_ACQUIRE_RETRY_DELAY = "C3P0_acquireRetryDelay";
@@ -83,6 +88,8 @@ public class ConnectionPoolBridgeToC3P0
             IDLE_CONNECTION_TEST_PERIOD = Integer.parseInt(s_props.getProperty(PROP_IDLE_CONNECTION_TEST_PERIOD));
             ACQUIRE_RETRY_ATTEMPTS = Integer.parseInt(s_props.getProperty(PROP_ACQUIRE_RETRY_ATTEMPTS));
             ACQUIRE_RETRY_DELAY = Integer.parseInt(s_props.getProperty(PROP_ACQUIRE_RETRY_DELAY));
+            MAX_IDLE_TIME_EXCESS_CONNECTIONS = Integer.parseInt(s_props.getProperty(PROP_MAX_IDLE_TIME_EXCESS_CONNECTIONS));
+            MAX_CONNECTION_AGE = Integer.parseInt(s_props.getProperty(PROP_MAX_CONNECTION_AGE));
             TEST_CONNECTION_ON_CHECKOUT = Boolean.parseBoolean(s_props.getProperty(PROP_TEST_CONNECTION_ON_CHECKOUT));
             TEST_CONNECTION_ON_CHECKIN = Boolean.parseBoolean(s_props.getProperty(PROP_TEST_CONNECTION_ON_CHECKIN));
             PREFERRED_TEST_QUERY= new String(s_props.getProperty(PROP_PREFERRED_TEST_QUERY));
@@ -154,6 +161,10 @@ public class ConnectionPoolBridgeToC3P0
         ds.setAcquireRetryDelay(ACQUIRE_RETRY_DELAY);
 
         ds.setAcquireRetryAttempts(ACQUIRE_RETRY_ATTEMPTS);
+
+		ds.setMaxConnectionAge(MAX_CONNECTION_AGE);
+
+		ds.setMaxIdleTimeExcessConnections(MAX_IDLE_TIME_EXCESS_CONNECTIONS);
 
         ds.setAutoCommitOnClose(true);
     }

@@ -33,6 +33,7 @@ import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvPerplexity;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
@@ -147,7 +148,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
             + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state != 'OUT_OF_DATE'"
             + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
-            + " AND tplg.tp_id = ?";
+            + " AND tplg.tp_id = ? AND tuv.modify_user like '%_MT' ";
 
     private static final String TRANSLATE_TUV_TRANSLATED = "SELECT DISTINCT TUV.ID FROM "
             + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
@@ -172,7 +173,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
 
     public static final String MT_APPROVE_TUV_SQL = "UPDATE " + TUV_TABLE_PLACEHOLDER + " tuv "
             + " SET tuv.STATE = 'APPROVED', " + " tuv.MODIFY_USER = ? "
-            + " WHERE tuv.ID IN (untranslated_target_tuv_ids)";
+            + " WHERE tuv.ID IN (untranslated_target_tuv_ids) AND tuv.MODIFY_USER like '%_MT' ";
 
     private static final String GET_MODIFY_USER_BY_TU_ID_SQL = "SELECT TU_ID FROM "
             + TUV_TABLE_PLACEHOLDER + " WHERE MODIFY_USER LIKE '%_MT' " + " AND TU_ID = ? "
@@ -182,7 +183,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
             + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
             + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state = 'APPROVED'"
-            + " AND tuv.locale_id = :lid" + " AND tplg.tp_id = :tid";
+            + " AND tuv.locale_id = :lid"
+            + " AND tplg.tp_id = :tid AND tuv.modify_user like '%_MT'";
 
     /**
      * Save TUVs into DB.
@@ -1727,30 +1729,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             map.put("tid", targetPageId);
 
             List<Long> tuvId = (List<Long>) HibernateUtil.searchWithSql(sql, map);
-            Set<Long> tids = new HashSet<Long>();
-            tids.addAll(tuvId);
-
-            String lmTableName = BigTableUtil.getLMTableJobDataInBySourcePageId(sourcePageId);
-            sql = LEVERAGE_MATCH_TRANSLATED_TUV.replace(LM_TABLE_PLACEHOLDER, lmTableName);
-            map = new HashMap<String, Object>();
-            map.put("lid", localeId);
-            map.put("sid", sourcePageId);
-
-            List<Object> sourceTuvId = (List<Object>) HibernateUtil.searchWithSql(sql, map);
-
-            if (sourceTuvId.size() > 0)
-            {
-                sql = TARGET_TUV_SOURCE_TUV.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
-                map = new HashMap<String, Object>();
-                map.put("lid", localeId);
-
-                Map<String, List<Object>> sids = new HashMap<String, List<Object>>();
-                sids.put("sids", sourceTuvId);
-
-                List<Long> targetTuvId = (List<Long>) HibernateUtil.searchWithSqlWithIn(sql, map,
-                        sids);
-                tids.addAll(targetTuvId);
-            }
+           
+            Set<Long> tids = new HashSet<Long>(tuvId);
 
             result[0] = total;
             result[1] = tids.size();
@@ -1855,8 +1835,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
                 if ((!mtApproved
                         && !SegmentFilter.isTreatAsTranslated(sourceTuv, targetTuv, tuvMatchTypes))
                         || (mtApproved && targetPage.getWorkflowInstance().getUseMT()
-                                && !SegmentFilter.isTreatAsTranslatedForMT(sourceTuv, targetTuv,
-                                        tuvMatchTypes)))
+                                && !TuvState.APPROVED.equals(targetTuv.getState())))
                 {
                     untranslatedTrgTuvIds.add(targetTuv.getIdAsLong());
                 }

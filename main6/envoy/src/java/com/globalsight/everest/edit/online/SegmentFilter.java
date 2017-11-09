@@ -288,38 +288,6 @@ public class SegmentFilter
         return isTranslated;
     }
 
-    /**
-     * Judge if a target TUV can be treated as "translated".
-     * 
-     * @param p_srcTuv
-     * @param p_trgTuv
-     * @param p_tuvMatchTypes
-     * @return boolean
-     */
-    public static boolean isTreatAsTranslatedForMT(Tuv p_srcTuv, Tuv p_trgTuv,
-            MatchTypeStatistics p_tuvMatchTypes)
-    {
-        boolean isTranslated = false;
-
-        TuvState trgState = p_trgTuv.getState();
-        if (TuvState.APPROVED.equals(trgState))
-        {
-            isTranslated = true;
-        }
-        else
-        {
-            int state = p_tuvMatchTypes.getLingManagerMatchType(p_srcTuv.getId(),
-                    OnlineEditorManagerLocal.DUMMY_SUBID);
-            if (state == LeverageMatchLingManager.EXACT
-                    || state == LeverageMatchLingManager.UNVERIFIED)
-            {
-                isTranslated = true;
-            }
-        }
-
-        return isTranslated;
-    }
-
     public static boolean haveCommentForSegment(List<String> p_commentKeys, Tuv p_tuv,
             long p_targetPageId)
     {

@@ -2661,7 +2661,7 @@ VALUES
 (13,'Base Text Filter','|0|','base_filter','The filter to handle extracted text.',1),
 (14,'Plain Text Filter','|6|','plain_text_filter','The filter for Plain Text files.',1),
 (15,'QA Filter','|0|','qa_filter','The filter to handle QA checks.',1),
-(16,'SID Filter','','sid_filter','The filter for String IDs.',1);
+(16,'SID Filter','','sid_filter','The filter for String IDs.',1),
 (17,'Global Exclusions','','global_exclusion_filter','The filter to handle extracted text.',1);
 UNLOCK TABLES;
 

@@ -148,6 +148,13 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
             + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state != 'OUT_OF_DATE'"
             + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
+            + " AND tplg.tp_id = ?";
+    
+    private static final String COUNT_TRANSLATE_TUV_ALL_MT = "SELECT COUNT(DISTINCT TUV.ID) FROM "
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
+            + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
+            + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state != 'OUT_OF_DATE'"
+            + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
             + " AND tplg.tp_id = ? AND tuv.modify_user like '%_MT' ";
 
     private static final String TRANSLATE_TUV_TRANSLATED = "SELECT DISTINCT TUV.ID FROM "
@@ -1716,7 +1723,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
                     targetPageId)).longValue();
             String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(sourcePageId);
             String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(sourcePageId);
-            String sql = COUNT_TRANSLATE_TUV_ALL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+            String sql = COUNT_TRANSLATE_TUV_ALL_MT.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
                     .replace(TU_TABLE_PLACEHOLDER, tuTableName);
 
             total = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId))

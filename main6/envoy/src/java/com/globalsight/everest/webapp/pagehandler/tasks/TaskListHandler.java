@@ -310,6 +310,8 @@ public class TaskListHandler extends PageHandler
             String taskIdParam = p_request.getParameter(TASK_ID);
             long taskId = TaskHelper.getLong(taskIdParam);
             TaskImpl task = HibernateUtil.get(TaskImpl.class, taskId);
+            //update DQF values
+            updateFluencyAndAdequacy(task, p_request);
             String taskStatusJSON = getTaskStatusJSON(sess, task, action, user);
             p_response.getWriter().write(taskStatusJSON);
             return;
@@ -1438,6 +1440,28 @@ public class TaskListHandler extends PageHandler
 
                 if (task != null)
                 {
+                    //GBS-4795 : After click on Apply Default DQF Values, it'll not continually check un-translated segment
+                    //update the Default DQF values
+                    String fluency_score = ServletUtil.get(p_request, "fluency_score");
+                    String adequacy_score = ServletUtil.get(p_request, "adequacy_score");
+                    if (StringUtil.isNotEmpty(fluency_score) && StringUtil.isNotEmpty(adequacy_score))
+                    {
+                        try
+                        {
+                            // Accept the task
+                            TaskHelper.acceptTask(p_user.getUserId(), task);
+                          //update DQF values
+                            updateFluencyAndAdequacy(task, p_request);
+                            
+                        }
+                        catch (Exception e)
+                        {
+                            log.error(e.getMessage(), e);
+                        }
+                        
+                        task = HibernateUtil.get(TaskImpl.class,
+                                Long.parseLong(taskId));
+                    }
                     //GBS-4309
                     int isActivityCommentUploaded = 0;
                     ArrayList<CommentFile> cf = ServerProxy.getCommentManager()
@@ -1456,7 +1480,6 @@ public class TaskListHandler extends PageHandler
                     else
                     {
                         //set default DQF values to task or not
-                        boolean isDQFFinishTaskId = false;
                         if (task.isReviewOnly() || task.isType(Task.TYPE_REVIEW_EDITABLE))
                         {
                             WorkflowImpl workflowImpl = (WorkflowImpl) task
@@ -1469,18 +1492,20 @@ public class TaskListHandler extends PageHandler
                                         .append(",JobName:").append(task.getJobName()).append("],");
                                 continue;
                             }
+                            
                             // check DQF Required or not
                             if ((showType == 3 || showType == 5)
                                     && (StringUtil.isEmpty(workflowImpl.getFluencyScore())
                                             || StringUtil.isEmpty(workflowImpl.getAdequacyScore())))
                             {
+                               
                                 if (isNeedDQFTaskId.length() == 0)
                                 {
                                     isNeedDQFTaskId.append("[JobID:").append(task.getJobId())
                                             .append(",JobName:").append(task.getJobName())
                                             .append("],");
                                 }
-                                isDQFFinishTaskId = true;
+                                isDQFFinishedTaskId.append(taskId).append(" ");
                             }
                         }
                         ProjectImpl project = (ProjectImpl) task.getWorkflow()
@@ -1494,8 +1519,7 @@ public class TaskListHandler extends PageHandler
                                     .getTranslatedPercentageForTask(task);
                             if (100 == percentage)
                             {
-                                setFinishedTaskIds(isFinishedTaskId, isDQFFinishedTaskId, taskId,
-                                        isDQFFinishTaskId);
+                                setFinishedTaskIds(isFinishedTaskId,  taskId);
                                 if (task.getIsReportUploadCheck() == 0
                                         || (task.getIsReportUploadCheck() == 1 && task
                                                 .getIsReportUploaded() == 1))
@@ -1536,9 +1560,7 @@ public class TaskListHandler extends PageHandler
                         }
                         else
                         {
-                            setFinishedTaskIds(isFinishedTaskId, isDQFFinishedTaskId, taskId,
-                                    isDQFFinishTaskId);
-
+                            setFinishedTaskIds(isFinishedTaskId,  taskId);
                             if (task.getIsActivityCommentUploadCheck() == 0
                                     || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
                             {
@@ -1655,23 +1677,12 @@ public class TaskListHandler extends PageHandler
      * isDQFFinishedTaskId is true for DQF required task ids
      * 
      * @param isFinishedTaskId
-     * @param isDQFFinishedTaskId
      * @param taskId
-     * @param isDQFFinishTaskId
      */
-    private void setFinishedTaskIds(StringBuffer isFinishedTaskId, StringBuffer isDQFFinishedTaskId,
-            String taskId, boolean isDQFFinishTaskId)
+    private void setFinishedTaskIds(StringBuffer isFinishedTaskId,
+            String taskId)
     {
-        // isDQFFinishTaskId is true for DQF required task ids for missing DQF
-        // info
-        if (isDQFFinishTaskId)
-        {
-            isDQFFinishedTaskId.append(taskId).append(" ");
-        }
-        else
-        {
             isFinishedTaskId.append(taskId).append(" ");
-        }
     }
 
     /**

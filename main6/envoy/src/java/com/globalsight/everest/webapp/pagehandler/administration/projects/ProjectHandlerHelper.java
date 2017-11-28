@@ -43,8 +43,7 @@ import com.globalsight.util.GeneralException;
 
 public class ProjectHandlerHelper
 {
-    private static Logger logger = Logger.getLogger(ProjectHandlerHelper.class
-            .getName());
+    private static Logger logger = Logger.getLogger(ProjectHandlerHelper.class.getName());
 
     /**
      * Add a project to the system.
@@ -52,12 +51,11 @@ public class ProjectHandlerHelper
      * 
      * @param p_project
      *            The project to add.
-     * @exception EnvoyServletException. Failed
-     *                to add the profile; the cause is indicated by the
+     * @exception EnvoyServletException.
+     *                Failed to add the profile; the cause is indicated by the
      *                exception code.
      */
-    public static void addProject(Project p_project)
-            throws EnvoyServletException
+    public static void addProject(Project p_project) throws EnvoyServletException
     {
         try
         {
@@ -86,9 +84,9 @@ public class ProjectHandlerHelper
      * <p>
      * 
      * @return Return the project that is created.
-     * @exception EnvoyServletException. Failed
-     *                to create the project; the cause is indicated by the
-     *                exception code.
+     * @exception EnvoyServletException.
+     *                Failed to create the project; the cause is indicated by
+     *                the exception code.
      */
     public static Project createProject() throws EnvoyServletException
     {
@@ -120,12 +118,11 @@ public class ProjectHandlerHelper
      * 
      * @param p_project
      *            The project to be deleted.
-     * @exception EnvoyServletException. Failed
-     *                to delete the project; the cause is indicated by the
-     *                exception code.
+     * @exception EnvoyServletException.
+     *                Failed to delete the project; the cause is indicated by
+     *                the exception code.
      */
-    public static void deleteProject(Project p_project)
-            throws EnvoyServletException
+    public static void deleteProject(Project p_project) throws EnvoyServletException
     {
         try
         {
@@ -154,12 +151,11 @@ public class ProjectHandlerHelper
      * <p>
      * 
      * @return Return all the projects in the system.
-     * @exception EnvoyServletException. Miscellaneous
-     *                exception, most likely occuring in the persistence
-     *                component.
+     * @exception EnvoyServletException.
+     *                Miscellaneous exception, most likely occuring in the
+     *                persistence component.
      */
-    public static Collection<Project> getAllProjects()
-            throws EnvoyServletException
+    public static Collection<Project> getAllProjects() throws EnvoyServletException
     {
         try
         {
@@ -188,12 +184,11 @@ public class ProjectHandlerHelper
      * <p>
      * 
      * @return Return all the projects (as ProjectInfo) in the system.
-     * @exception EnvoyServletException. Miscellaneous
-     *                exception, most likely occuring in the persistence
-     *                component.
+     * @exception EnvoyServletException.
+     *                Miscellaneous exception, most likely occuring in the
+     *                persistence component.
      */
-    public static Collection<ProjectInfo> getAllProjectsForGUI()
-            throws EnvoyServletException
+    public static Collection<ProjectInfo> getAllProjectsForGUI() throws EnvoyServletException
     {
         try
         {
@@ -248,16 +243,15 @@ public class ProjectHandlerHelper
      * 
      * @param p_project
      *            The project to be modified.
-     * @exception EnvoyServletException. Componenet
-     *                related exception.
+     * @exception EnvoyServletException.
+     *                Componenet related exception.
      */
     public static void modifyProject(Project p_project, String p_modifierId)
             throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getProjectHandler().modifyProject(p_project,
-                    p_modifierId);
+            ServerProxy.getProjectHandler().modifyProject(p_project, p_modifierId);
         }
         catch (ProjectHandlerException phe)
         {
@@ -282,12 +276,11 @@ public class ProjectHandlerHelper
      * <p>
      * 
      * @return Return an existing project.
-     * @exception EnvoyServletException. Failed
-     *                to access the project; the cause is indicated by the
-     *                exception code.
+     * @exception EnvoyServletException.
+     *                Failed to access the project; the cause is indicated by
+     *                the exception code.
      */
-    public static Project getProjectById(long p_id)
-            throws EnvoyServletException
+    public static Project getProjectById(long p_id) throws EnvoyServletException
     {
         try
         {
@@ -311,8 +304,7 @@ public class ProjectHandlerHelper
         }
     }
 
-    public static ProjectImpl getProjectByNameAndCompanyId(String p_name,
-            long p_companyId)
+    public static ProjectImpl getProjectByNameAndCompanyId(String p_name, long p_companyId)
     {
         try
         {
@@ -321,10 +313,8 @@ public class ProjectHandlerHelper
         }
         catch (Exception e)
         {
-            logger.error(
-                    "getProjectByNameAndCompanyId Error, with input name '"
-                            + p_name + "' and companyId '" + p_companyId + "' "
-                            + ": ", e);
+            logger.error("getProjectByNameAndCompanyId Error, with input name '" + p_name
+                    + "' and companyId '" + p_companyId + "' " + ": ", e);
         }
 
         return null;
@@ -339,8 +329,7 @@ public class ProjectHandlerHelper
      * @exception EnvoyServletException.
      * 
      */
-    public static List<Project> getProjectByUser(String p_id)
-            throws EnvoyServletException
+    public static List<Project> getProjectByUser(String p_id) throws EnvoyServletException
     {
         try
         {
@@ -370,8 +359,7 @@ public class ProjectHandlerHelper
      * 
      * @return Return an list of users.
      */
-    public static List<UserInfo> getPossibleUsersForProject(User pm)
-            throws EnvoyServletException
+    public static List<UserInfo> getPossibleUsersForProject(User pm) throws EnvoyServletException
     {
         try
         {
@@ -394,15 +382,13 @@ public class ProjectHandlerHelper
     /**
      * Extract data from users page and set in project.
      */
-    public static void extractUsers(Project project,
-            HttpServletRequest request, SessionManager sessionMgr)
-            throws EnvoyServletException
+    public static void extractUsers(Project project, HttpServletRequest request,
+            SessionManager sessionMgr) throws EnvoyServletException
     {
         // Set users
         String toField = (String) request.getParameter("toField");
         // First, make sure default users are in the list
-        ArrayList<UserInfo> defUsers = (ArrayList<UserInfo>) sessionMgr
-                .getAttribute("defUsers");
+        ArrayList<UserInfo> defUsers = (ArrayList<UserInfo>) sessionMgr.getAttribute("defUsers");
         TreeSet<String> addedUsers = new TreeSet<String>();
         for (int i = 0; i < defUsers.size(); i++)
         {
@@ -426,9 +412,8 @@ public class ProjectHandlerHelper
      * @param p_updatePm
      *            Whether update the Project PM
      */
-    public static void setData(ProjectImpl p_project,
-            HttpServletRequest p_request, boolean p_updatePm)
-            throws EnvoyServletException
+    public static void setData(ProjectImpl p_project, HttpServletRequest p_request,
+            boolean p_updatePm) throws EnvoyServletException
     {
         p_project.setName((String) p_request.getParameter("nameField"));
         p_project.setTermbaseName((String) p_request.getParameter("tbField"));
@@ -439,8 +424,7 @@ public class ProjectHandlerHelper
             String pmName = (String) p_request.getParameter("pmField");
             if (pmName != null)
             {
-                p_project.setProjectManager(ProjectHandlerHelper
-                        .getUser(pmName));
+                p_project.setProjectManager(ProjectHandlerHelper.getUser(pmName));
             }
         }
 
@@ -490,58 +474,54 @@ public class ProjectHandlerHelper
         p_project.setPoRequired(poRequired);
 
         // Auto Send Options
-        p_project.setAutoAcceptTrans("on".equalsIgnoreCase(p_request
-                .getParameter("translationAA")));
-        p_project.setAutoSendTrans("on".equalsIgnoreCase(p_request
-                .getParameter("translationAS")));
-        p_project.setReviewOnlyAutoAccept("on".equalsIgnoreCase(p_request
-                .getParameter("reviewOnlyAA")));
-        p_project.setReviewOnlyAutoSend("on".equalsIgnoreCase(p_request
-                .getParameter("reviewOnlyAS")));
-        p_project.setAutoAcceptPMTask("on".equalsIgnoreCase(p_request
-                .getParameter("autoAcceptPMTask")));
-        p_project.setReviewReportIncludeCompactTags("on"
-                .equalsIgnoreCase(p_request
-                        .getParameter("reviewReportIncludeCompactTags")));
+        p_project
+                .setAutoAcceptTrans("on".equalsIgnoreCase(p_request.getParameter("translationAA")));
+        p_project.setAutoSendTrans("on".equalsIgnoreCase(p_request.getParameter("translationAS")));
+        p_project.setReviewOnlyAutoAccept(
+                "on".equalsIgnoreCase(p_request.getParameter("reviewOnlyAA")));
+        p_project.setReviewOnlyAutoSend(
+                "on".equalsIgnoreCase(p_request.getParameter("reviewOnlyAS")));
+        p_project.setAutoAcceptPMTask(
+                "on".equalsIgnoreCase(p_request.getParameter("autoAcceptPMTask")));
+        p_project.setReviewReportIncludeCompactTags(
+                "on".equalsIgnoreCase(p_request.getParameter("reviewReportIncludeCompactTags")));
 
-        p_project.setCheckUnTranslatedSegments("on".equalsIgnoreCase(p_request
-                .getParameter("checkUnTransSeg")));
+        p_project.setCheckUnTranslatedSegments(
+                "on".equalsIgnoreCase(p_request.getParameter("checkUnTransSeg")));
 
-        p_project.setSaveTranslationsEditReport("on".equalsIgnoreCase(p_request
-                .getParameter("saveTranslationsEditReport")));
-        p_project.setSaveReviewersCommentsReport("on"
-                .equalsIgnoreCase(p_request
-                        .getParameter("saveReviewersCommentsReport")));
-        p_project.setSaveOfflineFiles("on".equalsIgnoreCase(p_request
-                .getParameter("saveOfflineFiles")));
-        p_project.setAllowManualQAChecks("on".equalsIgnoreCase(p_request
-                .getParameter("allowManualQAChecks")));
-        p_project.setAutoAcceptQATask("on".equalsIgnoreCase(p_request
-                .getParameter("autoAcceptQATask")));
-        p_project.setAutoSendQAReport("on".equalsIgnoreCase(p_request
-                .getParameter("autoSendQAReport")));
+        p_project.setCheckUnApprovedMTSegments(
+                "on".equalsIgnoreCase(p_request.getParameter("checkUnApprovedMTSeg")));
+
+        p_project.setSaveTranslationsEditReport(
+                "on".equalsIgnoreCase(p_request.getParameter("saveTranslationsEditReport")));
+        p_project.setSaveReviewersCommentsReport(
+                "on".equalsIgnoreCase(p_request.getParameter("saveReviewersCommentsReport")));
+        p_project.setSaveOfflineFiles(
+                "on".equalsIgnoreCase(p_request.getParameter("saveOfflineFiles")));
+        p_project.setAllowManualQAChecks(
+                "on".equalsIgnoreCase(p_request.getParameter("allowManualQAChecks")));
+        p_project.setAutoAcceptQATask(
+                "on".equalsIgnoreCase(p_request.getParameter("autoAcceptQATask")));
+        p_project.setAutoSendQAReport(
+                "on".equalsIgnoreCase(p_request.getParameter("autoSendQAReport")));
 
         try
         {
             long companyId = p_project.getCompanyId();
             if (companyId == -1)
             {
-                companyId = Long.parseLong(CompanyThreadLocal.getInstance()
-                        .getValue());
+                companyId = Long.parseLong(CompanyThreadLocal.getInstance().getValue());
             }
-            boolean enableDitaChecks = ServerProxy.getJobHandler()
-                    .getCompanyById(companyId).getEnableDitaChecks();
+            boolean enableDitaChecks = ServerProxy.getJobHandler().getCompanyById(companyId)
+                    .getEnableDitaChecks();
             if (enableDitaChecks)
             {
-                p_project.setManualRunDitaChecks("on"
-                        .equalsIgnoreCase(p_request
-                                .getParameter("manualRunDitaQAChecks")));
-                p_project.setAutoAcceptDitaQaTask("on"
-                        .equalsIgnoreCase(p_request
-                                .getParameter("autoAcceptDitaQaTask")));
-                p_project.setAutoSendDitaQaReport("on"
-                        .equalsIgnoreCase(p_request
-                                .getParameter("autoSendDitaQaReport")));
+                p_project.setManualRunDitaChecks(
+                        "on".equalsIgnoreCase(p_request.getParameter("manualRunDitaQAChecks")));
+                p_project.setAutoAcceptDitaQaTask(
+                        "on".equalsIgnoreCase(p_request.getParameter("autoAcceptDitaQaTask")));
+                p_project.setAutoSendDitaQaReport(
+                        "on".equalsIgnoreCase(p_request.getParameter("autoSendDitaQaReport")));
             }
         }
         catch (Exception e)

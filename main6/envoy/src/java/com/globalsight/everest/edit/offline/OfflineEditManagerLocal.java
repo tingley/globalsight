@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -73,6 +74,7 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.TuImpl;
@@ -787,10 +789,17 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
                 case UPLOAD_TYPE_XLF20:
                 {
-                    String txt = Tmx2Xliff20.conveterToTxt(
-                            FileUtil.readFile(p_tmpFile, ListViewWorkXLIFF20Writer.XLIFF_ENCODING));
+                    String content = FileUtil.readFile(p_tmpFile,
+                            ListViewWorkXLIFF20Writer.XLIFF_ENCODING);
+                    String txt = Tmx2Xliff20.conveterToTxt(content);
+
+                    // GBS-4716
+                    // Converts xliff 2.0 file to Object to get the targer state
+                    Map<String/* segment id */, String/* segment state */> segmentMapObj = Tmx2Xliff20
+                            .getSegmentsStateAsMap(content);
+
                     errorString = api.processXliff20(new StringReader(txt), p_fileName, p_user,
-                            taskId, excludedItemTypes);
+                            taskId, excludedItemTypes, segmentMapObj);
                     m_status.speak(processedCounter, fileName);
                     m_status.speak(processedCounter,
                             m_resource.getString("msg_upld_format_rtf_listview"));
@@ -1167,8 +1176,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
             else
             {
-                errorString = api.processReport(p_tmpFile, p_user, p_task, p_fileName,
-                        p_reportName, scorecardData);
+                errorString = api.processReport(p_tmpFile, p_user, p_task, p_fileName, p_reportName,
+                        scorecardData);
             }
             m_status.setResults(errorString);
             m_status.setCounter(1);
@@ -2010,8 +2019,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                 String key = CommentHelper.makeLogicalKey(tPage.getId(), tu.getId(),
                                         tuv.getId(), 0);
                                 issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv.getId(), title,
-                                        priority, status, category, null, p_user.getUserId(), textContent,
-                                        key);
+                                        priority, status, category, null, p_user.getUserId(),
+                                        textContent, key);
                                 issue.setShare(false);
                                 issue.setOverwrite(false);
                             }
@@ -2245,8 +2254,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         }
         catch (Exception e)
         {
-            s_category
-                    .error("Fail to get current user parameters, probably this user has never logged in system. Logging once, user paramters will be initialized default : "
+            s_category.error(
+                    "Fail to get current user parameters, probably this user has never logged in system. Logging once, user paramters will be initialized default : "
                             + p_userId);
             throw new OfflineEditorManagerException(e);
         }

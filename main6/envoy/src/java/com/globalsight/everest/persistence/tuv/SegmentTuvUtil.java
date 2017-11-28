@@ -33,6 +33,8 @@ import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvPerplexity;
+import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
@@ -43,6 +45,7 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.Fingerprint;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import org.apache.log4j.Logger;
 
@@ -58,8 +61,7 @@ import java.util.Date;
  * @since 2012-03-22
  * @version 8.2.3
  */
-public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
-        TuvQueryConstants
+public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQueryConstants
 {
     static private final Logger logger = Logger.getLogger(SegmentTuvUtil.class);
 
@@ -70,172 +72,126 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + "tuv.creation_user, tuv.updated_by_project, tuv.sid, tuv.src_comment, tuv.repetition_of_id, "
             + "tuv.is_repeated FROM ";
 
-    private static final String GET_TUV_BY_TUV_ID_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER + " tuv " 
-            + "WHERE tuv.id = ? ";
+    private static final String GET_TUV_BY_TUV_ID_SQL = SELECT_COLUMNS + TUV_TABLE_PLACEHOLDER
+            + " tuv " + "WHERE tuv.id = ? ";
 
-    private static final String GET_TUVS_BY_TU_ID_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER + " tuv "
-            + "WHERE tuv.state != 'OUT_OF_DATE' " 
-            + "AND tuv.tu_id = ? ";
+    private static final String GET_TUVS_BY_TU_ID_SQL = SELECT_COLUMNS + TUV_TABLE_PLACEHOLDER
+            + " tuv " + "WHERE tuv.state != 'OUT_OF_DATE' " + "AND tuv.tu_id = ? ";
 
     private static final String GET_TUV_BY_TU_ID_LOCALE_ID_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER + " tuv "
-            + "WHERE tuv.state != 'OUT_OF_DATE' "
-            + "AND tuv.locale_id = ? "
-            + "AND tuv.tu_id = ? ";
+            + TUV_TABLE_PLACEHOLDER + " tuv " + "WHERE tuv.state != 'OUT_OF_DATE' "
+            + "AND tuv.locale_id = ? " + "AND tuv.tu_id = ? ";
 
-    private static final String GET_SOURCE_TUVS_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER + " tuv, " 
-            + TU_TABLE_PLACEHOLDER + " tu, "
-            + "source_page_leverage_group splg " 
-            + "WHERE tuv.tu_id = tu.id "
-            + "AND tu.leverage_group_id = splg.lg_id "
-            + "AND tuv.locale_id = ? "
-            + "AND splg.sp_id = ? "
-            + "ORDER BY tuv.order_num asc";
+    private static final String GET_SOURCE_TUVS_SQL = SELECT_COLUMNS + TUV_TABLE_PLACEHOLDER
+            + " tuv, " + TU_TABLE_PLACEHOLDER + " tu, " + "source_page_leverage_group splg "
+            + "WHERE tuv.tu_id = tu.id " + "AND tu.leverage_group_id = splg.lg_id "
+            + "AND tuv.locale_id = ? " + "AND splg.sp_id = ? " + "ORDER BY tuv.order_num asc";
 
     // This SQL gets the same result as GET_TARGET_TUVS_SQL
-    private static final String GET_EXPORT_TUVS_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER + " tuv, "
-            + TU_TABLE_PLACEHOLDER + " tu, "
-            + "source_page_leverage_group splg "
-            + "WHERE tuv.tu_id = tu.id "
-            + "AND tu.leverage_group_id = splg.lg_id "
-            + "AND tuv.state != 'OUT_OF_DATE' "
-            + "AND tuv.locale_id = ? "
-            + "AND splg.sp_id = ? "
+    private static final String GET_EXPORT_TUVS_SQL = SELECT_COLUMNS + TUV_TABLE_PLACEHOLDER
+            + " tuv, " + TU_TABLE_PLACEHOLDER + " tu, " + "source_page_leverage_group splg "
+            + "WHERE tuv.tu_id = tu.id " + "AND tu.leverage_group_id = splg.lg_id "
+            + "AND tuv.state != 'OUT_OF_DATE' " + "AND tuv.locale_id = ? " + "AND splg.sp_id = ? "
             + "ORDER BY tuv.order_num asc";
 
     // NOTE: "Active" target TUVs only, no 'OUT_OF_DATE' TUVs.
-    private static final String GET_TARGET_TUVS_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER + " tuv, " 
-            + TU_TABLE_PLACEHOLDER + " tu, "
-            + "target_page_leverage_group tplg " 
-            + "WHERE tuv.tu_id = tu.id "
-            + "AND tu.leverage_group_id = tplg.lg_id "
-            + "AND tuv.state != 'OUT_OF_DATE' " 
-            + "AND tuv.locale_id = ? "
-            + "AND tplg.tp_id = ? " 
+    private static final String GET_TARGET_TUVS_SQL = SELECT_COLUMNS + TUV_TABLE_PLACEHOLDER
+            + " tuv, " + TU_TABLE_PLACEHOLDER + " tu, " + "target_page_leverage_group tplg "
+            + "WHERE tuv.tu_id = tu.id " + "AND tu.leverage_group_id = tplg.lg_id "
+            + "AND tuv.state != 'OUT_OF_DATE' " + "AND tuv.locale_id = ? " + "AND tplg.tp_id = ? "
             + "ORDER BY tuv.order_num asc ";
 
     // NOTE: Include 'OUT_OF_DATE' segments.
-    private static final String GET_ALL_TARGET_TUVS_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER + " tuv, " 
-            + TU_TABLE_PLACEHOLDER + " tu, "
-            + "target_page_leverage_group tplg " 
-            + "WHERE tuv.tu_id = tu.id "
-            + "AND tu.leverage_group_id = tplg.lg_id "
-            + "AND tuv.locale_id = ? "
-            + "AND tplg.tp_id = ? " 
-            + "ORDER BY tuv.order_num asc ";
-    
+    private static final String GET_ALL_TARGET_TUVS_SQL = SELECT_COLUMNS + TUV_TABLE_PLACEHOLDER
+            + " tuv, " + TU_TABLE_PLACEHOLDER + " tu, " + "target_page_leverage_group tplg "
+            + "WHERE tuv.tu_id = tu.id " + "AND tu.leverage_group_id = tplg.lg_id "
+            + "AND tuv.locale_id = ? " + "AND tplg.tp_id = ? " + "ORDER BY tuv.order_num asc ";
+
     private static final String LOAD_XLIFF_ALT_BY_SPID_LOCALE_SQL = "SELECT alt.* FROM xliff_alt alt, "
-            + TUV_TABLE_PLACEHOLDER
-            + " tuv, "
-            + TU_TABLE_PLACEHOLDER
-            + " tu, "
-            + "source_page_leverage_group splg "
-            + "WHERE alt.tuv_id = tuv.id "
-            + "AND tuv.tu_id = tu.id "
-            + "AND tu.leverage_group_id = splg.lg_id "
-            + "AND tuv.locale_id = ? "
-            + "AND splg.sp_id = ? "
-            + "ORDER BY alt.id, alt.tuv_id ";
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER + " tu, "
+            + "source_page_leverage_group splg " + "WHERE alt.tuv_id = tuv.id "
+            + "AND tuv.tu_id = tu.id " + "AND tu.leverage_group_id = splg.lg_id "
+            + "AND tuv.locale_id = ? " + "AND splg.sp_id = ? " + "ORDER BY alt.id, alt.tuv_id ";
 
     private static final String LOAD_XLIFF_ALT_BY_TPID_LOCALE_SQL = "SELECT alt.* FROM xliff_alt alt, "
-            + TUV_TABLE_PLACEHOLDER
-            + " tuv, "
-            + TU_TABLE_PLACEHOLDER
-            + " tu, "
-            + "target_page_leverage_group tplg "
-            + "WHERE alt.tuv_id = tuv.id "
-            + "AND tuv.tu_id = tu.id "
-            + "AND tu.leverage_group_id = tplg.lg_id "
-            + "AND tuv.locale_id = ? "
-            + "AND tplg.tp_id = ? "
-            + "ORDER BY alt.id, alt.tuv_id ";
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER + " tu, "
+            + "target_page_leverage_group tplg " + "WHERE alt.tuv_id = tuv.id "
+            + "AND tuv.tu_id = tu.id " + "AND tu.leverage_group_id = tplg.lg_id "
+            + "AND tuv.locale_id = ? " + "AND tplg.tp_id = ? " + "ORDER BY alt.id, alt.tuv_id ";
 
-    private static final String SAVE_TUVS_SQL = "INSERT INTO "
-            + TUV_TABLE_PLACEHOLDER
-            + " ("
+    private static final String SAVE_TUVS_SQL = "INSERT INTO " + TUV_TABLE_PLACEHOLDER + " ("
             + "id, order_num, locale_id, tu_id, is_indexed, "
             + "segment_clob, segment_string, word_count, exact_match_key, state, "
             + "merge_state, timestamp, last_modified, modify_user, creation_date, "
             + "creation_user, updated_by_project, sid, src_comment, repetition_of_id, is_repeated) "
             + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    private static final String SAVE_TUV_PERPLEXITYS_SQL = "INSERT INTO translation_unit_variant_perplexity_" 
-            + COMPANY_ID_PLACEHOLDER
-            + " (tuv_id, source_score, target_score, result) "
+
+    private static final String SAVE_TUV_PERPLEXITYS_SQL = "INSERT INTO translation_unit_variant_perplexity_"
+            + COMPANY_ID_PLACEHOLDER + " (tuv_id, source_score, target_score, result) "
             + "values (?, ?, ?, ?)";
-    
+
     private static final String GET_TUV_PERPLEXITYS_SQL = "SELECT id, tuv_id, source_score, target_score, result "
-            + "FROM translation_unit_variant_perplexity_"
-            + COMPANY_ID_PLACEHOLDER
+            + "FROM translation_unit_variant_perplexity_" + COMPANY_ID_PLACEHOLDER
             + " where tuv_id = ?";
 
     private static final String GET_REP_TUVS_BY_TU_ID_LOCALE_ID_SQL = SELECT_COLUMNS
-            + TUV_TABLE_PLACEHOLDER
-            + " tuv, "
-            + TU_TABLE_PLACEHOLDER
-            + " tu "
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER + " tu "
             + "WHERE tuv.TU_ID = tu.ID "
-            + "AND (tuv.is_repeated = 'Y' OR tuv.repetition_of_id > 0) "
-            + "AND tuv.locale_id = ? "
+            + "AND (tuv.is_repeated = 'Y' OR tuv.repetition_of_id > 0) " + "AND tuv.locale_id = ? "
             + "AND tu.id in (?) ";
 
-    private static final String APPROVE_TUV_SQL = "UPDATE "
-            + TUV_TABLE_PLACEHOLDER + " tuv "
-            + "SET tuv.STATE = 'APPROVED' "
-            + "WHERE tuv.ID IN (untranslated_target_tuv_ids) ";
-    
+    private static final String APPROVE_TUV_SQL = "UPDATE " + TUV_TABLE_PLACEHOLDER + " tuv "
+            + "SET tuv.STATE = 'APPROVED' " + "WHERE tuv.ID IN (untranslated_target_tuv_ids) ";
+
     private static final String COUNT_TRANSLATE_TUV_ALL = "SELECT COUNT(DISTINCT TUV.ID) FROM "
-            + TUV_TABLE_PLACEHOLDER
-            + " tuv, "
-            + TU_TABLE_PLACEHOLDER
-            + " tu, target_page_leverage_group tplg "
-            + " WHERE tuv.tu_id = tu.id"
-            + " AND tu.leverage_group_id = tplg.lg_id"
-            + " AND tuv.state != 'OUT_OF_DATE'"
-            + " AND tuv.STATE != 'DO_NOT_TRANSLATE'"
-            + " AND tuv.locale_id = ?"
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
+            + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
+            + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state != 'OUT_OF_DATE'"
+            + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
             + " AND tplg.tp_id = ?";
     
+    private static final String COUNT_TRANSLATE_TUV_ALL_MT = "SELECT COUNT(DISTINCT TUV.ID) FROM "
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
+            + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
+            + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state != 'OUT_OF_DATE'"
+            + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
+            + " AND tplg.tp_id = ? AND tuv.modify_user like '%_MT' ";
+
     private static final String TRANSLATE_TUV_TRANSLATED = "SELECT DISTINCT TUV.ID FROM "
-            + TUV_TABLE_PLACEHOLDER
-            + " tuv, "
-            + TU_TABLE_PLACEHOLDER
-            + " tu, target_page_leverage_group tplg "
-            + " WHERE tuv.tu_id = tu.id"
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
+            + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
             + " AND tu.leverage_group_id = tplg.lg_id"
             + " AND (tuv.state = 'LOCALIZED' OR tuv.state = 'APPROVED' OR tuv.state = 'EXACT_MATCH_LOCALIZED')"
-            + " AND tuv.locale_id = :lid"
-            + " AND tplg.tp_id = :tid";  
- 
+            + " AND tuv.locale_id = :lid" + " AND tplg.tp_id = :tid";
+
     private static final String GET_SOURCE_PAGE_ID = "SELECT SOURCE_PAGE_ID FROM TARGET_PAGE WHERE ID = ?";
     private static final String GET_LOCALE_ID = "SELECT TARGET_LOCALE_ID FROM WORKFLOW w, TARGET_PAGE tp "
             + "WHERE tp.WORKFLOW_IFLOW_INSTANCE_ID = w.IFLOW_INSTANCE_ID AND tp.ID = ?";
-    
+
     private static final String LEVERAGE_MATCH_TRANSLATED_TUV = "SELECT DISTINCT lm.ORIGINAL_SOURCE_TUV_ID FROM "
-            + LM_TABLE_PLACEHOLDER 
-            + " lm WHERE"
-            + " lm.SCORE_NUM = 100"
-            + " AND lm.MATCH_TYPE != 'UNVERIFIED_EXACT_MATCH'"
-            + " AND lm.SOURCE_PAGE_ID = :sid"
-            + " AND lm.SUB_ID = 0"
-            + " AND lm.TARGET_LOCALE_ID = :lid";
-    
+            + LM_TABLE_PLACEHOLDER + " lm WHERE" + " lm.SCORE_NUM = 100"
+            + " AND lm.MATCH_TYPE != 'UNVERIFIED_EXACT_MATCH'" + " AND lm.SOURCE_PAGE_ID = :sid"
+            + " AND lm.SUB_ID = 0" + " AND lm.TARGET_LOCALE_ID = :lid";
+
     private static final String TARGET_TUV_SOURCE_TUV = "SELECT tuv2.id FROM "
-            + TUV_TABLE_PLACEHOLDER
-            + " tuv1, "
-            + TUV_TABLE_PLACEHOLDER
-            + " tuv2 WHERE"
-            + " tuv1.TU_ID = tuv2.TU_ID"
-            + " AND tuv1.ID in (:sids)"
-            + " AND tuv2.LOCALE_ID = :lid"
-            + " AND tuv2.STATE != 'OUT_OF_DATE'"
-            + " AND tuv2.STATE != 'DO_NOT_TRANSLATE'";
+            + TUV_TABLE_PLACEHOLDER + " tuv1, " + TUV_TABLE_PLACEHOLDER + " tuv2 WHERE"
+            + " tuv1.TU_ID = tuv2.TU_ID" + " AND tuv1.ID in (:sids)" + " AND tuv2.LOCALE_ID = :lid"
+            + " AND tuv2.STATE != 'OUT_OF_DATE'" + " AND tuv2.STATE != 'DO_NOT_TRANSLATE'";
+
+    public static final String MT_APPROVE_TUV_SQL = "UPDATE " + TUV_TABLE_PLACEHOLDER + " tuv "
+            + " SET tuv.STATE = 'APPROVED', " + " tuv.MODIFY_USER = ? "
+            + " WHERE tuv.ID IN (untranslated_target_tuv_ids) AND tuv.MODIFY_USER like '%_MT' ";
+
+    private static final String GET_MODIFY_USER_BY_TU_ID_SQL = "SELECT TU_ID FROM "
+            + TUV_TABLE_PLACEHOLDER + " WHERE MODIFY_USER LIKE '%_MT' " + " AND TU_ID = ? "
+            + " AND LOCALE_ID = ? ";
+
+    private static final String APPROVED_TARGET_TUV_SOURCE_TUV = "SELECT DISTINCT TUV.ID FROM "
+            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
+            + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
+            + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state = 'APPROVED'"
+            + " AND tuv.locale_id = :lid"
+            + " AND tplg.tp_id = :tid AND tuv.modify_user like '%_MT'";
 
     /**
      * Save TUVs into DB.
@@ -246,8 +202,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @param companyId
      * @throws Exception
      */
-    public static void saveTuvs(Connection p_connection,
-            Collection<Tuv> p_tuvs, long p_jobId) throws Exception
+    public static void saveTuvs(Connection p_connection, Collection<Tuv> p_tuvs, long p_jobId)
+            throws Exception
     {
         PreparedStatement ps = null;
 
@@ -258,7 +214,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             {
                 try
                 {
-                    //For Blaise job, call method which is synchronized.
+                    // For Blaise job, call method which is synchronized.
                     saveTuvsForBlaiseJob(p_connection, p_tuvs, p_jobId);
                 }
                 catch (Exception be)
@@ -268,7 +224,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 return;
             }
 
-            // Update the TUV sequence first despite below succeeding or failure.
+            // Update the TUV sequence first despite below succeeding or
+            // failure.
             SegmentTuTuvIndexUtil.updateTuvSequence(p_connection);
 
             String sql = SAVE_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
@@ -296,13 +253,10 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 ps.setString(10, tuv.getState().getName());
 
                 ps.setString(11, tuv.getMergeState());
-                ps.setTimestamp(12, new java.sql.Timestamp(tuv.getTimestamp()
-                        .getTime()));
-                ps.setTimestamp(13, new java.sql.Timestamp(tuv
-                        .getLastModified().getTime()));
+                ps.setTimestamp(12, new java.sql.Timestamp(tuv.getTimestamp().getTime()));
+                ps.setTimestamp(13, new java.sql.Timestamp(tuv.getLastModified().getTime()));
                 ps.setString(14, tuv.getLastModifiedUser());
-                ps.setTimestamp(15, new java.sql.Timestamp(tuv.getCreatedDate()
-                        .getTime()));
+                ps.setTimestamp(15, new java.sql.Timestamp(tuv.getCreatedDate().getTime()));
 
                 ps.setString(16, tuv.getCreatedUser());
                 ps.setString(17, tuv.getUpdatedProject());
@@ -312,13 +266,13 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 if (StringUtil.isNotEmpty(tuv.getSid()))
                 {
                     // Also save it in original table if not too long.
-                    if (tuv.getSid().length() < 254) {
+                    if (tuv.getSid().length() < 254)
+                    {
                         ps.setString(18, tuv.getSid());
                     }
 
-                    TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
-                            tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-                            TuTuvAttributeImpl.SID);
+                    TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(tuv.getId(),
+                            TuTuvAttributeImpl.OBJECT_TYPE_TUV, TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());
                     sidAttibutes.add(sidAttr);
                 }
@@ -355,8 +309,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             // Save SID into "translation_tu_tuv_xx" table.
             if (sidAttibutes.size() > 0)
             {
-                SegmentTuTuvAttributeUtil.saveTuTuvAttributes(p_connection,
-                        sidAttibutes, p_jobId);
+                SegmentTuTuvAttributeUtil.saveTuTuvAttributes(p_connection, sidAttibutes, p_jobId);
             }
         }
         catch (Exception e)
@@ -373,7 +326,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         {
             DbUtil.silentClose(ps);
         }
-        
+
         saveTuvPerplexity(p_connection, p_tuvs);
     }
 
@@ -387,7 +340,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
         try
         {
-            // Update the TUV sequence first despite below succeeding or failure.
+            // Update the TUV sequence first despite below succeeding or
+            // failure.
             SegmentTuTuvIndexUtil.updateTuvSequence(p_connection);
 
             String sql = SAVE_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
@@ -415,13 +369,10 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 ps.setString(10, tuv.getState().getName());
 
                 ps.setString(11, tuv.getMergeState());
-                ps.setTimestamp(12, new java.sql.Timestamp(tuv.getTimestamp()
-                        .getTime()));
-                ps.setTimestamp(13, new java.sql.Timestamp(tuv
-                        .getLastModified().getTime()));
+                ps.setTimestamp(12, new java.sql.Timestamp(tuv.getTimestamp().getTime()));
+                ps.setTimestamp(13, new java.sql.Timestamp(tuv.getLastModified().getTime()));
                 ps.setString(14, tuv.getLastModifiedUser());
-                ps.setTimestamp(15, new java.sql.Timestamp(tuv.getCreatedDate()
-                        .getTime()));
+                ps.setTimestamp(15, new java.sql.Timestamp(tuv.getCreatedDate().getTime()));
 
                 ps.setString(16, tuv.getCreatedUser());
                 ps.setString(17, tuv.getUpdatedProject());
@@ -431,13 +382,13 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 if (StringUtil.isNotEmpty(tuv.getSid()))
                 {
                     // Also save it in original table if not too long.
-                    if (tuv.getSid().length() < 254) {
+                    if (tuv.getSid().length() < 254)
+                    {
                         ps.setString(18, tuv.getSid());
                     }
 
-                    TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
-                            tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-                            TuTuvAttributeImpl.SID);
+                    TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(tuv.getId(),
+                            TuTuvAttributeImpl.OBJECT_TYPE_TUV, TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());
                     sidAttibutes.add(sidAttr);
                 }
@@ -474,8 +425,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             // Save SID into "translation_tu_tuv_xx" table.
             if (sidAttibutes.size() > 0)
             {
-                SegmentTuTuvAttributeUtil.saveTuTuvAttributes(p_connection,
-                        sidAttibutes, p_jobId);
+                SegmentTuTuvAttributeUtil.saveTuTuvAttributes(p_connection, sidAttibutes, p_jobId);
             }
         }
         catch (Exception e)
@@ -514,12 +464,12 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 TuvPerplexity p = tuv.getPerplexity();
                 if (p == null)
                     continue;
-                
+
                 ps.setLong(1, tuv.getId());
                 ps.setDouble(2, p.getPerplexitySource());
                 ps.setDouble(3, p.getPerplexityTarget());
                 ps.setString(4, p.getPerplexityResult() ? "Y" : "N");
-                
+
                 ps.addBatch();
                 batchUpdate++;
                 if (batchUpdate > DbUtil.BATCH_INSERT_UNIT)
@@ -534,7 +484,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             {
                 ps.executeBatch();
             }
-            
+
             p_connection.commit();
         }
         catch (Exception e)
@@ -546,22 +496,22 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             DbUtil.silentClose(ps);
         }
     }
-    
+
     @SuppressWarnings("rawtypes")
     public static TuvPerplexity getTuvPerplexityByTuvId(long tuvId)
     {
-        if(!CompanyWrapper.isUsePerplexity())
+        if (!CompanyWrapper.isUsePerplexity())
             return null;
-        
+
         String sql = GET_TUV_PERPLEXITYS_SQL.replace(COMPANY_ID_PLACEHOLDER,
                 CompanyWrapper.getCurrentCompanyId());
-        
+
         try
         {
             List<ArrayList> datas = DbUtil.query(sql, tuvId);
             if (datas.size() == 0)
                 return null;
-            
+
             ArrayList data = datas.get(0);
             TuvPerplexity tp = new TuvPerplexity();
             tp.setId((long) data.get(0));
@@ -569,14 +519,14 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             tp.setPerplexitySource((double) data.get(2));
             tp.setPerplexityTarget((double) data.get(3));
             tp.setPerplexityResult("Y".equalsIgnoreCase((String) data.get(4)));
-            
+
             return tp;
         }
         catch (Exception e)
         {
             logger.error(e);
         }
-        
+
         return null;
     }
 
@@ -588,8 +538,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TuvImpl
      * @throws Exception
      */
-    public static TuvImpl getTuvById(long p_tuvId, long p_jobId)
-            throws Exception
+    public static TuvImpl getTuvById(long p_tuvId, long p_jobId) throws Exception
     {
         TuvImpl tuv = getTuvFromCache(p_tuvId);
         if (tuv != null)
@@ -623,8 +572,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TuvImpl
      * @throws SQLException
      */
-    public static TuvImpl getTuvById(Connection connection, long p_tuvId,
-            long p_jobId) throws Exception
+    public static TuvImpl getTuvById(Connection connection, long p_tuvId, long p_jobId)
+            throws Exception
     {
         TuvImpl tuv = getTuvFromCache(p_tuvId);
         if (tuv != null)
@@ -671,8 +620,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TuvImpl list
      * @throws Exception
      */
-    public static List<TuvImpl> getTuvsByTuIdsLocaleId(long[] p_tuIds,
-            long p_localeId, long p_jobId) throws Exception
+    public static List<TuvImpl> getTuvsByTuIdsLocaleId(long[] p_tuIds, long p_localeId,
+            long p_jobId) throws Exception
     {
         List<TuvImpl> result = new ArrayList<TuvImpl>();
 
@@ -681,8 +630,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         {
             for (int i = 0; i < p_tuIds.length; i++)
             {
-                result.add(getTuvByTuIdLocaleId(conn, p_tuIds[i], p_localeId,
-                        p_jobId));
+                result.add(getTuvByTuIdLocaleId(conn, p_tuIds[i], p_localeId, p_jobId));
             }
         }
         catch (Exception e)
@@ -706,8 +654,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TuvImpl
      * @throws Exception
      */
-    public static TuvImpl getTuvByTuIdLocaleId(long p_tuId, long p_localeId,
-            long jobId) throws Exception
+    public static TuvImpl getTuvByTuIdLocaleId(long p_tuId, long p_localeId, long jobId)
+            throws Exception
     {
         TuvImpl tuv = null;
 
@@ -738,8 +686,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TuvImpl
      * @throws Exception
      */
-    public static TuvImpl getTuvByTuIdLocaleId(Connection p_connection,
-            long p_tuId, long p_localeId, long p_jobId) throws Exception
+    public static TuvImpl getTuvByTuIdLocaleId(Connection p_connection, long p_tuId,
+            long p_localeId, long p_jobId) throws Exception
     {
         TuvImpl tuv = null;
 
@@ -749,8 +697,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         ResultSet rs2 = null;
         try
         {
-            String sql = GET_TUV_BY_TU_ID_LOCALE_ID_SQL.replace(
-                    TUV_TABLE_PLACEHOLDER,
+            String sql = GET_TUV_BY_TU_ID_LOCALE_ID_SQL.replace(TUV_TABLE_PLACEHOLDER,
                     BigTableUtil.getTuvTableJobDataInByJobId(p_jobId));
 
             ps1 = p_connection.prepareStatement(sql);
@@ -766,8 +713,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             // Maybe current job has been archived, so...
             else
             {
-                sql = GET_TUV_BY_TU_ID_LOCALE_ID_SQL.replace(
-                        TUV_TABLE_PLACEHOLDER,
+                sql = GET_TUV_BY_TU_ID_LOCALE_ID_SQL.replace(TUV_TABLE_PLACEHOLDER,
                         BigTableUtil.getTuvArchiveTableByJobId(p_jobId));
 
                 ps2 = p_connection.prepareStatement(sql);
@@ -784,8 +730,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         }
         catch (Exception e)
         {
-            logger.error("Error when get TUV by TuId " + p_tuId
-                    + " and localeId " + p_localeId, e);
+            logger.error("Error when get TUV by TuId " + p_tuId + " and localeId " + p_localeId, e);
             throw e;
         }
         finally
@@ -805,8 +750,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TUV list for specified TU_ID.
      * @throws Exception
      */
-    public static List<TuvImpl> getTuvsByTuId(long p_tuId, long p_jobId)
-            throws Exception
+    public static List<TuvImpl> getTuvsByTuId(long p_tuId, long p_jobId) throws Exception
     {
         List<TuvImpl> result = new ArrayList<TuvImpl>();
 
@@ -832,8 +776,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TUV list for specified TU_ID.
      * @throws Exception
      */
-    public static List<TuvImpl> getTuvsByTuId(Connection connection,
-            long p_tuId, long p_jobId) throws Exception
+    public static List<TuvImpl> getTuvsByTuId(Connection connection, long p_tuId, long p_jobId)
+            throws Exception
     {
         List<TuvImpl> result = new ArrayList<TuvImpl>();
 
@@ -885,8 +829,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return ArrayList<Tuv>
      * @throws Exception
      */
-    public static ArrayList<Tuv> getSourceTuvs(SourcePage p_sourcePage)
-            throws Exception
+    public static ArrayList<Tuv> getSourceTuvs(SourcePage p_sourcePage) throws Exception
     {
         boolean loadExtraInfo = true;
         return getSourceTuvs(p_sourcePage, loadExtraInfo);
@@ -902,8 +845,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return ArrayList<Tuv>
      * @throws Exception
      */
-    public static ArrayList<Tuv> getSourceTuvs(SourcePage p_sourcePage,
-            boolean p_needLoadXlfAlts) throws Exception
+    public static ArrayList<Tuv> getSourceTuvs(SourcePage p_sourcePage, boolean p_needLoadXlfAlts)
+            throws Exception
     {
         ArrayList<Tuv> result = new ArrayList<Tuv>();
 
@@ -914,35 +857,30 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         {
             conn = DbUtil.getConnection();
             long spId = p_sourcePage.getId();
-            String tuvTableName = BigTableUtil
-                    .getTuvTableJobDataInBySourcePageId(spId);
-            String tuTableName = BigTableUtil
-                    .getTuTableJobDataInBySourcePageId(spId);
-            String sql = GET_SOURCE_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
-                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(spId);
+            String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(spId);
+            String sql = GET_SOURCE_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
 
             ps = conn.prepareStatement(sql);
             ps.setLong(1, p_sourcePage.getLocaleId());
             ps.setLong(2, p_sourcePage.getId());
             rs = ps.executeQuery();
 
-            result.addAll(convertResultSetToTuv(rs, false,
-                    p_sourcePage.getJobId()));
+            result.addAll(convertResultSetToTuv(rs, false, p_sourcePage.getJobId()));
 
             // Load xliff_alt data in page level to improve performance.
-            if (p_needLoadXlfAlts
-                    && XliffAltUtil.isGenerateXliffAlt(p_sourcePage))
+            if (p_needLoadXlfAlts && XliffAltUtil.isGenerateXliffAlt(p_sourcePage))
             {
-                loadXliffAlts(result, p_sourcePage.getLocaleId(),
-                        p_sourcePage.getId(), tuTableName, tuvTableName);
+                loadXliffAlts(result, p_sourcePage.getLocaleId(), p_sourcePage.getId(), tuTableName,
+                        tuvTableName);
             }
 
             setHashValues(result);
         }
         catch (Exception e)
         {
-            logger.error("Error when getSourceTuvs() for source page "
-                    + p_sourcePage.getId(), e);
+            logger.error("Error when getSourceTuvs() for source page " + p_sourcePage.getId(), e);
             throw e;
         }
         finally
@@ -965,8 +903,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return TuvImpl list
      * @throws Exception
      */
-    public static List<Tuv> getExportTuvs(long p_localeId, long p_sourcePageId)
-            throws Exception
+    public static List<Tuv> getExportTuvs(long p_localeId, long p_sourcePageId) throws Exception
     {
         List<Tuv> result = new ArrayList<Tuv>();
 
@@ -977,35 +914,31 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         try
         {
             conn = DbUtil.getConnection();
-            String tuvTableName = BigTableUtil
-                    .getTuvTableJobDataInBySourcePageId(p_sourcePageId);
-            String tuTableName = BigTableUtil
-                    .getTuTableJobDataInBySourcePageId(p_sourcePageId);
-            String sql = GET_EXPORT_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
-                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(p_sourcePageId);
+            String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(p_sourcePageId);
+            String sql = GET_EXPORT_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
 
             ps = conn.prepareStatement(sql);
             ps.setLong(1, p_localeId);
             ps.setLong(2, p_sourcePageId);
             rs = ps.executeQuery();
 
-            SourcePage sp = ServerProxy.getPageManager().getSourcePage(
-                    p_sourcePageId);
+            SourcePage sp = ServerProxy.getPageManager().getSourcePage(p_sourcePageId);
             result.addAll(convertResultSetToTuv(rs, false, sp.getJobId()));
 
             if (XliffAltUtil.isGenerateXliffAlt(sp))
             {
                 // Load xliff_alt data in page level to improve performance.
-                loadXliffAlts(result, p_localeId, p_sourcePageId, tuTableName,
-                        tuvTableName);
+                loadXliffAlts(result, p_localeId, p_sourcePageId, tuTableName, tuvTableName);
             }
 
             setHashValues(result);
         }
         catch (Exception e)
         {
-            logger.error("Error when getExportTuvs for sourcePageId "
-                    + p_sourcePageId + " and localeId " + p_localeId, e);
+            logger.error("Error when getExportTuvs for sourcePageId " + p_sourcePageId
+                    + " and localeId " + p_localeId, e);
             throw e;
         }
         finally
@@ -1025,8 +958,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return Tuv list
      * @throws Exception
      */
-    public static List<TuvImpl> getTargetTuvs(TargetPage p_targetPage)
-            throws Exception
+    public static List<TuvImpl> getTargetTuvs(TargetPage p_targetPage) throws Exception
     {
         List<Tuv> tuvs = new ArrayList<Tuv>();
 
@@ -1037,26 +969,22 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         {
             conn = DbUtil.getConnection();
             long sourcePageId = p_targetPage.getSourcePage().getId();
-            String tuvTableName = BigTableUtil
-                    .getTuvTableJobDataInBySourcePageId(sourcePageId);
-            String tuTableName = BigTableUtil
-                    .getTuTableJobDataInBySourcePageId(sourcePageId);
-            String sql = GET_TARGET_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
-                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(sourcePageId);
+            String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(sourcePageId);
+            String sql = GET_TARGET_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
 
             ps = conn.prepareStatement(sql);
             ps.setLong(1, p_targetPage.getLocaleId());
             ps.setLong(2, p_targetPage.getId());
             rs = ps.executeQuery();
-            tuvs.addAll(convertResultSetToTuv(rs, false, p_targetPage
-                    .getSourcePage().getJobId()));
+            tuvs.addAll(convertResultSetToTuv(rs, false, p_targetPage.getSourcePage().getJobId()));
 
             // Load xliff_alt data in page level to improve performance.
             if (XliffAltUtil.isGenerateXliffAlt(p_targetPage.getSourcePage()))
             {
-                loadXliffAlts2(new ArrayList<Tuv>(tuvs),
-                        p_targetPage.getLocaleId(), p_targetPage.getId(),
-                        tuTableName, tuvTableName);                
+                loadXliffAlts2(new ArrayList<Tuv>(tuvs), p_targetPage.getLocaleId(),
+                        p_targetPage.getId(), tuTableName, tuvTableName);
             }
 
             setHashValues(tuvs);
@@ -1070,8 +998,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         }
         catch (Exception e)
         {
-            logger.error("Error when getTargetTuvs for target page "
-                    + p_targetPage.getId(), e);
+            logger.error("Error when getTargetTuvs for target page " + p_targetPage.getId(), e);
             throw e;
         }
         finally
@@ -1089,8 +1016,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return Tuv list
      * @throws Exception
      */
-    public static List<Tuv> getAllTargetTuvs(TargetPage p_targetPage)
-            throws Exception
+    public static List<Tuv> getAllTargetTuvs(TargetPage p_targetPage) throws Exception
     {
         List<Tuv> result = new ArrayList<Tuv>();
 
@@ -1101,32 +1027,29 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         {
             conn = DbUtil.getConnection();
             long sourcePageId = p_targetPage.getSourcePage().getId();
-            String tuvTableName = BigTableUtil
-                    .getTuvTableJobDataInBySourcePageId(sourcePageId);
-            String tuTableName = BigTableUtil
-                    .getTuTableJobDataInBySourcePageId(sourcePageId);
-            String sql = GET_ALL_TARGET_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
-                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(sourcePageId);
+            String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(sourcePageId);
+            String sql = GET_ALL_TARGET_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
 
             ps = conn.prepareStatement(sql);
             ps.setLong(1, p_targetPage.getLocaleId());
             ps.setLong(2, p_targetPage.getId());
             rs = ps.executeQuery();
 
-            result.addAll(convertResultSetToTuv(rs, false, p_targetPage
-                    .getSourcePage().getJobId()));
+            result.addAll(
+                    convertResultSetToTuv(rs, false, p_targetPage.getSourcePage().getJobId()));
 
             // Load xliff_alt data in page level to improve performance.
             if (XliffAltUtil.isGenerateXliffAlt(p_targetPage.getSourcePage()))
             {
-                loadXliffAlts2(result, p_targetPage.getLocaleId(),
-                        p_targetPage.getId(), tuTableName, tuvTableName);                
+                loadXliffAlts2(result, p_targetPage.getLocaleId(), p_targetPage.getId(),
+                        tuTableName, tuvTableName);
             }
         }
         catch (Exception e)
         {
-            logger.error("Error when getTargetTuvs for target page "
-                    + p_targetPage.getId(), e);
+            logger.error("Error when getTargetTuvs for target page " + p_targetPage.getId(), e);
             throw e;
         }
         finally
@@ -1146,8 +1069,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return List<TuvImpl>
      * @throws Exception
      */
-    public static List<TuvImpl> getRepTuvsByTargetPage(TargetPage p_targetPage)
-            throws Exception
+    public static List<TuvImpl> getRepTuvsByTargetPage(TargetPage p_targetPage) throws Exception
     {
         List<TuvImpl> result = new ArrayList<TuvImpl>();
 
@@ -1164,17 +1086,18 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     }
 
     /**
-     * Get all repeated and repetitions target TUVs for specified TUs and locale.
+     * Get all repeated and repetitions target TUVs for specified TUs and
+     * locale.
      * 
-     * @param p_tuIds in List.
+     * @param p_tuIds
+     *            in List.
      * @param p_targetLocaleId
      * @param p_jobId
      * @return List<TuImpl>
      * @throws Exception
      */
-    public static List<TuvImpl> getRepTuvsByTuIdsAndLocaleId(
-            List<Long> p_tuIds, long p_targetLocaleId, long p_jobId)
-            throws Exception
+    public static List<TuvImpl> getRepTuvsByTuIdsAndLocaleId(List<Long> p_tuIds,
+            long p_targetLocaleId, long p_jobId) throws Exception
     {
         List<TuvImpl> result = new ArrayList<TuvImpl>();
 
@@ -1184,13 +1107,11 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         try
         {
             conn = DbUtil.getConnection();
-            String tuvTableName = BigTableUtil
-                    .getTuvTableJobDataInByJobId(p_jobId);
-            String tuTableName = BigTableUtil
-                    .getTuTableJobDataInByJobId(p_jobId);
-            String sql = GET_REP_TUVS_BY_TU_ID_LOCALE_ID_SQL.replace(
-                    TUV_TABLE_PLACEHOLDER, tuvTableName).replace(
-                    TU_TABLE_PLACEHOLDER, tuTableName);
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(p_jobId);
+            String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);
+            String sql = GET_REP_TUVS_BY_TU_ID_LOCALE_ID_SQL
+                    .replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
 
             StringBuilder tuIds = new StringBuilder();
             for (Long tuId : p_tuIds)
@@ -1231,17 +1152,17 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @param p_tuTableName
      * @param p_tuvTableName
      */
-    private static void loadXliffAlts(List<Tuv> p_tuvs, long p_localeId,
-            long p_sourcePageId, String p_tuTableName, String p_tuvTableName)
+    private static void loadXliffAlts(List<Tuv> p_tuvs, long p_localeId, long p_sourcePageId,
+            String p_tuTableName, String p_tuvTableName)
     {
         try
         {
-            String sql = LOAD_XLIFF_ALT_BY_SPID_LOCALE_SQL.replace(
-                    TUV_TABLE_PLACEHOLDER, p_tuvTableName).replace(
-                    TU_TABLE_PLACEHOLDER, p_tuTableName);
+            String sql = LOAD_XLIFF_ALT_BY_SPID_LOCALE_SQL
+                    .replace(TUV_TABLE_PLACEHOLDER, p_tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, p_tuTableName);
 
-            List<XliffAlt> xlfAlts = HibernateUtil.searchWithSql(
-                    XliffAlt.class, sql, p_localeId, p_sourcePageId);
+            List<XliffAlt> xlfAlts = HibernateUtil.searchWithSql(XliffAlt.class, sql, p_localeId,
+                    p_sourcePageId);
 
             Map<Long, Set<XliffAlt>> xlfAltMap = getXliffAltMap(xlfAlts);
 
@@ -1252,14 +1173,13 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
             for (Tuv tuv : p_tuvs)
             {
-                recordWhichTuvExtraDataAlreadyLoaded(tuv.getIdAsLong(),
-                        XLIFF_ALT);
+                recordWhichTuvExtraDataAlreadyLoaded(tuv.getIdAsLong(), XLIFF_ALT);
             }
         }
         catch (Exception e)
         {
-            logger.error("Error when loadXliffAlts() for sourcePageId "
-                    + p_sourcePageId + " localeId " + p_localeId, e);
+            logger.error("Error when loadXliffAlts() for sourcePageId " + p_sourcePageId
+                    + " localeId " + p_localeId, e);
         }
     }
 
@@ -1271,17 +1191,17 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @param p_localeId
      * @param p_targetPageId
      */
-    private static void loadXliffAlts2(List<Tuv> p_tuvs, long p_localeId,
-            long p_targetPageId, String p_tuTableName, String p_tuvTableName)
+    private static void loadXliffAlts2(List<Tuv> p_tuvs, long p_localeId, long p_targetPageId,
+            String p_tuTableName, String p_tuvTableName)
     {
         try
         {
-            String sql = LOAD_XLIFF_ALT_BY_TPID_LOCALE_SQL.replace(
-                    TUV_TABLE_PLACEHOLDER, p_tuvTableName).replace(
-                    TU_TABLE_PLACEHOLDER, p_tuTableName);
+            String sql = LOAD_XLIFF_ALT_BY_TPID_LOCALE_SQL
+                    .replace(TUV_TABLE_PLACEHOLDER, p_tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, p_tuTableName);
 
-            List<XliffAlt> xlfAlts = HibernateUtil.searchWithSql(
-                    XliffAlt.class, sql, p_localeId, p_targetPageId);
+            List<XliffAlt> xlfAlts = HibernateUtil.searchWithSql(XliffAlt.class, sql, p_localeId,
+                    p_targetPageId);
 
             Map<Long, Set<XliffAlt>> xlfAltMap = getXliffAltMap(xlfAlts);
 
@@ -1292,14 +1212,13 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
             for (Tuv tuv : p_tuvs)
             {
-                recordWhichTuvExtraDataAlreadyLoaded(tuv.getIdAsLong(),
-                        XLIFF_ALT);
+                recordWhichTuvExtraDataAlreadyLoaded(tuv.getIdAsLong(), XLIFF_ALT);
             }
         }
         catch (Exception e)
         {
-            logger.error("Error when loadXliffAlts2() for pageId "
-                    + p_targetPageId + " localeId " + p_localeId, e);
+            logger.error("Error when loadXliffAlts2() for pageId " + p_targetPageId + " localeId "
+                    + p_localeId, e);
         }
     }
 
@@ -1340,8 +1259,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @param p_xlfAltMap
      * @param p_tuvs
      */
-    private static void putXliffAltIntoTuv(
-            Map<Long, Set<XliffAlt>> p_xlfAltMap, List<Tuv> p_tuvs)
+    private static void putXliffAltIntoTuv(Map<Long, Set<XliffAlt>> p_xlfAltMap, List<Tuv> p_tuvs)
     {
         if (p_xlfAltMap != null && p_xlfAltMap.size() > 0)
         {
@@ -1356,24 +1274,22 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         }
     }
 
-    public static void updateTuv(TuvImpl p_tuv, long jobId)
-            throws Exception
+    public static void updateTuv(TuvImpl p_tuv, long jobId) throws Exception
     {
         List<TuvImpl> tuvs = new ArrayList<TuvImpl>();
         tuvs.add(p_tuv);
         updateTuvs(tuvs, jobId);
     }
 
-    public static void updateTuv(Connection p_connection, TuvImpl p_tuv,
-            long jobId) throws Exception
+    public static void updateTuv(Connection p_connection, TuvImpl p_tuv, long jobId)
+            throws Exception
     {
         List<TuvImpl> tuvs = new ArrayList<TuvImpl>();
         tuvs.add(p_tuv);
         updateTuvs(p_connection, tuvs, jobId);
     }
 
-    public static void updateTuvs(List<TuvImpl> p_tuvs, long p_jobId)
-            throws Exception
+    public static void updateTuvs(List<TuvImpl> p_tuvs, long p_jobId) throws Exception
     {
         Connection conn = DbUtil.getConnection();
         boolean isAutoCommit = conn.getAutoCommit();
@@ -1400,8 +1316,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      *            TuvImpl
      * @throws Exception
      */
-    public static void updateTuvs(Connection p_connection,
-            List<TuvImpl> p_tuvs, long p_jobId) throws Exception
+    public static void updateTuvs(Connection p_connection, List<TuvImpl> p_tuvs, long p_jobId)
+            throws Exception
     {
         if (p_tuvs == null || p_tuvs.size() == 0)
         {
@@ -1413,8 +1329,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         {
             StringBuilder sql = new StringBuilder();
 
-            sql.append("update ")
-                    .append(BigTableUtil.getTuvTableJobDataInByJobId(p_jobId))
+            sql.append("update ").append(BigTableUtil.getTuvTableJobDataInByJobId(p_jobId))
                     .append(" set ");
             sql.append("order_num = ?, ");// 1
             sql.append("locale_id = ?, ");// 2
@@ -1444,8 +1359,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             List<TuTuvAttributeImpl> sidAttibutes = new ArrayList<TuTuvAttributeImpl>();
             for (TuvImpl tuv : p_tuvs)
             {
-                tuv.setExactMatchKey(GlobalSightCrc.calculate(tuv
-                        .getExactMatchFormat()));
+                tuv.setExactMatchKey(GlobalSightCrc.calculate(tuv.getExactMatchFormat()));
                 tuv.setLastModified(new Date());
                 // We should not do this in a general API, this should be set
                 // outside this API.
@@ -1462,11 +1376,9 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 tuvUpdateStmt.setString(9, tuv.getState().getName());
                 tuvUpdateStmt.setString(10, tuv.getMergeState());
                 tuvUpdateStmt.setTimestamp(11, tuv.getTimestamp());
-                tuvUpdateStmt.setTimestamp(12, new Timestamp(tuv
-                        .getLastModified().getTime()));
+                tuvUpdateStmt.setTimestamp(12, new Timestamp(tuv.getLastModified().getTime()));
                 tuvUpdateStmt.setString(13, tuv.getLastModifiedUser());
-                tuvUpdateStmt.setTimestamp(14, new Timestamp(tuv
-                        .getCreatedDate().getTime()));
+                tuvUpdateStmt.setTimestamp(14, new Timestamp(tuv.getCreatedDate().getTime()));
                 tuvUpdateStmt.setString(15, tuv.getCreatedUser());
                 tuvUpdateStmt.setString(16, tuv.getUpdatedProject());
 
@@ -1476,13 +1388,13 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 if (StringUtil.isNotEmpty(tuv.getSid()))
                 {
                     // Also save it in original table if not too long.
-                    if (tuv.getSid().length() < 254) {
+                    if (tuv.getSid().length() < 254)
+                    {
                         tuvUpdateStmt.setString(17, tuv.getSid());
                     }
 
-                    TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
-                            tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-                            TuTuvAttributeImpl.SID);
+                    TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(tuv.getId(),
+                            TuTuvAttributeImpl.OBJECT_TYPE_TUV, TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());
                     sidAttibutes.add(sidAttr);
                 }
@@ -1514,8 +1426,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             // Update SID into "translation_tu_tuv_xx" table.
             if (sidAttibutes.size() > 0)
             {
-                SegmentTuTuvAttributeUtil.updateSidAttributes(
-                        p_connection, sidAttibutes, p_jobId);
+                SegmentTuTuvAttributeUtil.updateSidAttributes(p_connection, sidAttibutes, p_jobId);
             }
         }
         catch (Exception e)
@@ -1543,8 +1454,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * @return
      * @throws Exception
      */
-    private static ArrayList<TuvImpl> convertResultSetToTuv(ResultSet rs,
-            boolean loadExtraInfo, long p_jobId) throws Exception
+    private static ArrayList<TuvImpl> convertResultSetToTuv(ResultSet rs, boolean loadExtraInfo,
+            long p_jobId) throws Exception
     {
         ArrayList<TuvImpl> result = new ArrayList<TuvImpl>();
         if (rs == null)
@@ -1569,8 +1480,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             tuv.setOrder(rs.getLong(2));
             tuv.setLocaleId(rs.getLong(3));
             tuv.setTuId(rs.getLong(4));
-            tuv.setIsIndexed("Y".equalsIgnoreCase(rs.getString(5)) ? true
-                    : false);
+            tuv.setIsIndexed("Y".equalsIgnoreCase(rs.getString(5)) ? true : false);
 
             tuv.setSegmentClob(rs.getString(6));
             tuv.setSegmentString(rs.getString(7));
@@ -1589,8 +1499,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             tuv.setSid(rs.getString(18));
             tuv.setSrcComment(rs.getString(19));
             tuv.setRepetitionOfId(rs.getLong(20));
-            tuv.setRepeated("Y".equalsIgnoreCase(rs.getString(21)) ? true
-                    : false);
+            tuv.setRepeated("Y".equalsIgnoreCase(rs.getString(21)) ? true : false);
 
             if (loadExtraInfo)
             {
@@ -1631,14 +1540,12 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     @SuppressWarnings("unchecked")
     public static void loadXliffAlt(TuvImpl tuv)
     {
-        boolean isXliffAltLoaded = isTuvExtraDataLoaded(tuv.getIdAsLong(),
-                XLIFF_ALT);
+        boolean isXliffAltLoaded = isTuvExtraDataLoaded(tuv.getIdAsLong(), XLIFF_ALT);
         if (!isXliffAltLoaded)
         {
             Set<XliffAlt> xliff_alt = new HashSet<XliffAlt>();
             String hql = "from XliffAlt xa where xa.tuvId = " + tuv.getId();
-            List<XliffAlt> xliffAlts = (List<XliffAlt>) HibernateUtil
-                    .search(hql);
+            List<XliffAlt> xliffAlts = (List<XliffAlt>) HibernateUtil.search(hql);
             if (xliffAlts != null && xliffAlts.size() > 0)
             {
                 for (XliffAlt alt : xliffAlts)
@@ -1673,7 +1580,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     /**
      * Get the translated percentage for task.
      * 
-     * @param p_task -- Task object
+     * @param p_task
+     *            -- Task object
      *
      * @return translated percentage in string.
      * 
@@ -1694,8 +1602,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         return calculateTranslatedPercentage(totalCounts, translatedCounts);
     }
 
-    public static int getTranslatedPercentageForTargetPages(
-            List<TargetPage> targetPages)
+    public static int getTranslatedPercentageForTargetPages(List<TargetPage> targetPages)
     {
         int totalCounts = 0;
         int translatedCounts = 0;
@@ -1709,15 +1616,14 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
         return calculateTranslatedPercentage(totalCounts, translatedCounts);
     }
-    
-    private static int calculateTranslatedPercentage(int totalCounts,
-            int translatedCounts)
+
+    private static int calculateTranslatedPercentage(int totalCounts, int translatedCounts)
     {
         int translatedPercentage = 100;
         if (totalCounts != 0)
         {
-            translatedPercentage = Math.round(BigDecimalHelper.divide(
-                    translatedCounts * 100, totalCounts));
+            translatedPercentage = Math
+                    .round(BigDecimalHelper.divide(translatedCounts * 100, totalCounts));
             // 9999/10000 may return 100, so -1 in purpose.
             if (translatedPercentage == 100 && totalCounts > translatedCounts)
             {
@@ -1735,6 +1641,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
      * 
      * @return int[2], int[0] is total count, int[1] is translated count.
      */
+    @SuppressWarnings("unchecked")
     private static int[] getTotalAndTranslatedTuvCount(Long targetPageId)
     {
         int[] result = new int[2];
@@ -1742,50 +1649,53 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         int total = 0;
         try
         {
-            Long sourcePageId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_SOURCE_PAGE_ID, targetPageId)).longValue();
-            Long localeId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_LOCALE_ID, targetPageId)).longValue();
-            String tuvTableName = BigTableUtil
-                    .getTuvTableJobDataInBySourcePageId(sourcePageId);
-            String tuTableName = BigTableUtil
-                    .getTuTableJobDataInBySourcePageId(sourcePageId);
-            String sql = COUNT_TRANSLATE_TUV_ALL.replace(TUV_TABLE_PLACEHOLDER,
-                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
-            total = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId)).intValue();
-            
-            sql = TRANSLATE_TUV_TRANSLATED.replace(TUV_TABLE_PLACEHOLDER,
-                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            Long sourcePageId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_SOURCE_PAGE_ID,
+                    targetPageId)).longValue();
+            Long localeId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_LOCALE_ID,
+                    targetPageId)).longValue();
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(sourcePageId);
+            String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(sourcePageId);
+            String sql = COUNT_TRANSLATE_TUV_ALL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            total = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId))
+                    .intValue();
+
+            sql = TRANSLATE_TUV_TRANSLATED.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("lid", localeId);
             map.put("tid", targetPageId);
             List<Long> tuvId = (List<Long>) HibernateUtil.searchWithSql(sql, map);
             Set<Long> tids = new HashSet<Long>();
             tids.addAll(tuvId);
-            
+
             String lmTableName = BigTableUtil.getLMTableJobDataInBySourcePageId(sourcePageId);
             sql = LEVERAGE_MATCH_TRANSLATED_TUV.replace(LM_TABLE_PLACEHOLDER, lmTableName);
             map = new HashMap<String, Object>();
             map.put("lid", localeId);
             map.put("sid", sourcePageId);
             List<Object> sourceTuvId = (List<Object>) HibernateUtil.searchWithSql(sql, map);
-            
+
             if (sourceTuvId.size() > 0)
             {
                 sql = TARGET_TUV_SOURCE_TUV.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
                 map = new HashMap<String, Object>();
                 map.put("lid", localeId);
-                
+
                 Map<String, List<Object>> sids = new HashMap<String, List<Object>>();
                 sids.put("sids", sourceTuvId);
-                
-                List<Long> targetTuvId = (List<Long>) HibernateUtil.searchWithSqlWithIn(sql, map, sids);
+
+                List<Long> targetTuvId = (List<Long>) HibernateUtil.searchWithSqlWithIn(sql, map,
+                        sids);
                 tids.addAll(targetTuvId);
             }
-            
+
             result[0] = total;
             result[1] = tids.size();
         }
         catch (Exception e)
         {
+            logger.error("Error while getting total and translated tuv count", e);
             throw new EnvoyServletException(e);
         }
 
@@ -1793,19 +1703,81 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     }
 
     /**
-     * Get the target pages which include un-translated segments.
+     * Get total and translated segment counter in array.
+     * 
+     * @param targetPageId
+     * 
+     * @return int[2], int[0] is total count and int[1] is approved tuv count.
+     */
+    @SuppressWarnings("unchecked")
+    private static int[] getTotalAndApprovedTuvCount(Long targetPageId)
+    {
+        int[] result = new int[2];
+
+        int total = 0;
+        try
+        {
+            Long sourcePageId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_SOURCE_PAGE_ID,
+                    targetPageId)).longValue();
+            Long localeId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_LOCALE_ID,
+                    targetPageId)).longValue();
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(sourcePageId);
+            String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(sourcePageId);
+            String sql = COUNT_TRANSLATE_TUV_ALL_MT.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
+
+            total = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId))
+                    .intValue();
+
+            sql = APPROVED_TARGET_TUV_SOURCE_TUV.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                    .replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("lid", localeId);
+            map.put("tid", targetPageId);
+
+            List<Long> tuvId = (List<Long>) HibernateUtil.searchWithSql(sql, map);
+           
+            Set<Long> tids = new HashSet<Long>(tuvId);
+
+            result[0] = total;
+            result[1] = tids.size();
+        }
+        catch (Exception e)
+        {
+            logger.error(
+                    "Error while getting total and approved tuv count in getTotalAndApprovedTuvCount()",
+                    e);
+            throw new EnvoyServletException(e);
+        }
+
+        return result;
+    }
+
+    /**
+     * Get the target pages which include un-translated segments or un-approved
+     * segments.
      * 
      * @param p_tps
      *            Target page list
      */
-    public static List<TargetPage> filterUnTranslatedTargetPages(
-            List<TargetPage> p_tps)
+    public static List<TargetPage> filterUnTranslatedTargetPages(List<TargetPage> p_tps)
     {
         List<TargetPage> result = new ArrayList<TargetPage>();
 
         for (TargetPage tp : p_tps)
         {
-            int[] counts = getTotalAndTranslatedTuvCount(tp.getIdAsLong());
+            int[] counts;
+            Workflow workflowObj = tp.getWorkflowInstance();
+            // GBS-4716
+            // If target page uses MT, get total and approved tuvs count
+            if (workflowObj != null && workflowObj.getUseMT())
+            {
+                counts = getTotalAndApprovedTuvCount(tp.getIdAsLong());
+            }
+            else
+            {
+                counts = getTotalAndTranslatedTuvCount(tp.getIdAsLong());
+            }
             int total = counts[0];
             int translatedCounts = counts[1];
             if (total > translatedCounts)
@@ -1819,6 +1791,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
     /**
      * Return a string like "1,2,3,4".
+     * 
      * @param ids
      * @return
      */
@@ -1836,11 +1809,11 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         return idsBuffer.toString().substring(0, idsBuffer.length() - 1);
     }
 
-    public static void approveTuvByTargetPageId(Long targetPageId)
+    public static void approveTuvByTargetPageId(Long targetPageId, Boolean mtApproved,
+            String userName)
     {
         PageManager pageManager = ServerProxy.getPageManager();
-        LeverageMatchLingManager lingManager =
-                LingServerProxy.getLeverageMatchLingManager();
+        LeverageMatchLingManager lingManager = LingServerProxy.getLeverageMatchLingManager();
 
         SourcePage sourcePage = null;
         TargetPage targetPage = null;
@@ -1849,20 +1822,27 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         try
         {
             targetPage = pageManager.getTargetPage(targetPageId);
-            sourcePage= targetPage.getSourcePage();
+            sourcePage = targetPage.getSourcePage();
             List sourceTuvs = getSourceTuvs(sourcePage);
             List targetTuvs = getTargetTuvs(targetPage);
             Long targetLocaleId = targetPage.getGlobalSightLocale().getIdAsLong();
             lingManager.setIncludeMtMatches(true);
-            tuvMatchTypes = lingManager.getMatchTypesForStatistics(
-                    sourcePage.getIdAsLong(), targetLocaleId, 0);
+            tuvMatchTypes = lingManager.getMatchTypesForStatistics(sourcePage.getIdAsLong(),
+                    targetLocaleId, 0);
 
             for (int i = 0; i < targetTuvs.size(); i++)
             {
                 Tuv sourceTuv = (Tuv) sourceTuvs.get(i);
                 Tuv targetTuv = (Tuv) targetTuvs.get(i);
-                if (!SegmentFilter.isTreatAsTranslated(sourceTuv, targetTuv,
-                        tuvMatchTypes))
+                // GBS-4716
+                // MT segments to be approved when we click on Approve MT button
+                // mtApproved value is true when we click on Approve MT button
+                // targetPage.getWorkflowInstance().getUseMT() value is true if
+                // it is mt segment
+                if ((!mtApproved
+                        && !SegmentFilter.isTreatAsTranslated(sourceTuv, targetTuv, tuvMatchTypes))
+                        || (mtApproved && targetPage.getWorkflowInstance().getUseMT()
+                                && !TuvState.APPROVED.equals(targetTuv.getState())))
                 {
                     untranslatedTrgTuvIds.add(targetTuv.getIdAsLong());
                 }
@@ -1870,8 +1850,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
             String trgTuvIds = formStringFromList(untranslatedTrgTuvIds);
 
-            if(trgTuvIds != null)
-            {               
+            if (trgTuvIds != null)
+            {
                 Connection conn = null;
                 PreparedStatement ps = null;
                 try
@@ -1879,13 +1859,26 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                     conn = DbUtil.getConnection();
                     conn.setAutoCommit(false);
                     String tuvTableName = BigTableUtil
-                            .getTuvTableJobDataInBySourcePageId(sourcePage
-                                    .getId());
-                    String sql = APPROVE_TUV_SQL.replace(TUV_TABLE_PLACEHOLDER,
-                            tuvTableName).replace(
-                            "untranslated_target_tuv_ids", trgTuvIds);
-                    
-                    ps = conn.prepareStatement(sql);
+                            .getTuvTableJobDataInBySourcePageId(sourcePage.getId());
+                    String sql = null;
+                    // Update MT segments state to approved for target tuv ids
+                    if (mtApproved == Boolean.TRUE)
+                    {
+                        sql = MT_APPROVE_TUV_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                                .replace("untranslated_target_tuv_ids", trgTuvIds);
+
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1, userName);
+
+                    }
+                    else
+                    {
+                        sql = APPROVE_TUV_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+                                .replace("untranslated_target_tuv_ids", trgTuvIds);
+
+                        ps = conn.prepareStatement(sql);
+                    }
+
                     ps.executeUpdate();
                     conn.commit();
                 }
@@ -1899,10 +1892,11 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                     DbUtil.silentReturnConnection(conn);
                 }
             }
-            
+
         }
         catch (Exception e)
         {
+            logger.error("Error while approving the target tuv ids.", e);
             throw new EnvoyServletException(e);
         }
     }
@@ -1932,10 +1926,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     {
         try
         {
-            SegmentTmExactMatchFormatHandler handler =
-                new SegmentTmExactMatchFormatHandler();
-            DiplomatBasicParser diplomatParser =
-                new DiplomatBasicParser(handler);
+            SegmentTmExactMatchFormatHandler handler = new SegmentTmExactMatchFormatHandler();
+            DiplomatBasicParser diplomatParser = new DiplomatBasicParser(handler);
             diplomatParser.parse(data);
             return Fingerprint.fromString(handler.toString());
         }
@@ -1945,4 +1937,79 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         }
         return -1;
     }
+
+    // GBS-4716
+    /**
+     * Verifying whether the given segment(tuId) is MT OR not by using tuId,
+     * pageId and targetLocale values
+     * 
+     * If the given tuId is MT segment then return true else return false
+     * 
+     * @param tuId
+     * @param pageId
+     * @param targetLocale
+     * @return true or false
+     * @throws Exception
+     */
+    public static Boolean isMtSegment(String tuId, Long pageId, String targetLocale)
+            throws Exception
+    {
+        if (StringUtil.isEmptyAndNull(targetLocale))
+        {
+            throw new Exception("Target language is not found");
+        }
+
+        if (StringUtil.isEmptyAndNull(tuId) || pageId == null)
+        {
+            throw new Exception("TU id or PAGE id is not found");
+        }
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int tuvId = 0;
+        try
+        {
+            conn = DbUtil.getConnection();
+
+            // Get target locale id
+            GlobalSightLocale trgLoc = ServerProxy.getLocaleManager()
+                    .getLocaleByString(targetLocale);
+
+            // Get translation_unit_variant_XXX table name
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(pageId);
+
+            /*
+             * Get tu_id from translation_unit_variant_XXX table if it is MT
+             * segment to verify whether it is MT segment or not
+             */
+            String sql = GET_MODIFY_USER_BY_TU_ID_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
+            logger.info(sql);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, tuId);
+            ps.setLong(2, trgLoc.getId());
+            rs = ps.executeQuery();
+
+            if (rs.next())
+            {
+                tuvId = rs.getInt(1);
+            }
+
+        }
+        catch (Exception e)
+        {
+            logger.error("Error while checking the given segment is MT or not in isMtSegment().",
+                    e);
+            throw e;
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(conn);
+        }
+
+        return tuvId != 0;
+    }
+
 }

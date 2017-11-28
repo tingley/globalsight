@@ -26,12 +26,14 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -60,6 +62,9 @@ import com.globalsight.util.StringUtil;
  */
 public class WorkflowImpl extends PersistentObject implements Workflow, WorkObject
 {
+	
+	private static final Logger CATEGORY = Logger.getLogger(WorkflowImpl.class);
+	
     private static final long serialVersionUID = -9074840785216382158L;
 
     private static Logger c_logger = Logger.getLogger(WorkflowImpl.class.getName());
@@ -203,6 +208,25 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     private String adequacyScore;
     private int scorecardShowType = -1;// -1:Not Showing,0:Optional,1:Required
     private boolean isSinceVersion87 = true;
+    
+    private static ResourceBundle m_resource;
+    private static Integer dqfCommentCharLimit;
+    
+    static
+    {
+        try
+        {
+            // GBS-4710 
+         	m_resource = ResourceBundle.getBundle(AmbassadorDwUpConstants.OFFLINE_CONFIG_PROPERTY);
+         	String characterLimit = m_resource.getString("DQFCommentCharacterLimit");
+         	dqfCommentCharLimit = StringUtil.getInt(characterLimit);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("WorkflowImpl: Problem while loading the OfflineEditorConfig "
+            		+ "property file ", e);
+        }
+    }
 
     /**
      * Get name of the company this activity belong to.
@@ -1751,5 +1775,26 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     {
         this.perplexityWordCount = perplexityWordCount;
     }
+    
+    // GBS-4710 
+    public void setTrimmedDQFComment(String dqfComment)
+    {
+        if (dqfComment == null)
+        {
+            return;
+        }
 
+        String trimmedDQFComment = dqfComment.trim();
+        // To Consider paragraph as single character, convert paragraph into new
+        // line
+        trimmedDQFComment = trimmedDQFComment.replaceAll("\r\n", "\n");
+
+        if (StringUtil.isNotEmpty(trimmedDQFComment) && dqfCommentCharLimit > 0
+                && trimmedDQFComment.length() > dqfCommentCharLimit)
+        {
+            trimmedDQFComment = trimmedDQFComment.substring(0, dqfCommentCharLimit);
+        }
+        this.dqfComment = trimmedDQFComment;
+    }
+    
 }

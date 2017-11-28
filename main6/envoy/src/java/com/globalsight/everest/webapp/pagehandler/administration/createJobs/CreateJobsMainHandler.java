@@ -255,6 +255,12 @@ public class CreateJobsMainHandler extends PageHandler
                 List<File> uploadedFiles = new ArrayList<File>();
                 try
                 {
+                    if (!tempFolder.matches("^[0123456789]+-[0123456789]+$"))
+                    {
+                        logger.error("Error temp folder:" + tempFolder);
+                        return;
+                    }
+                    
                     uploadedFiles = uploadSelectedFile(request, tempFolder, type,"uploadSelectedFile");
                     for (File uploadedFile : uploadedFiles)
                     {

@@ -76,8 +76,7 @@ import com.globalsight.util.gxml.GxmlElement;
 
 public class OfflinePtagErrorChecker implements Cancelable
 {
-    static private final Logger CATEGORY = Logger
-            .getLogger(OfflinePtagErrorChecker.class);
+    static private final Logger CATEGORY = Logger.getLogger(OfflinePtagErrorChecker.class);
 
     private PtagErrorPageWriter m_errWriter = null;
     private ResourceBundle m_messages = null;
@@ -105,16 +104,13 @@ public class OfflinePtagErrorChecker implements Cancelable
     static private final String tradosSegMid = "<\\s*\\}\\s*\\d+\\s*\\{\\s*>";
     static private final String tradosSegTarget = "(.*)";
     static private final String tradosSegEnd = "<\\s*0\\s*\\}\\w*";
-    static private final Pattern pattern = Pattern.compile(tradosSegStart
-            + tradosSegSource + tradosSegMid + tradosSegTarget + tradosSegEnd,
+    static private final Pattern pattern = Pattern.compile(
+            tradosSegStart + tradosSegSource + tradosSegMid + tradosSegTarget + tradosSegEnd,
             Pattern.DOTALL);
 
-    static private final Pattern RE_SEGMENT_START = Pattern.compile(
-            tradosSegStart, Pattern.DOTALL);
-    static private final Pattern RE_SEGMENT_MID = Pattern.compile(tradosSegMid,
-            Pattern.DOTALL);
-    static private final Pattern RE_SEGMENT_END = Pattern.compile(tradosSegEnd,
-            Pattern.DOTALL);
+    static private final Pattern RE_SEGMENT_START = Pattern.compile(tradosSegStart, Pattern.DOTALL);
+    static private final Pattern RE_SEGMENT_MID = Pattern.compile(tradosSegMid, Pattern.DOTALL);
+    static private final Pattern RE_SEGMENT_END = Pattern.compile(tradosSegEnd, Pattern.DOTALL);
 
     private OEMProcessStatus status = null;
     private boolean cancel = false;
@@ -138,28 +134,27 @@ public class OfflinePtagErrorChecker implements Cancelable
     static private final int m_maxLengthNativeContent = 0; // disabled
     static private final String m_nativeContentEncoding = "UTF8";
     static private final List<String> stateList = new ArrayList<String>();
-    static{
+    static
+    {
         stateList.add("translated");
         stateList.add("signed-off");
-    	stateList.add("final");
-//        stateList.add("needs-adaptation");
-//        stateList.add("needs-l10n");
-//        stateList.add("needs-review-adaptation");
-//        stateList.add("needs-review-l10n");
-//        stateList.add("needs-review-translation");
-//        stateList.add("needs-translation");
+        stateList.add("final");
+        // stateList.add("needs-adaptation");
+        // stateList.add("needs-l10n");
+        // stateList.add("needs-review-adaptation");
+        // stateList.add("needs-review-l10n");
+        // stateList.add("needs-review-translation");
+        // stateList.add("needs-translation");
     }
 
     /**
      * Constructor.
      */
-    public OfflinePtagErrorChecker(PtagErrorPageWriter p_errWriter)
-            throws AmbassadorDwUpException
+    public OfflinePtagErrorChecker(PtagErrorPageWriter p_errWriter) throws AmbassadorDwUpException
     {
-        m_messages = ResourceBundle
-                .getBundle(
-                        "com.globalsight.everest.edit.offline.upload.OfflinePtagErrorChecker",
-                        p_errWriter.getLocale());
+        m_messages = ResourceBundle.getBundle(
+                "com.globalsight.everest.edit.offline.upload.OfflinePtagErrorChecker",
+                p_errWriter.getLocale());
 
         m_errWriter = p_errWriter;
     }
@@ -169,8 +164,8 @@ public class OfflinePtagErrorChecker implements Cancelable
      */
     @SuppressWarnings(
     { "unchecked", "rawtypes" })
-    public String checkAndSave(Map p_idSegmentMap, boolean p_adjustWS,
-            long p_localeId, User p_user, long p_jobId) throws Exception
+    public String checkAndSave(Map p_idSegmentMap, boolean p_adjustWS, long p_localeId, User p_user,
+            long p_jobId) throws Exception
     {
         List tuvs = new ArrayList<Tuv>();
         Set tuIds = p_idSegmentMap.keySet();
@@ -200,8 +195,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                 {
                     Tuv t = (Tuv) ob;
                     SegmentTuTuvCacheManager.removeTuvFromCache(t.getId());
-                }
-                ;
+                } ;
                 return null;
             }
 
@@ -210,15 +204,13 @@ public class OfflinePtagErrorChecker implements Cancelable
 
             tuIdLong = (Long) tuIdIterator.next();
             tuId = tuIdLong.longValue();
-            Tuv trgTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(tuId, p_localeId,
-                    p_jobId);
+            Tuv trgTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(tuId, p_localeId, p_jobId);
             TuImpl tu = (TuImpl) trgTuv.getTu(p_jobId);
             Tuv srcTuv = tu.getSourceTuv();
             String dataType = trgTuv.getDataType(p_jobId);
             pTagData.setAddables(dataType);
             // special treatment for html
-            if ("html".equalsIgnoreCase(dataType)
-                    && !"text".equalsIgnoreCase(tu.getTuType()))
+            if ("html".equalsIgnoreCase(dataType) && !"text".equalsIgnoreCase(tu.getTuType()))
             {
                 pTagData.setAddables(tu.getTuType());
             }
@@ -233,8 +225,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             {
                 isChanged = false;
                 hasError = false;
-                allTrgCompactTrans = splitSegFromTERWithSubs(segment, tuId,
-                        trgTuv);
+                allTrgCompactTrans = splitSegFromTERWithSubs(segment, tuId, trgTuv);
                 allSrcGxmls = getAllGxmls(srcTuv);
                 allTrgGxmls = getAllGxmls(trgTuv);
 
@@ -266,15 +257,13 @@ public class OfflinePtagErrorChecker implements Cancelable
                         pTagData.setPTagTargetString(compactTrans);
                         pTagData.setDataType(dataType);
                         // Tag check (TER translation VS source)
-                        if ((errMsg = errorChecker.check(pTagData, "",
-                                m_maxLengthGxml, m_gxmlEncoding,
-                                m_maxLengthNativeContent,
+                        if ((errMsg = errorChecker.check(pTagData, "", m_maxLengthGxml,
+                                m_gxmlEncoding, m_maxLengthNativeContent,
                                 m_nativeContentEncoding)) != null)
                         {
                             hasError = true;
                             hasErrorFlag = true;
-                            m_errWriter.addSegmentErrorMsg(
-                                    String.valueOf(tuId), errMsg.trim());
+                            m_errWriter.addSegmentErrorMsg(String.valueOf(tuId), errMsg.trim());
                         }
                         else
                         {
@@ -292,19 +281,14 @@ public class OfflinePtagErrorChecker implements Cancelable
 
                                 if ("xlf".equalsIgnoreCase(dataType))
                                 {
-                                    Vector srcTagList = pTagData
-                                            .getSrcCompleteTagList();
-                                    if (srcTagList != null
-                                            && srcTagList.size() > 0)
+                                    Vector srcTagList = pTagData.getSrcCompleteTagList();
+                                    if (srcTagList != null && srcTagList.size() > 0)
                                     {
-                                        Hashtable map = pTagData
-                                                .getPseudo2TmxMap();
-                                        Enumeration srcEnumerator = srcTagList
-                                                .elements();
+                                        Hashtable map = pTagData.getPseudo2TmxMap();
+                                        Enumeration srcEnumerator = srcTagList.elements();
                                         while (srcEnumerator.hasMoreElements())
                                         {
-                                            TagNode srcItem = (TagNode) srcEnumerator
-                                                    .nextElement();
+                                            TagNode srcItem = (TagNode) srcEnumerator.nextElement();
                                             String tagName = PseudoConstants.PSEUDO_OPEN_TAG
                                                     + srcItem.getPTagName()
                                                     + PseudoConstants.PSEUDO_CLOSE_TAG;
@@ -312,18 +296,15 @@ public class OfflinePtagErrorChecker implements Cancelable
                                             if (newGxml.contains(tagName))
                                             {
                                                 String oriTag = (String) map
-                                                        .get(srcItem
-                                                                .getPTagName());
-                                                newGxml = newGxml.replace(
-                                                        tagName, oriTag);
+                                                        .get(srcItem.getPTagName());
+                                                newGxml = newGxml.replace(tagName, oriTag);
                                             }
                                         }
                                     }
                                 }
 
                                 // Set changed master segment
-                                trgTuv.setGxmlExcludeTopTagsIgnoreSubflows(
-                                        newGxml, p_jobId);
+                                trgTuv.setGxmlExcludeTopTagsIgnoreSubflows(newGxml, p_jobId);
                                 trgTuv.setLastModifiedUser(p_user.getUserId());
                                 trgTuv.setState(TuvState.LOCALIZED);
                             }
@@ -337,12 +318,10 @@ public class OfflinePtagErrorChecker implements Cancelable
                 {
                     allTrgCompactTrans.remove("0");
                     // Set sub segments
-                    Set<Entry<String, String>> entries = allTrgCompactTrans
-                            .entrySet();
+                    Set<Entry<String, String>> entries = allTrgCompactTrans.entrySet();
                     for (Entry<String, String> entry : entries)
                     {
-                        String value = xmlEncoder.encodeStringBasic(entry
-                                .getValue());
+                        String value = xmlEncoder.encodeStringBasic(entry.getValue());
                         entry.setValue(value);
                     }
                     trgTuv.setSubflowsGxml(allTrgCompactTrans);
@@ -438,8 +417,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             if (tuvToUpdate instanceof TuvImpl)
             {
                 TuvImpl tuvImpl = (TuvImpl) tuvToUpdate;
-                Long targetPageId = tuvImpl.getTargetPage(p_jobId)
-                        .getIdAsLong();
+                Long targetPageId = tuvImpl.getTargetPage(p_jobId).getIdAsLong();
                 if (!targetPageIds.contains(targetPageId))
                 {
                     targetPageIds.add(targetPageId);
@@ -484,8 +462,8 @@ public class OfflinePtagErrorChecker implements Cancelable
      */
     @SuppressWarnings(
     { "rawtypes", "unchecked", "static-access" })
-    public String check(ArrayList<PageData> p_referencePages,
-            OfflinePageData p_uploadPage, boolean p_adjustWS)
+    public String check(ArrayList<PageData> p_referencePages, OfflinePageData p_uploadPage,
+            boolean p_adjustWS)
     {
         PseudoData pTagData = null;
         TmxPseudo convertor = null;
@@ -507,13 +485,11 @@ public class OfflinePtagErrorChecker implements Cancelable
         errorChecker.setEscapeResult(true);
         errorChecker.setStyles(SegmentUtil2.getTAGS());
         // Confirm/get the ptag display mode.
-        if (p_uploadPage.getPlaceholderFormat().equals(
-                AmbassadorDwUpConstants.TAG_TYPE_PTAGV))
+        if (p_uploadPage.getPlaceholderFormat().equals(AmbassadorDwUpConstants.TAG_TYPE_PTAGV))
         {
             uploadPagePtagDisplayMode = PseudoConstants.PSEUDO_VERBOSE;
         }
-        else if (p_uploadPage.getPlaceholderFormat().equals(
-                AmbassadorDwUpConstants.TAG_TYPE_PTAGC))
+        else if (p_uploadPage.getPlaceholderFormat().equals(AmbassadorDwUpConstants.TAG_TYPE_PTAGC))
         {
             uploadPagePtagDisplayMode = PseudoConstants.PSEUDO_COMPACT;
         }
@@ -526,8 +502,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             { label, AmbassadorDwUpConstants.TAG_TYPE_PTAGV,
                     AmbassadorDwUpConstants.TAG_TYPE_PTAGC };
 
-            errMsg = MessageFormat.format(
-                    m_messages.getString("InvalidTagModeError"), args);
+            errMsg = MessageFormat.format(m_messages.getString("InvalidTagModeError"), args);
 
             m_errWriter.addFileErrorMsg(errMsg);
 
@@ -544,6 +519,7 @@ public class OfflinePtagErrorChecker implements Cancelable
         HashMap segmentsMap = new HashMap();
         String currentTuId = null;
         String xlfTargetState = null;
+        String xlfSegmentState = null;
         for (int ii = 0; ii < p_referencePages.size(); ii++)
         {
             p_referencePage = p_referencePages.get(ii).getOfflinePageData();
@@ -558,13 +534,13 @@ public class OfflinePtagErrorChecker implements Cancelable
                 segmentsMap.putAll(p_referencePage.getSegmentMap());
             }
 
-            for (ListIterator it = p_referencePage.getSegmentIterator(); it
-                    .hasNext();)
+            for (ListIterator it = p_referencePage.getSegmentIterator(); it.hasNext();)
             {
                 refSeg = (OfflineSegmentData) it.next();
                 currentTuId = refSeg.getDisplaySegmentID();
                 uploadSeg = p_uploadPage.getSegmentByDisplayId(currentTuId);
                 xlfTargetState = p_uploadPage.getXlfTargetState(currentTuId);
+                xlfSegmentState = p_uploadPage.getXlfSegmentState(currentTuId);
                 pTagData.setDataType(refSeg.getDisplaySegmentFormat());
 
                 if (uploadSeg == null)
@@ -573,11 +549,16 @@ public class OfflinePtagErrorChecker implements Cancelable
                 }
 
                 uploadSeg.setReferenceSegmentFound(true);
-                String tempUploadTargetDisplayText = uploadSeg
-                        .getDisplayTargetText();
+                String tempUploadTargetDisplayText = uploadSeg.getDisplayTargetText();
                 boolean isIncludeSeparateFlag = false;// define IN loop
                 try
                 {
+                    // GBS-4716
+                    // Check the segment type is MT or not for the current tuid
+                    CATEGORY.info("PAGEID : " + refSeg.getPageId());
+                    Boolean isMtSegment = SegmentTuvUtil.isMtSegment(currentTuId,
+                            refSeg.getPageId(), p_uploadPage.getTargetLocaleName().toString());
+
                     // flag protected segments
                     if (UploadPageSaver.confirmUploadProtection(uploadSeg))
                     {
@@ -588,38 +569,32 @@ public class OfflinePtagErrorChecker implements Cancelable
                         refSeg.setWriteAsProtectedSegment(false);
 
                         // detect uncleared Trados segments
-                        Matcher matcher = pattern
-                                .matcher(tempUploadTargetDisplayText);
+                        Matcher matcher = pattern.matcher(tempUploadTargetDisplayText);
                         if (matcher.matches())
                         {
-                            tempUploadTargetDisplayText = matcher
-                                    .group(TRADOS_REGX_TARGET_PAREN);
-                            String src = matcher
-                                    .group(TRADOS_REGX_SOURCE_PAREN);
+                            tempUploadTargetDisplayText = matcher.group(TRADOS_REGX_TARGET_PAREN);
+                            String src = matcher.group(TRADOS_REGX_SOURCE_PAREN);
 
                             isIncludeSeparateFlag = isIncludeSeparateFlag(src);
                             if (isIncludeSeparateFlag)
                             {
-                                errMsg = m_messages
-                                        .getString("TradosSegmentationError");
-                                m_errWriter.addSegmentErrorMsg(uploadSeg,
-                                        errMsg);
+                                errMsg = m_messages.getString("TradosSegmentationError");
+                                m_errWriter.addSegmentErrorMsg(uploadSeg, errMsg);
                                 hasErr = true;
                             }
                         }
                         else
                         {
-                            isIncludeSeparateFlag = isIncludeSeparateFlag(tempUploadTargetDisplayText);
+                            isIncludeSeparateFlag = isIncludeSeparateFlag(
+                                    tempUploadTargetDisplayText);
                             if (isIncludeSeparateFlag)
                             {
                                 String args[] =
                                 { "<,},0,{,>,<,0,}" };
-                                errMsg = MessageFormat.format(
-                                        m_messages.getString("TagsMissError"),
+                                errMsg = MessageFormat.format(m_messages.getString("TagsMissError"),
                                         args);
 
-                                m_errWriter.addSegmentErrorMsg(uploadSeg,
-                                        errMsg);
+                                m_errWriter.addSegmentErrorMsg(uploadSeg, errMsg);
                                 hasErr = true;
                             }
                         }
@@ -636,8 +611,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                         // default
                         pTagData.setAddables(disSegFormat);
                         // special treatment for html
-                        if ("html".equalsIgnoreCase(disSegFormat)
-                                && !"text".equals(segType))
+                        if ("html".equalsIgnoreCase(disSegFormat) && !"text".equals(segType))
                         {
                             pTagData.setAddables(segType);
                         }
@@ -651,10 +625,9 @@ public class OfflinePtagErrorChecker implements Cancelable
                         String oriTarget = refSeg.getDisplayTargetText();
                         String oriSource = refSeg.getDisplaySourceText();
                         PseudoData tuvPtagData = null;
-                        boolean isXliff = (refSeg.getDisplaySegmentFormat()
-                                .toLowerCase().equals("xlf")
-                                && filename != null && filename.toLowerCase()
-                                .endsWith(".xlf"));
+                        boolean isXliff = (refSeg.getDisplaySegmentFormat().toLowerCase()
+                                .equals("xlf") && filename != null
+                                && filename.toLowerCase().endsWith(".xlf"));
                         if (isXliff)
                         {
                             // save tuv tags
@@ -667,10 +640,8 @@ public class OfflinePtagErrorChecker implements Cancelable
                             convertor.tmx2Pseudo(oriSource, tuvPtagData);
 
                             // convert xliff standard to tmx standard
-                            oriSource = XLIFFStandardUtil
-                                    .convertToTmx(oriSource);
-                            oriTarget = XLIFFStandardUtil
-                                    .convertToTmx(oriTarget);
+                            oriSource = XLIFFStandardUtil.convertToTmx(oriSource);
+                            oriTarget = XLIFFStandardUtil.convertToTmx(oriTarget);
 
                             // avoid entity difference impacting
                             tempUploadTargetDisplayText = xmlEncoder
@@ -687,10 +658,8 @@ public class OfflinePtagErrorChecker implements Cancelable
                         convertor.tmx2Pseudo(oriSource, pTagData);
                         String refSource = pTagData.getPTagSourceString();
                         // For RTF, OmegaT, TTX etc (except for XLF format).
-                        if (!p_uploadPage.isXliff()
-                                && !isIncludeSeparateFlag
-                                && !refTarget
-                                        .equals(tempUploadTargetDisplayText))
+                        if (!p_uploadPage.isXliff() && !isIncludeSeparateFlag
+                                && !refTarget.equals(tempUploadTargetDisplayText))
                         {
                             uploadSeg.setTargetHasBeenEdited(true);
                         }
@@ -699,17 +668,29 @@ public class OfflinePtagErrorChecker implements Cancelable
                         {
                             if (refSource.equals(tempUploadTargetDisplayText))
                             {
-                                if (xlfTargetState != null && 
-                                        stateList.contains(xlfTargetState.toLowerCase()))
+                                if (xlfTargetState != null
+                                        && stateList.contains(xlfTargetState.toLowerCase()))
                                 {
                                     uploadSeg.setTargetHasBeenEdited(true);
                                     uploadSeg.setStateTranslated(true);
                                 }
                             }
-                            else if (!refTarget
-                                    .equals(tempUploadTargetDisplayText))
+                            else if (!refTarget.equals(tempUploadTargetDisplayText))
                             {
                                 uploadSeg.setTargetHasBeenEdited(true);
+                            }
+                            // GBS-4716
+                            // Verifying MT segment or not
+                            // If yes and Target segment state is in
+                            // translated,signed-off,final then set true for
+                            // stateTranslated.
+                            if (isMtSegment && ((xlfSegmentState != null
+                                    && stateList.contains(xlfSegmentState.toLowerCase()))
+                                    || (xlfTargetState != null
+                                            && stateList.contains(xlfTargetState.toLowerCase()))))
+                            {
+                                uploadSeg.setTargetHasBeenEdited(true);
+                                uploadSeg.setStateTranslated(true);
                             }
                         }
                         // for TTX only
@@ -722,18 +703,15 @@ public class OfflinePtagErrorChecker implements Cancelable
                         }
 
                         pTagData.setPTagTargetString(tempUploadTargetDisplayText);
-                        if ((errMsg = errorChecker.check(pTagData, "",
-                                m_maxLengthGxml, m_gxmlEncoding,
-                                m_maxLengthNativeContent,
+                        if ((errMsg = errorChecker.check(pTagData, "", m_maxLengthGxml,
+                                m_gxmlEncoding, m_maxLengthNativeContent,
                                 m_nativeContentEncoding)) != null)
                         {
                             hasErr = true;
                             uploadSeg.setTagCheckSuccesful(false);
-                            m_errWriter.addSegmentErrorMsg(uploadSeg,
-                                    errMsg.trim());
-                            errorList.add("Segment "
-                                    + uploadSeg.getDisplaySegmentID()
-                                    + " error : " + errMsg);
+                            m_errWriter.addSegmentErrorMsg(uploadSeg, errMsg.trim());
+                            errorList.add("Segment " + uploadSeg.getDisplaySegmentID() + " error : "
+                                    + errMsg);
                         }
                         else
                         {
@@ -749,8 +727,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                                 {
                                     List<String> segment = new ArrayList<String>();
                                     segment.add(uploadSeg.getDisplaySegmentID());
-                                    segment.add(errorChecker
-                                            .geStrInternalErrMsg());
+                                    segment.add(errorChecker.geStrInternalErrMsg());
                                     errorInternalList.add(segment);
                                 }
                             }
@@ -758,14 +735,13 @@ public class OfflinePtagErrorChecker implements Cancelable
                             // for xliff of xliff format upload
                             // <bpt id="1" ctype="">&lt;a
                             // href="http://en.wikipedia.org/wiki/Field_bus"
-                            // title="<sub ctype="x-xhtml-a-title" datatype="xhtml" xid="5" />"&gt;</bpt>
+                            // title="<sub ctype="x-xhtml-a-title"
+                            // datatype="xhtml" xid="5" />"&gt;</bpt>
                             if (tuvPtagData != null)
                             {
                                 Hashtable oriTags = pTagData.getPseudo2TmxMap();
-                                Hashtable tuvTags = tuvPtagData
-                                        .getPseudo2TmxMap();
-                                Hashtable tuvNativeTags = tuvPtagData
-                                        .getPseudo2NativeMap();
+                                Hashtable tuvTags = tuvPtagData.getPseudo2TmxMap();
+                                Hashtable tuvNativeTags = tuvPtagData.getPseudo2NativeMap();
                                 Hashtable tuvNativeTags2 = new Hashtable();
 
                                 if (tuvNativeTags.size() > 0)
@@ -774,29 +750,22 @@ public class OfflinePtagErrorChecker implements Cancelable
                                     {
                                         tuvNativeTags2 = tuvNativeTags;
                                     }
-                                    else if (tuvNativeTags.size() > oriTags
-                                            .size())
+                                    else if (tuvNativeTags.size() > oriTags.size())
                                     {
                                         List<String> inlineKeys = new ArrayList<String>();
 
-                                        for (Object obj : tuvNativeTags
-                                                .entrySet())
+                                        for (Object obj : tuvNativeTags.entrySet())
                                         {
                                             Map.Entry eee = (Map.Entry) obj;
-                                            String eeekey = (String) eee
-                                                    .getKey();
-                                            String eeevalue = (String) eee
-                                                    .getValue();
+                                            String eeekey = (String) eee.getKey();
+                                            String eeevalue = (String) eee.getValue();
                                             boolean isInline = false;
                                             String newValue = "";
-                                            for (Object obj2 : tuvNativeTags
-                                                    .entrySet())
+                                            for (Object obj2 : tuvNativeTags.entrySet())
                                             {
                                                 Map.Entry eee2 = (Map.Entry) obj2;
-                                                String eee2key = (String) eee2
-                                                        .getKey();
-                                                String eee2value = (String) eee2
-                                                        .getValue();
+                                                String eee2key = (String) eee2.getKey();
+                                                String eee2value = (String) eee2.getValue();
                                                 if (eee2key.equals(eeekey))
                                                 {
                                                     continue;
@@ -804,9 +773,7 @@ public class OfflinePtagErrorChecker implements Cancelable
 
                                                 if (eeevalue.contains(eee2key))
                                                 {
-                                                    newValue = eeevalue
-                                                            .replace(eee2key,
-                                                                    eee2value);
+                                                    newValue = eeevalue.replace(eee2key, eee2value);
                                                     isInline = true;
                                                     inlineKeys.add(eee2key);
                                                     break;
@@ -815,25 +782,19 @@ public class OfflinePtagErrorChecker implements Cancelable
 
                                             if (isInline)
                                             {
-                                                tuvNativeTags2.put(eeekey,
-                                                        newValue);
+                                                tuvNativeTags2.put(eeekey, newValue);
                                             }
                                         }
 
-                                        for (Object obj : tuvNativeTags
-                                                .entrySet())
+                                        for (Object obj : tuvNativeTags.entrySet())
                                         {
                                             Map.Entry eee = (Map.Entry) obj;
-                                            String eeekey = (String) eee
-                                                    .getKey();
-                                            String eeevalue = (String) eee
-                                                    .getValue();
+                                            String eeekey = (String) eee.getKey();
+                                            String eeevalue = (String) eee.getValue();
                                             if (!inlineKeys.contains(eeekey)
-                                                    && !tuvNativeTags2
-                                                            .containsKey(eeekey))
+                                                    && !tuvNativeTags2.containsKey(eeekey))
                                             {
-                                                tuvNativeTags2.put(eeekey,
-                                                        eeevalue);
+                                                tuvNativeTags2.put(eeekey, eeevalue);
                                             }
                                         }
                                     }
@@ -844,8 +805,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                                     {
                                         String stt = (String) vit.next();
                                         String newstt = XLIFFStandardUtil
-                                                .convertToStandard(uploadSeg,
-                                                        stt);
+                                                .convertToStandard(uploadSeg, stt);
                                         oriValues.add(newstt);
                                     }
 
@@ -855,8 +815,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                                     {
                                         String stt = (String) vit.next();
                                         String newstt = XLIFFStandardUtil
-                                                .convertToStandard(uploadSeg,
-                                                        stt);
+                                                .convertToStandard(uploadSeg, stt);
                                         tuvValues.add(newstt);
                                     }
 
@@ -871,15 +830,13 @@ public class OfflinePtagErrorChecker implements Cancelable
 
                                             if (tagNativeValue == null)
                                             {
-                                                tuvTagsInline.put("[" + key
-                                                        + "]", tagValue);
+                                                tuvTagsInline.put("[" + key + "]", tagValue);
                                             }
                                         }
 
                                         for (Object key : tuvTags.keySet())
                                         {
-                                            String tagValue = (String) tuvTags
-                                                    .get(key);
+                                            String tagValue = (String) tuvTags.get(key);
                                             Object tagNativeValue = tuvNativeTags2
                                                     .get("[" + key + "]");
 
@@ -889,49 +846,34 @@ public class OfflinePtagErrorChecker implements Cancelable
                                             }
 
                                             String tagNativeValueStr = XLIFFStandardUtil
-                                                    .convertToStandard(
-                                                            uploadSeg,
+                                                    .convertToStandard(uploadSeg,
                                                             (String) tagNativeValue);
 
-                                            for (Object orikey : oriTags
-                                                    .keySet())
+                                            for (Object orikey : oriTags.keySet())
                                             {
-                                                Object oritagValue = oriTags
-                                                        .get(orikey);
+                                                Object oritagValue = oriTags.get(orikey);
                                                 String oritagValueStr = XLIFFStandardUtil
-                                                        .convertToStandard(
-                                                                uploadSeg,
+                                                        .convertToStandard(uploadSeg,
                                                                 (String) oritagValue);
 
                                                 // put new value from source tuv
-                                                if (oritagValueStr
-                                                        .equals(tagNativeValueStr))
+                                                if (oritagValueStr.equals(tagNativeValueStr))
                                                 {
-                                                    for (Object obj : tuvTagsInline
-                                                            .entrySet())
+                                                    for (Object obj : tuvTagsInline.entrySet())
                                                     {
                                                         Map.Entry eee = (Map.Entry) obj;
-                                                        String eeekey = (String) eee
-                                                                .getKey();
-                                                        String eeevalue = (String) eee
-                                                                .getValue();
-                                                        if (tagValue
-                                                                .contains(eeekey))
+                                                        String eeekey = (String) eee.getKey();
+                                                        String eeevalue = (String) eee.getValue();
+                                                        if (tagValue.contains(eeekey))
                                                         {
-                                                            tagValue = tagValue
-                                                                    .replace(
-                                                                            eeekey,
-                                                                            eeevalue);
+                                                            tagValue = tagValue.replace(eeekey,
+                                                                    eeevalue);
                                                         }
                                                     }
 
-                                                    pTagData.m_hPseudo2TmxMap
-                                                            .put(orikey,
-                                                                    tagValue);
-                                                    pTagData.getPseudo2NativeMap()
-                                                            .put("[" + orikey
-                                                                    + "]",
-                                                                    tagNativeValue);
+                                                    pTagData.m_hPseudo2TmxMap.put(orikey, tagValue);
+                                                    pTagData.getPseudo2NativeMap().put(
+                                                            "[" + orikey + "]", tagNativeValue);
                                                 }
                                             }
                                         }
@@ -945,8 +887,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                             String newGxml = convertor.pseudo2Tmx(pTagData);
 
                             if (tuvPtagData == null
-                                    && refSeg.getDisplaySegmentFormat()
-                                            .toLowerCase().equals("xlf"))
+                                    && refSeg.getDisplaySegmentFormat().toLowerCase().equals("xlf"))
                             {
                                 PseudoData mTagData = new PseudoData();
                                 mTagData.setLocale(m_errWriter.getLocale());
@@ -954,32 +895,26 @@ public class OfflinePtagErrorChecker implements Cancelable
                                 mTagData.setAddables("xlf");
                                 mTagData.setMode(uploadPagePtagDisplayMode);
 
-                                String orisrc = refSeg.getSourceTuv()
-                                        .getGxmlExcludeTopTags();
+                                String orisrc = refSeg.getSourceTuv().getGxmlExcludeTopTags();
                                 convertor.tmx2Pseudo(orisrc, mTagData);
 
-                                Vector srcTagList = mTagData
-                                        .getSrcCompleteTagList();
+                                Vector srcTagList = mTagData.getSrcCompleteTagList();
 
                                 if (srcTagList != null && srcTagList.size() > 0)
                                 {
                                     Hashtable map = mTagData.getPseudo2TmxMap();
-                                    Enumeration srcEnumerator = srcTagList
-                                            .elements();
+                                    Enumeration srcEnumerator = srcTagList.elements();
                                     while (srcEnumerator.hasMoreElements())
                                     {
-                                        TagNode srcItem = (TagNode) srcEnumerator
-                                                .nextElement();
+                                        TagNode srcItem = (TagNode) srcEnumerator.nextElement();
                                         String tagName = PseudoConstants.PSEUDO_OPEN_TAG
                                                 + srcItem.getPTagName()
                                                 + PseudoConstants.PSEUDO_CLOSE_TAG;
 
                                         if (newGxml.contains(tagName))
                                         {
-                                            String oriTag = (String) map
-                                                    .get(srcItem.getPTagName());
-                                            newGxml = newGxml.replace(tagName,
-                                                    oriTag);
+                                            String oriTag = (String) map.get(srcItem.getPTagName());
+                                            newGxml = newGxml.replace(tagName, oriTag);
                                         }
                                     }
                                 }
@@ -999,8 +934,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                 {
                     String args[] =
                     { ex.toString() };
-                    errMsg = MessageFormat.format(
-                            m_messages.getString("PtagParseError"), args);
+                    errMsg = MessageFormat.format(m_messages.getString("PtagParseError"), args);
 
                     m_errWriter.addSegmentErrorMsg(uploadSeg, errMsg);
                     return m_errWriter.buildPage().toString();
@@ -1009,16 +943,14 @@ public class OfflinePtagErrorChecker implements Cancelable
                 {
                     String args[] =
                     { ex.toString() };
-                    errMsg = MessageFormat.format(
-                            m_messages.getString("GXMLParseError"), args);
+                    errMsg = MessageFormat.format(m_messages.getString("GXMLParseError"), args);
 
                     m_errWriter.addSegmentErrorMsg(uploadSeg, errMsg);
                     return m_errWriter.buildPage().toString();
                 }
                 catch (UploadPageSaverException ex)
                 {
-                    m_errWriter.addSegmentErrorMsg(refSeg,
-                            ex.getMessage(m_errWriter.getLocale()));
+                    m_errWriter.addSegmentErrorMsg(refSeg, ex.getMessage(m_errWriter.getLocale()));
                     return m_errWriter.buildPage().toString();
                 }
                 catch (Exception ex)
@@ -1057,8 +989,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             String args[] =
             { extraIds.toString() };
 
-            errMsg = MessageFormat.format(
-                    m_messages.getString("SegmentAddError"), args);
+            errMsg = MessageFormat.format(m_messages.getString("SegmentAddError"), args);
 
             m_errWriter.addSegmentErrorMsg(refSeg, errMsg.trim());
         }
@@ -1096,8 +1027,8 @@ public class OfflinePtagErrorChecker implements Cancelable
 
         if (CATEGORY.isDebugEnabled())
         {
-            CATEGORY.debug("Uploaded issues=" + issues.size() + ", new=" + iNew
-                    + " replies=" + iReplies + " discarded=" + iDiscard);
+            CATEGORY.debug("Uploaded issues=" + issues.size() + ", new=" + iNew + " replies="
+                    + iReplies + " discarded=" + iDiscard);
         }
 
         // Then we fill in the missing TUV ID.
@@ -1107,10 +1038,9 @@ public class OfflinePtagErrorChecker implements Cancelable
         if (hasErr)
         {
             CATEGORY.info("Error happens with the following segments when uploading them.");
-            CATEGORY.info("File Name = " + m_errWriter.getFileName()
-                    + " Task Id = " + p_uploadPage.getTaskId() + " Page ID = "
-                    + p_uploadPage.getPageId() + " Workflow ID = "
-                    + p_uploadPage.getWorkflowId());
+            CATEGORY.info("File Name = " + m_errWriter.getFileName() + " Task Id = "
+                    + p_uploadPage.getTaskId() + " Page ID = " + p_uploadPage.getPageId()
+                    + " Workflow ID = " + p_uploadPage.getWorkflowId());
             for (int i = 0, len = errorList.size(); i < len; i++)
             {
                 CATEGORY.info((String) errorList.get(i));
@@ -1168,8 +1098,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             }
         }
 
-        p_uploadPage
-                .setPlaceholderFormat(AmbassadorDwUpConstants.TAG_TYPE_GXML);
+        p_uploadPage.setPlaceholderFormat(AmbassadorDwUpConstants.TAG_TYPE_GXML);
 
         return null;
     }
@@ -1267,8 +1196,7 @@ public class OfflinePtagErrorChecker implements Cancelable
     /**
      * Checks if the uploaded issue is new.
      */
-    private boolean isNewIssue(HashMap oldIssues, UploadIssue p_issue,
-            String p_key)
+    private boolean isNewIssue(HashMap oldIssues, UploadIssue p_issue, String p_key)
     {
         Issue issue = getReferenceIssue(oldIssues, p_key);
 
@@ -1285,8 +1213,7 @@ public class OfflinePtagErrorChecker implements Cancelable
      * Checks if the uploaded issue is a reply to an existing issue, or merely a
      * discardable copy of an existing issue.
      */
-    private boolean isModifiedIssue(HashMap oldIssues, UploadIssue p_issue,
-            String p_key)
+    private boolean isModifiedIssue(HashMap oldIssues, UploadIssue p_issue, String p_key)
     {
         Issue issue = getReferenceIssue(oldIssues, p_key);
 
@@ -1297,8 +1224,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             return false;
         }
 
-        String oldComment = ((IssueHistory) issue.getHistory().get(0))
-                .getComment();
+        String oldComment = ((IssueHistory) issue.getHistory().get(0)).getComment();
 
         if (issue.getTitle().equals(p_issue.getTitle())
                 && issue.getStatus().equals(p_issue.getStatus())
@@ -1315,8 +1241,7 @@ public class OfflinePtagErrorChecker implements Cancelable
      * Fix the UploadIssue objects by patching in the TUV ID based on the
      * available TU and SUB ID.
      */
-    private void fixIssueTuvs(HashMap p_segmentsMap,
-            OfflinePageData p_uploadPageData)
+    private void fixIssueTuvs(HashMap p_segmentsMap, OfflinePageData p_uploadPageData)
     {
         // Collect all uploaded issues in a nice data structure.
         ArrayList issues = new ArrayList();
@@ -1336,27 +1261,15 @@ public class OfflinePtagErrorChecker implements Cancelable
              * = key + "_" + String.valueOf(issue.getSubId()); }
              */
 
-            OfflineSegmentData resOsd = (OfflineSegmentData) p_segmentsMap
-                    .get(key);
+            OfflineSegmentData resOsd = (OfflineSegmentData) p_segmentsMap.get(key);
 
             if (CATEGORY.isDebugEnabled())
             {
-                System.out
-                        .println("fixIssueTuvs looking for tu "
-                                + issue.getTuId()
-                                + CommentHelper.SEPARATOR
-                                + "?"
-                                + CommentHelper.SEPARATOR
-                                + issue.getSubId()
-                                + " (display id="
-                                + key
-                                + ")"
-                                + ", found display id "
-                                + (resOsd != null ? resOsd
-                                        .getDisplaySegmentID() : "???")
-                                + " tuvid="
-                                + (resOsd != null ? resOsd.getTrgTuvId()
-                                        : new Long(-1)));
+                System.out.println("fixIssueTuvs looking for tu " + issue.getTuId()
+                        + CommentHelper.SEPARATOR + "?" + CommentHelper.SEPARATOR + issue.getSubId()
+                        + " (display id=" + key + ")" + ", found display id "
+                        + (resOsd != null ? resOsd.getDisplaySegmentID() : "???") + " tuvid="
+                        + (resOsd != null ? resOsd.getTrgTuvId() : new Long(-1)));
             }
 
             // resOsd better be an object!
@@ -1403,8 +1316,7 @@ public class OfflinePtagErrorChecker implements Cancelable
      * #66524:2 Content for sub 2
      * 
      */
-    private HashMap<String, String> splitSegFromTERWithSubs(String segment,
-            long tuId, Tuv tuv)
+    private HashMap<String, String> splitSegFromTERWithSubs(String segment, long tuId, Tuv tuv)
     {
         if (segment == null || tuv == null)
             return null;

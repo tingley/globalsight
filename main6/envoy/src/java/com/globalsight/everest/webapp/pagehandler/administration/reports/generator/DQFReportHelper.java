@@ -22,7 +22,7 @@ public class DQFReportHelper
         if (!isDQFEnabled || dqfData == null || sheet == null || sheet.getWorkbook() == null || startRow < 1 || bundle == null)
             return;
 
-        boolean isStored = StringUtil.isNotEmpty(dqfData.getFluency());
+    //  boolean isStored = StringUtil.isNotEmpty(dqfData.getFluency());
         ReportStyle reportStyle = new ReportStyle(sheet.getWorkbook());
 
         // DQF enabled
@@ -33,7 +33,7 @@ public class DQFReportHelper
         cell.setCellStyle(reportStyle.getHeaderStyle());
 
         cell = ExcelUtil.getCell(rowLine, 1);
-        if (isStored || needProtect)
+        if (needProtect)
         {
             cell.setCellStyle(reportStyle.getLockedStyle());
         }
@@ -50,7 +50,7 @@ public class DQFReportHelper
         cell.setCellValue(bundle.getString("lb_dqf_adequacy_only"));
         cell.setCellStyle(reportStyle.getHeaderStyle());
         cell = ExcelUtil.getCell(rowLine, 1);
-        if (isStored || needProtect)
+        if (needProtect)
         {
             cell.setCellStyle(reportStyle.getLockedStyle());
         }
@@ -66,7 +66,7 @@ public class DQFReportHelper
         cell.setCellValue(bundle.getString("lb_comment"));
         cell.setCellStyle(reportStyle.getHeaderStyle());
         cell = ExcelUtil.getCell(rowLine, 1);
-        if (isStored || needProtect)
+        if (needProtect)
         {
             cell.setCellStyle(reportStyle.getLockedStyle());
         }

@@ -20,6 +20,8 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 
 /**
  * Report styles
@@ -44,6 +46,8 @@ public class ReportStyle
     private short colorIndex;
     private Font contentFont = null;
     private Font internalFont = null;
+	private XSSFCellStyle dqfInfoHeaderStyle = null;
+	private XSSFCellStyle dqfInfoContentStyle = null;
 
     public ReportStyle()
     {
@@ -126,6 +130,48 @@ public class ReportStyle
 
         return contentFont;
     }
+    
+    // GBS-4727 Create DQF Information sheet
+    public CellStyle getCellHeaderStyle(Font font, XSSFColor xssfColor, short verticalAlignmentIndex,
+			short alignmentIndex, boolean isLocked, boolean isWrapText) {
+		dqfInfoHeaderStyle = (XSSFCellStyle) workbook.createCellStyle();
+		if (xssfColor != null) {
+			dqfInfoHeaderStyle.setFillForegroundColor(xssfColor);
+			dqfInfoHeaderStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		}
+		dqfInfoHeaderStyle.setVerticalAlignment(verticalAlignmentIndex);
+		if (alignmentIndex != 0) {
+			dqfInfoHeaderStyle.setAlignment(alignmentIndex);
+		}
+		dqfInfoHeaderStyle.setBorderTop(CellStyle.BORDER_MEDIUM);
+		dqfInfoHeaderStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
+		dqfInfoHeaderStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
+		dqfInfoHeaderStyle.setBorderLeft(CellStyle.BORDER_MEDIUM);
+		dqfInfoHeaderStyle.setFont(font);
+		dqfInfoHeaderStyle.setWrapText(isWrapText);
+		dqfInfoHeaderStyle.setLocked(isLocked);
+		return dqfInfoHeaderStyle;
+	}
+    // GBS-4727 Create DQF Information sheet
+	public CellStyle getCellContentStyle(Font font, short fillForegroundColorIndex, short verticalAlignmentIndex,
+			short alignmentIndex, boolean isLocked, boolean isWrapText) {
+		dqfInfoContentStyle = (XSSFCellStyle) workbook.createCellStyle();
+		dqfInfoContentStyle.setVerticalAlignment(verticalAlignmentIndex);
+		dqfInfoContentStyle.setFont(font);
+		dqfInfoContentStyle.setWrapText(isWrapText);
+		if (alignmentIndex != 0) {
+			dqfInfoContentStyle.setAlignment(alignmentIndex);
+		}
+		if (fillForegroundColorIndex != 0) {
+			dqfInfoContentStyle.setFillForegroundColor(fillForegroundColorIndex);
+		}
+		dqfInfoContentStyle.setBorderTop(CellStyle.BORDER_MEDIUM);
+		dqfInfoContentStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
+		dqfInfoContentStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
+		dqfInfoContentStyle.setBorderLeft(CellStyle.BORDER_MEDIUM);
+		dqfInfoContentStyle.setLocked(isLocked);
+		return dqfInfoContentStyle;
+	}
 
     /**
      * Gets the internal text font.

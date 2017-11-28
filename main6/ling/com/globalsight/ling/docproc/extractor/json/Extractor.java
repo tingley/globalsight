@@ -45,8 +45,8 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 {
     static private final Logger s_logger = Logger.getLogger(Extractor.class);
 
-    private String REGEX_COLON = ":[\\s|\\t|\\r|\\n]*\"";
-    private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[[\\s|\\t|\\r|\\n]*\"";
+    private String REGEX_COLON = ":[\\s|\\t|\\r|\\n|\u00a0]*\"";
+    private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n|\u00a0]*\\[[\\s|\\t|\\r|\\n|\u00a0]*\"";
     private static String[] invalidHtmlTagCharacters = new String[]
     	    { "{", "}", "%", "^", "~", "!", "&", "*", "(", ")", "?" };
 	private static final String PLACEHOLDER_LEFT_TAG = "GS_PLACEHOLDER_LEFT_TAG";

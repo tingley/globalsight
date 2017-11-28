@@ -229,10 +229,14 @@ function getScrollableDiv(p_html, p_dataArr) {
     return result;
 }
 
-var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
-var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
+var mtApproved = '<%=project.isCheckUnApprovedMTSegments()%>';
+var isMtProfile = '<%=workflowImpl.getUseMT()%>';
+var dialogTitle = (mtApproved == 'true' && isMtProfile == 'true')?'Unapproved Segments':'Not 100% translated primary target files';
+var popTitle=["No DQF Information has been saved.","There are some failed or in-progress status of target files",dialogTitle,"Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
+var popDialogId=["dialog-DQFfileState","dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
 var popDiv="<div style='display:none' class='detailText'></div>";
 var popArray=new Array();
+
 var dialogParam={
         modal: true,
 		autoOpen: false,
@@ -255,6 +259,9 @@ var dialogParam1={
 		minHeight: 110,
         buttons: {
         	Close: function () {
+				if("<%=needDQF%>" == 'true'){
+					location.reload();
+				}
 				$(this).dialog("close");
             }
         }
@@ -291,13 +298,37 @@ var dialogParam3={
             }
         }
     };
-
+	
+	var dialogParam4={
+         modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+        buttons: {
+            "Apply Default DQF Values": function () {
+                $(this).dialog("close");
+				$.getJSON($(this).prop("urlSent"), function (data) {
+					doFinish(data);
+				});
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+            }
+        }
+    };
+	
 $(function () {
+
     for(var i = 0; i < popDialogId.length; i++) {
 		var temp = $(popDiv).clone(true);
 		temp.attr("id",popDialogId[i]);
-		temp.attr("title",popTile[i]);
-		if(i < popDialogId.length - 3)
+		temp.attr("title",popTitle[i]);
+		// GBS-4793 The Default DQF Values dialog should only display for review activities in workflows where DQF is enabled. 
+		if(i == popDialogId.length - 7)
+		{
+			temp.dialog(dialogParam4);
+		}
+		else if(i < popDialogId.length - 3)
 		{
 			temp.dialog(dialogParam1);
 		}
@@ -307,7 +338,7 @@ $(function () {
 		}
 		else if(i == popDialogId.length - 1)
 		{
-		    temp.dialog(dialogParam3);
+			temp.dialog(dialogParam3);
 		}
 		else
 		{
@@ -330,15 +361,17 @@ $(function () {
  
 function checkActivityCommentAttaches(obj)
 {
-    var urlSent = taskCompleteUrl;
 	var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
 	var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
 	var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
     if(isActivityCommentUploadCheck==1 && isActivityCommentUploaded !=1)
 	{
 	    var urlCancel = "<%=commentUrl%>";
+		if("<%=needDQF%>" == 'true'){
+			urlCancel = urlCancel+"&fluency_score=Flawless&adequacy_score=Everything"
+		}
 		$("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
-		$("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
+		$("#dialog-activityCommentUploadCheck").prop("urlSent", $(obj).prop("urlSent"));
 		$("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
 		$("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
 	}
@@ -348,16 +381,13 @@ function checkActivityCommentAttaches(obj)
     }
 }
 
+
+
 function doFinished(urlSent)
 {
-    var isReportUploadCheck = <%=isReportUploadCheck%>;
-    var isUploaded = <%=isUploaded%>;
-    var labelReportUploadCheckWarningMessage = "<%=labelReportUploadCheckWarningMessage%>";
-    var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
-    var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
+    
     var stfStatusMessage = "<%=stfStatusMessage%>";
     var isExportSTF = "<%=isExportSTF%>";
-    var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
     if (stfStatusMessage != "null" && isExportSTF == "true")
     {
         if (stfStatusMessage == "inprogress")
@@ -389,13 +419,7 @@ function doFinished(urlSent)
         alert('Please score before finishing the activity.');
         return false;
     }
-
-    if("<%=needDQF%>" == 'true')
-    {
-        alert('Please fill in DQF information before finishing the activity.');
-        return false;
-    }
-
+	
     var checked = false;
     var selectedRadioBtn = null;
     if (DetailsForm.RadioBtn != null)
@@ -428,94 +452,154 @@ function doFinished(urlSent)
 
         urlSent = conditionUrls[selectedRadioBtn];
         taskCompleteUrl = urlSent;
+		
     }
     else
     {
         checked = true;
     }
-
+	
     if (!checked)
     {
         alert("<%= labelSelectionWarning %>");
         return false;
     }
     else
-    {
-        var warningMessage = '';
+    {	
+       var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&taskId="+taskId+"&t=" + new Date();
+	   
+		if("<%=needDQF%>" == 'true')
+		{      	
+		
+			url = url+"&fluency_score=Flawless&adequacy_score=Everything";
+			$("#dialog-DQFfileState").html("Please click Apply Default DQF Values to set Fluency to Flawless and Adequacy to Everything, save the Scorecard and complete the activity OR click Cancel to return to the activity and provide and save DQF information.");
+			$("#dialog-DQFfileState").prop("urlSent", url);
+			$("#dialog-DQFfileState").dialog("open").height("auto");
+		} else {
+			$.getJSON(url, function (data) {
+					doFinish(data);
+			});
+		}
+	}
+}
+
+function doFinish(data){
+
+		var isReportUploadCheck = <%=isReportUploadCheck%>;
+		var isUploaded = <%=isUploaded%>;
+		var labelReportUploadCheckWarningMessage = "<%=labelReportUploadCheckWarningMessage%>";
+		var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
+		var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;	
+		var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
+	
+		var urlSent = '<%= finishUrl %>';
+		var warningMessage = '';
         var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
-        var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&taskId="+taskId+"&t=" + new Date();
         var pagesArr;
         var tempMsg;
+		
+		
+		var checked = false;
+		var selectedRadioBtn = null;
+		if (DetailsForm.RadioBtn != null)
+		{
+			// If more than one radio button is displayed, the length
+			// attribute of the radio button array will be non-zero,
+			// so find which one is checked
+			if (DetailsForm.RadioBtn.length)
+			{
+				for (i = 0; i < DetailsForm.RadioBtn.length; i++)
+				{
+					if (DetailsForm.RadioBtn[i].checked == true)
+					{
+						checked = true;
+						selectedRadioBtn = DetailsForm.RadioBtn[i].value;
+						break;
+					}
+				}
+			}
+			// If only one is displayed, there is no radio button array, so
+			// just check if the single radio button is checked.
+			else
+			{
+				if (DetailsForm.RadioBtn.checked == true)
+				{
+					checked = true;
+					selectedRadioBtn = DetailsForm.RadioBtn.value;
+				}
+			}
 
-        $.getJSON(url, function (data) {
-            // Check task status
-            if (taskUploadingStatus == data.uploadStatus && taskId == data.taskId) {
-                alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>');
-                return;
-            }
+			urlSent = conditionUrls[selectedRadioBtn];
+			taskCompleteUrl = urlSent;
+		}
+		
+		// Check task status
+		if (taskUploadingStatus == data.uploadStatus && taskId == data.taskId) {
+			alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>');
+			return;
+		}
 
-            // Check Secondary Target Files Status
-            var stfStatusMessage = "<%=stfStatusMessage%>";
-            if(stfStatusMessage == "inprogress")
-            {
-                warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
-            }
-            else if(stfStatusMessage == "failed")
-            {
-                warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
-            }
+		// Check Secondary Target Files Status
+		var stfStatusMessage = "<%=stfStatusMessage%>";
+		if(stfStatusMessage == "inprogress")
+		{
+			warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
+		}
+		else if(stfStatusMessage == "failed")
+		{
+			warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
+		}
 
-            if(warningMessage)
-            {
-                $("#dialog-fileState").html(warningMessage);
-                $("#dialog-fileState").prop("urlSent", urlSent);
-                $("#dialog-fileState").dialog("open").height("auto");
-                return;
-            }
+		if(warningMessage)
+		{
+			$("#dialog-fileState").html(warningMessage);
+			$("#dialog-fileState").prop("urlSent", urlSent);
+			$("#dialog-fileState").dialog("open").height("auto");
+			return;
+		}
+		
+		// Check un-translated Segments Page Array
+		pagesArr = data.pagesWithUnTranslatedSeg;
+		tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
+		warningMessage += getScrollableDiv(tempMsg, pagesArr);
 
-            // Check un-translated Segments Page Array
-            pagesArr = data.pagesWithUnTranslatedSeg;
-            tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
-            warningMessage += getScrollableDiv(tempMsg, pagesArr);
+		if(warningMessage)
+		{
+			$("#dialog-unTranslated").html(warningMessage);
+			$("#dialog-unTranslated").prop("urlSent", urlSent);
+			$("#dialog-unTranslated").dialog("open").height("auto");
+			return;
+		}
+		
 
-            if(warningMessage)
-            {
-                $("#dialog-unTranslated").html(warningMessage);
-                $("#dialog-unTranslated").prop("urlSent", urlSent);
-                $("#dialog-unTranslated").dialog("open").height("auto");
-                return;
-            }
-
-            // Check un-closed Comments Page Array
-            pagesArr = data.pagesWithUnClosedComment;
-            tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
-            warningMessage += getScrollableDiv(tempMsg, pagesArr);
-            warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
-
-            if(isReportUploadCheck == 1 && isUploaded != 1)
-            {
-                var urlCancel = "<%=uploadReportUrl%>";
-                $("#dialog-reportUploadCheck").html(labelReportUploadCheckWarningMessage);
-                $("#dialog-reportUploadCheck").prop("urlSent", urlSent);
-                $("#dialog-reportUploadCheck").prop("urlCancel", urlCancel);
-                $("#dialog-reportUploadCheck").dialog("open").height("auto");
-            }
-            else if(isActivityCommentUploadCheck==1 && isActivityCommentUploaded != 1)
-            {
-                var urlCancel = "<%=commentUrl%>";
-                $("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
-                $("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
-                $("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
-                $("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
-            }
-            else
-            {
-                $("#dialog-complActivity").html(warningMessage);
-                $("#dialog-complActivity").prop("urlSent", urlSent);
-                $("#dialog-complActivity").dialog("open").height("auto");
-            }
-        });
-    }
+		// Check un-closed Comments Page Array
+		pagesArr = data.pagesWithUnClosedComment;
+		tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
+		warningMessage += getScrollableDiv(tempMsg, pagesArr);
+		warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
+		
+		if(isReportUploadCheck == 1 && isUploaded != 1)
+		{
+			var urlCancel = "<%=uploadReportUrl%>";
+			$("#dialog-reportUploadCheck").html(labelReportUploadCheckWarningMessage);
+			$("#dialog-reportUploadCheck").prop("urlSent", urlSent);
+			$("#dialog-reportUploadCheck").prop("urlCancel", urlCancel);
+			$("#dialog-reportUploadCheck").dialog("open").height("auto");
+		}
+		else if(isActivityCommentUploadCheck==1 && isActivityCommentUploaded != 1)
+		{
+			var urlCancel = "<%=commentUrl%>";
+			$("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
+			$("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
+			$("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
+			$("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
+		}
+		else
+		{
+			$("#dialog-complActivity").html(warningMessage);
+			$("#dialog-complActivity").prop("urlSent", urlSent);
+			$("#dialog-complActivity").dialog("open").height("auto");
+		}
 }
 
  function checkDelayTime()
@@ -823,7 +907,6 @@ function doUploadingCheck(urlSent)
 	                           String color = "#FFFFFF";
 	                           //select the first radio button by default
 	                           String checked = "";//"checked";
-	
 	                           for (int i=0; i < listSize; i++)
 	                           {
 	                              //String color = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";

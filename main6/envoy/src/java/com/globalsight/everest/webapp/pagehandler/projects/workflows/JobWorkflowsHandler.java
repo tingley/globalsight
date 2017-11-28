@@ -322,7 +322,9 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                     WorkflowImpl workflowImpl = (WorkflowImpl)ServerProxy.getWorkflowManager().getWorkflowById(wfId);
                     workflowImpl.setFluencyScore(ServletUtil.get(p_request, "fluencyScore"));
                     workflowImpl.setAdequacyScore(ServletUtil.get(p_request, "adequacyScore"));
-                    workflowImpl.setDQFComment(ServletUtil.get(p_request, "dqfComment"));
+                    //GBS-4716
+                    //Trim DQF comment up to 4000 characters if more than 4000
+                    workflowImpl.setTrimmedDQFComment(ServletUtil.get(p_request, "dqfComment"));
                     HibernateUtil.update(workflowImpl);
                 }
                 catch (Exception e)

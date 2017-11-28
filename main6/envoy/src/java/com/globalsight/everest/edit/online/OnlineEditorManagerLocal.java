@@ -4620,16 +4620,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String key = CommentHelper.makeLogicalKey(getCurrentTargetPage()
                 .getId(), p_tuId, p_tuvId, p_subId);
 
-        for (int i = 0, max = p_comments.size(); i < max; i++)
-        {
-            Issue issue = (Issue) p_comments.get(i);
-
-            if (issue.getLogicalKey().equals(key))
-            {
-                return true;
-            }
-        }
-
+		for (int i = 0, max = p_comments.size(); i < max; i++) {
+			Issue issue = (Issue) p_comments.get(i);
+			// GBS-4676 
+			//Segment comment icon should not come if segment comment is empty
+			IssueHistory history = (IssueHistory) issue.getHistory().get(0);
+			if (StringUtil.isNotEmpty(history.getComment()) && issue.getLogicalKey().equals(key)) {
+				return true;
+			}
+		}
         return false;
     }
 

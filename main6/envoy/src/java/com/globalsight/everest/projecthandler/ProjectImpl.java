@@ -32,12 +32,10 @@ import com.globalsight.everest.servlet.util.ServerProxy;
  * This interface provides access to the project in Envoy.
  * <p>
  */
-public class ProjectImpl extends PersistentObject implements Project,
-        Serializable
+public class ProjectImpl extends PersistentObject implements Project, Serializable
 {
     private static final long serialVersionUID = 1620074336358442246L;
-    private static final Logger CATEGORY = Logger.getLogger(ProjectImpl.class
-            .getName());
+    private static final Logger CATEGORY = Logger.getLogger(ProjectImpl.class.getName());
     // Used for TOPLink Querying
     public static final String PM_USER_ID = "m_userId";
     public static final String QP_USER_ID = "m_qpId";
@@ -64,7 +62,8 @@ public class ProjectImpl extends PersistentObject implements Project,
 
     // Auto-accept task and Auto-send report options.
     private boolean autoAcceptTrans = false; // Auto-accept Translation Task
-    private boolean autoSendTrans = false; // Auto-send Translations Comments Report
+    private boolean autoSendTrans = false; // Auto-send Translations Comments
+                                           // Report
     private boolean reviewOnlyAutoAccept = false; // Auto-accept Review Task
     private boolean reviewOnlyAutoSend = false; // Auto-send Reviewers Comments
                                                 // Report
@@ -75,6 +74,8 @@ public class ProjectImpl extends PersistentObject implements Project,
     private boolean autoAcceptPMTask = false; // Auto-accept PM Task
 
     private boolean checkUnTranslatedSegments = false;
+    // GBS-4716
+    private boolean checkUnApprovedMTSegments = false;
     // GBS-3115
     private boolean saveTranslationsEditReport = true;
     private boolean saveReviewersCommentsReport = true;
@@ -130,8 +131,7 @@ public class ProjectImpl extends PersistentObject implements Project,
      * @param p_projectManager
      *            The user assigned to the project.
      */
-    public ProjectImpl(String p_name, String p_description,
-            User p_projectManager)
+    public ProjectImpl(String p_name, String p_description, User p_projectManager)
     {
         this(p_name, p_description, p_projectManager, null);
     }
@@ -148,8 +148,8 @@ public class ProjectImpl extends PersistentObject implements Project,
      * @param p_quotePerson
      *            The user assigned to receive the quotation email.
      */
-    public ProjectImpl(String p_name, String p_description,
-            User p_projectManager, Object p_quotePerson)
+    public ProjectImpl(String p_name, String p_description, User p_projectManager,
+            Object p_quotePerson)
     {
         m_name = p_name;
         m_description = p_description;
@@ -197,13 +197,11 @@ public class ProjectImpl extends PersistentObject implements Project,
         {
             try
             {
-                m_projectManager = ServerProxy.getUserManager().getUser(
-                        m_userId);
+                m_projectManager = ServerProxy.getUserManager().getUser(m_userId);
             }
             catch (Exception e)
             {
-                CATEGORY.warn("Failed to get project manager " + m_userId
-                        + " from LDAP.");
+                CATEGORY.warn("Failed to get project manager " + m_userId + " from LDAP.");
             }
         }
         return m_projectManager;
@@ -264,8 +262,7 @@ public class ProjectImpl extends PersistentObject implements Project,
     {
         if (m_quotePerson == null && CATEGORY.isDebugEnabled())
         {
-            CATEGORY.debug("getQuotePerson null for m_qpId " + m_qpId + " "
-                    + toDebugString());
+            CATEGORY.debug("getQuotePerson null for m_qpId " + m_qpId + " " + toDebugString());
         }
         return m_quotePerson;
     }
@@ -426,19 +423,13 @@ public class ProjectImpl extends PersistentObject implements Project,
      */
     public String toDebugString()
     {
-        return super.toString()
-                + " m_name="
-                + (m_name == null ? "null" : m_name)
-                + " m_description="
-                + (m_description == null ? "null" : m_description)
-                + " m_userId="
-                + (m_userId == null ? "null" : m_userId)
-                + " m_projectManager="
-                + (m_projectManager == null ? "null" : m_projectManager
-                        .toString() + "m_userIds=" + m_userIds.toString())
-                + " m_quotePerson="
-                + (m_quotePerson == null ? "null" : m_quotePerson.toString()
-                        + "m_userIds=" + m_userIds.toString());
+        return super.toString() + " m_name=" + (m_name == null ? "null" : m_name)
+                + " m_description=" + (m_description == null ? "null" : m_description)
+                + " m_userId=" + (m_userId == null ? "null" : m_userId) + " m_projectManager="
+                + (m_projectManager == null ? "null"
+                        : m_projectManager.toString() + "m_userIds=" + m_userIds.toString())
+                + " m_quotePerson=" + (m_quotePerson == null ? "null"
+                        : m_quotePerson.toString() + "m_userIds=" + m_userIds.toString());
     }
 
     public boolean equals(Object p_object)
@@ -540,23 +531,27 @@ public class ProjectImpl extends PersistentObject implements Project,
         this.poRequired = poRequired;
     }
 
-    public boolean getAutoAcceptTrans() {
-		return autoAcceptTrans;
-	}
+    public boolean getAutoAcceptTrans()
+    {
+        return autoAcceptTrans;
+    }
 
-	public void setAutoAcceptTrans(boolean autoAcceptTrans) {
-		this.autoAcceptTrans = autoAcceptTrans;
-	}
+    public void setAutoAcceptTrans(boolean autoAcceptTrans)
+    {
+        this.autoAcceptTrans = autoAcceptTrans;
+    }
 
-	public boolean getAutoSendTrans() {
-		return autoSendTrans;
-	}
+    public boolean getAutoSendTrans()
+    {
+        return autoSendTrans;
+    }
 
-	public void setAutoSendTrans(boolean autoSendTrans) {
-		this.autoSendTrans = autoSendTrans;
-	}
+    public void setAutoSendTrans(boolean autoSendTrans)
+    {
+        this.autoSendTrans = autoSendTrans;
+    }
 
-	public boolean getReviewOnlyAutoAccept()
+    public boolean getReviewOnlyAutoAccept()
     {
         return reviewOnlyAutoAccept;
     }
@@ -606,6 +601,16 @@ public class ProjectImpl extends PersistentObject implements Project,
         this.checkUnTranslatedSegments = p_checkUnTranslatedSegments;
     }
 
+    public boolean isCheckUnApprovedMTSegments()
+    {
+        return checkUnApprovedMTSegments;
+    }
+
+    public void setCheckUnApprovedMTSegments(boolean p_checkUnApprovedMTSegments)
+    {
+        this.checkUnApprovedMTSegments = p_checkUnApprovedMTSegments;
+    }
+
     public boolean getSaveTranslationsEditReport()
     {
         return saveTranslationsEditReport;
@@ -621,8 +626,7 @@ public class ProjectImpl extends PersistentObject implements Project,
         return saveReviewersCommentsReport;
     }
 
-    public void setSaveReviewersCommentsReport(
-            boolean saveReviewersCommentsReport)
+    public void setSaveReviewersCommentsReport(boolean saveReviewersCommentsReport)
     {
         this.saveReviewersCommentsReport = saveReviewersCommentsReport;
     }
@@ -672,8 +676,7 @@ public class ProjectImpl extends PersistentObject implements Project,
         return reviewReportIncludeCompactTags;
     }
 
-    public void setReviewReportIncludeCompactTags(
-            boolean reviewReportIncludeCompactTags)
+    public void setReviewReportIncludeCompactTags(boolean reviewReportIncludeCompactTags)
     {
         this.reviewReportIncludeCompactTags = reviewReportIncludeCompactTags;
     }

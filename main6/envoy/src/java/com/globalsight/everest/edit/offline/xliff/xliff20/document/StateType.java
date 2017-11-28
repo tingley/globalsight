@@ -50,7 +50,8 @@ public enum StateType
     INITIAL("initial"), @XmlEnumValue("translated")
     TRANSLATED("translated"), @XmlEnumValue("reviewed")
     REVIEWED("reviewed"), @XmlEnumValue("final")
-    FINAL("final");
+    FINAL("final"), @XmlEnumValue("signed-off")
+    SIGNEDOFF("signed-off");
     private final String value;
 
     StateType(String v)

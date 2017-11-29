@@ -580,15 +580,27 @@ function initButtonActions() {
             
             if(!isFinishUnUploadReportTask)
             {
-            	if (data.isFinishedReportUploadTaskId) {
+            	if (data.isFinishedReportUploadTaskId)
+            	{
                 	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
                     for(var i=0;i<rowsPerPage;i++)
                     {
                     	taskIds = taskIds.replace(","," ");
                     }
-                    if (data.unTranslatedTaskId) {
-                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					
+					if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+					{
+                    	confirmInfo = "Tasks that are not 100% translated or not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                     }
+					else if(data.unMtApprovedTaskId)
+					{
+						confirmInfo = "Tasks that are not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					}
+					else if (data.unTranslatedTaskId) 
+                	{
+                		confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                	}
+					
 	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
 	            	{
 	            		$.post(selfUrl, {
@@ -606,7 +618,15 @@ function initButtonActions() {
                 }
                 else
     			{
-    				if (data.unTranslatedTaskId) 
+    				if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+    				{
+                    	alert ("The selected activities are not 100% translated or not 100% approved or not scored, can not be completed.");
+                    }
+    				else if(data.unMtApprovedTaskId)
+    				{
+						alert ("The selected activities are not 100% approved or not scored, can not be completed.");
+					}
+    				else if (data.unTranslatedTaskId) 
                 	{
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}
@@ -629,9 +649,19 @@ function initButtonActions() {
                     {
                     	taskIds = taskIds.replace(","," ");
                     }
-                    if (data.unTranslatedTaskId) {
-                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					
+                    if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+                    {
+                    	confirmInfo = "Tasks that are not 100% translated or not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                     }
+                    else if(data.unMtApprovedTaskId)
+                    {
+						confirmInfo = "Tasks that are not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					}
+                    else if (data.unTranslatedTaskId) 
+                	{
+                		confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                	}
 
                     
                 	if (confirm(confirmInfo)) {
@@ -646,7 +676,15 @@ function initButtonActions() {
                 }
                 else
     			{
-                	if (data.unTranslatedTaskId) 
+                	if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+                	{
+                    	alert ("The selected activities are not 100% translated or not 100% approved or not scored, can not be completed.");
+                    }
+                	else if(data.unMtApprovedTaskId)
+                	{
+						alert ("The selected activities are not 100% approved or not scored, can not be completed.");
+					}
+                	else if (data.unTranslatedTaskId) 
                 	{
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}
@@ -660,9 +698,20 @@ function initButtonActions() {
                     {
                     	taskIds = taskIds.replace(","," ");
                     }
-                    if (data.unTranslatedTaskId) {
-                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					
+					if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+					{
+                    	confirmInfo = "Tasks that are not 100% translated or not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                     }
+					else if(data.unMtApprovedTaskId)
+					{
+						confirmInfo = "Tasks that are not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					}
+					else if (data.unTranslatedTaskId) 
+                	{
+                		confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                	}
+					
 	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
 	            	{
 	            		$.post(selfUrl, {
@@ -680,7 +729,15 @@ function initButtonActions() {
                 }
                 else
     			{
-    				if (data.unTranslatedTaskId) 
+    				if (data.unTranslatedTaskId && data.unMtApprovedTaskId) 
+    				{
+                    	alert ("The selected activities are not 100% translated or not 100% approved or not scored, can not be completed.");
+                    }
+    				else if(data.unMtApprovedTaskId)
+    				{
+						alert ("The selected activities are not 100% approved or not scored, can not be completed.");
+					}
+    				else if (data.unTranslatedTaskId) 
                 	{
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}
@@ -738,9 +795,20 @@ function initButtonActions() {
                     {
                     	taskIds = taskIds.replace(","," ");
                     }
-                    if (data.unTranslatedTaskId) {
-                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					
+					if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+					{
+                    	confirmInfo = "Tasks that are not 100% translated or not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                     }
+					else if(data.unMtApprovedTaskId)
+					{
+						confirmInfo = "Tasks that are not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					}
+					else if (data.unTranslatedTaskId) 
+                	{
+                		confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                	}
+					
 	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
 	            	{
 	            		$.post(selfUrl, {
@@ -758,7 +826,15 @@ function initButtonActions() {
                 }
                 else
     			{
-    				if (data.unTranslatedTaskId) 
+    				if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+    				{
+                    	alert ("The selected activities are not 100% translated or not 100% approved or not scored, can not be completed.");
+                    }
+    				else if(data.unMtApprovedTaskId)
+    				{
+						alert ("The selected activities are not 100% approved or not scored, can not be completed.");
+					}
+    				else if (data.unTranslatedTaskId) 
                 	{
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}
@@ -781,11 +857,20 @@ function initButtonActions() {
                     {
                     	taskIds = taskIds.replace(","," ");
                     }
-                    if (data.unTranslatedTaskId) {
-                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					
+					if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+					{
+                    	confirmInfo = "Tasks that are not 100% translated or not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                     }
-
-                    
+					else if(data.unMtApprovedTaskId)
+					{
+						confirmInfo = "Tasks that are not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					}
+					else if (data.unTranslatedTaskId) 
+                	{
+                		confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                	}
+					
                 	if (confirm(confirmInfo)) {
                 		$.post(selfUrl, {
                 			state:currentTaskState,
@@ -798,7 +883,15 @@ function initButtonActions() {
                 }
                 else
     			{
-                	if (data.unTranslatedTaskId) 
+                	if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+                	{
+                    	alert ("The selected activities are not 100% translated or not 100% approved or not scored, can not be completed.");
+                    }
+                	else if(data.unMtApprovedTaskId)
+                	{
+						alert ("The selected activities are not 100% approved or not scored, can not be completed.");
+					}
+                	else if (data.unTranslatedTaskId) 
                 	{
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}
@@ -806,15 +899,27 @@ function initButtonActions() {
             }
             if(!isFinishUnUploadActivityCommentTak)
             {
-            	if (data.isFinishedActivityCommentUploadTaskId) {
+            	if (data.isFinishedActivityCommentUploadTaskId)
+            	{
                 	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
                     for(var i=0;i<rowsPerPage;i++)
                     {
                     	taskIds = taskIds.replace(","," ");
                     }
-                    if (data.unTranslatedTaskId) {
-                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					
+					if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+					{
+                    	confirmInfo = "Tasks that are not 100% translated or not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                     }
+					else if(data.unMtApprovedTaskId)
+					{
+						confirmInfo = "Tasks that are not 100% approved can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+					}
+					else if (data.unTranslatedTaskId) 
+                	{
+                		confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                	}
+					
 	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
 	            	{
 	            		$.post(selfUrl, {
@@ -832,7 +937,15 @@ function initButtonActions() {
                 }
                 else
     			{
-    				if (data.unTranslatedTaskId) 
+    				if (data.unTranslatedTaskId && data.unMtApprovedTaskId)
+    				{
+                    	alert ("The selected activities are not 100% translated or not 100% approved or not scored, can not be completed.");
+                    }
+    				else if(data.unMtApprovedTaskId)
+    				{
+						alert ("The selected activities are not 100% approved or not scored, can not be completed.");
+					}
+    				else if (data.unTranslatedTaskId) 
                 	{
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}

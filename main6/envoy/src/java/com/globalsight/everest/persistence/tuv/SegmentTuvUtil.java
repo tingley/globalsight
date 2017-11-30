@@ -155,7 +155,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
             + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state != 'OUT_OF_DATE'"
             + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
-            + " AND tplg.tp_id = ? AND tuv.modify_user like '%_MT' ";
+            + " AND tplg.tp_id = ? AND (tuv.modify_user like '%_MT' OR tuv.modify_user IS NULL OR tuv.modify_user = '') ";
 
     private static final String TRANSLATE_TUV_TRANSLATED = "SELECT DISTINCT TUV.ID FROM "
             + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
@@ -180,7 +180,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
 
     public static final String MT_APPROVE_TUV_SQL = "UPDATE " + TUV_TABLE_PLACEHOLDER + " tuv "
             + " SET tuv.STATE = 'APPROVED', " + " tuv.MODIFY_USER = ? "
-            + " WHERE tuv.ID IN (untranslated_target_tuv_ids) AND tuv.MODIFY_USER like '%_MT' ";
+            + " WHERE tuv.ID IN (untranslated_target_tuv_ids) AND (tuv.MODIFY_USER like '%_MT' "
+            + " OR tuv.MODIFY_USER is null OR tuv.modify_user = '')";
 
     private static final String GET_MODIFY_USER_BY_TU_ID_SQL = "SELECT TU_ID FROM "
             + TUV_TABLE_PLACEHOLDER + " WHERE MODIFY_USER LIKE '%_MT' " + " AND TU_ID = ? "
@@ -1595,6 +1596,33 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
         for (TargetPage tp : targetPages)
         {
             int[] counts = getTotalAndTranslatedTuvCount(tp.getId());
+            totalCounts += counts[0];
+            translatedCounts += counts[1];
+        }
+
+        return calculateTranslatedPercentage(totalCounts, translatedCounts);
+    }
+    
+    /**
+     * Get Approved percentage for MT Task.
+     * 
+     * MT Approved percentage.
+     * 
+     * @param p_task
+     * 
+     * @return int
+     * 
+     */
+    @SuppressWarnings("unchecked")
+    public static int getMTApprovedPercentageForTask(Task p_task)
+    {
+        int totalCounts = 0;
+        int translatedCounts = 0;
+
+        List<TargetPage> targetPages = p_task.getTargetPages();
+        for (TargetPage tp : targetPages)
+        {
+            int[] counts = getTotalAndApprovedTuvCount(tp.getId());
             totalCounts += counts[0];
             translatedCounts += counts[1];
         }

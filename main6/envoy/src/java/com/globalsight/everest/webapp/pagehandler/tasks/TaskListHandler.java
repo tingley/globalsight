@@ -1427,6 +1427,7 @@ public class TaskListHandler extends PageHandler
         StringBuffer isFinishedActivityCommentUploadTaskId = new StringBuffer();
         StringBuffer isFinishedReportUploadTaskId = new StringBuffer();
         StringBuffer unTranslatedTaskId = new StringBuffer();
+        StringBuffer unMtApprovedTaskId = new StringBuffer();
         StringBuffer isDQFFinishedTaskId = new StringBuffer();
         int percentage = 0;
 
@@ -1512,11 +1513,12 @@ public class TaskListHandler extends PageHandler
                                 .getJob().getProject();
                         boolean isCheckUnTranslatedSegments = project
                                 .isCheckUnTranslatedSegments();
+                        boolean isCheckUnApprovedMTSegments = project.isCheckUnApprovedMTSegments();
+                        boolean isMtProfile = task.getWorkflow().getUseMT();
                         boolean isReviewOnly = task.isReviewOnly();
-                        if (isCheckUnTranslatedSegments && !isReviewOnly)
-                        {
+                        if(isCheckUnApprovedMTSegments && isMtProfile) {
                             percentage = SegmentTuvUtil
-                                    .getTranslatedPercentageForTask(task);
+                                    .getMTApprovedPercentageForTask(task);
                             if (100 == percentage)
                             {
                                 setFinishedTaskIds(isFinishedTaskId,  taskId);
@@ -1541,6 +1543,48 @@ public class TaskListHandler extends PageHandler
 
                                 if (task.getIsActivityCommentUploadCheck() == 0
                                         || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+                                {
+                                    isFinishedActivityCommentUploadTaskId.append(taskId)
+                                            .append(" ");
+                                }
+                                if (task.getIsActivityCommentUploadCheck() == 1
+                                        && isActivityCommentUploaded == 0)
+                                {
+                                    isNeedActivityCommentCheckTaskId.append("[JobID:")
+                                            .append(task.getJobId()).append(",JobName:")
+                                            .append(task.getJobName()).append("],");
+                                }
+                            }
+                            else
+                            {
+                                unMtApprovedTaskId.append(taskId).append(" ");
+                            }
+                            
+                        }
+                        else if ((isCheckUnTranslatedSegments && !isReviewOnly))
+                        {
+                            percentage = SegmentTuvUtil.getTranslatedPercentageForTask(task);
+                            if (100 == percentage)
+                            {
+                                setFinishedTaskIds(isFinishedTaskId, taskId);
+                                if (task.getIsReportUploadCheck() == 0
+                                        || (task.getIsReportUploadCheck() == 1
+                                                && task.getIsReportUploaded() == 1))
+                                {
+                                    isFinishedReportUploadTaskId.append(taskId).append(" ");
+                                }
+
+                                if (task.getIsReportUploadCheck() == 1
+                                        && task.getIsReportUploaded() == 0)
+                                {
+                                    isNeedReportUploadCheckTaskId.append("[JobID:")
+                                            .append(task.getJobId()).append(",JobName:")
+                                            .append(task.getJobName()).append("],");
+                                }
+
+                                if (task.getIsActivityCommentUploadCheck() == 0
+                                        || (task.getIsActivityCommentUploadCheck() == 1
+                                                && isActivityCommentUploaded == 1))
                                 {
                                     isFinishedActivityCommentUploadTaskId.append(taskId)
                                             .append(" ");
@@ -1656,6 +1700,12 @@ public class TaskListHandler extends PageHandler
             {
                 result = result + "\"unTranslatedTaskId\":\""
                         + unTranslatedTaskId.toString().trim() + "\",";
+            }
+            
+            if (unMtApprovedTaskId.length() != 0)
+            {
+                result = result + "\"unMtApprovedTaskId\":\""
+                        + unMtApprovedTaskId.toString().trim() + "\",";
             }
 
             if (result.length() > 2)

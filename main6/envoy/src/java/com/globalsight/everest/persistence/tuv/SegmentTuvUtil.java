@@ -1755,10 +1755,30 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("lid", localeId);
             map.put("tid", targetPageId);
-
             List<Long> tuvId = (List<Long>) HibernateUtil.searchWithSql(sql, map);
-           
-            Set<Long> tids = new HashSet<Long>(tuvId);
+            Set<Long> tids = new HashSet<Long>();
+            tids.addAll(tuvId);
+
+            String lmTableName = BigTableUtil.getLMTableJobDataInBySourcePageId(sourcePageId);
+            sql = LEVERAGE_MATCH_TRANSLATED_TUV.replace(LM_TABLE_PLACEHOLDER, lmTableName);
+            map = new HashMap<String, Object>();
+            map.put("lid", localeId);
+            map.put("sid", sourcePageId);
+            List<Object> sourceTuvId = (List<Object>) HibernateUtil.searchWithSql(sql, map);
+
+            if (sourceTuvId.size() > 0)
+            {
+                sql = TARGET_TUV_SOURCE_TUV.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
+                map = new HashMap<String, Object>();
+                map.put("lid", localeId);
+
+                Map<String, List<Object>> sids = new HashMap<String, List<Object>>();
+                sids.put("sids", sourceTuvId);
+
+                List<Long> targetTuvId = (List<Long>) HibernateUtil.searchWithSqlWithIn(sql, map,
+                        sids);
+                tids.addAll(targetTuvId);
+            }
 
             result[0] = total;
             result[1] = tids.size();
@@ -2006,7 +2026,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
              * segment to verify whether it is MT segment or not
              */
             String sql = GET_MODIFY_USER_BY_TU_ID_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
-            logger.info(sql);
             ps = conn.prepareStatement(sql);
             ps.setString(1, tuId);
             ps.setLong(2, trgLoc.getId());

@@ -287,6 +287,39 @@ public class SegmentFilter
 
         return isTranslated;
     }
+    
+    /**
+     * Judge if a target TUV can be treated as "approved".
+     * 
+     * @param p_srcTuv
+     * @param p_trgTuv
+     * @param p_tuvMatchTypes
+     * @return boolean
+     */
+    public static boolean isTreatAsApproved(Tuv p_srcTuv, Tuv p_trgTuv,
+            MatchTypeStatistics p_tuvMatchTypes)
+    {
+        boolean isApproved = false;
+
+        TuvState trgState = p_trgTuv.getState();
+        if (TuvState.DO_NOT_TRANSLATE.equals(trgState) || TuvState.APPROVED.equals(trgState)
+                || TuvState.EXACT_MATCH_LOCALIZED.equals(trgState))
+        {
+            isApproved = true;
+        }
+        else
+        {
+            int state = p_tuvMatchTypes.getLingManagerMatchType(p_srcTuv.getId(),
+                    OnlineEditorManagerLocal.DUMMY_SUBID);
+            if (state == LeverageMatchLingManager.EXACT
+                    || state == LeverageMatchLingManager.UNVERIFIED)
+            {
+                isApproved = true;
+            }
+        }
+
+        return isApproved;
+    }
 
     public static boolean haveCommentForSegment(List<String> p_commentKeys, Tuv p_tuv,
             long p_targetPageId)

@@ -555,7 +555,6 @@ public class OfflinePtagErrorChecker implements Cancelable
                 {
                     // GBS-4716
                     // Check the segment type is MT or not for the current tuid
-                    CATEGORY.info("PAGEID : " + refSeg.getPageId());
                     Boolean isMtSegment = SegmentTuvUtil.isMtSegment(currentTuId,
                             refSeg.getPageId(), p_uploadPage.getTargetLocaleName().toString());
 

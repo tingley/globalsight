@@ -150,13 +150,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
             + " AND tplg.tp_id = ?";
     
-    private static final String COUNT_TRANSLATE_TUV_ALL_MT = "SELECT COUNT(DISTINCT TUV.ID) FROM "
-            + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
-            + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
-            + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state != 'OUT_OF_DATE'"
-            + " AND tuv.STATE != 'DO_NOT_TRANSLATE'" + " AND tuv.locale_id = ?"
-            + " AND tplg.tp_id = ? AND (tuv.modify_user like '%_MT' OR tuv.modify_user IS NULL OR tuv.modify_user = '') ";
-
     private static final String TRANSLATE_TUV_TRANSLATED = "SELECT DISTINCT TUV.ID FROM "
             + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
             + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
@@ -180,8 +173,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
 
     public static final String MT_APPROVE_TUV_SQL = "UPDATE " + TUV_TABLE_PLACEHOLDER + " tuv "
             + " SET tuv.STATE = 'APPROVED', " + " tuv.MODIFY_USER = ? "
-            + " WHERE tuv.ID IN (untranslated_target_tuv_ids) AND (tuv.MODIFY_USER like '%_MT' "
-            + " OR tuv.MODIFY_USER is null OR tuv.modify_user = '')";
+            + " WHERE tuv.ID IN (untranslated_target_tuv_ids) AND tuv.MODIFY_USER like '%_MT' ";
 
     private static final String GET_MODIFY_USER_BY_TU_ID_SQL = "SELECT TU_ID FROM "
             + TUV_TABLE_PLACEHOLDER + " WHERE MODIFY_USER LIKE '%_MT' " + " AND TU_ID = ? "
@@ -190,9 +182,10 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
     private static final String APPROVED_TARGET_TUV_SOURCE_TUV = "SELECT DISTINCT TUV.ID FROM "
             + TUV_TABLE_PLACEHOLDER + " tuv, " + TU_TABLE_PLACEHOLDER
             + " tu, target_page_leverage_group tplg " + " WHERE tuv.tu_id = tu.id"
-            + " AND tu.leverage_group_id = tplg.lg_id" + " AND tuv.state = 'APPROVED'"
+            + " AND tu.leverage_group_id = tplg.lg_id"
+            + " AND (tuv.modify_user  NOT LIKE '%_MT' OR tuv.modify_user IS NULL OR tuv.modify_user = '')" 
             + " AND tuv.locale_id = :lid"
-            + " AND tplg.tp_id = :tid AND tuv.modify_user like '%_MT'";
+            + " AND tplg.tp_id = :tid";
 
     /**
      * Save TUVs into DB.
@@ -1751,7 +1744,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
                     targetPageId)).longValue();
             String tuvTableName = BigTableUtil.getTuvTableJobDataInBySourcePageId(sourcePageId);
             String tuTableName = BigTableUtil.getTuTableJobDataInBySourcePageId(sourcePageId);
-            String sql = COUNT_TRANSLATE_TUV_ALL_MT.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
+            String sql = COUNT_TRANSLATE_TUV_ALL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName)
                     .replace(TU_TABLE_PLACEHOLDER, tuTableName);
 
             total = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId))
@@ -1762,10 +1755,30 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("lid", localeId);
             map.put("tid", targetPageId);
-
             List<Long> tuvId = (List<Long>) HibernateUtil.searchWithSql(sql, map);
-           
-            Set<Long> tids = new HashSet<Long>(tuvId);
+            Set<Long> tids = new HashSet<Long>();
+            tids.addAll(tuvId);
+
+            String lmTableName = BigTableUtil.getLMTableJobDataInBySourcePageId(sourcePageId);
+            sql = LEVERAGE_MATCH_TRANSLATED_TUV.replace(LM_TABLE_PLACEHOLDER, lmTableName);
+            map = new HashMap<String, Object>();
+            map.put("lid", localeId);
+            map.put("sid", sourcePageId);
+            List<Object> sourceTuvId = (List<Object>) HibernateUtil.searchWithSql(sql, map);
+
+            if (sourceTuvId.size() > 0)
+            {
+                sql = TARGET_TUV_SOURCE_TUV.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
+                map = new HashMap<String, Object>();
+                map.put("lid", localeId);
+
+                Map<String, List<Object>> sids = new HashMap<String, List<Object>>();
+                sids.put("sids", sourceTuvId);
+
+                List<Long> targetTuvId = (List<Long>) HibernateUtil.searchWithSqlWithIn(sql, map,
+                        sids);
+                tids.addAll(targetTuvId);
+            }
 
             result[0] = total;
             result[1] = tids.size();
@@ -1870,7 +1883,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
                 if ((!mtApproved
                         && !SegmentFilter.isTreatAsTranslated(sourceTuv, targetTuv, tuvMatchTypes))
                         || (mtApproved && targetPage.getWorkflowInstance().getUseMT()
-                                && !TuvState.APPROVED.equals(targetTuv.getState())))
+                                && !SegmentFilter.isTreatAsApproved(sourceTuv, targetTuv,
+                                        tuvMatchTypes)))
                 {
                     untranslatedTrgTuvIds.add(targetTuv.getIdAsLong());
                 }
@@ -2012,7 +2026,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
              * segment to verify whether it is MT segment or not
              */
             String sql = GET_MODIFY_USER_BY_TU_ID_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
-            logger.info(sql);
             ps = conn.prepareStatement(sql);
             ps.setString(1, tuId);
             ps.setLong(2, trgLoc.getId());

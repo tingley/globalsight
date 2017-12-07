@@ -1801,17 +1801,17 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
      * @param p_tps
      *            Target page list
      */
-    public static List<TargetPage> filterUnTranslatedTargetPages(List<TargetPage> p_tps)
+    public static List<TargetPage> filterUnTranslatedTargetPages(List<TargetPage> p_tps,
+            Boolean isCheckUnApprovedMTSegments)
     {
         List<TargetPage> result = new ArrayList<TargetPage>();
 
         for (TargetPage tp : p_tps)
         {
             int[] counts;
-            Workflow workflowObj = tp.getWorkflowInstance();
             // GBS-4716
             // If target page uses MT, get total and approved tuvs count
-            if (workflowObj != null && workflowObj.getUseMT())
+            if (isCheckUnApprovedMTSegments)
             {
                 counts = getTotalAndApprovedTuvCount(tp.getIdAsLong());
             }
@@ -1880,8 +1880,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements TuvQuery
                 // mtApproved value is true when we click on Approve MT button
                 // targetPage.getWorkflowInstance().getUseMT() value is true if
                 // it is mt segment
-                if ((!mtApproved
-                        && !SegmentFilter.isTreatAsTranslated(sourceTuv, targetTuv, tuvMatchTypes))
+                if ((!SegmentFilter.isTreatAsTranslated(sourceTuv, targetTuv, tuvMatchTypes))
                         || (mtApproved && targetPage.getWorkflowInstance().getUseMT()
                                 && !SegmentFilter.isTreatAsApproved(sourceTuv, targetTuv,
                                         tuvMatchTypes)))

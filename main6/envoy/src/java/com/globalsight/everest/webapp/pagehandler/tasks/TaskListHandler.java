@@ -1318,33 +1318,47 @@ public class TaskListHandler extends PageHandler
 
             WorkflowImpl workflowImpl = (WorkflowImpl) p_task.getWorkflow();
             // JSON Array for Pages included Un-translated Segments
-            if (((workflowImpl.getUseMT() && proj.isCheckUnApprovedMTSegments())
-                    || (!workflowImpl.getUseMT() && proj.isCheckUnTranslatedSegments()))
-                    && !p_task.isReviewOnly())
+            if (((workflowImpl.getUseMT() && (proj.isCheckUnApprovedMTSegments()))
+                    || (proj.isCheckUnTranslatedSegments())) && !p_task.isReviewOnly())
             {
-                List<TargetPage> unTransTps = ServerProxy
-                        .getPageManager()
-                        .filterTargetPages(
-                                p_task,
+                List<TargetPage> unTransTps = null;
+
+                if (workflowImpl.getUseMT() && proj.isCheckUnApprovedMTSegments()
+                        && proj.isCheckUnTranslatedSegments())
+                {
+                    unTransTps = ServerProxy.getPageManager().filterTargetPages(p_task,
+                            OnlineEditorConstants.SEGMENT_FILTER_NOT_APPROVED);
+                    if (unTransTps == null || unTransTps.isEmpty())
+                    {
+                        unTransTps = ServerProxy.getPageManager().filterTargetPages(p_task,
                                 OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED);
+                    }
+                }
+                else if (workflowImpl.getUseMT() && proj.isCheckUnApprovedMTSegments())
+                {
+                    unTransTps = ServerProxy.getPageManager().filterTargetPages(p_task,
+                            OnlineEditorConstants.SEGMENT_FILTER_NOT_APPROVED);
+                }
+                else
+                {
+                    unTransTps = ServerProxy.getPageManager().filterTargetPages(p_task,
+                            OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED);
+                }
                 if (unTransTps != null && unTransTps.size() > 0)
                 {
                     for (TargetPage tp : unTransTps)
                     {
-                        pageName = isDisplayFull ? tp.getDisplayPageName() : tp
-                                .getShortPageName();
+                        pageName = isDisplayFull ? tp.getDisplayPageName() : tp.getShortPageName();
                         if (pageName.contains("\\\\"))
                         {
                             pageName = pageName.replace("\\\\", "\\");
                         }
                         pageName = JsonUtil.encode(pageName);
-                        pagesWithUnTranslatedSeg.append("\"")
-                                .append(JsonUtil.encode(pageName))
+                        pagesWithUnTranslatedSeg.append("\"").append(JsonUtil.encode(pageName))
                                 .append("\",");
                     }
                     pagesWithUnTranslatedSeg
-                            .deleteCharAt(pagesWithUnTranslatedSeg
-                                    .lastIndexOf(","));
+                            .deleteCharAt(pagesWithUnTranslatedSeg.lastIndexOf(","));
                 }
             }
 
@@ -1409,8 +1423,7 @@ public class TaskListHandler extends PageHandler
     /**
      * for GBS-1939 Get selectedTasksStatus,and send it to client by JSON data
      */
-    private String selectedTasksStatusJSON(HttpServletRequest p_request,
-            User p_user)
+    private String selectedTasksStatusJSON(HttpServletRequest p_request, User p_user)
     {
         String taskIds = p_request.getParameter("taskParam");
         StringTokenizer tokenizer;
@@ -1436,34 +1449,34 @@ public class TaskListHandler extends PageHandler
             while (tokenizer.hasMoreTokens())
             {
                 String taskId = tokenizer.nextToken();
-                TaskImpl task = HibernateUtil.get(TaskImpl.class,
-                        Long.parseLong(taskId));
+                TaskImpl task = HibernateUtil.get(TaskImpl.class, Long.parseLong(taskId));
 
                 if (task != null)
                 {
-                    //GBS-4795 : After click on Apply Default DQF Values, it'll not continually check un-translated segment
-                    //update the Default DQF values
+                    // GBS-4795 : After click on Apply Default DQF Values, it'll
+                    // not continually check un-translated segment
+                    // update the Default DQF values
                     String fluency_score = ServletUtil.get(p_request, "fluency_score");
                     String adequacy_score = ServletUtil.get(p_request, "adequacy_score");
-                    if (StringUtil.isNotEmpty(fluency_score) && StringUtil.isNotEmpty(adequacy_score))
+                    if (StringUtil.isNotEmpty(fluency_score)
+                            && StringUtil.isNotEmpty(adequacy_score))
                     {
                         try
                         {
                             // Accept the task
                             TaskHelper.acceptTask(p_user.getUserId(), task);
-                          //update DQF values
+                            // update DQF values
                             updateFluencyAndAdequacy(task, p_request);
-                            
+
                         }
                         catch (Exception e)
                         {
                             log.error(e.getMessage(), e);
                         }
-                        
-                        task = HibernateUtil.get(TaskImpl.class,
-                                Long.parseLong(taskId));
+
+                        task = HibernateUtil.get(TaskImpl.class, Long.parseLong(taskId));
                     }
-                    //GBS-4309
+                    // GBS-4309
                     int isActivityCommentUploaded = 0;
                     ArrayList<CommentFile> cf = ServerProxy.getCommentManager()
                             .getActivityCommentAttachments(task);
@@ -1471,20 +1484,18 @@ public class TaskListHandler extends PageHandler
                     {
                         isActivityCommentUploaded = 1;
                     }
-                    
+
                     if (task.getIsUploading() == 'Y')
                     {
-                        isUploadingJobName.append("[JobID:")
-                                .append(task.getJobId()).append(",JobName:")
-                                .append(task.getJobName()).append("],");
+                        isUploadingJobName.append("[JobID:").append(task.getJobId())
+                                .append(",JobName:").append(task.getJobName()).append("],");
                     }
                     else
                     {
-                        //set default DQF values to task or not
+                        // set default DQF values to task or not
                         if (task.isReviewOnly() || task.isType(Task.TYPE_REVIEW_EDITABLE))
                         {
-                            WorkflowImpl workflowImpl = (WorkflowImpl) task
-                                    .getWorkflow();
+                            WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
                             int showType = workflowImpl.getScorecardShowType();
                             if ((showType == 1 || showType == 3)
                                     && StringUtil.isEmpty(workflowImpl.getScorecardComment()))
@@ -1493,13 +1504,13 @@ public class TaskListHandler extends PageHandler
                                         .append(",JobName:").append(task.getJobName()).append("],");
                                 continue;
                             }
-                            
+
                             // check DQF Required or not
                             if ((showType == 3 || showType == 5)
                                     && (StringUtil.isEmpty(workflowImpl.getFluencyScore())
                                             || StringUtil.isEmpty(workflowImpl.getAdequacyScore())))
                             {
-                               
+
                                 if (isNeedDQFTaskId.length() == 0)
                                 {
                                     isNeedDQFTaskId.append("[JobID:").append(task.getJobId())
@@ -1509,93 +1520,61 @@ public class TaskListHandler extends PageHandler
                                 isDQFFinishedTaskId.append(taskId).append(" ");
                             }
                         }
-                        ProjectImpl project = (ProjectImpl) task.getWorkflow()
-                                .getJob().getProject();
-                        boolean isCheckUnTranslatedSegments = project
-                                .isCheckUnTranslatedSegments();
+                        ProjectImpl project = (ProjectImpl) task.getWorkflow().getJob()
+                                .getProject();
+                        boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
                         boolean isCheckUnApprovedMTSegments = project.isCheckUnApprovedMTSegments();
                         boolean isMtProfile = task.getWorkflow().getUseMT();
                         boolean isReviewOnly = task.isReviewOnly();
-                        if(isCheckUnApprovedMTSegments && isMtProfile) {
-                            percentage = SegmentTuvUtil
-                                    .getMTApprovedPercentageForTask(task);
+
+                        //GBS-4716
+                        //isCheckUnApprovedMTSegments is true and 100% approved for MT then verify
+                        //isCheckUnTranslatedSegments is or not
+                        if (isCheckUnApprovedMTSegments && isMtProfile && !isReviewOnly)
+                        {
+                            percentage = SegmentTuvUtil.getMTApprovedPercentageForTask(task);
                             if (100 == percentage)
                             {
-                                setFinishedTaskIds(isFinishedTaskId,  taskId);
-                                if (task.getIsReportUploadCheck() == 0
-                                        || (task.getIsReportUploadCheck() == 1 && task
-                                                .getIsReportUploaded() == 1))
+                                boolean isTranslated = true;
+                                if (isCheckUnTranslatedSegments)
                                 {
-                                    isFinishedReportUploadTaskId.append(taskId)
-                                            .append(" ");
+                                    percentage = SegmentTuvUtil
+                                            .getTranslatedPercentageForTask(task);
+                                    if (100 != percentage)
+                                    {
+                                        isTranslated = false;
+                                    }
                                 }
-
-                                if (task.getIsReportUploadCheck() == 1
-                                        && task.getIsReportUploaded() == 0)
+                                if (isTranslated)
                                 {
-                                    isNeedReportUploadCheckTaskId
-                                            .append("[JobID:")
-                                            .append(task.getJobId())
-                                            .append(",JobName:")
-                                            .append(task.getJobName())
-                                            .append("],");
+                                    setTaskStatus(isFinishedTaskId,
+                                            isNeedActivityCommentCheckTaskId,
+                                            isNeedReportUploadCheckTaskId,
+                                            isFinishedActivityCommentUploadTaskId,
+                                            isFinishedReportUploadTaskId, taskId, task,
+                                            isActivityCommentUploaded);
                                 }
-
-                                if (task.getIsActivityCommentUploadCheck() == 0
-                                        || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+                                else
                                 {
-                                    isFinishedActivityCommentUploadTaskId.append(taskId)
-                                            .append(" ");
-                                }
-                                if (task.getIsActivityCommentUploadCheck() == 1
-                                        && isActivityCommentUploaded == 0)
-                                {
-                                    isNeedActivityCommentCheckTaskId.append("[JobID:")
-                                            .append(task.getJobId()).append(",JobName:")
-                                            .append(task.getJobName()).append("],");
+                                    unTranslatedTaskId.append(taskId).append(" ");
                                 }
                             }
                             else
                             {
                                 unMtApprovedTaskId.append(taskId).append(" ");
                             }
-                            
+
                         }
                         else if ((isCheckUnTranslatedSegments && !isReviewOnly))
                         {
                             percentage = SegmentTuvUtil.getTranslatedPercentageForTask(task);
                             if (100 == percentage)
                             {
-                                setFinishedTaskIds(isFinishedTaskId, taskId);
-                                if (task.getIsReportUploadCheck() == 0
-                                        || (task.getIsReportUploadCheck() == 1
-                                                && task.getIsReportUploaded() == 1))
-                                {
-                                    isFinishedReportUploadTaskId.append(taskId).append(" ");
-                                }
-
-                                if (task.getIsReportUploadCheck() == 1
-                                        && task.getIsReportUploaded() == 0)
-                                {
-                                    isNeedReportUploadCheckTaskId.append("[JobID:")
-                                            .append(task.getJobId()).append(",JobName:")
-                                            .append(task.getJobName()).append("],");
-                                }
-
-                                if (task.getIsActivityCommentUploadCheck() == 0
-                                        || (task.getIsActivityCommentUploadCheck() == 1
-                                                && isActivityCommentUploaded == 1))
-                                {
-                                    isFinishedActivityCommentUploadTaskId.append(taskId)
-                                            .append(" ");
-                                }
-                                if (task.getIsActivityCommentUploadCheck() == 1
-                                        && isActivityCommentUploaded == 0)
-                                {
-                                    isNeedActivityCommentCheckTaskId.append("[JobID:")
-                                            .append(task.getJobId()).append(",JobName:")
-                                            .append(task.getJobName()).append("],");
-                                }
+                                setTaskStatus(isFinishedTaskId, isNeedActivityCommentCheckTaskId,
+                                        isNeedReportUploadCheckTaskId,
+                                        isFinishedActivityCommentUploadTaskId,
+                                        isFinishedReportUploadTaskId, taskId, task,
+                                        isActivityCommentUploaded);
                             }
                             else
                             {
@@ -1604,12 +1583,12 @@ public class TaskListHandler extends PageHandler
                         }
                         else
                         {
-                            setFinishedTaskIds(isFinishedTaskId,  taskId);
+                            setFinishedTaskIds(isFinishedTaskId, taskId);
                             if (task.getIsActivityCommentUploadCheck() == 0
-                                    || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+                                    || (task.getIsActivityCommentUploadCheck() == 1
+                                            && isActivityCommentUploaded == 1))
                             {
-                                isFinishedActivityCommentUploadTaskId.append(taskId)
-                                        .append(" ");
+                                isFinishedActivityCommentUploadTaskId.append(taskId).append(" ");
                             }
                             if (task.getIsActivityCommentUploadCheck() == 1
                                     && isActivityCommentUploaded == 0)
@@ -1618,21 +1597,19 @@ public class TaskListHandler extends PageHandler
                                         .append(task.getJobId()).append(",JobName:")
                                         .append(task.getJobName()).append("],");
                             }
-                            
+
                             if (task.getIsReportUploadCheck() == 0
-                                    || (task.getIsReportUploadCheck() == 1 && task
-                                            .getIsReportUploaded() == 1))
+                                    || (task.getIsReportUploadCheck() == 1
+                                            && task.getIsReportUploaded() == 1))
                             {
-                                isFinishedReportUploadTaskId.append(taskId)
-                                        .append(" ");
+                                isFinishedReportUploadTaskId.append(taskId).append(" ");
                             }
 
                             if (task.getIsReportUploadCheck() == 1
                                     && task.getIsReportUploaded() == 0)
                             {
                                 isNeedReportUploadCheckTaskId.append("[JobID:")
-                                        .append(task.getJobId())
-                                        .append(",JobName:")
+                                        .append(task.getJobId()).append(",JobName:")
                                         .append(task.getJobName()).append("],");
                             }
                         }
@@ -1643,29 +1620,25 @@ public class TaskListHandler extends PageHandler
             String result = "{";
             if (isUploadingJobName.length() != 0)
             {
-                result = result
-                        + "\"isUploadingJobName\":\""
-                        + isUploadingJobName.substring(0,
-                                isUploadingJobName.length() - 1) + "\",";
+                result = result + "\"isUploadingJobName\":\""
+                        + isUploadingJobName.substring(0, isUploadingJobName.length() - 1) + "\",";
             }
             if (isFinishedTaskId.length() != 0)
             {
-                result = result + "\"isFinishedTaskId\":\""
-                        + isFinishedTaskId.toString().trim() + "\",";
+                result = result + "\"isFinishedTaskId\":\"" + isFinishedTaskId.toString().trim()
+                        + "\",";
             }
-            // set the DQF required task id's to result 
+            // set the DQF required task id's to result
             if (isDQFFinishedTaskId.length() != 0)
             {
                 result = result + "\"isDQFFinishedTaskId\":\""
                         + isDQFFinishedTaskId.toString().trim() + "\",";
             }
-            
+
             if (isNeedScoreTaskId.length() != 0)
             {
-                result = result
-                        + "\"isNeedScoreTaskId\":\""
-                        + isNeedScoreTaskId.substring(0,
-                                isNeedScoreTaskId.length() - 1) + "\",";
+                result = result + "\"isNeedScoreTaskId\":\""
+                        + isNeedScoreTaskId.substring(0, isNeedScoreTaskId.length() - 1) + "\",";
             }
             if (isNeedDQFTaskId.length() != 0)
             {
@@ -1675,37 +1648,33 @@ public class TaskListHandler extends PageHandler
             if (isNeedReportUploadCheckTaskId.length() != 0)
             {
                 result = result + "\"isNeedReportUploadCheckTaskId\":\""
-                        + isNeedReportUploadCheckTaskId.toString().trim()
-                        + "\",";
+                        + isNeedReportUploadCheckTaskId.toString().trim() + "\",";
             }
             if (isFinishedReportUploadTaskId.length() != 0)
             {
                 result = result + "\"isFinishedReportUploadTaskId\":\""
-                        + isFinishedReportUploadTaskId.toString().trim()
-                        + "\",";
-            }            
+                        + isFinishedReportUploadTaskId.toString().trim() + "\",";
+            }
             if (isNeedActivityCommentCheckTaskId.length() != 0)
             {
                 result = result + "\"isNeedActivityCommentCheckTaskId\":\""
-                        + isNeedActivityCommentCheckTaskId.toString().trim()
-                        + "\",";
+                        + isNeedActivityCommentCheckTaskId.toString().trim() + "\",";
             }
             if (isFinishedActivityCommentUploadTaskId.length() != 0)
             {
                 result = result + "\"isFinishedActivityCommentUploadTaskId\":\""
-                        + isFinishedActivityCommentUploadTaskId.toString().trim()
-                        + "\",";
-            }          
+                        + isFinishedActivityCommentUploadTaskId.toString().trim() + "\",";
+            }
             if (unTranslatedTaskId.length() != 0)
             {
-                result = result + "\"unTranslatedTaskId\":\""
-                        + unTranslatedTaskId.toString().trim() + "\",";
+                result = result + "\"unTranslatedTaskId\":\"" + unTranslatedTaskId.toString().trim()
+                        + "\",";
             }
-            
+
             if (unMtApprovedTaskId.length() != 0)
             {
-                result = result + "\"unMtApprovedTaskId\":\""
-                        + unMtApprovedTaskId.toString().trim() + "\",";
+                result = result + "\"unMtApprovedTaskId\":\"" + unMtApprovedTaskId.toString().trim()
+                        + "\",";
             }
 
             if (result.length() > 2)
@@ -1717,8 +1686,51 @@ public class TaskListHandler extends PageHandler
         }
         catch (Exception e)
         {
-            throw new TaskException(TaskException.MSG_FAILED_TO_COMPLETE_TASK,
-                    null, e);
+            throw new TaskException(TaskException.MSG_FAILED_TO_COMPLETE_TASK, null, e);
+        }
+    }
+
+    /**
+     * Set task status
+     * 
+     * @param isFinishedTaskId
+     * @param isNeedActivityCommentCheckTaskId
+     * @param isNeedReportUploadCheckTaskId
+     * @param isFinishedActivityCommentUploadTaskId
+     * @param isFinishedReportUploadTaskId
+     * @param taskId
+     * @param task
+     * @param isActivityCommentUploaded
+     */
+    private void setTaskStatus(StringBuffer isFinishedTaskId,
+            StringBuffer isNeedActivityCommentCheckTaskId,
+            StringBuffer isNeedReportUploadCheckTaskId,
+            StringBuffer isFinishedActivityCommentUploadTaskId,
+            StringBuffer isFinishedReportUploadTaskId, String taskId, TaskImpl task,
+            int isActivityCommentUploaded)
+    {
+        setFinishedTaskIds(isFinishedTaskId, taskId);
+        if (task.getIsReportUploadCheck() == 0
+                || (task.getIsReportUploadCheck() == 1 && task.getIsReportUploaded() == 1))
+        {
+            isFinishedReportUploadTaskId.append(taskId).append(" ");
+        }
+
+        if (task.getIsReportUploadCheck() == 1 && task.getIsReportUploaded() == 0)
+        {
+            isNeedReportUploadCheckTaskId.append("[JobID:").append(task.getJobId())
+                    .append(",JobName:").append(task.getJobName()).append("],");
+        }
+
+        if (task.getIsActivityCommentUploadCheck() == 0
+                || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+        {
+            isFinishedActivityCommentUploadTaskId.append(taskId).append(" ");
+        }
+        if (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 0)
+        {
+            isNeedActivityCommentCheckTaskId.append("[JobID:").append(task.getJobId())
+                    .append(",JobName:").append(task.getJobName()).append("],");
         }
     }
     

@@ -17,6 +17,7 @@ public class OnlineEditorConstants
     public static final String SEGMENT_FILTER_COMMENTED = "segFilterCommented";
     public static final String SEGMENT_FILTER_MACHINETRANSLATION = "segFilterMT";
     public static final String SEGMENT_FILTER_NO_TRANSLATED = "segFilterNoTrans";
+    public static final String SEGMENT_FILTER_NOT_APPROVED = "segFilterNotApproved";
     public static final String SEGMENT_FILTER_APPROVED = "segFilterApproved";
     public static final String SEGMENT_FILTER_PERPLEXITY= "segFilterPerplexity";
     

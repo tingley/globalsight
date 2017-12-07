@@ -303,7 +303,7 @@ public class SegmentFilter
 
         TuvState trgState = p_trgTuv.getState();
         if (TuvState.DO_NOT_TRANSLATE.equals(trgState) || TuvState.APPROVED.equals(trgState)
-                || TuvState.EXACT_MATCH_LOCALIZED.equals(trgState))
+                || TuvState.EXACT_MATCH_LOCALIZED.equals(trgState) || TuvState.NOT_LOCALIZED.equals(trgState))
         {
             isApproved = true;
         }

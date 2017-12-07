@@ -315,9 +315,15 @@ public final class PageManagerLocal implements PageManager
     public List<TargetPage> filterTargetPages(Task p_task, String p_filertType)
     {
         List<TargetPage> tps = p_task.getTargetPages();
-        if (OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED.equalsIgnoreCase(p_filertType))
+        // GBS-4716
+        // isCheckUnApprovedMTSegments is checked then true otherwise false
+        if (OnlineEditorConstants.SEGMENT_FILTER_NOT_APPROVED.equalsIgnoreCase(p_filertType))
         {
-            return SegmentTuvUtil.filterUnTranslatedTargetPages(tps);
+            return SegmentTuvUtil.filterUnTranslatedTargetPages(tps, true);
+        }
+        else if (OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED.equalsIgnoreCase(p_filertType))
+        {
+            return SegmentTuvUtil.filterUnTranslatedTargetPages(tps, false);
         }
 
         return tps;

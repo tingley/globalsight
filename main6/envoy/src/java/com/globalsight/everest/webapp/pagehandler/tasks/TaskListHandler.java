@@ -1277,8 +1277,8 @@ public class TaskListHandler extends PageHandler
      * @param p_user
      *            Operator user
      */
-    public String getTaskStatusJSON(HttpSession p_session, TaskImpl p_task,
-            String p_action, User p_user)
+    public String getTaskStatusJSON(HttpSession p_session, TaskImpl p_task, String p_action,
+            User p_user)
     {
         StringBuilder result = new StringBuilder();
         // JSON Array for Pages included Un-translated Segment
@@ -1292,12 +1292,12 @@ public class TaskListHandler extends PageHandler
             uploadStatus = OfflineConstants.TASK_UPLOADSTATUS_UPLOADING;
         }
 
+        Boolean isMTApproved = false;
         // Gets pages info with un-translated segment and the opened Comments.
         if (TASK_ACTION_GETTASKSTATUS_ALL.equals(p_action))
         {
             ProjectImpl proj = ProjectHandlerHelper
-                    .getProjectByNameAndCompanyId(p_task.getProjectName(),
-                            p_task.getCompanyId());
+                    .getProjectByNameAndCompanyId(p_task.getProjectName(), p_task.getCompanyId());
             List<TargetPage> allTPs = p_task.getTargetPages();
             List<Long> allTPIds = new ArrayList<Long>();
             for (TargetPage tp : allTPs)
@@ -1309,14 +1309,13 @@ public class TaskListHandler extends PageHandler
             boolean isDisplayFull = true;
             UserParameter param = PageHandler.getUserParameter(p_session,
                     UserParamNames.PAGENAME_DISPLAY);
-            if (param != null
-                    && UserParamNames.PAGENAME_DISPLAY_SHORT.equals(param
-                            .getValue()))
+            if (param != null && UserParamNames.PAGENAME_DISPLAY_SHORT.equals(param.getValue()))
             {
                 isDisplayFull = false;
             }
 
             WorkflowImpl workflowImpl = (WorkflowImpl) p_task.getWorkflow();
+
             // JSON Array for Pages included Un-translated Segments
             if (((workflowImpl.getUseMT() && (proj.isCheckUnApprovedMTSegments()))
                     || (proj.isCheckUnTranslatedSegments())) && !p_task.isReviewOnly())
@@ -1330,6 +1329,7 @@ public class TaskListHandler extends PageHandler
                             OnlineEditorConstants.SEGMENT_FILTER_NOT_APPROVED);
                     if (unTransTps == null || unTransTps.isEmpty())
                     {
+                        isMTApproved = true;
                         unTransTps = ServerProxy.getPageManager().filterTargetPages(p_task,
                                 OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED);
                     }
@@ -1338,6 +1338,10 @@ public class TaskListHandler extends PageHandler
                 {
                     unTransTps = ServerProxy.getPageManager().filterTargetPages(p_task,
                             OnlineEditorConstants.SEGMENT_FILTER_NOT_APPROVED);
+                    if (unTransTps == null || unTransTps.isEmpty())
+                    {
+                        isMTApproved = true;
+                    }
                 }
                 else
                 {
@@ -1371,29 +1375,25 @@ public class TaskListHandler extends PageHandler
                     statusList.add(Issue.STATUS_OPEN);
                     statusList.add(Issue.STATUS_QUERY);
                     statusList.add(Issue.STATUS_REJECTED);
-                    HashMap<Long, Integer> openCounts = ServerProxy
-                            .getCommentManager().getIssueCountPerTargetPage(
-                                    Issue.TYPE_SEGMENT, allTPIds, statusList);
+                    HashMap<Long, Integer> openCounts = ServerProxy.getCommentManager()
+                            .getIssueCountPerTargetPage(Issue.TYPE_SEGMENT, allTPIds, statusList);
                     for (TargetPage tp : allTPs)
                     {
                         long tpId = tp.getId();
-                        int numOpen = (openCounts.get(tpId) == null ? 0
-                                : openCounts.get(tpId));
+                        int numOpen = (openCounts.get(tpId) == null ? 0 : openCounts.get(tpId));
                         if (numOpen > 0)
                         {
                             pageName = isDisplayFull ? tp.getDisplayPageName()
                                     : tp.getShortPageName();
                             pageName = JsonUtil.encode(pageName);
-                            pagesWithUnClosedComment.append("\"")
-                                    .append(JsonUtil.encode(pageName))
+                            pagesWithUnClosedComment.append("\"").append(JsonUtil.encode(pageName))
                                     .append("\",");
                         }
                     }
                     if (pagesWithUnClosedComment.indexOf(",") > 0)
                     {
                         pagesWithUnClosedComment
-                                .deleteCharAt(pagesWithUnClosedComment
-                                        .lastIndexOf(","));
+                                .deleteCharAt(pagesWithUnClosedComment.lastIndexOf(","));
                     }
                 }
                 catch (Exception e)
@@ -1410,11 +1410,11 @@ public class TaskListHandler extends PageHandler
         result.append(",");
         result.append("\"uploadStatus\":").append("\"" + uploadStatus + "\"");
         result.append(",");
-        result.append("\"pagesWithUnTranslatedSeg\":").append(
-                pagesWithUnTranslatedSeg);
+        result.append("\"pagesWithUnTranslatedSeg\":").append(pagesWithUnTranslatedSeg);
         result.append(",");
-        result.append("\"pagesWithUnClosedComment\":").append(
-                pagesWithUnClosedComment);
+        result.append("\"pagesWithUnClosedComment\":").append(pagesWithUnClosedComment);
+        result.append(",");
+        result.append("\"isMTApproved\":").append(isMTApproved);
         result.append("}");
 
         return result.toString();

@@ -229,10 +229,8 @@ function getScrollableDiv(p_html, p_dataArr) {
     return result;
 }
 
-var mtApproved = '<%=project.isCheckUnApprovedMTSegments()%>';
-var isMtProfile = '<%=workflowImpl.getUseMT()%>';
-var dialogTitle = (mtApproved == 'true' && isMtProfile == 'true')?'Unapproved MT Segments':'Not 100% translated primary target files';
-var popTitle=["No DQF Information has been saved.","There are some failed or in-progress status of target files",dialogTitle,"Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
+
+var popTitle=["No DQF Information has been saved.","There are some failed or in-progress status of target files",'Not 100% translated primary target files',"Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
 var popDialogId=["dialog-DQFfileState","dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
 var popDiv="<div style='display:none' class='detailText'></div>";
 var popArray=new Array();
@@ -561,12 +559,19 @@ function doFinish(data){
 		// Check un-translated Segments Page Array
 		pagesArr = data.pagesWithUnTranslatedSeg;
 		
-		if(isMtProfile == 'true' && mtApproved == 'true')
+		var mtApproved = '<%=project.isCheckUnApprovedMTSegments()%>';
+        var isMtProfile = '<%=workflowImpl.getUseMT()%>';
+		
+		// if MT Segments not approved 100% then show the popup message
+		if(isMtProfile == 'true' && mtApproved == 'true' && data.isMTApproved != true)
         {
+			
+		    $("#ui-dialog-title-dialog-unTranslated").text("Unapproved MT Segments");
 			tempMsg = '<%=bundle.getString("msg_task_finish_warning_unApprovedSegment")%>';
 		}
 		else 
 		{
+			$("#ui-dialog-title-dialog-unTranslated").text("Not 100% translated primary target files");
 		    tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
 		}
 		

@@ -31,6 +31,7 @@ public interface MachineTranslator
     public static final String ENGINE_MSTRANSLATOR = "MS_Translator";
     public static final String ENGINE_ASIA_ONLINE = "Asia_Online";
     public static final String ENGINE_SAFABA = "Safaba";
+    public static final String ENGINE_GLOBALESE = "Globalese";
     public static final String ENGINE_IPTRANSLATOR = "IPTranslator";
     public static final String ENGINE_DOMT = "DoMT";
 
@@ -54,6 +55,13 @@ public interface MachineTranslator
     public static final String AO_USERNAME = "aoMtUsername";
     public static final String AO_PASSWORD = "aoMtPassword";
     public static final String AO_ACCOUNT_NUMBER = "aoMtAccountNumber";
+
+    public static final String GLOBALESE_ENDPOINT = "globaleseMtEndpoint";
+    public static final String GLOBALESE_URL = "globaleseMtUrl";
+    public static final String GLOBALESE_USERNAME = "globaleseMtUsername";
+    public static final String GLOBALESE_API_KEY = "globaleseMtApiKey";
+    public static final String GLOBALESE_GROUP_ID = "globaleseMtGroupId";
+    public static final String GLOBALESE_ENGINE_ID = "globaleseMtEngineId";
 
     public static final String DOMT_URL = "doMtUrl";
     public static final String DOMT_PORT = "doMtPort";
@@ -93,7 +101,7 @@ public interface MachineTranslator
 
     public static final String[] gsSupportedMTEngines =
     { ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE, ENGINE_SAFABA,
-            ENGINE_IPTRANSLATOR, ENGINE_DOMT, ENGINE_GOOGLE};
+      ENGINE_GLOBALESE, ENGINE_IPTRANSLATOR, ENGINE_DOMT, ENGINE_GOOGLE};
 
     /**
      * Returns the MT engine name.

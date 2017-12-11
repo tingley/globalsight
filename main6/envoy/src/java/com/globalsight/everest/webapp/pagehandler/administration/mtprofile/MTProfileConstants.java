@@ -213,6 +213,12 @@ public interface MTProfileConstants
     public static final String MT_AO_PASSWORD = "ao_mt_password";
     public static final String MT_AO_ACCOUNT_NUMBER = "ao_mt_account_number";
 
+    public static final String MT_GLOBALESE_URL = "globalese_mt_url";
+    public static final String MT_GLOBALESE_USERNAME = "globalese_mt_username";
+    public static final String MT_GLOBALESE_API_KEY = "globalese_api_key";
+    public static final String MT_GLOBALESE_GROUP_ID = "globalese_group_id";
+    public static final String MT_GLOBALESE_ENGINE_ID = "globalese_engine_id";
+
     public static final String MT_SAFA_HOST = "safa_mt_host";
     public static final String MT_SAFA_PORT = "safa_mt_port";
     public static final String MT_SAFA_COMPANY_NAME = "safa_mt_company_name";
@@ -225,6 +231,7 @@ public interface MTProfileConstants
     public static final String MT_ENGINE_PROMT = "Promt";
     public static final String MT_ENGINE_MSTRANSLATOR = "MS_Translator";
     public static final String MT_ENGINE_DOMT = "DoMT";
+    public static final String MT_ENGINE_GLOBALESE = "Globalese";
 
     /**
      * For TM accessing control

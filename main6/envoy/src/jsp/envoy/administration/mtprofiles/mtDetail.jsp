@@ -340,6 +340,14 @@
 	           	return false
 	        }
 		}
+		else if (formAction == "Globalese")
+		{
+			var canGoOn = checkGlobaleseOptions();
+			if (canGoOn != true)
+			{
+	           	return false
+	        }
+		}
 		else if (formAction == "ProMT") 
 		{
             MTOptionsForm.action = '<%=nextUrlForPromt%>';
@@ -454,6 +462,7 @@
         var msMtDiv = document.getElementById("msMtDiv");
         var aoMtDiv = document.getElementById("aoMtDiv");
         var safaMtDiv = document.getElementById("safaMtDiv");
+        var globaleseMtDiv = document.getElementById("globaleseMtDiv")
         var IPTranslatorDiv=document.getElementById("IPTranslatorDiv");
         var doMtDiv=document.getElementById("doMtDiv");
 		var googleDiv = document.getElementById("googleDiv");
@@ -465,6 +474,7 @@
         msMtDiv.style.display='none';
         aoMtDiv.style.display='none';
         safaMtDiv.style.display='none';
+        globaleseMtDiv.style.display = 'none';
         IPTranslatorDiv.style.display='none';
         doMtDiv.style.display='none';
         googleDiv.style.display='none';
@@ -490,6 +500,10 @@
 	    {
 	    	safaMtDiv.style.display='block';
 	    }
+	    else if(selectedEngineName.toLowerCase() == "globalese")
+	    {
+	    	globaleseMtDiv.style.display='block';
+	    }
 	    else if(selectedEngineName == "IPTranslator")
 	    {
 	    	IPTranslatorDiv.style.display='block';
@@ -504,6 +518,7 @@
 	    if (selectedEngineName.toLowerCase() == "google_translate"
 		    || selectedEngineName.toLowerCase() == "ms_translator" 
 		    || selectedEngineName.toLowerCase() == "safaba"
+		    || selectedEngineName.toLowerCase() == "globalese"
 		    || selectedEngineName == "IPTranslator"
 		    || selectedEngineName == "DoMT")
 	    {
@@ -556,6 +571,46 @@
         return true;
 	}
 	
+	function checkGlobaleseOptions()
+	{
+        var globaleseMtUrl = $.trim($('#idGlobaleseMtUrl').val());
+        var globaleseMtUserName = $.trim($('#idGlobaleseMtUsername').val());
+		var globaleseMtApiKey = $.trim($('#idGlobaleseMtApiKey').val());
+        var globaleseMtGroupId = $.trim($('#idGlobaleseMtGroupId').val());
+        var globaleseMtEngineId = $.trim($('#idGlobaleseMtEngineId').val());
+
+        //var jobNameRegex = /[\\/:;\*\?\|\"\'<>&%]/;
+   	    //if (jobNameRegex.test(customerForm.jobName.value))
+
+        if (!globaleseMtUrl)
+        {
+            alert("<%=bundle.getString("lb_tm_globalese_mt_url_empty")%>");
+            return false;
+        }
+        else if (!globaleseMtUserName)
+        {
+            alert("<%=bundle.getString("lb_tm_globalese_mt_username_empty")%>");
+            return false;
+        }   	  
+        else if (!globaleseMtApiKey)
+        {
+            alert("<%=bundle.getString("lb_tm_globalese_mt_key_empty_invalid")%>");
+            return false;
+        }
+        else if (!globaleseMtGroupId)
+        {
+            alert("<%=bundle.getString("lb_tm_globalese_mt_group_id_empty_invalid")%>");            
+            return false;
+        }
+        else if (!globaleseMtEngineId)
+        {
+            alert("<%=bundle.getString("lb_tm_globalese_mt_engine_id_empty_invalid")%>");            
+            return false;
+        }
+        return true;
+	}
+
+
 	//remove all whitespace on left and right
 	function trim(str)
 	{
@@ -813,6 +868,67 @@
 						<p>
 					</div>
 					<!-- **************** Promt MT Options : End *************************** -->
+
+				<!-- **************** Globalese MT Options : Start ***************** -->
+				<%if ("Globalese".equalsIgnoreCase(current_engine))
+				{
+					mtProfile4val = mtProfile;%>
+					<div id="globaleseMtDiv" style="display: block;">
+				<%} else {
+					mtProfile4val = new MachineTranslationProfile();%>
+					<div id="globaleseMtDiv" style="display: none;">
+				<%}%>
+						<p>
+						<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="100%">
+							<tr>
+								<td colspan="3"><b><%=bundle.getString("lb_tm_globalese_mt_title")%></b></td>
+							</tr>
+							<tr>
+								<td ALIGN="LEFT"><%=bundle.getString("lb_tm_globalese_mt_url")%><font
+									color="red">*</font>:</td>
+								<td colspan="2"><INPUT CLASS="standardText" ID="idGlobaleseMtUrl"
+									NAME="<%=MTProfileConstants.MT_GLOBALESE_URL%>"
+									value="<%=mtProfile4val.getUrl()%>" TYPE="text"
+									MAXLENGTH="99" SIZE="50" /></td>
+							</tr>
+							<tr>
+								<td ALIGN="LEFT"><%=bundle.getString("lb_tm_globalese_mt_username")%><font
+									color="red">*</font>:</td>
+								<td><INPUT CLASS="standardText" ID="idGlobaleseMtUsername"
+									NAME="<%=MTProfileConstants.MT_GLOBALESE_USERNAME%>"
+									value="<%=mtProfile4val.getUsername()%>" TYPE="text"
+									MAXLENGTH="99" SIZE="50" /></td>
+							</tr>
+							<tr>
+								<td ALIGN="LEFT"><%=bundle.getString("lb_tm_globalese_mt_api_key")%><font
+									color="red">*</font>:</td>
+								<td colspan="2" style="white-space:nowrap"><INPUT CLASS="standardText" ID="idGlobaleseMtApiKey"
+									NAME="<%=MTProfileConstants.MT_GLOBALESE_API_KEY%>"
+									value="<%=mtProfile4val.getAccountinfo()%>" TYPE="password"
+									MAXLENGTH="100" SIZE="50"></input>
+								</td>
+							</tr>
+							<tr>
+								<td ALIGN="LEFT"><%=bundle.getString("lb_tm_globalese_mt_group_id")%><font
+									color="red">*</font>:</td>
+								<td><INPUT CLASS="standardText" ID="idGlobaleseMtGroupId"
+									NAME="<%=MTProfileConstants.MT_GLOBALESE_GROUP_ID%>"
+									value="<%=mtProfile4val.getJsonValue("groupId")%>" TYPE="text"
+									MAXLENGTH="128" SIZE="50" /></td>
+							</tr>
+
+							<tr>
+								<td ALIGN="LEFT"><%=bundle.getString("lb_tm_globalese_mt_engine_id")%><font
+									color="red">*</font>:</td>
+								<td><INPUT CLASS="standardText" ID="idGlobaleseMtEngineId"
+									NAME="<%=MTProfileConstants.MT_GLOBALESE_ENGINE_ID%>"
+									value="<%=mtProfile4val.getJsonValue("engineId")%>" TYPE="text"
+									MAXLENGTH="128" SIZE="50" /></td>
+							</tr>
+						</TABLE>
+						<p>
+					</div>
+					<!-- **************** Globalese MT Options : End ******************* -->
 
 					<!-- **************** MS Translator MT Options : Start ***************** -->
 					<%if ("MS_Translator".equalsIgnoreCase(current_engine))

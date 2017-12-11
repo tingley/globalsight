@@ -52,6 +52,25 @@ public enum EngineEnum
             return "com.globalsight.machineTranslation.domt.DoMTProxy";
         }
     },
+    Globalese
+    {
+        @Override
+        String[] getInfo()
+        {
+            return new String[]{
+                    "mtProfileID", MTProfileConstants.MT_GLOBALESE_URL,
+                    MTProfileConstants.MT_GLOBALESE_USERNAME, MTProfileConstants.MT_GLOBALESE_API_KEY,
+                    MTProfileConstants.MT_GLOBALESE_GROUP_ID, MTProfileConstants.MT_GLOBALESE_ENGINE_ID
+            };
+        }
+
+        @Override
+        String getClassName()
+        {
+            return "com.globalsight.machineTranslation.globalese.GlobaleseProxy";
+        }
+        
+    },
     IPTranslator
     {
         String[] getInfo()

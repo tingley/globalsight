@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -51,6 +52,9 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.machineTranslation.asiaOnline.AsiaOnlineMtInvoker;
 import com.globalsight.machineTranslation.asiaOnline.DomainCombination;
 import com.globalsight.machineTranslation.domt.DoMTUtil;
+import com.globalsight.machineTranslation.globalese.Client;
+import com.globalsight.machineTranslation.globalese.GlobaleseEngine;
+import com.globalsight.machineTranslation.globalese.GlobaleseMTUtil;
 import com.globalsight.machineTranslation.iptranslator.IPTranslatorUtil;
 import com.globalsight.machineTranslation.mstranslator.MSMTUtil;
 import com.globalsight.machineTranslation.promt.ProMtInvoker;
@@ -61,9 +65,7 @@ import com.microsofttranslator.api.V2.LanguageService;
 
 public class MachineTranslateAdapter
 {
-
-    private static Logger logger = Logger
-            .getLogger(MachineTranslateAdapter.class);
+    private static Logger logger = Logger.getLogger(MachineTranslateAdapter.class);
 
     public static final String MSMT_CONTENT_TYPE = "text/plain";
 
@@ -96,6 +98,9 @@ public class MachineTranslateAdapter
                 setAOParams(p_request, mtProfile);
                 setExtendInfo(p_request, mtProfile);
                 break;
+            case Globalese:
+                setGlobaleseParams(p_request, mtProfile);
+                break;
             case Safaba:
                 setSafabaParams(p_request, mtProfile);
                 break;
@@ -114,11 +119,9 @@ public class MachineTranslateAdapter
         }
     }
 
-    private void setGoogleParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setGoogleParams(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
-        String apiKey = p_request
-                .getParameter(MTProfileConstants.MT_GOOGLE_API_KEY);
+        String apiKey = p_request.getParameter(MTProfileConstants.MT_GOOGLE_API_KEY);
         if (apiKey != null)
             apiKey = apiKey.trim();
 
@@ -128,8 +131,8 @@ public class MachineTranslateAdapter
         }
     }
 
-    private void makeBaseMT(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile, String engine)
+    private void makeBaseMT(HttpServletRequest p_request, MachineTranslationProfile mtProfile,
+            String engine)
     {
         String mtProfileName = p_request.getParameter("MtProfileName");
         mtProfile.setMtProfileName(mtProfileName);
@@ -162,19 +165,18 @@ public class MachineTranslateAdapter
 
         }
         mtProfile.setMtThreshold(long_mtThreshold);
-        
-       String mtIgnoreTmMatches = p_request.getParameter(MTProfileConstants.MT_IGNORE_TM_MATCHES);
-       if (mtIgnoreTmMatches == null || !"on".equals(mtIgnoreTmMatches))
-       {
-           mtProfile.setIgnoreTMMatch(false);
-       }
-       else
-       {
-           mtProfile.setIgnoreTMMatch(true);
-       }
+
+        String mtIgnoreTmMatches = p_request.getParameter(MTProfileConstants.MT_IGNORE_TM_MATCHES);
+        if (mtIgnoreTmMatches == null || !"on".equals(mtIgnoreTmMatches))
+        {
+            mtProfile.setIgnoreTMMatch(false);
+        }
+        else
+        {
+            mtProfile.setIgnoreTMMatch(true);
+        }
         // show log debug info
-        String logDebugInfo = p_request
-                .getParameter(MTProfileConstants.MT_LOG_DEBUG_INFO);
+        String logDebugInfo = p_request.getParameter(MTProfileConstants.MT_LOG_DEBUG_INFO);
         if (logDebugInfo == null || !"on".equals(logDebugInfo))
         {
             mtProfile.setLogDebugInfo(false);
@@ -220,8 +222,7 @@ public class MachineTranslateAdapter
         {
             try
             {
-                long companyId = ServerProxy.getJobHandler()
-                        .getCompany(companyName).getIdAsLong();
+                long companyId = ServerProxy.getJobHandler().getCompany(companyName).getIdAsLong();
                 mtProfile.setCompanyid(companyId);
             }
             catch (Exception e)
@@ -231,36 +232,30 @@ public class MachineTranslateAdapter
         }
     }
 
-    private void setDoMtParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setDoMtParams(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
-        String url = p_request.getParameter(MTProfileConstants.MT_DOMT_URL)
-                .trim();
+        String url = p_request.getParameter(MTProfileConstants.MT_DOMT_URL).trim();
         if (StringUtils.isNotBlank(url))
         {
             mtProfile.setUrl(url);
         }
 
-        String engineName = p_request.getParameter(
-                MTProfileConstants.MT_DOMT_ENGINE_NAME).trim();
+        String engineName = p_request.getParameter(MTProfileConstants.MT_DOMT_ENGINE_NAME).trim();
         if (StringUtils.isNotBlank(engineName))
         {
             mtProfile.setCategory(engineName);
         }
     }
 
-    private void setIPMtParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setIPMtParams(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
-        String url = p_request.getParameter(MTProfileConstants.MT_IP_URL)
-                .trim();
+        String url = p_request.getParameter(MTProfileConstants.MT_IP_URL).trim();
 
         if (StringUtils.isNotBlank(url))
         {
             mtProfile.setUrl(url);
         }
-        String key = p_request.getParameter(MTProfileConstants.MT_IP_KEY)
-                .trim();
+        String key = p_request.getParameter(MTProfileConstants.MT_IP_KEY).trim();
         if (StringUtils.isNotBlank(key))
         {
             mtProfile.setPassword(key);
@@ -268,25 +263,125 @@ public class MachineTranslateAdapter
     }
 
     /**
+     * Set Globalese specified parameters into TM profile object for save.
+     */
+    private void setGlobaleseParams(HttpServletRequest p_request,
+            MachineTranslationProfile mtProfile)
+    {
+        // =========================
+        // Global settings
+        // =========================
+        // Globalese server
+        String url = p_request.getParameter(MTProfileConstants.MT_GLOBALESE_URL);
+        // Globalese User name
+        String userName = p_request.getParameter(MTProfileConstants.MT_GLOBALESE_USERNAME);
+        // Globalese api Key
+        String apiKey = p_request.getParameter(MTProfileConstants.MT_GLOBALESE_API_KEY);
+
+        // =========================
+        // Project specific settings
+        // =========================
+
+        // Group Id to match with what is in Globalese
+        String groupId = p_request.getParameter(MTProfileConstants.MT_GLOBALESE_GROUP_ID);
+
+        // Engine Id to match with what is in Globalese
+        String engineId = p_request.getParameter(MTProfileConstants.MT_GLOBALESE_ENGINE_ID);
+
+        if (url != null && !"".equals(url.trim()))
+        {
+            mtProfile.setUrl(url.trim());
+        }
+
+        if (userName != null && !"".equals(userName.trim()))
+        {
+            mtProfile.setUsername(userName);
+        }
+
+        JSONObject ob = new JSONObject();
+        if (groupId != null && !"".equals(groupId.trim()))
+        {
+            try
+            {
+                ob.put("groupId", groupId);
+            }
+            catch (JSONException e)
+            {
+                logger.error(e);
+            }
+        }
+
+        if (engineId != null && !"".equals(engineId.trim()))
+        {
+            try
+            {
+                ob.put("engineId", engineId);
+            }
+            catch (JSONException e)
+            {
+                logger.error(e);
+            }
+        }
+
+        mtProfile.setJsonInfo(ob.toString());
+
+        if (apiKey != null)
+            apiKey = apiKey.trim();
+
+        // User Name and ApiKey to generate Base64 encoded string
+        String encoding = "";
+        try
+        {
+            encoding = Base64.getEncoder()
+                    .encodeToString((userName + ":" + apiKey).getBytes("UTF-8"));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            logger.error(e);
+        }
+
+        // Use base64 encoding as Category
+        mtProfile.setCategory(encoding);
+
+        // store api key into "accountinfo" column
+        if (StringUtils.isNotBlank(apiKey))
+        {
+            mtProfile.setAccountinfo(apiKey);
+        }
+
+        String msTransType = p_request.getParameter(MTProfileConstants.MT_MS_TRANS_TYPE);
+        if (msTransType != null && !"".equals(msTransType.trim()))
+        {
+            mtProfile.setMsTransType(msTransType);
+        }
+
+        String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
+        if (msMaxLength != null && !"".equals(msMaxLength.trim()))
+        {
+            mtProfile.setMsMaxLength(Long.parseLong(msMaxLength));
+        }
+        else
+        {
+            mtProfile.setMsMaxLength(1000);
+        }
+    }
+
+    /**
      * Set Promt specified parameters into TM profile object for save.
      */
-    private void setPromtParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setPromtParams(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
         // set pts url
         String ptsUrl = p_request.getParameter(MTProfileConstants.MT_PTSURL);
-        if (ptsUrl != null && !"".equals(ptsUrl.trim())
-                && !"null".equals(ptsUrl.trim()))
+        if (ptsUrl != null && !"".equals(ptsUrl.trim()) && !"null".equals(ptsUrl.trim()))
         {
             mtProfile.setUrl(ptsUrl.trim());
         }
         // set pts username
-        String ptsUsername = p_request
-                .getParameter(MTProfileConstants.MT_PTS_USERNAME);
+        String ptsUsername = p_request.getParameter(MTProfileConstants.MT_PTS_USERNAME);
         mtProfile.setUsername(ptsUsername.trim());
         // set pts password
-        String ptsPassword = p_request
-                .getParameter(MTProfileConstants.MT_PTS_PASSWORD);
+        String ptsPassword = p_request.getParameter(MTProfileConstants.MT_PTS_PASSWORD);
         if (checkPassword(ptsPassword))
         {
             mtProfile.setPassword(ptsPassword);
@@ -294,8 +389,7 @@ public class MachineTranslateAdapter
 
     }
 
-    private void setExtendInfo(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setExtendInfo(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
         String[] dirNames = p_request.getParameterValues("dirName");
         if (dirNames == null || dirNames.length == 0)
@@ -304,8 +398,7 @@ public class MachineTranslateAdapter
         if (exInfo == null || exInfo.size() < dirNames.length)
         {
 
-            exInfo = exInfo == null ? new HashSet<MachineTranslationExtentInfo>()
-                    : exInfo;
+            exInfo = exInfo == null ? new HashSet<MachineTranslationExtentInfo>() : exInfo;
             for (int i = exInfo.size(); i < dirNames.length; i++)
             {
                 exInfo.add(new MachineTranslationExtentInfo());
@@ -329,8 +422,7 @@ public class MachineTranslateAdapter
     /**
      * Set MS MT specified parameters into TM profile object for save.
      */
-    private void setMsMtParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setMsMtParams(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
         String url = p_request.getParameter(MTProfileConstants.MT_MS_URL);
         String clientId = p_request.getParameter(MTProfileConstants.MT_MS_CLIENT_ID);
@@ -371,36 +463,40 @@ public class MachineTranslateAdapter
         }
 
         String srRS = p_request.getParameter("sr_RS");
-        if (StringUtils.isEmpty(srRS)) {
-        	srRS = "sr-Latn";
+        if (StringUtils.isEmpty(srRS))
+        {
+            srRS = "sr-Latn";
         }
         String srYU = p_request.getParameter("sr_YU");
-        if (StringUtils.isEmpty(srYU)) {
-        	srYU = "sr-Latn";
+        if (StringUtils.isEmpty(srYU))
+        {
+            srYU = "sr-Latn";
         }
         JSONArray arr = new JSONArray();
         JSONObject srRSObj = new JSONObject();
         JSONObject srYUObj = new JSONObject();
-        try {
-			srRSObj.put("sr_RS", srRS);
-			srYUObj.put("sr_YU", srYU);
-			arr.put(srRSObj);
-			arr.put(srYUObj);
-			mtProfile.setJsonInfo(arr.toString());
-		} catch (JSONException e) {
-			// default.
-			mtProfile.setJsonInfo("[{\"sr_RS\":\"sr-Latn\"},{\"sr_YU\":\"sr-Latn\"}]");
-			logger.warn("Fail to save MT setting for MS Translator Serbian: "
-					+ e.getMessage());
-		}
-        
-       String msTransType =  p_request.getParameter(MTProfileConstants.MT_MS_TRANS_TYPE);
-       if (msTransType != null && !"".equals(msTransType.trim()))
-       {
-           mtProfile.setMsTransType(msTransType);
-       }
-  
-       String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
+        try
+        {
+            srRSObj.put("sr_RS", srRS);
+            srYUObj.put("sr_YU", srYU);
+            arr.put(srRSObj);
+            arr.put(srYUObj);
+            mtProfile.setJsonInfo(arr.toString());
+        }
+        catch (JSONException e)
+        {
+            // default.
+            mtProfile.setJsonInfo("[{\"sr_RS\":\"sr-Latn\"},{\"sr_YU\":\"sr-Latn\"}]");
+            logger.warn("Fail to save MT setting for MS Translator Serbian: " + e.getMessage());
+        }
+
+        String msTransType = p_request.getParameter(MTProfileConstants.MT_MS_TRANS_TYPE);
+        if (msTransType != null && !"".equals(msTransType.trim()))
+        {
+            mtProfile.setMsTransType(msTransType);
+        }
+
+        String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
         if (msMaxLength != null && !"".equals(msMaxLength.trim()))
         {
             mtProfile.setMsMaxLength(Long.parseLong(msMaxLength));
@@ -414,19 +510,13 @@ public class MachineTranslateAdapter
     /**
      * Set Safaba specified parameters into TM profile object for save.
      */
-    private void setSafabaParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setSafabaParams(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
-        String safaHost = p_request
-                .getParameter(MTProfileConstants.MT_SAFA_HOST);
-        String safaPort = p_request.getParameter(
-                MTProfileConstants.MT_SAFA_PORT).trim();
-        String safaCompanyName = p_request
-                .getParameter(MTProfileConstants.MT_SAFA_COMPANY_NAME);
-        String safaClient = p_request
-                .getParameter(MTProfileConstants.MT_SAFA_CLIENT);
-        String safaPassword = p_request
-                .getParameter(MTProfileConstants.MT_SAFA_PASSWORD);
+        String safaHost = p_request.getParameter(MTProfileConstants.MT_SAFA_HOST);
+        String safaPort = p_request.getParameter(MTProfileConstants.MT_SAFA_PORT).trim();
+        String safaCompanyName = p_request.getParameter(MTProfileConstants.MT_SAFA_COMPANY_NAME);
+        String safaClient = p_request.getParameter(MTProfileConstants.MT_SAFA_CLIENT);
+        String safaPassword = p_request.getParameter(MTProfileConstants.MT_SAFA_PASSWORD);
         mtProfile.setUrl(safaHost);
 
         mtProfile.setPort(Integer.parseInt(safaPort.trim()));
@@ -438,29 +528,25 @@ public class MachineTranslateAdapter
     /**
      * Set Asian Online specified parameters into TM profile object for save.
      */
-    private void setAOParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
+    private void setAOParams(HttpServletRequest p_request, MachineTranslationProfile mtProfile)
     {
         // MS Translator options
 
         String aoMtUrl = p_request.getParameter(MTProfileConstants.MT_AO_URL);
         mtProfile.setUrl(aoMtUrl.trim());
-        String aoMtPort = p_request.getParameter(MTProfileConstants.MT_AO_PORT)
-                .trim();
+        String aoMtPort = p_request.getParameter(MTProfileConstants.MT_AO_PORT).trim();
         mtProfile.setPort(Integer.parseInt(aoMtPort.trim()));
-        String aoMtUsername = p_request
-                .getParameter(MTProfileConstants.MT_AO_USERNAME);
+        String aoMtUsername = p_request.getParameter(MTProfileConstants.MT_AO_USERNAME);
         mtProfile.setUsername(aoMtUsername);
-        String aoMtPassword = p_request
-                .getParameter(MTProfileConstants.MT_AO_PASSWORD);
+        String aoMtPassword = p_request.getParameter(MTProfileConstants.MT_AO_PASSWORD);
         mtProfile.setPassword(aoMtPassword);
-        String aoMtAccountNumber = p_request.getParameter(
-                MTProfileConstants.MT_AO_ACCOUNT_NUMBER).trim();
+        String aoMtAccountNumber = p_request.getParameter(MTProfileConstants.MT_AO_ACCOUNT_NUMBER)
+                .trim();
         mtProfile.setAccountinfo(aoMtAccountNumber);
     }
 
-    public boolean testMTCommonOptions(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    public boolean testMTCommonOptions(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         EngineEnum ee = EngineEnum.getEngine(mtProfile.getMtEngine());
         switch (ee)
@@ -471,6 +557,8 @@ public class MachineTranslateAdapter
                 return testAOHost(mtProfile, writer);
             case Safaba:
                 return testSafabaHost(mtProfile, writer);
+            case Globalese:
+                return testGlobaleseHost(mtProfile, writer);
             case MS_Translator:
                 return testMSHost(mtProfile, writer);
             case IPTranslator:
@@ -484,8 +572,8 @@ public class MachineTranslateAdapter
         return false;
     }
 
-    private boolean testGoogle(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    private boolean testGoogle(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         String encodedText = "";
 
@@ -509,8 +597,8 @@ public class MachineTranslateAdapter
         catch (Exception e)
         {
             JSONObject jso = new JSONObject();
-            jso.put("ExceptionInfo", new String(
-                    "Connection to https://www.googleapis.com refused."));
+            jso.put("ExceptionInfo",
+                    new String("Connection to https://www.googleapis.com refused."));
             writer.write(jso.toString());
             logger.error(e);
             return false;
@@ -533,8 +621,8 @@ public class MachineTranslateAdapter
      * @return
      * @throws JSONException
      */
-    private boolean testMSHost(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    private boolean testMSHost(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         String clientId = mtProfile.getUsername();
         String clientSecret = mtProfile.getPassword();
@@ -587,8 +675,8 @@ public class MachineTranslateAdapter
      * @return
      * @throws JSONException
      */
-    private boolean testSafabaHost(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    private boolean testSafabaHost(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         String safaHost = mtProfile.getUrl();
         Integer safaPort = mtProfile.getPort();
@@ -598,9 +686,8 @@ public class MachineTranslateAdapter
 
         try
         {
-            SafabaTranslateUtil.translate(safaHost, (int) safaPort,
-                    safaCompanyName, safaPassword, safaClient, "ENUS-DEDE",
-                    "This is a test.", 30);
+            SafabaTranslateUtil.translate(safaHost, (int) safaPort, safaCompanyName, safaPassword,
+                    safaClient, "ENUS-DEDE", "This is a test.", 30);
         }
         catch (Exception e)
         {
@@ -625,6 +712,57 @@ public class MachineTranslateAdapter
     }
 
     /**
+     * Test the Globalese engine is reachable for specified parameters.
+     * 
+     * @param mtProfile
+     * @param writer
+     * @param tmProfile
+     * @return
+     * @throws JSONException
+     */
+    private boolean testGlobaleseHost(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
+    {
+        Client globClient = new Client(mtProfile.getUsername(), mtProfile.getAccountinfo(),
+                mtProfile.getUrl());
+        try
+        {
+            Long groupId = Long.parseLong(mtProfile.getJsonValue("groupId"));
+            Long engineId = Long.parseLong(mtProfile.getJsonValue("engineId"));
+            GlobaleseEngine engine = GlobaleseMTUtil.getEngine(globClient, engineId);
+            if (engine == null)
+            {
+                JSONObject jso = new JSONObject();
+                jso.put("ExceptionInfo", "Invalid Globalese Engine.");
+                writer.write(jso.toString());
+                return false;
+            }
+
+            GlobaleseMTUtil.translate(globClient, groupId, engineId, engine.getSource(),
+                    engine.getTarget(), "This is a test", 5);
+        }
+        catch (Exception e)
+        {
+            String errString = e.getMessage();
+            if (StringUtils.isNotEmpty(errString))
+            {
+                JSONObject jso = new JSONObject();
+                jso.put("ExceptionInfo", e.getMessage());
+                writer.write(jso.toString());
+                return false;
+            }
+            else
+            {
+                JSONObject jso = new JSONObject();
+                jso.put("ExceptionInfo", "Globalese server is not reachable.");
+                writer.write(jso.toString());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Test the Asian Online engine is reachable for specified parameters.
      * 
      * @param mtProfile
@@ -633,8 +771,8 @@ public class MachineTranslateAdapter
      * @return
      * @throws JSONException
      */
-    private boolean testAOHost(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    private boolean testAOHost(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         String aoMtUrl = mtProfile.getUrl();
         Integer aoMtPort = mtProfile.getPort();
@@ -644,16 +782,13 @@ public class MachineTranslateAdapter
 
         try
         {
-            AsiaOnlineMtInvoker aoInvoker = new AsiaOnlineMtInvoker(aoMtUrl,
-                    (int) aoMtPort, aoMtUserName, aoMtPassword,
-                    Integer.parseInt(aoMtAccountNumber.trim()));
+            AsiaOnlineMtInvoker aoInvoker = new AsiaOnlineMtInvoker(aoMtUrl, (int) aoMtPort,
+                    aoMtUserName, aoMtPassword, Integer.parseInt(aoMtAccountNumber.trim()));
 
-            Map aoSupportedLocalePairs = aoInvoker
-                    .getAllSupportedLanguagePairs();
+            Map aoSupportedLocalePairs = aoInvoker.getAllSupportedLanguagePairs();
 
             Map dirToTopicTemplateHM = new TreeMap();
-            if (aoSupportedLocalePairs != null
-                    && aoSupportedLocalePairs.size() > 0)
+            if (aoSupportedLocalePairs != null && aoSupportedLocalePairs.size() > 0)
             {
                 Iterator lpCodesIt = aoSupportedLocalePairs.keySet().iterator();
                 while (lpCodesIt.hasNext())
@@ -662,10 +797,8 @@ public class MachineTranslateAdapter
                     List dcListForSpecifiedLPCode = null;
 
                     dcListForSpecifiedLPCode = aoInvoker
-                            .getDomainCombinationByLPCode(Long
-                                    .parseLong(strLPCode));
-                    if (dcListForSpecifiedLPCode != null
-                            && dcListForSpecifiedLPCode.size() > 0)
+                            .getDomainCombinationByLPCode(Long.parseLong(strLPCode));
+                    if (dcListForSpecifiedLPCode != null && dcListForSpecifiedLPCode.size() > 0)
                     {
                         List directionsTplList = new ArrayList();
                         DomainCombination firstDC = (DomainCombination) dcListForSpecifiedLPCode
@@ -682,8 +815,8 @@ public class MachineTranslateAdapter
                             String dcCode = dc.getCode();
                             directionsTplList.add(dcCode + "@" + dcName);
                         }
-                        dirToTopicTemplateHM.put(lpName + "@" + strLPCode
-                                + "@#" + lpName4show, directionsTplList);
+                        dirToTopicTemplateHM.put(lpName + "@" + strLPCode + "@#" + lpName4show,
+                                directionsTplList);
 
                     }
                 }
@@ -699,8 +832,7 @@ public class MachineTranslateAdapter
         catch (Exception ex)
         {
             String exceptionInfo = ex.getMessage();
-            exceptionInfo = "Asia_Online server is not reachable.Please check "
-                    + exceptionInfo;
+            exceptionInfo = "Asia_Online server is not reachable.Please check " + exceptionInfo;
             JSONObject jso = new JSONObject();
             jso.put("ExceptionInfo", exceptionInfo);
             writer.write(jso.toString());
@@ -708,8 +840,8 @@ public class MachineTranslateAdapter
         }
     }
 
-    private boolean testPromtInfo(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    private boolean testPromtInfo(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         Map<String, String> dirsMap = null;
         List directionsList = new ArrayList();
@@ -743,14 +875,11 @@ public class MachineTranslateAdapter
                     Map.Entry entry = (Map.Entry) iter.next();
                     String lpName = (String) entry.getKey();
                     String lpId = (String) entry.getValue();
-                    List directionsTplList = invoker
-                            .getTopicTemplateByDirId(lpId);
-                    if (directionsTplList != null
-                            && directionsTplList.size() > 0)
+                    List directionsTplList = invoker.getTopicTemplateByDirId(lpId);
+                    if (directionsTplList != null && directionsTplList.size() > 0)
                     {
                         Collections.sort(directionsTplList);
-                        dirToTopicTemplateHM.put(lpName + "@" + lpId + "@",
-                                directionsTplList);
+                        dirToTopicTemplateHM.put(lpName + "@" + lpId + "@", directionsTplList);
                     }
                     else
                     {
@@ -775,8 +904,8 @@ public class MachineTranslateAdapter
             if (exMsg.toLowerCase().indexOf("unknownhostexception") != -1)
             {
                 int index = exMsg.toLowerCase().indexOf("unknownhostexception");
-                exMsg = exMsg.substring(index + "unknownhostexception".length()
-                        + 1, exMsg.length());
+                exMsg = exMsg.substring(index + "unknownhostexception".length() + 1,
+                        exMsg.length());
                 // exMsg = "Unkown Host:" + exMsg;
             }
 
@@ -786,8 +915,7 @@ public class MachineTranslateAdapter
                 ProMtPts9Invoker invoker2 = null;
                 if (ptsUsername != null && !"".equals(ptsUsername))
                 {
-                    invoker2 = new ProMtPts9Invoker(ptsUrl, ptsUsername,
-                            ptsPassword);
+                    invoker2 = new ProMtPts9Invoker(ptsUrl, ptsUsername, ptsPassword);
                 }
                 else
                 {
@@ -803,14 +931,11 @@ public class MachineTranslateAdapter
                         Map.Entry entry = (Map.Entry) iter.next();
                         String lpName = (String) entry.getKey();
                         String lpId = (String) entry.getValue();
-                        List directionsTplList = invoker2
-                                .getTopicTemplateByDirId(lpId);
-                        if (directionsTplList != null
-                                && directionsTplList.size() > 0)
+                        List directionsTplList = invoker2.getTopicTemplateByDirId(lpId);
+                        if (directionsTplList != null && directionsTplList.size() > 0)
                         {
                             Collections.sort(directionsTplList);
-                            dirToTopicTemplateHM.put(lpName + "@" + lpId,
-                                    directionsTplList);
+                            dirToTopicTemplateHM.put(lpName + "@" + lpId, directionsTplList);
                         }
                         else
                         {
@@ -842,8 +967,8 @@ public class MachineTranslateAdapter
         return false;
     }
 
-    private boolean testIPHost(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    private boolean testIPHost(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         String ipUrl = mtProfile.getUrl();
         String ipKey = mtProfile.getPassword();
@@ -868,8 +993,8 @@ public class MachineTranslateAdapter
         return true;
     }
 
-    private boolean testDoMT(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
+    private boolean testDoMT(MachineTranslationProfile mtProfile, PrintWriter writer)
+            throws JSONException
     {
         String url = mtProfile.getUrl();
         String engineName = mtProfile.getCategory();
@@ -906,8 +1031,8 @@ public class MachineTranslateAdapter
         return lang;
     }
 
-    public boolean isSupportsLocalePair(MachineTranslationProfile mt,
-            Locale sourcelocale, Locale targetlocale)
+    public boolean isSupportsLocalePair(MachineTranslationProfile mt, Locale sourcelocale,
+            Locale targetlocale)
     {
         boolean isSupportLocalePair = false;
         MachineTranslationExtentInfo result = null;
@@ -920,8 +1045,7 @@ public class MachineTranslateAdapter
                 lp = getLanguagePairNameForProMt(sourcelocale, targetlocale);
                 break;
             case IPTranslator:
-                return IPTranslatorUtil.supportsLocalePair(sourcelocale,
-                        targetlocale);
+                return IPTranslatorUtil.supportsLocalePair(sourcelocale, targetlocale);
             case Asia_Online:
                 lp = getLanguagePairNameForAo(sourcelocale, targetlocale);
                 // Currently AO supports zh-CN, not support zh-HK and zh-TW.
@@ -940,8 +1064,7 @@ public class MachineTranslateAdapter
         try
         {
             Set lp2DomainCombinations = mt.getExInfo();
-            if (lp2DomainCombinations != null
-                    && lp2DomainCombinations.size() > 0)
+            if (lp2DomainCombinations != null && lp2DomainCombinations.size() > 0)
             {
                 Iterator lp2DCIt = lp2DomainCombinations.iterator();
                 while (lp2DCIt.hasNext())
@@ -965,8 +1088,7 @@ public class MachineTranslateAdapter
         return isSupportLocalePair;
     }
 
-    private String getLanguagePairNameForAo(Locale sourcelocale,
-            Locale targetlocale)
+    private String getLanguagePairNameForAo(Locale sourcelocale, Locale targetlocale)
     {
         String srcLang = checkLang(sourcelocale);
         String trgLang = checkLang(targetlocale);
@@ -974,8 +1096,7 @@ public class MachineTranslateAdapter
         return lp;
     }
 
-    private String getLanguagePairNameForProMt(Locale p_sourceLocale,
-            Locale p_targetLocale)
+    private String getLanguagePairNameForProMt(Locale p_sourceLocale, Locale p_targetLocale)
     {
         if (p_sourceLocale == null || p_targetLocale == null)
         {

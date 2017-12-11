@@ -18,7 +18,6 @@ package com.globalsight.machineTranslation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -127,6 +126,9 @@ public abstract class AbstractTranslator implements MachineTranslator
                 break;
             case Safaba:
                 translatedSegs = trSafaba(sourceLocale, targetLocale, segments);
+                break;
+            case Globalese:
+                translatedSegs = doBatchTranslation(sourceLocale, targetLocale, segments);
                 break;
             case MS_Translator:
                     HashMap paramMap = getMtParameterMap();
@@ -775,6 +777,54 @@ public abstract class AbstractTranslator implements MachineTranslator
         return results;
     }
 
+
+    // Globalese does a file translation but it is sage to translate one by one.
+	// To be checked
+    @SuppressWarnings("unchecked")
+    private String[] trGlobalese(Locale sourceLocale, Locale targetLocale,
+            String[] segments, boolean containTags)
+            throws MachineTranslationException
+    {
+        if (containTags)
+        {
+            getMtParameterMap().put(MachineTranslator.CONTAIN_TAGS, "Y");            
+        }
+        else
+        {
+            getMtParameterMap().put(MachineTranslator.CONTAIN_TAGS, "N");            
+        }
+
+        String[] results = new String[segments.length];
+        for (int i = 0; i < segments.length; i++)
+        {
+            String translatedSegment = null;
+
+            if (containTags)
+            {
+                String segment = GxmlUtil.stripRootTag(segments[i]);
+                translatedSegment = doTranslation(sourceLocale, targetLocale,
+                        segment);
+                translatedSegment = MTHelper
+                        .encodeSeparatedAndChar(translatedSegment);
+                int index = segments[i].indexOf(">");
+                String head = segments[i].substring(0, index + 1);
+                if (translatedSegment == null)
+                {
+                    translatedSegment = "";
+                }
+                results[i] = head + translatedSegment + "</segment>";
+            }
+            else
+            {
+                translatedSegment = doTranslation(sourceLocale, targetLocale,
+                        segments[i]);
+                results[i] = translatedSegment;
+            }
+        }
+        return results;
+    }
+
+
     private String removeTags(String segment)
     {
         String s1, s2;
@@ -1070,6 +1120,8 @@ public abstract class AbstractTranslator implements MachineTranslator
                 return 99999;
             case Safaba:
                 return 50;
+			case Globalese:
+				return 50;
             case MS_Translator:
                 return 50;
             case IPTranslator:

@@ -368,6 +368,22 @@ public class MachineTranslationProfile implements java.io.Serializable
         this.exInfo = exInfo;
     }
 
+    public String getJsonValue(String key)
+    {
+        if (StringUtils.isEmpty(jsonInfo))
+            return "";
+        
+        try
+        {
+            JSONObject ob = new JSONObject(jsonInfo);
+            return ob.getString(key);
+        }
+        catch (JSONException e)
+        {
+            return "";
+        }
+    }
+    
     /**
      * For MS Translator and "sr" locale only
      * 

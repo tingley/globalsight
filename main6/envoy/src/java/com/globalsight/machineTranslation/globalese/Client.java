@@ -96,7 +96,6 @@ public class Client
 	
 	public Response execute(String uri, int method, String body) 
 	{
-	    System.out.println(uri);
 		Response response = new Response();
 		
 		String methodString = "";
@@ -148,7 +147,6 @@ public class Client
 	                        if (line1.contains("File not found"))
 	                            continue;
 	                        
-	                        System.out.println(line1);
 	                        logger.error(line1);
 	                    }
 	                    errReader.close();
@@ -157,7 +155,6 @@ public class Client
             }
             catch (Exception e)
             {
-                e.printStackTrace();
                 logger.error(e);
             }
 	        

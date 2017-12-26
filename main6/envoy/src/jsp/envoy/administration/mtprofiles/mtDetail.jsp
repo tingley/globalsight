@@ -597,12 +597,12 @@
             alert("<%=bundle.getString("lb_tm_globalese_mt_key_empty_invalid")%>");
             return false;
         }
-        else if (!globaleseMtGroupId)
+        else if (!globaleseMtGroupId || !isPositiveNum(globaleseMtGroupId))
         {
             alert("<%=bundle.getString("lb_tm_globalese_mt_group_id_empty_invalid")%>");            
             return false;
         }
-        else if (!globaleseMtEngineId)
+        else if (!globaleseMtEngineId || !isPositiveNum(globaleseMtEngineId))
         {
             alert("<%=bundle.getString("lb_tm_globalese_mt_engine_id_empty_invalid")%>");            
             return false;
@@ -664,15 +664,23 @@
 	
 	function checkLength()
 	{
+		var noError = true;
+		
 		var msMaxLength = $("#msMaxLength").val().trim();
-		if(msMaxLength == '' || isPositiveNum(msMaxLength))
+		if(!(msMaxLength == '' || isPositiveNum(msMaxLength)))
 		{
-			return true;
-		}else{
 			alert("<%=bundle.getString("msg_duplicate_max_length")%>");
 			return false;
 		}
 		
+		var maxLength = $("#maxLength2").val().trim();
+		if(!(maxLength == '' || isPositiveNum(maxLength)))
+		{
+			alert("<%=bundle.getString("msg_duplicate_max_length")%>");
+			return false;
+		}
+		
+		return true;
 	}
 	
 	function isPositiveNum(s)
@@ -925,6 +933,31 @@
 									value="<%=mtProfile4val.getJsonValue("engineId")%>" TYPE="text"
 									MAXLENGTH="128" SIZE="50" /></td>
 							</tr>
+							<tr>
+		                        <td  ALIGN="LEFT" STYLE="vertical-align: middle">
+		                        	<%=bundle.getString("lb_mt_ms_trans_type") %>:
+		                        </td>
+		                        <td>
+		                        	<INPUT CLASS="standardText"
+								NAME="<%= MTProfileConstants.MT_GLOBALESE_TRANS_TYPE%>"
+								 VALUE= "1" TYPE="radio" <%="1".equals(mtProfile4val.getMsTransType()) ? "checked" : ""%>></input>
+								<%=bundle.getString("lb_ms_text_between_tags")%>
+		                        	<br/>
+		                        	<INPUT CLASS="standardText"
+								NAME="<%=MTProfileConstants.MT_GLOBALESE_TRANS_TYPE %>"
+								 VALUE= "2" TYPE="radio" <%="2".equals(mtProfile4val.getMsTransType())||mtProfile4val.getMsTransType()==null? "checked" : ""%>></input>
+								<%=bundle.getString("lb_ms_text_including_tags")%>
+		                        </td>
+	                        </tr>
+							
+							<TR>
+								<TD align="left" style="white-space:nowrap"><%=bundle.getString("lb_ms_max_length")%>:</TD>
+								<TD><INPUT CLASS="standardText"
+									NAME="<%=MTProfileConstants.MT_GLOBALESE_MAX_LENGTH%>"
+								id="maxLength2" value="<%=mtProfile4val.getMsMaxLength()==0?1000:mtProfile4val.getMsMaxLength() %>"
+								 TYPE="text"	MAXLENGTH="20" SIZE="7"/>
+								</TD>
+							</TR>
 						</TABLE>
 						<p>
 					</div>

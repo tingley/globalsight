@@ -31,8 +31,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.globalsight.connector.eloqua.util.Response;
+import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
-import com.globalsight.util.FileUtil;
 import com.google.gson.Gson;
 
 public class GlobaleseMTUtil implements MTProfileConstants
@@ -41,8 +41,11 @@ public class GlobaleseMTUtil implements MTProfileConstants
 //    private static long projectId = 0L;
     private static long fileIdx = 1;
 
-    private static final String TARGET_REGEX = "<target[^>]*>(.*?)</target>";
+    private static final String TARGET_REGEX = "<target[^>/]*>(.*?)</target>";
     private static final Pattern TARGET_PATTERN = Pattern.compile(TARGET_REGEX);
+    
+    private static final String TARGET_REGEX2 = "<target[^>/]*/>";
+    private static final Pattern TARGET_PATTERN2 = Pattern.compile(TARGET_REGEX2);
 
     /**
      * Run a get request to test the Globalese connection
@@ -217,19 +220,76 @@ public class GlobaleseMTUtil implements MTProfileConstants
                 }
             }
             
-            Matcher m = TARGET_PATTERN.matcher(result);
             int i = 0;
-            while (m.find())
+            int s1 = -1;
+            int s2 = -1;
+            String ss1 = null;
+            
+            Matcher m2 = TARGET_PATTERN2.matcher(result);
+            Matcher m = TARGET_PATTERN.matcher(result);
+            while (true)
             {
-                String seg = m.group(1);
-                if (hasPrefix)
+                if (s1 < 0)
                 {
-                    seg = prefixs.get(i) + seg + "</segment>";
+                    if (m.find())
+                    {
+                        ss1 = m.group(1);
+                        s1 = m.start();
+                    }
                 }
-                translation.add(seg);
-                i++;
-            }
                 
+                if (s2 < 0)
+                {
+                    if (m2.find())
+                    {
+                        s2 = m2.start();
+                    }
+                }
+                
+                if (s1 < 0 && s2 < 0)
+                    break;
+                
+                if (s1 < 0)
+                {
+                    translation.add(segments[i]);
+                    s2 = -1;
+                    i++;
+                    continue;
+                }
+                    
+                
+                if (s2 < 0)
+                {
+                    if (hasPrefix)
+                    {
+                        ss1 = prefixs.get(i) + ss1 + "</segment>";
+                    }
+                    translation.add(ss1);
+                    s1 = -1;
+                    ss1 = null;
+                    i++;
+                    continue;
+                }
+                
+                if (s1 < s2)
+                {
+                    if (hasPrefix)
+                    {
+                        ss1 = prefixs.get(i) + ss1 + "</segment>";
+                    }
+                    translation.add(ss1);
+                    s1 = -1;
+                    ss1 = null;
+                    i++;
+                    continue;
+                }
+                else
+                {
+                    translation.add(segments[i]);
+                    s2 = -1;
+                    i++;
+                }
+            }
         }
 
         return translation;
@@ -526,7 +586,7 @@ public class GlobaleseMTUtil implements MTProfileConstants
         for (String segment : segments)
         {
             sb.append("  <trans-unit id=\"37323\">\r\n");
-            sb.append("  <source>").append(segment).append("</source>\r\n");
+            sb.append("  <source>").append(XmlUtil.escapeString(segment)).append("</source>\r\n");
             sb.append("  <target state=\"new\"></target>\r\n");
             sb.append("  </trans-unit>\r\n");
         }

@@ -349,13 +349,13 @@ public class MachineTranslateAdapter
             mtProfile.setAccountinfo(apiKey);
         }
 
-        String msTransType = p_request.getParameter(MTProfileConstants.MT_MS_TRANS_TYPE);
+        String msTransType = p_request.getParameter(MTProfileConstants.MT_GLOBALESE_TRANS_TYPE);
         if (msTransType != null && !"".equals(msTransType.trim()))
         {
             mtProfile.setMsTransType(msTransType);
         }
 
-        String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
+        String msMaxLength = p_request.getParameter(MTProfileConstants.MT_GLOBALESE_MAX_LENGTH);
         if (msMaxLength != null && !"".equals(msMaxLength.trim()))
         {
             mtProfile.setMsMaxLength(Long.parseLong(msMaxLength));
@@ -737,9 +737,14 @@ public class MachineTranslateAdapter
                 writer.write(jso.toString());
                 return false;
             }
-
-            GlobaleseMTUtil.translate(globClient, groupId, engineId, engine.getSource(),
-                    engine.getTarget(), "This is a test", 5);
+            
+            if (engine.getGroup() != groupId)
+            {
+                JSONObject jso = new JSONObject();
+                jso.put("ExceptionInfo", "Invalid Globalese group.");
+                writer.write(jso.toString());
+                return false;
+            }
         }
         catch (Exception e)
         {

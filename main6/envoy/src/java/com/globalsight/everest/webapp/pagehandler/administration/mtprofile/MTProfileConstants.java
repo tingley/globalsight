@@ -218,6 +218,8 @@ public interface MTProfileConstants
     public static final String MT_GLOBALESE_API_KEY = "globalese_api_key";
     public static final String MT_GLOBALESE_GROUP_ID = "globalese_group_id";
     public static final String MT_GLOBALESE_ENGINE_ID = "globalese_engine_id";
+    public static final String MT_GLOBALESE_MAX_LENGTH = "globalese_max_length";
+    public static final String MT_GLOBALESE_TRANS_TYPE = "globalese_trans_type";
 
     public static final String MT_SAFA_HOST = "safa_mt_host";
     public static final String MT_SAFA_PORT = "safa_mt_port";

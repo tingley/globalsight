@@ -128,7 +128,18 @@ public abstract class AbstractTranslator implements MachineTranslator
                 translatedSegs = trSafaba(sourceLocale, targetLocale, segments);
                 break;
             case Globalese:
-                translatedSegs = doBatchTranslation(sourceLocale, targetLocale, segments);
+                HashMap paramMap1 = getMtParameterMap();
+                MachineTranslationProfile mtProfile1 = (MachineTranslationProfile) paramMap1
+                        .get(MachineTranslator.MT_PROFILE);
+                String type1 = mtProfile1.getMsTransType();
+                if ("1".equals(type1))
+                {
+                    translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
+                }
+                else
+                {
+                    translatedSegs = trMs2(sourceLocale, targetLocale, segments);
+                }
                 break;
             case MS_Translator:
                     HashMap paramMap = getMtParameterMap();

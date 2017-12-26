@@ -23,6 +23,7 @@ public class GlobaleseEngine
     private String source;
     private String target;
     private String status;
+    private long group;
 
     GlobaleseEngine()
     {
@@ -73,5 +74,19 @@ public class GlobaleseEngine
     {
         this.status = status;
     }
+    
+    public long getGroup()
+    {
+        return group;
+    }
 
+    public void setGroup(long group)
+    {
+        this.group = group;
+    }
+
+    public void setId(long id)
+    {
+        this.id = id;
+    }
 }

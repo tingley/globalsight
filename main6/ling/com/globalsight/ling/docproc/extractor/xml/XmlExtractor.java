@@ -176,7 +176,8 @@ public class XmlExtractor extends AbstractExtractor
     // XML encoder
     private XmlEntities m_xmlEncoder = new XmlEntities();
     private XmlEntities m_xmlEncoderNoDefault = new XmlEntities();
-    private char[] m_postEntityChar = { '&' };
+    private char[] m_postEntityChar =
+    { '&' };
 
     // for extractor switching
     private String m_switchExtractionBuffer = new String();
@@ -208,7 +209,7 @@ public class XmlExtractor extends AbstractExtractor
 
     private long sidFilterId = -1;
     private long secondarySidFilter = -1;
-    
+
     //
     // Constructors
     //
@@ -256,7 +257,7 @@ public class XmlExtractor extends AbstractExtractor
             // Set the main format depending on which (derived) class
             // we're called in.
             setFormat();
-            
+
             // set use default xml entities to no
             m_xmlEncoderNoDefault.setUseDefaultXmlEncoderChar(false);
 
@@ -290,7 +291,7 @@ public class XmlExtractor extends AbstractExtractor
                 // files
                 preserveEmptyTag();
             }
-//            Reader reader = readInput(m_baseFilter);
+            // Reader reader = readInput(m_baseFilter);
             Reader reader = readInput();
             if (m_checkWellFormed)
             {
@@ -316,20 +317,20 @@ public class XmlExtractor extends AbstractExtractor
             m_isElementPost = m_xmlFilterHelper.isElementPostFilter();
             m_isElementPostToHtml = m_isElementPost
                     ? (IFormatNames.FORMAT_HTML.equals(m_elementPostFormat)) : false;
-            m_isElementPostToJson = m_isElementPost ? (IFormatNames.FORMAT_JSON
-                    .equals(m_elementPostFormat)) : false;
+            m_isElementPostToJson = m_isElementPost
+                    ? (IFormatNames.FORMAT_JSON.equals(m_elementPostFormat)) : false;
             m_cdataPostFormat = m_xmlFilterHelper.getCdataPostFormat();
             m_isCdataPost = m_xmlFilterHelper.isCdataPostFilter();
-            m_isCdataPostToHtml = m_isCdataPost ? (IFormatNames.FORMAT_HTML
-                    .equals(m_cdataPostFormat)) : false;
-            m_isCdataPostToJson = m_isCdataPost ? (IFormatNames.FORMAT_JSON
-                    .equals(m_cdataPostFormat)) : false;
-                    
+            m_isCdataPostToHtml = m_isCdataPost
+                    ? (IFormatNames.FORMAT_HTML.equals(m_cdataPostFormat)) : false;
+            m_isCdataPostToJson = m_isCdataPost
+                    ? (IFormatNames.FORMAT_JSON.equals(m_cdataPostFormat)) : false;
+
             String mainFormat = getMainFormat();
             // get rule map for the document
             m_ruleMap = m_rules.buildRulesWithFilter(document, m_xmlFilterHelper.getXmlFilterTags(),
                     mainFormat);
-            
+
             sidFilterId = m_xmlFilterHelper.getXmlFilterTags().getSidFilterId();
             secondarySidFilter = Long.parseLong(m_xmlFilterHelper.getSecondarySidFilter());
             for (ExtractRule rule : rules)
@@ -876,27 +877,35 @@ public class XmlExtractor extends AbstractExtractor
 
             if (switchesExtraction || m_isCdataPost || postFilter != null)
             {
+                // GBS-4799
+                String sid = Rule.getSid(m_ruleMap, p_node);
+                if (StringUtil.isNotEmpty(sid))
+                {
+                    m_switchExtractionSid = sid;
+                }
                 outputOtherFormat();
                 outputSkeleton("<![CDATA[");
                 m_switchExtractionBuffer += nodeValue;
 
                 if (postFilter != null && otherFormat != null)
                 {
-                    outputOtherFormatForCdata(otherFormat, postFilter, false);
+                    outputOtherFormatForCdata(otherFormat, postFilter, false,
+                            m_switchExtractionSid);
                 }
                 else if (m_isCdataPost)
                 {
-                    outputOtherFormatForCdata(null, null, true);
+                    outputOtherFormatForCdata(null, null, true, m_switchExtractionSid);
                 }
                 else
                 {
-                    outputOtherFormatForCdata(null, null, false);
+                    outputOtherFormatForCdata(null, null, false, m_switchExtractionSid);
                 }
 
                 outputSkeleton("]]>");
             }
             else
             {
+                String sid = Rule.getSid(m_ruleMap, p_node);
                 outputSkeleton("<![CDATA[");
                 // handle internal text for cdata
                 if (m_internalTexts != null && m_internalTexts.size() > 0)
@@ -909,6 +918,7 @@ public class XmlExtractor extends AbstractExtractor
                     outputExtractedStuff(m_xmlEncoder.encodeStringBasic(nodeValue), isTranslatable,
                             false);
                 }
+                setSid(sid);
                 outputSkeleton("]]>");
             }
         }
@@ -2039,7 +2049,7 @@ public class XmlExtractor extends AbstractExtractor
         }
         m_admin.addContent(p_ToAdd);
     }
-    
+
     private boolean isXmlSidFirst()
     {
         if (sidFilterId > 0)
@@ -2050,7 +2060,7 @@ public class XmlExtractor extends AbstractExtractor
                 return sf.getType() == 1;
             }
         }
-        
+
         if (secondarySidFilter > 0)
         {
             SidFilter sf = HibernateUtil.get(SidFilter.class, secondarySidFilter);
@@ -2059,7 +2069,7 @@ public class XmlExtractor extends AbstractExtractor
                 return sf.getType() == 1;
             }
         }
-        
+
         return false;
     }
 
@@ -2162,7 +2172,7 @@ public class XmlExtractor extends AbstractExtractor
     }
 
     private void outputOtherFormatForCdata(String p_otherFormat, Filter p_otherFilter,
-            boolean p_useGlobal) throws ExtractorException
+            boolean p_useGlobal, String sid) throws ExtractorException
     {
         try
         {
@@ -2178,7 +2188,7 @@ public class XmlExtractor extends AbstractExtractor
                 otherFilter = (p_otherFilter != null) ? p_otherFilter : null;
             }
 
-            outputOtherFormat(otherFormat, otherFilter, true, null);
+            outputOtherFormat(otherFormat, otherFilter, true, sid);
         }
         catch (Exception ex)
         {
@@ -2188,58 +2198,60 @@ public class XmlExtractor extends AbstractExtractor
             m_switchExtractionSid = null;
         }
     }
-    
+
     private boolean isUnextractSid(String sid)
     {
         if (sid == null)
             return false;
-        
+
         int n = sid.lastIndexOf("\n");
         if (n > 0)
         {
             sid = sid.substring(n);
         }
-        
+
         sid = sid.trim();
         if (sid.length() == 0)
             return false;
-        
+
         if (allGlobalExclusionFilterSids == null)
         {
             allGlobalExclusionFilterSids = new ArrayList<>();
-            
+
             if (sidFilterId > 0)
             {
                 SidFilter sf = HibernateUtil.get(SidFilter.class, sidFilterId);
                 if (sf != null)
                 {
-                    allGlobalExclusionFilterSids.addAll(GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sf));
+                    allGlobalExclusionFilterSids.addAll(
+                            GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sf));
                 }
             }
-            
+
             if (secondarySidFilter > 0)
             {
                 SidFilter sf = HibernateUtil.get(SidFilter.class, secondarySidFilter);
                 if (sf != null)
                 {
-                    allGlobalExclusionFilterSids.addAll(GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sf));
+                    allGlobalExclusionFilterSids.addAll(
+                            GlobalExclusionFilterHelper.getAllEnabledGlobalExclusionFilters(sf));
                 }
             }
         }
-        
+
         for (GlobalExclusionFilterSid f : allGlobalExclusionFilterSids)
         {
             if (!f.isSidIsRegEx() && f.getSid().equals(sid))
             {
                 return true;
             }
-            
+
             if (f.isSidIsRegEx() && sid.matches(f.getSid()))
             {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -2291,8 +2303,8 @@ public class XmlExtractor extends AbstractExtractor
                 }
 
                 Output output = null;
-                if (!isJsonStr
-                        && ((!m_isCdataPostToHtml && m_isCdataPostToJson) || (!m_isElementPostToHtml && m_isElementPostToJson)))
+                if (!isJsonStr && ((!m_isCdataPostToHtml && m_isCdataPostToJson)
+                        || (!m_isElementPostToHtml && m_isElementPostToJson)))
                 {
                     if (htmlFilterFormat != null && htmlFilterInJson != null)
                     {
@@ -2308,7 +2320,8 @@ public class XmlExtractor extends AbstractExtractor
                 }
                 else
                 {
-                    output = switchExtractor(replaced, otherFormat, null, otherFilter, true, this.getMainFilter());
+                    output = switchExtractor(replaced, otherFormat, null, otherFilter, true,
+                            this.getMainFilter());
                 }
                 Iterator it = output.documentElementIterator();
                 while (it.hasNext())
@@ -2348,12 +2361,12 @@ public class XmlExtractor extends AbstractExtractor
                             {
                                 skeleton = m_xmlEncoder.decodeStringBasic(skeleton);
                             }
-                            
+
                             if (isJsonStr)
                             {
                                 skeleton = m_xmlEncoder.decodeStringBasic(skeleton);
                             }
-                            
+
                             if (m_isOriginalXmlNode)
                             {
                                 skeleton = fixOriginalXmlNode(skeleton, m_originalXmlNode, false);
@@ -2416,7 +2429,7 @@ public class XmlExtractor extends AbstractExtractor
 
         return isJsonStr;
     }
-    
+
     private String fixOriginalXmlNode(String segment, List<String> originalXmlNode,
             boolean doubleEntity)
     {
@@ -2475,7 +2488,7 @@ public class XmlExtractor extends AbstractExtractor
         }
         else
         {
-            //replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
+            // replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
             replaced = StringUtil.replace(replaced, "&nbsp;", "_amp_amp_nbsp_");
         }
 
@@ -2945,7 +2958,9 @@ public class XmlExtractor extends AbstractExtractor
             Node att = attrs.item(i);
             String attname = att.getNodeName();
             String value = att.getNodeValue();
-            m_switchExtractionBuffer += " " + attname + "=&quot;" + m_xmlEncoder.encodeStringBasic(m_xmlEncoder.encodeStringBasic(value)) + "&quot;";
+            m_switchExtractionBuffer += " " + attname + "=&quot;"
+                    + m_xmlEncoder.encodeStringBasic(m_xmlEncoder.encodeStringBasic(value))
+                    + "&quot;";
         }
         m_switchExtractionBuffer += "&gt;</bpt>";
         outputExtractedStuffForInternalTag(isTranslatable, isPreserveWS);
@@ -2972,7 +2987,8 @@ public class XmlExtractor extends AbstractExtractor
             Node att = attrs.item(i);
             String attname = att.getNodeName();
             String value = att.getNodeValue();
-            m_switchExtractionBuffer += " " + attname + "=\"" + m_xmlEncoder.encodeStringBasic(value) + "\"";
+            m_switchExtractionBuffer += " " + attname + "=\""
+                    + m_xmlEncoder.encodeStringBasic(value) + "\"";
         }
 
         if (isEmptyTag)

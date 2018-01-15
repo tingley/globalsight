@@ -30,8 +30,6 @@ import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.ling.tm.LeverageSegment;
-import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -85,25 +83,26 @@ public interface LeverageMatchLingManager
      * @param p_jobId
      *            -- job ID
      */
-    public void deleteLeverageMatches(Long p_originalSourceTuvId,
-            String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId);
+    public void deleteLeverageMatches(Long p_originalSourceTuvId, String p_subId,
+            Long p_targetLocaleId, Long p_orderNum, long p_jobId);
 
     /**
-	 * Delete leverage matches for specified TUVs.
-	 * 
-	 * @param p_originalSourceTuvIds
-	 *            -- Can not be null
-	 * @param p_targetLocale
-	 * @param p_deleteFlag
-	 * 			  -- 0 (DEL_LEV_MATCHES_ALL): delete all matches.
-	 *            -- 1 (DEL_LEV_MATCHES_GOLD_TM_ONLY): delete matches from gold TM.
-	 *            -- 2 (DEL_LEV_MATCHES_IP_TM_ONLY): delete matches from in-progress TM.
-	 *            -- 3 (DEL_LEV_MATCHES_MT_ONLY): delete matches from MT engine.
-	 * @param p_jobId
-	 *            -- job ID
-	 */
-	public void deleteLeverageMatches(List<Long> p_originalSourceTuvIds,
-			GlobalSightLocale p_targetLocale, int p_deleteFlag, long p_jobId);
+     * Delete leverage matches for specified TUVs.
+     * 
+     * @param p_originalSourceTuvIds
+     *            -- Can not be null
+     * @param p_targetLocale
+     * @param p_deleteFlag
+     *            -- 0 (DEL_LEV_MATCHES_ALL): delete all matches. -- 1
+     *            (DEL_LEV_MATCHES_GOLD_TM_ONLY): delete matches from gold TM.
+     *            -- 2 (DEL_LEV_MATCHES_IP_TM_ONLY): delete matches from
+     *            in-progress TM. -- 3 (DEL_LEV_MATCHES_MT_ONLY): delete matches
+     *            from MT engine.
+     * @param p_jobId
+     *            -- job ID
+     */
+    public void deleteLeverageMatches(List<Long> p_originalSourceTuvIds,
+            GlobalSightLocale p_targetLocale, int p_deleteFlag, long p_jobId);
 
     /**
      * For each source Tuv find any exact matches in the LEVERAGE_MATCH table
@@ -116,8 +115,8 @@ public interface LeverageMatchLingManager
      * @return HashMap of target Strings. Key - source Tuv Id, Value -
      *         LeverageSegment.
      */
-    HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId,
-            Long p_targetLocaleId) throws RemoteException, LingManagerException;
+    HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId, Long p_targetLocaleId)
+            throws RemoteException, LingManagerException;
 
     /**
      * This method returns all the fuzzy matches for the given sourceTuvIds. If
@@ -138,12 +137,11 @@ public interface LeverageMatchLingManager
      *         the length of the list of keys in the returned HashMap can be
      *         different.
      */
-    HashMap<Long, Set<LeverageMatch>> getFuzzyMatches(Long p_sourePageId,
-            Long p_targetLocaleId) throws RemoteException, LingManagerException;
+    HashMap<Long, Set<LeverageMatch>> getFuzzyMatches(Long p_sourePageId, Long p_targetLocaleId)
+            throws RemoteException, LingManagerException;
 
-    HashMap<Long, ArrayList<LeverageSegment>> getExactMatchesWithSetInside(
-            Long p_sourcePageId, Long p_targetLocaleId, int model,
-            TranslationMemoryProfile tmProfile);
+    HashMap<Long, ArrayList<LeverageSegment>> getExactMatchesWithSetInside(Long p_sourcePageId,
+            Long p_targetLocaleId, int model, TranslationMemoryProfile tmProfile);
 
     /**
      * This method returns all the fuzzy matches for the given sourceTuvId. If
@@ -159,10 +157,9 @@ public interface LeverageMatchLingManager
      * @return SortedSet of LeverageMatch in sorted order. If no match is found,
      *         it returns null
      */
-    SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId,
-            Long p_targetLocaleId, String p_subId, boolean isTmProcedence,
-            long p_jobId, long... tmIds) throws RemoteException,
-            LingManagerException;
+    SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId, Long p_targetLocaleId,
+            String p_subId, boolean isTmProcedence, long p_jobId, long... tmIds)
+            throws RemoteException, LingManagerException;
 
     /**
      * Returns match type of Tuvs. With the given source Tuv ids and a target
@@ -176,9 +173,8 @@ public interface LeverageMatchLingManager
      *            job level value.
      * @return MatchTypeStatistics object
      */
-    MatchTypeStatistics getMatchTypesForStatistics(Long p_sourcePageId,
-            Long p_targetLocaleId, int p_levMatchThreshold)
-            throws RemoteException, LingManagerException;
+    MatchTypeStatistics getMatchTypesForStatistics(Long p_sourcePageId, Long p_targetLocaleId,
+            int p_levMatchThreshold) throws RemoteException, LingManagerException;
 
     /**
      * Returns true if a specified state indicates that the match is copied into
@@ -187,17 +183,17 @@ public interface LeverageMatchLingManager
      * @param p_lingManagerMatchType
      *            match state defined in this class
      */
-    boolean isMatchCopied(int p_lingManagerMatchType) throws RemoteException,
-            LingManagerException;
+    boolean isMatchCopied(int p_lingManagerMatchType) throws RemoteException, LingManagerException;
 
-    public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(
-            Long pageId, Long idAsLong);
+    public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(Long pageId, Long idAsLong);
 
-	public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId,
-			Long p_targetLocaleId);
+    public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId, Long p_targetLocaleId);
 
-    public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(
-            Long p_sourcePageId, Long p_targetLocaleId);
+    public List<LeverageMatch> getMultipleExactLeverageMatches(long p_sourcePageId,
+            long p_targetLocaleId);
+
+    public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(Long p_sourcePageId,
+            Long p_targetLocaleId);
 
     public boolean isIncludeMtMatches();
 
@@ -213,15 +209,12 @@ public interface LeverageMatchLingManager
      * @param p_leverageDataCenter
      *            Repository of matches of a page
      */
-    public void saveLeverageResults(Connection p_connection,
-            SourcePage p_sourcePage, LeverageDataCenter p_leverageDataCenter)
-            throws LingManagerException;
+    public void saveLeverageResults(Connection p_connection, SourcePage p_sourcePage,
+            LeverageDataCenter p_leverageDataCenter) throws LingManagerException;
 
-    public void saveLeverageResults(Connection p_connection,
-            long p_sourcePageId,
-            Map<Long, LeverageMatches> p_leverageMatchesMap,
-            GlobalSightLocale p_targetLocale, LeverageOptions p_leverageOptions)
-            throws LingManagerException;
+    public void saveLeverageResults(Connection p_connection, long p_sourcePageId,
+            Map<Long, LeverageMatches> p_leverageMatchesMap, GlobalSightLocale p_targetLocale,
+            LeverageOptions p_leverageOptions) throws LingManagerException;
 
     /**
      * Update the LEVERAGED_MATCH tables with the collection of LeverageMatch.
@@ -231,18 +224,15 @@ public interface LeverageMatchLingManager
      * @param p_leverageMatchList
      *            - a Collection of LeverageMatch.
      */
-    public void saveLeveragedMatches(
-            Collection<LeverageMatch> p_leverageMatchList, long p_jobId)
+    public void saveLeveragedMatches(Collection<LeverageMatch> p_leverageMatchList, long p_jobId)
             throws RemoteException, LingManagerException;
 
-    public void saveLeveragedMatches(
-            Collection<LeverageMatch> p_leverageMatchList,
+    public void saveLeveragedMatches(Collection<LeverageMatch> p_leverageMatchList,
             Connection p_connection, long p_jobId) throws LingManagerException;
 
     /**
      * Get best match score for specified TUV.
      */
-    public float getBestMatchScore(Connection p_connection,
-            long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
-            long p_jobId);
+    public float getBestMatchScore(Connection p_connection, long p_originalSourceTuvId,
+            long p_targetLocaleId, String p_subId, long p_jobId);
 }

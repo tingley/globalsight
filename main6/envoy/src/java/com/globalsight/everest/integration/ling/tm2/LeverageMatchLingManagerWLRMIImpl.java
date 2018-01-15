@@ -37,8 +37,8 @@ import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.util.GlobalSightLocale;
 
-public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
-        LeverageMatchLingManagerWLRemote
+public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer
+        implements LeverageMatchLingManagerWLRemote
 {
     private LeverageMatchLingManager m_localInstance = null;
 
@@ -58,43 +58,40 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance;
     }
 
-	@Override
-    public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
-            String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId)
-            throws LingManagerException
+    @Override
+    public void deleteLeverageMatches(Long p_OriginalSourceTuvId, String p_subId,
+            Long p_targetLocaleId, Long p_orderNum, long p_jobId) throws LingManagerException
     {
-        m_localInstance.deleteLeverageMatches(p_OriginalSourceTuvId, p_subId,
-                p_targetLocaleId, p_orderNum, p_jobId);
+        m_localInstance.deleteLeverageMatches(p_OriginalSourceTuvId, p_subId, p_targetLocaleId,
+                p_orderNum, p_jobId);
     }
 
-	@Override
-	public void deleteLeverageMatches(List<Long> p_originalSourceTuvIds,
-			GlobalSightLocale p_targetLocale, int p_deleteFlag, long p_jobId)
-	{
-		m_localInstance.deleteLeverageMatches(p_originalSourceTuvIds,
-				p_targetLocale, p_deleteFlag, p_jobId);
-	}
+    @Override
+    public void deleteLeverageMatches(List<Long> p_originalSourceTuvIds,
+            GlobalSightLocale p_targetLocale, int p_deleteFlag, long p_jobId)
+    {
+        m_localInstance.deleteLeverageMatches(p_originalSourceTuvIds, p_targetLocale, p_deleteFlag,
+                p_jobId);
+    }
 
-	public HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId,
-            Long p_targetLocaleId) throws RemoteException, LingManagerException
+    public HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId, Long p_targetLocaleId)
+            throws RemoteException, LingManagerException
     {
         return m_localInstance.getExactMatches(p_spLgId, p_targetLocaleId);
     }
 
-    public HashMap<Long, Set<LeverageMatch>> getFuzzyMatches(
-            Long p_sourePageId, Long p_targetLocaleId) throws RemoteException,
-            LingManagerException
+    public HashMap<Long, Set<LeverageMatch>> getFuzzyMatches(Long p_sourePageId,
+            Long p_targetLocaleId) throws RemoteException, LingManagerException
     {
         return m_localInstance.getFuzzyMatches(p_sourePageId, p_targetLocaleId);
     }
 
-    public SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId,
-            Long p_targetLocaleId, String p_subId, boolean isTmProcedence,
-            long p_jobId, long... tmIds) throws RemoteException,
-            LingManagerException
+    public SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId, Long p_targetLocaleId,
+            String p_subId, boolean isTmProcedence, long p_jobId, long... tmIds)
+            throws RemoteException, LingManagerException
     {
-        return m_localInstance.getTuvMatches(p_sourceTuvId, p_targetLocaleId,
-                p_subId, isTmProcedence, p_jobId, tmIds);
+        return m_localInstance.getTuvMatches(p_sourceTuvId, p_targetLocaleId, p_subId,
+                isTmProcedence, p_jobId, tmIds);
     }
 
     /**
@@ -105,8 +102,8 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
             Long p_targetLocaleId, int p_levMatchThreshold)
             throws RemoteException, LingManagerException
     {
-        return m_localInstance.getMatchTypesForStatistics(p_sourcePageId,
-                p_targetLocaleId, p_levMatchThreshold);
+        return m_localInstance.getMatchTypesForStatistics(p_sourcePageId, p_targetLocaleId,
+                p_levMatchThreshold);
     }
 
     public boolean isMatchCopied(int p_lingManagerMatchType)
@@ -115,25 +112,20 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.isMatchCopied(p_lingManagerMatchType);
     }
 
-    public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(
-            Long pageId, Long idAsLong)
+    public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(Long pageId, Long idAsLong)
     {
         return m_localInstance.getExactMatchesForDownLoadTmx(pageId, idAsLong);
     }
 
-    public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(
-            Long pageId, Long idAsLong)
+    public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(Long pageId, Long idAsLong)
     {
-        return m_localInstance.getLeverageMatchesForOfflineDownLoad(pageId,
-                idAsLong);
+        return m_localInstance.getLeverageMatchesForOfflineDownLoad(pageId, idAsLong);
     }
 
-    public HashMap<Long, ArrayList<LeverageSegment>> getExactMatchesWithSetInside(
-            Long pageId, Long localeId, int model,
-            TranslationMemoryProfile tmProfile)
+    public HashMap<Long, ArrayList<LeverageSegment>> getExactMatchesWithSetInside(Long pageId,
+            Long localeId, int model, TranslationMemoryProfile tmProfile)
     {
-        return m_localInstance.getExactMatchesWithSetInside(pageId, localeId,
-                model, tmProfile);
+        return m_localInstance.getExactMatchesWithSetInside(pageId, localeId, model, tmProfile);
     }
 
     public boolean isIncludeMtMatches()
@@ -146,54 +138,50 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
         m_localInstance.setIncludeMtMatches(isIncludeMtMatches);
     }
 
-    public void saveLeverageResults(Connection p_connection,
-            SourcePage p_sourcePage, LeverageDataCenter p_leverageDataCenter)
-            throws LingManagerException
+    public void saveLeverageResults(Connection p_connection, SourcePage p_sourcePage,
+            LeverageDataCenter p_leverageDataCenter) throws LingManagerException
     {
-        m_localInstance.saveLeverageResults(p_connection, p_sourcePage,
-                p_leverageDataCenter);
+        m_localInstance.saveLeverageResults(p_connection, p_sourcePage, p_leverageDataCenter);
     }
 
-    public void saveLeverageResults(Connection p_connection,
-            long p_sourcePageId,
-            Map<Long, LeverageMatches> p_leverageMatchesMap,
-            GlobalSightLocale p_targetLocale, LeverageOptions p_leverageOptions)
-            throws LingManagerException
+    public void saveLeverageResults(Connection p_connection, long p_sourcePageId,
+            Map<Long, LeverageMatches> p_leverageMatchesMap, GlobalSightLocale p_targetLocale,
+            LeverageOptions p_leverageOptions) throws LingManagerException
     {
-        m_localInstance.saveLeverageResults(p_connection, p_sourcePageId,
-                p_leverageMatchesMap, p_targetLocale, p_leverageOptions);
+        m_localInstance.saveLeverageResults(p_connection, p_sourcePageId, p_leverageMatchesMap,
+                p_targetLocale, p_leverageOptions);
     }
 
-    public void saveLeveragedMatches(
-            Collection<LeverageMatch> p_leverageMatchList, long p_jobId)
+    public void saveLeveragedMatches(Collection<LeverageMatch> p_leverageMatchList, long p_jobId)
             throws RemoteException, LingManagerException
     {
         m_localInstance.saveLeveragedMatches(p_leverageMatchList, p_jobId);
     }
 
-    public void saveLeveragedMatches(
-            Collection<LeverageMatch> p_leverageMatchList,
+    public void saveLeveragedMatches(Collection<LeverageMatch> p_leverageMatchList,
             Connection p_connection, long p_jobId) throws LingManagerException
     {
-        m_localInstance.saveLeveragedMatches(p_leverageMatchList, p_connection,
-                p_jobId);
+        m_localInstance.saveLeveragedMatches(p_leverageMatchList, p_connection, p_jobId);
     }
 
     /**
      * Get best match score for specified TUV.
      */
-    public float getBestMatchScore(Connection p_connection,
-            long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
-            long p_jobId)
+    public float getBestMatchScore(Connection p_connection, long p_originalSourceTuvId,
+            long p_targetLocaleId, String p_subId, long p_jobId)
     {
-        return m_localInstance.getBestMatchScore(p_connection,
-                p_originalSourceTuvId, p_targetLocaleId, p_subId, p_jobId);
+        return m_localInstance.getBestMatchScore(p_connection, p_originalSourceTuvId,
+                p_targetLocaleId, p_subId, p_jobId);
     }
 
-	public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId,
-			Long p_targetLocaleId)
-	{
-		return m_localInstance.getExactLeverageMatches(p_sourcePageId,
-				p_targetLocaleId);
-	}
+    public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId, Long p_targetLocaleId)
+    {
+        return m_localInstance.getExactLeverageMatches(p_sourcePageId, p_targetLocaleId);
+    }
+
+    public List<LeverageMatch> getMultipleExactLeverageMatches(long p_sourcePageId,
+            long p_targetLocaleId)
+    {
+        return m_localInstance.getMultipleExactLeverageMatches(p_sourcePageId, p_targetLocaleId);
+    }
 }

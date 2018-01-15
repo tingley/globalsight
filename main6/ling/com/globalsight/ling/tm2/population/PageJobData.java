@@ -204,10 +204,6 @@ public class PageJobData
         Set<String> excludeStates = new HashSet<String>();
         excludeStates.add(TuvState.COMPLETE.getName());
 
-        if (!p_saveUntranslated)
-        {
-            excludeStates.add(TuvState.NOT_LOCALIZED.getName());
-        }
         if (!saveWhollyInternalText)
         {
             excludeStates.add(TuvState.DO_NOT_TRANSLATE.getName());
@@ -221,10 +217,17 @@ public class PageJobData
 
         tuList = filterData(tuList, p_saveLocalized, p_saveMTedSeg);
 
+        // GBS-4808, save multiple 100% match with sid available when "save
+        // approved segments to TM"
+        tuList = filterMultipleExactMatchWithSidData(tuList, p_targetLocales, p_page.getId(),
+                p_saveUntranslated, p_saveApproved);
+
         if (!p_saveExactMatch)
-            return filterExactMatchData(tuList, p_targetLocales, p_page.getId());
-        else
-            return tuList;
+        {
+            tuList = filterExactMatchData(tuList, p_targetLocales, p_page.getId());
+        }
+
+        return tuList;
     }
 
     private Collection<PageTmTu> filterData(Collection<PageTmTu> tuList, boolean p_saveLocalized,
@@ -277,9 +280,108 @@ public class PageJobData
     }
 
     /**
+     * Adds multiple 100% match segments with SID available in the list.
+     * 
+     * @since GBS-4808
+     */
+    private Collection<PageTmTu> filterMultipleExactMatchWithSidData(Collection<PageTmTu> tuList,
+            Set<GlobalSightLocale> p_targetLocales, long pageId, boolean p_saveUntranslated,
+            boolean p_saveApproved)
+    {
+        ArrayList<PageTmTu> returnTuList = new ArrayList<PageTmTu>();
+        Map<String, Set<LeverageMatch>> leverageMatchMap = new HashMap<String, Set<LeverageMatch>>();
+        List<LeverageMatch> leverageMatches = null;
+        for (GlobalSightLocale targetLocale : p_targetLocales)
+        {
+            leverageMatches = LingServerProxy.getLeverageMatchLingManager()
+                    .getMultipleExactLeverageMatches(pageId, targetLocale.getId());
+            for (LeverageMatch match : leverageMatches)
+            {
+                String key = match.getOriginalSourceTuvId() + "_" + targetLocale.getId();
+                Set<LeverageMatch> set = (TreeSet<LeverageMatch>) leverageMatchMap.get(key);
+                if (set == null)
+                {
+                    set = new TreeSet<LeverageMatch>();
+                    leverageMatchMap.put(key, set);
+                }
+                set.add(match);
+            }
+        }
+        Set<LeverageMatch> leverageMatchSet = null;
+        for (PageTmTu tu : tuList)
+        {
+            PageTmTu clonedTu = (PageTmTu) tu.clone();
+            PageTmTuv sourceTuv = (PageTmTuv) tu.getFirstTuv(m_sourceLocale);
+            clonedTu.addTuv(sourceTuv);
+
+            Iterator itLocale = tu.getAllTuvLocales().iterator();
+            while (itLocale.hasNext())
+            {
+                GlobalSightLocale tuvLocale = (GlobalSightLocale) itLocale.next();
+                if (!tuvLocale.equals(m_sourceLocale))
+                {
+                    PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
+                    leverageMatchSet = leverageMatchMap
+                            .get(sourceTuv.getId() + "_" + tuvLocale.getId());
+                    if (leverageMatchSet != null)
+                    {
+                        if (TuvState.NOT_LOCALIZED.getName().equals(tuv.getState()))
+                        {
+                            boolean isSidDifferent = false;
+                            for (LeverageMatch match : leverageMatchSet)
+                            {
+                                if (match.getSid() != null && tuv.getSid() != null
+                                        && !match.getSid().equals(tuv.getSid()))
+                                {
+                                    isSidDifferent = true;
+                                    break;
+                                }
+                                else if (match.getSid() == null && tuv.getSid() != null)
+                                {
+                                    isSidDifferent = true;
+                                    break;
+                                }
+                            }
+                            if (isSidDifferent && (p_saveApproved || p_saveUntranslated))
+                            {
+                                clonedTu.addTuv(tuv);
+                            }
+                            else if (tuv.getSid() == null && p_saveUntranslated)
+                            {
+                                clonedTu.addTuv(tuv);
+                            }
+                        }
+                        else
+                        {
+                            clonedTu.addTuv(tuv);
+                        }
+                    }
+                    else if (TuvState.NOT_LOCALIZED.getName().equals(tuv.getState()))
+                    {
+                        if (p_saveUntranslated)
+                        {
+                            clonedTu.addTuv(tuv);
+                        }
+                    }
+                    else
+                    {
+                        clonedTu.addTuv(tuv);
+                    }
+                }
+            }
+            if (clonedTu.getTuvSize() > 1)
+            {
+                returnTuList.add(clonedTu);
+            }
+        }
+
+        return returnTuList;
+    }
+
+    /**
      * GBS-4068 : No new TU (with SID) created in the storage TM for AuthorIT
      * SID
-     * */
+     */
     private Collection<PageTmTu> filterExactMatchData(Collection<PageTmTu> tuList,
             Set<GlobalSightLocale> p_targetLocales, long pageId)
     {
@@ -320,8 +422,8 @@ public class PageJobData
                     if (!tuvLocale.equals(m_sourceLocale))
                     {
                         PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
-                        leverageMatchSet = leverageMatchMap.get(sourceTuv.getId() + "_"
-                                + tuvLocale.getId());
+                        leverageMatchSet = leverageMatchMap
+                                .get(sourceTuv.getId() + "_" + tuvLocale.getId());
                         if (leverageMatchSet != null)
                         {
                             if (TuvState.EXACT_MATCH_LOCALIZED.getName().equals(tuv.getState()))
@@ -486,8 +588,8 @@ public class PageJobData
             }
 
             // load SID from "translation_tu_tuv_attr_xx" table
-            List<TuTuvAttributeImpl> sidAttrs = SegmentTuTuvAttributeUtil.getSidAttributesByTuvIds(
-                    tuvIds, m_jobId);
+            List<TuTuvAttributeImpl> sidAttrs = SegmentTuTuvAttributeUtil
+                    .getSidAttributesByTuvIds(tuvIds, m_jobId);
             HashMap<Long, String> sidAttrMap = new HashMap<Long, String>();
             for (TuTuvAttributeImpl sidAttr : sidAttrs)
             {
@@ -582,8 +684,7 @@ public class PageJobData
         }
     }
 
-    private void doRenumberSubIds(PageTmTuv p_tuv, GxmlFragmentReader p_gxmlReader)
-            throws Exception
+    private void doRenumberSubIds(PageTmTuv p_tuv, GxmlFragmentReader p_gxmlReader) throws Exception
     {
         String segment = p_tuv.getSegment();
         GxmlElement gxmlElement = p_gxmlReader.parseFragment(segment);

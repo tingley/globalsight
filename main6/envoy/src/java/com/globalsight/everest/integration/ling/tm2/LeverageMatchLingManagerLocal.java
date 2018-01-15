@@ -106,6 +106,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     /**
      * Used to get all exact matches despite of where they come from.
      */
+    private static final String MULTIPLE_EXACT_LEVERAGE_MATCH_SQL = SELECT_COLUMNS
+            + " WHERE lm.SOURCE_PAGE_ID = ?" + " AND lm.TARGET_LOCALE_ID = ?"
+            + " AND lm.SCORE_NUM = 100" + " AND lm.MATCH_TYPE = '"
+            + MatchState.MULTIPLE_TRANSLATION.getName() + "'";
+
     private static final String EXACT_LEVERAGE_MATCH_SQL = SELECT_COLUMNS
             + " WHERE lm.SOURCE_PAGE_ID = ?" + " AND lm.TARGET_LOCALE_ID = ?"
             + " AND lm.SCORE_NUM = 100";
@@ -556,6 +561,47 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 p_targetLocaleId);
 
         return getLeverageMatchMap(leverageMatches);
+    }
+
+    public List<LeverageMatch> getMultipleExactLeverageMatches(long p_sourcePageId,
+            long p_targetLocaleId) throws LingManagerException
+    {
+        List<LeverageMatch> leverageMatches = new ArrayList<LeverageMatch>();
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try
+        {
+            connection = DbUtil.getConnection();
+
+            String lmTableName = BigTableUtil.getLMTableJobDataInBySourcePageId(p_sourcePageId);
+            String lmExtTableName = BigTableUtil
+                    .getLMExtTableJobDataInBySourcePageId(p_sourcePageId);
+            String sql = MULTIPLE_EXACT_LEVERAGE_MATCH_SQL
+                    .replace(LM_TABLE_NAME_PLACE_HOLDER, lmTableName)
+                    .replace(LM_EXT_TABLE_NAME_PLACE_HOLDER, lmExtTableName);
+
+            ps = connection.prepareStatement(sql);
+            ps.setLong(1, p_sourcePageId);
+            ps.setLong(2, p_targetLocaleId);
+            rs = ps.executeQuery();
+            leverageMatches = convertToLeverageMatches(rs);
+        }
+        catch (Exception ex)
+        {
+            c_logger.error("getMultipleExactLeverageMatches() error", ex);
+            throw new LingManagerException(ex);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+        return leverageMatches;
     }
 
     public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId, Long p_targetLocaleId)

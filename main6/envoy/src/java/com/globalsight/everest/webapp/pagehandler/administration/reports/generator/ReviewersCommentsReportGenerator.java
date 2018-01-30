@@ -320,6 +320,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat) throws Exception
     {
+ 	boolean lastPass = true;
         boolean categoryFailureDropDownAdded = false;
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
         for (GlobalSightLocale trgLocale : p_targetLocales)
@@ -389,9 +390,11 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             // Insert Segment Data
             int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
 			 // GBS-4727 Create DQF Information sheet
-			if (isDQFEnabled) {
+			if (isDQFEnabled && lastPass) 
+			{
 				Sheet dqfInfoSheet = p_workbook.createSheet(m_bundle.getString("dqf_info_title"));
 				DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, m_bundle);
+				lastPass = false;
 			}
         }
     }

@@ -94,6 +94,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
+import com.globalsight.util.DQFInfoReport;
 import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ReportStyle;
@@ -324,6 +325,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         {
             File file = getFile(reportType + TAG_COMBINED, null, combinedWorkBook);
             addCriteriaSheet(combinedWorkBook, jobsList, stateSet, projectSet, data);
+
+			// GBS-4790 Create DQF Information sheet
+           if (isDQFEnabled) 
+			{  
+				Sheet dqfInfoSheet = combinedWorkBook.createSheet(bundle.getString("dqf_info_title"));
+				DQFInfoReport.generateDQFInfoSheet(combinedWorkBook, dqfInfoSheet, bundle);
+			}
+
             FileOutputStream out = new FileOutputStream(file);
             combinedWorkBook.write(out);
             out.close();
@@ -394,7 +403,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat,
             HashMap<Long, List<DQFDataInCAR>> dqfInfo) throws Exception
-    {
+    {	
+		boolean addDQFInfo = false;
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
         for (GlobalSightLocale trgLocale : p_targetLocales)
         {
@@ -480,7 +490,17 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, p_dateFormat,
                         SEGMENT_START_ROW);
             }
+
+			if(isDQFEnabled) // even if enabled only on one sheet add DQF info
+					addDQFInfo = true;
         }
+			
+        // GBS-4790 Create DQF Information sheet
+		 if (addDQFInfo && !isCombineAllJobs) 
+		  {  
+				Sheet dqfInfoSheet = p_workbook.createSheet(bundle.getString("dqf_info_title"));
+				DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, bundle);
+		  }
     }
 
     private int addDQFHeader(Workbook workbook, Sheet sheet, Job job,

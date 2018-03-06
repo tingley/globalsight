@@ -16,13 +16,37 @@
  */
 package com.globalsight.connector.blaise;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
 import com.cognitran.translation.client.TranslationPageCommand;
-import com.globalsight.connector.blaise.form.*;
+import com.globalsight.connector.blaise.form.BlaiseConnectorAttribute;
+import com.globalsight.connector.blaise.form.BlaiseConnectorFilter;
+import com.globalsight.connector.blaise.form.CreateBlaiseJobForm;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
-import com.globalsight.cxe.entity.customAttribute.*;
+import com.globalsight.cxe.entity.customAttribute.Attribute;
+import com.globalsight.cxe.entity.customAttribute.Condition;
+import com.globalsight.cxe.entity.customAttribute.FloatCondition;
+import com.globalsight.cxe.entity.customAttribute.IntCondition;
+import com.globalsight.cxe.entity.customAttribute.ListCondition;
+import com.globalsight.cxe.entity.customAttribute.TextCondition;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -37,32 +61,24 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
-import jodd.util.StringBand;
-import org.apache.log4j.Logger;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import jodd.util.StringBand;
 
 public class BlaiseMainHandler extends PageActionHandler
 {
-	static private final Logger logger = Logger
-			.getLogger(BlaiseMainHandler.class);
+    static private final Logger logger = Logger.getLogger(BlaiseMainHandler.class);
 
-	private List<?> allConns = null;
+    private List<?> allConns = null;
 
     @ActionHandler(action = "save", formClass = "com.globalsight.cxe.entity.blaise.BlaiseConnector", loadFromDb = false)
-    public void save(HttpServletRequest request, HttpServletResponse response,
-            Object form) throws Exception
+    public void save(HttpServletRequest request, HttpServletResponse response, Object form)
+            throws Exception
     {
-    	BlaiseConnector connector = (BlaiseConnector) form;
+        BlaiseConnector connector = (BlaiseConnector) form;
         String id = request.getParameter("companyId");
-        if(StringUtil.isNotEmpty(id))
+        if (StringUtil.isNotEmpty(id))
         {
-        	connector.setCompanyId(Long.parseLong(id));
+            connector.setCompanyId(Long.parseLong(id));
         }
 
         HttpSession session = request.getSession(false);
@@ -78,18 +94,17 @@ public class BlaiseMainHandler extends PageActionHandler
         if (systemCalendar.getTimeZone().getRawOffset() != userCalendar.getTimeZone()
                 .getRawOffset())
         {
-            //user set a different time zone from system time zone
+            // user set a different time zone from system time zone
             Calendar cal = Calendar.getInstance();
             cal.set(userCalendar.get(Calendar.YEAR), userCalendar.get(Calendar.MONTH),
-                    userCalendar.get(Calendar.DATE),
-                    userCalendar.get(Calendar.HOUR_OF_DAY),
+                    userCalendar.get(Calendar.DATE), userCalendar.get(Calendar.HOUR_OF_DAY),
                     userCalendar.get(Calendar.MINUTE), userCalendar.get(Calendar.SECOND));
             long times = cal.getTimeInMillis() - systemCalendar.getTimeInMillis();
             hours = (int) times / 3600000;
         }
 
-        String[] days = new String[] { "monday", "tuesday", "wednesday", "thursday", "friday",
-                "saturday", "sunday" };
+        String[] days = new String[]
+        { "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" };
         StringBand pullDays = new StringBand();
         ArrayList<Integer> pullDaysList = new ArrayList<>();
         for (String day : days)
@@ -112,7 +127,7 @@ public class BlaiseMainHandler extends PageActionHandler
 
         if (hours != 0)
         {
-            //user set different time zone with server time zone
+            // user set different time zone with server time zone
             int cz = 0;
 
             int iHours = tmpPullHour - hours;
@@ -183,23 +198,39 @@ public class BlaiseMainHandler extends PageActionHandler
             attribute = new BlaiseConnectorAttribute();
             value = request.getParameter(param);
             attribute.setBlaiseConnectorId(connectorId);
-            if (!param.startsWith("anyAttr") && !param.startsWith("hduAttr")
-                    && !param.startsWith("isheetAttr"))
+            if (!param.startsWith("isheetAttr") && !param.startsWith("ownerManualAttr")
+                    && !param.startsWith("serviceManualAttr") && !param.startsWith("edmAttr")
+                    && !param.startsWith("hduMiscLiteratureAttr") && !param.startsWith("paAttr"))
                 continue;
-            if (param.startsWith("anyAttr"))
-            {
-                param = param.substring("anyAttr".length());
-                attribute.setBlaiseJobType("A");
-            }
-            else if (param.startsWith("hduAttr"))
-            {
-                param = param.substring("hudAttr".length());
-                attribute.setBlaiseJobType("H");
-            }
-            else if (param.startsWith("isheetAttr"))
+            if (param.startsWith("isheetAttr"))
             {
                 param = param.substring("isheetAttr".length());
                 attribute.setBlaiseJobType("I");
+            }
+            else if (param.startsWith("ownerManualAttr"))
+            {
+                param = param.substring("ownerManualAttr".length());
+                attribute.setBlaiseJobType("O");
+            }
+            else if (param.startsWith("serviceManualAttr"))
+            {
+                param = param.substring("serviceManualAttr".length());
+                attribute.setBlaiseJobType("S");
+            }
+            else if (param.startsWith("edmAttr"))
+            {
+                param = param.substring("edmAttr".length());
+                attribute.setBlaiseJobType("E");
+            }
+            else if (param.startsWith("hduMiscLiteratureAttr"))
+            {
+                param = param.substring("hduMiscLiteratureAttr".length());
+                attribute.setBlaiseJobType("H");
+            }
+            else if (param.startsWith("paAttr"))
+            {
+                param = param.substring("paAttr".length());
+                attribute.setBlaiseJobType("P");
             }
             long attrId = Long.parseLong(param);
             Attribute attribute1 = HibernateUtil.get(Attribute.class, attrId);
@@ -220,8 +251,8 @@ public class BlaiseMainHandler extends PageActionHandler
     }
 
     @ActionHandler(action = "remove", formClass = "")
-    public void remove(HttpServletRequest request,
-            HttpServletResponse response, Object form) throws Exception
+    public void remove(HttpServletRequest request, HttpServletResponse response, Object form)
+            throws Exception
     {
         String[] ids = request.getParameterValues("blaiseConnectorIds");
         for (String id : ids)
@@ -234,8 +265,8 @@ public class BlaiseMainHandler extends PageActionHandler
     }
 
     @ActionHandler(action = "demo", formClass = "")
-    public void demo(HttpServletRequest request,
-                       HttpServletResponse response, Object form) throws Exception
+    public void demo(HttpServletRequest request, HttpServletResponse response, Object form)
+            throws Exception
     {
         String[] ids = request.getParameterValues("blaiseConnectorIds");
         for (String id : ids)
@@ -244,26 +275,50 @@ public class BlaiseMainHandler extends PageActionHandler
             BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(cId);
             BlaiseHelper helper = new BlaiseHelper(blc);
 
-            //demo to fetch procedure entries to create a job
-            TranslationPageCommand command = helper.initTranslationPageCommand(0, 10,
-                    null, "en_US", "de_DE",
-                    BlaiseConstants.GS_TYPE_PROCEDURE, null, 0, false);
+            // demo to fetch procedure entries to create a job
+            TranslationPageCommand command = helper.initTranslationPageCommand(0, 10, null, "en_US",
+                    "de_DE", BlaiseConstants.GS_TYPE_PROCEDURE, null, 0, false);
             List<TranslationInboxEntryVo> entries = helper.listInbox(command);
             logger.info("Fetch entries == " + (entries != null ? entries.size() : "0"));
-            ArrayList<TranslationInboxEntryVo> hduEntries = new ArrayList<>();
-            ArrayList<TranslationInboxEntryVo> edmEntries = new ArrayList<>();
-            ArrayList<TranslationInboxEntryVo> otherEntries = new ArrayList<>();
+            List<TranslationInboxEntryVo> iSheetEntries = new ArrayList<>();
+            List<TranslationInboxEntryVo> ownerManualEntries = new ArrayList<>();
+            List<TranslationInboxEntryVo> serviceManualEntries = new ArrayList<>();
+            List<TranslationInboxEntryVo> edmManualEntries = new ArrayList<>();
+            List<TranslationInboxEntryVo> hduMiscLiteratureEntries = new ArrayList<>();
+            List<TranslationInboxEntryVo> paEntries = new ArrayList<>();
             if (entries != null)
             {
-                for (TranslationInboxEntryVo entry : entries)
+                for (TranslationInboxEntryVo vo : entries)
                 {
-                    if (entry.isUsageOfHDU())
-                        hduEntries.add(entry);
-                    else if (entry.isUsageOfIsSheet())
-                        edmEntries.add(entry);
+                    if (helper.isCategoryISheet(vo))
+                    {
+                        iSheetEntries.add(vo);
+                    }
+                    else if (helper.isCategoryOwnerManual(vo))
+                    {
+                        ownerManualEntries.add(vo);
+                    }
+                    else if (helper.isCategoryServiceManual(vo))
+                    {
+                        serviceManualEntries.add(vo);
+                    }
+                    else if (helper.isCategoryEdmManual(vo))
+                    {
+                        edmManualEntries.add(vo);
+                    }
+                    else if (helper.isCategoryHduMiscLiterature(vo))
+                    {
+                        hduMiscLiteratureEntries.add(vo);
+                    }
+                    else if (helper.isCategoryPa(vo))
+                    {
+                        paEntries.add(vo);
+                    }
                     else
-                        otherEntries.add(entry);
-                    helper.claim(entry.getId());
+                    {
+                        ownerManualEntries.add(vo);
+                    }
+                    helper.claim(vo.getId());
                 }
                 ExecutorService pool = Executors.newFixedThreadPool(10);
                 HttpSession session = request.getSession(false);
@@ -272,8 +327,8 @@ public class BlaiseMainHandler extends PageActionHandler
                 User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
                 String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
                 List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
-                FileProfile fp = HibernateUtil
-                        .get(FileProfileImpl.class, blc.getDefaultFileProfileId());
+                FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
+                        blc.getDefaultFileProfileId());
                 for (int i = 0; i < entries.size(); i++)
                     fileProfiles.add(fp);
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
@@ -284,8 +339,7 @@ public class BlaiseMainHandler extends PageActionHandler
                 blaiseForm.setPriority("3");
 
                 CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
-                        blc, blaiseForm, entries, fileProfiles, null,
-                        null, null, null);
+                        blc, blaiseForm, entries, fileProfiles, null, null, null, null);
                 Thread t = new MultiCompanySupportedThread(runnable);
                 pool.execute(t);
             }
@@ -293,9 +347,9 @@ public class BlaiseMainHandler extends PageActionHandler
     }
 
     @SuppressWarnings("unchecked")
-	@ActionHandler(action = "filter", formClass = "com.globalsight.connector.blaise.form.BlaiseConnectorFilter")
-    public void filter(HttpServletRequest request,
-            HttpServletResponse response, Object form) throws Exception
+    @ActionHandler(action = "filter", formClass = "com.globalsight.connector.blaise.form.BlaiseConnectorFilter")
+    public void filter(HttpServletRequest request, HttpServletResponse response, Object form)
+            throws Exception
     {
         allConns = BlaiseManager.getAllConnectors();
         BlaiseConnectorFilter filter = (BlaiseConnectorFilter) form;
@@ -308,31 +362,26 @@ public class BlaiseMainHandler extends PageActionHandler
     }
 
     @Override
-	public void beforeAction(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException,
-			EnvoyServletException
-	{
+    public void beforeAction(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, EnvoyServletException
+    {
         allConns = null;
-        clearSessionExceptTableInfo(request.getSession(false),
-                "blaiseConnectorKey");
+        clearSessionExceptTableInfo(request.getSession(false), "blaiseConnectorKey");
 
         response.setCharacterEncoding("utf-8");
-	}
+    }
 
-	@Override
-	public void afterAction(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException,
-			EnvoyServletException
-	{
-		dataForTable(request);
-	}
+    @Override
+    public void afterAction(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, EnvoyServletException
+    {
+        dataForTable(request);
+    }
 
-	private void dataForTable(HttpServletRequest request)
-            throws GeneralException
+    private void dataForTable(HttpServletRequest request) throws GeneralException
     {
         HttpSession session = request.getSession(false);
-        Locale uiLocale = (Locale) session
-                .getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
 
         if (allConns == null)
         {
@@ -352,12 +401,11 @@ public class BlaiseMainHandler extends PageActionHandler
             {
                 size = Integer.MAX_VALUE;
             }
-            
+
             session.setAttribute("blaiseConnectorPageSize", size);
         }
 
-        setTableNavigation(request, session, allConns,
-                new BlaiseConnectorComparator(uiLocale), size,
-                "blaiseConnectorList", "blaiseConnectorKey");
+        setTableNavigation(request, session, allConns, new BlaiseConnectorComparator(uiLocale),
+                size, "blaiseConnectorList", "blaiseConnectorKey");
     }
 }

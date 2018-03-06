@@ -136,6 +136,8 @@ public class BlaiseHelper
                 BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT);
         relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_TRANSLATABLE_OBJECT,
                 BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT);
+        relatedObjectClassName2Type.put(BlaiseConstants.BLAISE_TYPE_PARTS_CATALOG,
+                BlaiseConstants.GS_TYPE_PARTS_CATALOG);
 
         type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_GRAPHIC,
                 BlaiseConstants.BLAISE_TYPE_GRAPHIC);
@@ -147,6 +149,8 @@ public class BlaiseHelper
                 BlaiseConstants.BLAISE_TYPE_CONTROLLED_CONTENT);
         type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT,
                 BlaiseConstants.BLAISE_TYPE_TRANSLATABLE_OBJECT);
+        type2RelatedObjectClassName.put(BlaiseConstants.GS_TYPE_PARTS_CATALOG,
+                BlaiseConstants.BLAISE_TYPE_PARTS_CATALOG);
     }
 
     public BlaiseHelper(BlaiseConnector blc)
@@ -292,7 +296,7 @@ public class BlaiseHelper
 
     /**
      * Converts Blaise translation inbox entry to GlobalSight
-     * TranslationInboxEntryVo object
+     * TranslationInboxEntryVo object.
      */
     private TranslationInboxEntryVo convert(TranslationInboxEntry entry,
             TranslationAgencyClient client) throws Exception
@@ -344,7 +348,7 @@ public class BlaiseHelper
     }
 
     /**
-     * Groups the inbox entries
+     * Groups the inbox entries.
      */
     public void groupInboxEntries()
     {
@@ -374,9 +378,12 @@ public class BlaiseHelper
 
             List<TranslationInboxEntryVo> entries = null;
             List<TranslationInboxEntryVo> totalEntries = new ArrayList<>();
-            ArrayList<TranslationInboxEntryVo> hduEntries = null;
-            ArrayList<TranslationInboxEntryVo> inSheetEntries = null;
-            ArrayList<TranslationInboxEntryVo> otherEntries = null;
+            List<TranslationInboxEntryVo> iSheetEntries = null;
+            List<TranslationInboxEntryVo> ownerManualEntries = null;
+            List<TranslationInboxEntryVo> serviceManualEntries = null;
+            List<TranslationInboxEntryVo> edmManualEntries = null;
+            List<TranslationInboxEntryVo> hduMiscLiteratureEntries = null;
+            List<TranslationInboxEntryVo> paEntries = null;
             TranslationPageCommand command = new TranslationPageCommand();
             int count = 100;
             if (blc.getQaCount() > 0)
@@ -418,18 +425,43 @@ public class BlaiseHelper
 
             if (totalEntries != null && totalEntries.size() > 0)
             {
-                hduEntries = new ArrayList<>();
-                inSheetEntries = new ArrayList<>();
-                otherEntries = new ArrayList<>();
+                iSheetEntries = new ArrayList<>();
+                ownerManualEntries = new ArrayList<>();
+                serviceManualEntries = new ArrayList<>();
+                edmManualEntries = new ArrayList<>();
+                hduMiscLiteratureEntries = new ArrayList<>();
+                paEntries = new ArrayList<>();
                 Set<Long> entryIds = new HashSet<>();
                 for (TranslationInboxEntryVo vo : totalEntries)
                 {
-                    if (vo.isUsageOfIsSheet() && isInSheetType(vo))
-                        inSheetEntries.add(vo);
-                    else if (vo.isUsageOfHDU() && isHDUType(vo))
-                        hduEntries.add(vo);
+                    if (isCategoryISheet(vo))
+                    {
+                        iSheetEntries.add(vo);
+                    }
+                    else if (isCategoryOwnerManual(vo))
+                    {
+                        ownerManualEntries.add(vo);
+                    }
+                    else if (isCategoryServiceManual(vo))
+                    {
+                        serviceManualEntries.add(vo);
+                    }
+                    else if (isCategoryEdmManual(vo))
+                    {
+                        edmManualEntries.add(vo);
+                    }
+                    else if (isCategoryHduMiscLiterature(vo))
+                    {
+                        hduMiscLiteratureEntries.add(vo);
+                    }
+                    else if (isCategoryPa(vo))
+                    {
+                        paEntries.add(vo);
+                    }
                     else
-                        otherEntries.add(vo);
+                    {
+                        ownerManualEntries.add(vo);
+                    }
                     entryIds.add(vo.getEntry().getId());
                     try
                     {
@@ -443,29 +475,39 @@ public class BlaiseHelper
                 }
                 logger.info("Done fetching entries for company " + companyId);
 
-                BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class,
-                        fp.getL10nProfileId());
-                ExecutorService pool = Executors.newFixedThreadPool(5);
                 CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm();
                 blaiseForm.setPriority("3");
                 blaiseForm.setBlaiseConnectorId(String.valueOf(blc.getId()));
                 blaiseForm.setUserName(userId);
-                int size = 0;
-                ArrayList<FileProfile> fps = null;
                 String companyIdString = String.valueOf(companyId);
-                if (inSheetEntries != null && inSheetEntries.size() > 0)
+                if (iSheetEntries != null && iSheetEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "I", companyIdString, userId, fp, inSheetEntries,
+                    createJob(blaiseForm, "I", companyIdString, userId, fp, iSheetEntries,
                             blc.isCombined());
                 }
-                if (otherEntries != null && otherEntries.size() > 0)
+                if (ownerManualEntries != null && ownerManualEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "A", companyIdString, userId, fp, otherEntries,
+                    createJob(blaiseForm, "O", companyIdString, userId, fp, ownerManualEntries,
                             blc.isCombined());
                 }
-                if (hduEntries != null && hduEntries.size() > 0)
+                if (serviceManualEntries != null && serviceManualEntries.size() > 0)
                 {
-                    createJob(blaiseForm, "H", companyIdString, userId, fp, hduEntries,
+                    createJob(blaiseForm, "S", companyIdString, userId, fp, serviceManualEntries,
+                            blc.isCombined());
+                }
+                if (edmManualEntries != null && edmManualEntries.size() > 0)
+                {
+                    createJob(blaiseForm, "E", companyIdString, userId, fp, edmManualEntries,
+                            blc.isCombined());
+                }
+                if (hduMiscLiteratureEntries != null && hduMiscLiteratureEntries.size() > 0)
+                {
+                    createJob(blaiseForm, "H", companyIdString, userId, fp,
+                            hduMiscLiteratureEntries, blc.isCombined());
+                }
+                if (paEntries != null && paEntries.size() > 0)
+                {
+                    createJob(blaiseForm, "P", companyIdString, userId, fp, paEntries,
                             blc.isCombined());
                 }
             }
@@ -477,7 +519,7 @@ public class BlaiseHelper
     }
 
     private void createJob(CreateBlaiseJobForm blaiseJobForm, String type, String companyId,
-            String userId, FileProfile fp, ArrayList<TranslationInboxEntryVo> entries,
+            String userId, FileProfile fp, List<TranslationInboxEntryVo> entries,
             boolean isCombinedByLang) throws RemoteException
     {
         BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class,
@@ -494,11 +536,11 @@ public class BlaiseHelper
             if (isCombinedByLang)
             {
                 blaiseJobForm.setCombineByLangs("on");
-                HashMap<String, ArrayList<TranslationInboxEntryVo>> localeGroup = groupEntriesByLang(
+                HashMap<String, List<TranslationInboxEntryVo>> localeGroup = groupEntriesByLang(
                         entries);
                 Iterator<String> keys = localeGroup.keySet().iterator();
                 String targetLocale;
-                ArrayList<TranslationInboxEntryVo> localeEntries;
+                List<TranslationInboxEntryVo> localeEntries;
                 while (keys.hasNext())
                 {
                     targetLocale = keys.next();
@@ -539,13 +581,13 @@ public class BlaiseHelper
         }
     }
 
-    private HashMap<String, ArrayList<TranslationInboxEntryVo>> groupEntriesByLang(
-            ArrayList<TranslationInboxEntryVo> entries)
+    private HashMap<String, List<TranslationInboxEntryVo>> groupEntriesByLang(
+            List<TranslationInboxEntryVo> entries)
     {
-        HashMap<String, ArrayList<TranslationInboxEntryVo>> result = new HashMap<>();
+        HashMap<String, List<TranslationInboxEntryVo>> result = new HashMap<>();
         if (entries != null && entries.size() > 0)
         {
-            ArrayList<TranslationInboxEntryVo> entryList = new ArrayList<>();
+            List<TranslationInboxEntryVo> entryList = new ArrayList<>();
             String tmp;
             for (TranslationInboxEntryVo entry : entries)
             {
@@ -616,27 +658,111 @@ public class BlaiseHelper
         return result;
     }
 
-    public boolean isHDUType(TranslationInboxEntryVo vo)
+    public boolean isCategoryISheet(TranslationInboxEntryVo vo)
     {
-        if (vo == null || !vo.isUsageOfHDU())
+        if (vo == null)
+        {
             return false;
+        }
         String type = vo.getType();
-        if (type.equals(BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT)
-                || type.equals(BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT)
-                || type.equals(BlaiseConstants.GS_TYPE_GRAPHIC)
-                || type.equals(BlaiseConstants.GS_TYPE_PROCEDURE))
+        if (BlaiseConstants.GS_TYPE_STANDALONE.equals(type))
+        {
             return true;
+        }
+        if (BlaiseConstants.GS_TYPE_PROCEDURE.equals(type) && vo.hasUsageISheet())
+        {
+            return true;
+        }
+
         return false;
     }
 
-    public boolean isInSheetType(TranslationInboxEntryVo vo)
+    public boolean isCategoryOwnerManual(TranslationInboxEntryVo vo)
     {
-        if (vo == null || !vo.isUsageOfIsSheet())
+        if (vo == null)
+        {
             return false;
+        }
         String type = vo.getType();
-        if (type.equals(BlaiseConstants.GS_TYPE_STANDALONE)
-                || type.equals(BlaiseConstants.GS_TYPE_GRAPHIC))
+        if (BlaiseConstants.GS_TYPE_CONTROLLED_CONTENT.equals(type)
+                || BlaiseConstants.GS_TYPE_GRAPHIC.equals(type)
+                || BlaiseConstants.GS_TYPE_TRANSLATABLE_OBJECT.equals(type))
+        {
             return true;
+        }
+        if (BlaiseConstants.GS_TYPE_PROCEDURE.equals(type) && !vo.hasUsageISheet()
+                && vo.hasUsageOwnerManual())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isCategoryServiceManual(TranslationInboxEntryVo vo)
+    {
+        if (vo == null)
+        {
+            return false;
+        }
+        String type = vo.getType();
+        if (BlaiseConstants.GS_TYPE_PROCEDURE.equals(type) && !vo.hasUsageISheet()
+                && !vo.hasUsageOwnerManual()
+                && (vo.hasUsageServiceManual() || vo.hasUsagePdiManual()))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isCategoryEdmManual(TranslationInboxEntryVo vo)
+    {
+        if (vo == null)
+        {
+            return false;
+        }
+        String type = vo.getType();
+        if (BlaiseConstants.GS_TYPE_PROCEDURE.equals(type) && !vo.hasUsageISheet()
+                && !vo.hasUsageOwnerManual() && !vo.hasUsageServiceManual()
+                && !vo.hasUsagePdiManual() && vo.hasUsageEdmManual())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isCategoryHduMiscLiterature(TranslationInboxEntryVo vo)
+    {
+        if (vo == null)
+        {
+            return false;
+        }
+        String type = vo.getType();
+        if (BlaiseConstants.GS_TYPE_PROCEDURE.equals(type) && !vo.hasUsageISheet()
+                && !vo.hasUsageOwnerManual() && !vo.hasUsageServiceManual()
+                && !vo.hasUsagePdiManual() && !vo.hasUsageEdmManual()
+                && vo.hasUsageHduMiscLiterature())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isCategoryPa(TranslationInboxEntryVo vo)
+    {
+        if (vo == null)
+        {
+            return false;
+        }
+        String type = vo.getType();
+        if (BlaiseConstants.GS_TYPE_PARTS_CATALOG.equals(type))
+        {
+            return true;
+        }
+
         return false;
     }
 

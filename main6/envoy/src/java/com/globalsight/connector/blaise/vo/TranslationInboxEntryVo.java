@@ -16,14 +16,18 @@
  */
 package com.globalsight.connector.blaise.vo;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.log4j.Logger;
+
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.globalsight.connector.blaise.BlaiseConstants;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
-import jodd.util.StringBand;
-import org.apache.log4j.Logger;
 
-import java.util.*;
+import jodd.util.StringBand;
 
 public class TranslationInboxEntryVo
 {
@@ -32,25 +36,28 @@ public class TranslationInboxEntryVo
     private TranslationInboxEntry entry = null;
     private List<String> usages = null;
     private int wordCount = 0;
-    private boolean isUsageOfHDU = false;
-    private boolean isUsageOfIsSheet = false;
-    private boolean isOtherUsages = false;
+    private boolean hasUsageISheet = false;
+    private boolean hasUsageOwnerManual = false;
+    private boolean hasUsageServiceManual = false;
+    private boolean hasUsagePdiManual = false;
+    private boolean hasUsageEdmManual = false;
+    private boolean hasUsageHduMiscLiterature = false;
 
-	// GlobalSight Job ID if job created
-	private List<Long> jobIds = null;
+    // GlobalSight Job ID if job created
+    private List<Long> jobIds = null;
 
-	// for junit test only
-	public TranslationInboxEntryVo()
-	{
-	}
+    // for junit test only
+    public TranslationInboxEntryVo()
+    {
+    }
 
-	public TranslationInboxEntryVo(TranslationInboxEntry entry) throws Exception
-	{
-		if (entry == null)
-		{
-		    logger.error("The TranslationInboxEntry object is null.");
-			throw new Exception("The TranslationInboxEntry object is null.");
-		}
+    public TranslationInboxEntryVo(TranslationInboxEntry entry) throws Exception
+    {
+        if (entry == null)
+        {
+            logger.error("The TranslationInboxEntry object is null.");
+            throw new Exception("The TranslationInboxEntry object is null.");
+        }
 
         if (entry.getSourceLocale() == null)
         {
@@ -66,8 +73,8 @@ public class TranslationInboxEntryVo
             throw new Exception(msg);
         }
 
-		this.entry = entry;
-	}
+        this.entry = entry;
+    }
 
     private void logBadEntryInfo(TranslationInboxEntry entry, String msg)
     {
@@ -79,220 +86,256 @@ public class TranslationInboxEntryVo
         logger.info("entry.getDescription(): " + entry.getDescription());
         logger.info("entry.getSourceLocale(): " + entry.getSourceLocale());
         logger.info("entry.getTargetLocale(): " + entry.getTargetLocale());
-		logger.info("usages of entry: " + usages);
-		logger.info("word count of entry: " + wordCount);
+        logger.info("usages of entry: " + usages);
+        logger.info("word count of entry: " + wordCount);
         logger.info("------------------------------------------------------------");
     }
 
-	public List<String> getUsages()
-	{
-		return usages;
-	}
-
-	public String getUsages2UI()
-	{
-		StringBand usagesString = new StringBand();
-		if (usages != null && usages.size() > 0)
-		{
-			for (String usage : usages)
-			{
-				usagesString.append(usage).append("<br>");
-			}
-		}
-		String info = usagesString.toString();
-		if (info.length() > 0)
-			info.substring(0, info.length() - 4);
-		return info;
-	}
-
-	public void setUsages(List<String> usages)
-	{
-		this.usages = usages;
-		if (usages != null) {
-			for (String usage : usages)
-			{
-				if (BlaiseConstants.USAGE_TYPE_HDU.equals(usage))
-					isUsageOfHDU = true;
-				else if (BlaiseConstants.USAGE_TYPE_ISHEET.equals(usage))
-					isUsageOfIsSheet = true;
-				else
-				    isOtherUsages = true;
-			}
-		}
-	}
-
-    public boolean isUsageOfHDU()
+    public List<String> getUsages()
     {
-        return isUsageOfHDU;
+        return usages;
     }
 
-    public boolean isUsageOfIsSheet()
+    public String getUsages2UI()
     {
-        return isUsageOfIsSheet;
+        StringBand usagesString = new StringBand();
+        if (usages != null && usages.size() > 0)
+        {
+            for (String usage : usages)
+            {
+                usagesString.append(usage).append("<br>");
+            }
+        }
+        String info = usagesString.toString();
+        if (info.length() > 0)
+            info.substring(0, info.length() - 4);
+        return info;
     }
 
-    public boolean isOtherUsages()
+    public void setUsages(List<String> usages)
     {
-        return isOtherUsages;
+        this.usages = usages;
+        if (usages != null)
+        {
+            for (String usage : usages)
+            {
+                if (BlaiseConstants.USAGE_ISHEET.equals(usage))
+                {
+                    hasUsageISheet = true;
+                }
+                else if (BlaiseConstants.USAGE_OWNER_MANUAL.equals(usage))
+                {
+                    hasUsageOwnerManual = true;
+                }
+                else if (BlaiseConstants.USAGE_SERVICE_MANUAL.equals(usage))
+                {
+                    hasUsageServiceManual = true;
+                }
+                else if (BlaiseConstants.USAGE_PDI_MANUAL.equals(usage))
+                {
+                    hasUsagePdiManual = true;
+                }
+                else if (BlaiseConstants.USAGE_EDM_MANUAL.equals(usage))
+                {
+                    hasUsageEdmManual = true;
+                }
+                else if (BlaiseConstants.USAGE_HDU_WORKBOOK.equals(usage))
+                {
+                    hasUsageHduMiscLiterature = true;
+                }
+            }
+        }
     }
 
-	public int getWordCount()
-	{
-		return wordCount;
-	}
+    public boolean hasUsageHduMiscLiterature()
+    {
+        return hasUsageHduMiscLiterature;
+    }
 
-	public void setWordCount(int wordCount)
-	{
-		this.wordCount = wordCount;
-	}
+    public boolean hasUsageEdmManual()
+    {
+        return hasUsageEdmManual;
+    }
 
-	public TranslationInboxEntry getEntry()
-	{
-		return entry;
-	}
+    public boolean hasUsagePdiManual()
+    {
+        return hasUsagePdiManual;
+    }
 
-	public void setEntry(TranslationInboxEntry entry)
-	{
-		this.entry = entry;
-	}
+    public boolean hasUsageServiceManual()
+    {
+        return hasUsageServiceManual;
+    }
 
-	public long getId()
-	{
-		return this.entry.getId();
-	}
+    public boolean hasUsageOwnerManual()
+    {
+        return hasUsageOwnerManual;
+    }
 
-	public long getRelatedObjectId()
-	{
-		return this.entry.getRelatedObjectId();
-	}
+    public boolean hasUsageISheet()
+    {
+        return hasUsageISheet;
+    }
 
-	public Locale getSourceLocale()
-	{
-		return this.entry.getSourceLocale().toLocale();
-	}
+    public int getWordCount()
+    {
+        return wordCount;
+    }
 
-	public String getDisplaySourceLocale()
-	{
+    public void setWordCount(int wordCount)
+    {
+        this.wordCount = wordCount;
+    }
+
+    public TranslationInboxEntry getEntry()
+    {
+        return entry;
+    }
+
+    public void setEntry(TranslationInboxEntry entry)
+    {
+        this.entry = entry;
+    }
+
+    public long getId()
+    {
+        return this.entry.getId();
+    }
+
+    public long getRelatedObjectId()
+    {
+        return this.entry.getRelatedObjectId();
+    }
+
+    public Locale getSourceLocale()
+    {
+        return this.entry.getSourceLocale().toLocale();
+    }
+
+    public String getDisplaySourceLocale()
+    {
         Locale locale = getSourceLocale();
         return getLocaleCode(locale) + " (" + locale.getDisplayLanguage() + "_"
                 + locale.getDisplayCountry() + ")";
-	}
+    }
 
-	public String getSourceLocaleAsString()
-	{
-		Locale locale = getSourceLocale();
-		return getLocaleCode(locale);
-	}
+    public String getSourceLocaleAsString()
+    {
+        Locale locale = getSourceLocale();
+        return getLocaleCode(locale);
+    }
 
-	public Locale getTargetLocale()
-	{
-		return this.entry.getTargetLocale().toLocale();
-	}
+    public Locale getTargetLocale()
+    {
+        return this.entry.getTargetLocale().toLocale();
+    }
 
-	public String getDisplayTargetLocale()
-	{
-	    Locale locale = getTargetLocale();
+    public String getDisplayTargetLocale()
+    {
+        Locale locale = getTargetLocale();
         return getLocaleCode(getTargetLocale()) + " (" + locale.getDisplayLanguage() + "_"
                 + locale.getDisplayCountry() + ")";
-	}
+    }
 
-	public String getTargetLocaleAsString()
-	{
-		Locale locale = getTargetLocale();
-		return getLocaleCode(locale);
-	}
+    public String getTargetLocaleAsString()
+    {
+        Locale locale = getTargetLocale();
+        return getLocaleCode(locale);
+    }
 
-	private String getLocaleCode(Locale locale)
-	{
+    private String getLocaleCode(Locale locale)
+    {
         return BlaiseHelper.fixLocale(locale.getLanguage() + "_" + locale.getCountry());
-	}
+    }
 
-	public String getDescription()
-	{
-		return this.entry.getDescription();
-	}
+    public String getDescription()
+    {
+        return this.entry.getDescription();
+    }
 
-	public int getSourceRevision()
-	{
-		return this.entry.getSourceRevision();
-	}
+    public int getSourceRevision()
+    {
+        return this.entry.getSourceRevision();
+    }
 
-	public Date getWorkflowStartDate()
-	{
-		return this.entry.getWorkflowStartDate();
-	}
+    public Date getWorkflowStartDate()
+    {
+        return this.entry.getWorkflowStartDate();
+    }
 
-	public Date getDueDate()
-	{
-		return this.entry.getDueDate();
-	}
+    public Date getDueDate()
+    {
+        return this.entry.getDueDate();
+    }
 
-	public String getWorkflowId()
-	{
-		return this.entry.getWorkflowId();
-	}
+    public String getWorkflowId()
+    {
+        return this.entry.getWorkflowId();
+    }
 
-	public long getWorkflowObjectId()
-	{
-		return this.entry.getWorkflowObjectId();
-	}
+    public long getWorkflowObjectId()
+    {
+        return this.entry.getWorkflowObjectId();
+    }
 
-	public String getSourceType()
-	{
-		return this.entry.getSourceType();
-	}
+    public String getSourceType()
+    {
+        return this.entry.getSourceType();
+    }
 
-	public String getRelatedObjectClassName()
-	{
-	    return this.entry.getRelatedObjectClassName();
-	}
+    public String getRelatedObjectClassName()
+    {
+        return this.entry.getRelatedObjectClassName();
+    }
 
-	public String getCompanyName()
-	{
-		return this.entry.getCompanyName();
-	}
+    public String getCompanyName()
+    {
+        return this.entry.getCompanyName();
+    }
 
-	public List<Long> getJobIds()
-	{
-		return this.jobIds;
-	}
+    public List<Long> getJobIds()
+    {
+        return this.jobIds;
+    }
 
-	public void setJobIds(List<Long> jobIds)
-	{
-		this.jobIds = jobIds;
-	}
+    public void setJobIds(List<Long> jobIds)
+    {
+        this.jobIds = jobIds;
+    }
 
-	//
-	// Utility methods
-	//
+    //
+    // Utility methods
+    //
 
-	public String getJobIdsForDisplay()
-	{
-		return BlaiseManager.listToString(jobIds);
-	}
+    public String getJobIdsForDisplay()
+    {
+        return BlaiseManager.listToString(jobIds);
+    }
 
-	public String getJobIdLinks()
-	{
-	    if (this.jobIds == null || this.jobIds.size() == 0)
-	        return "";
+    public String getJobIdLinks()
+    {
+        if (this.jobIds == null || this.jobIds.size() == 0)
+            return "";
 
-	    StringBuffer links = new StringBuffer();
+        StringBuffer links = new StringBuffer();
         for (int i = 0; i < jobIds.size(); i++)
-	    {
-	        long jobId = jobIds.get(i);
-	        links.append("<a class='standardHREF' ");
-	        links.append("target='_blank' ");
-	        links.append("href='/globalsight/ControlServlet?linkName=jobDetails&pageName=DTLS&jobId=").append(jobId).append("'>");
-	        links.append(jobId);
-	        links.append("</a>");
+        {
+            long jobId = jobIds.get(i);
+            links.append("<a class='standardHREF' ");
+            links.append("target='_blank' ");
+            links.append(
+                    "href='/globalsight/ControlServlet?linkName=jobDetails&pageName=DTLS&jobId=")
+                    .append(jobId).append("'>");
+            links.append(jobId);
+            links.append("</a>");
 
-	        if (i < jobIds.size() - 1)
-	        {
-	            links.append(", ");
-	        }
-	    }
-	    return links.toString();
-	}
+            if (i < jobIds.size() - 1)
+            {
+                links.append(", ");
+            }
+        }
+        return links.toString();
+    }
 
     public String getType()
     {

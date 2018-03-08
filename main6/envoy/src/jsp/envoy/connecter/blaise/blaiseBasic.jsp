@@ -193,7 +193,7 @@ function confirmForm()
     if ($("#automatic1").attr("checked") == "checked") {
 		// Automatic setting is on
         var existUrls = "<c:out value='${urls}' />";
-        var urlName = "$@$" + $("#url").val().trim() + "$@$";
+        var urlName = "$@$" + jQuery.trim($("#url").val()) + "$@$";
         existUrls = existUrls.toLowerCase();
         if (existUrls.indexOf(urlName) != -1)
         {
@@ -294,7 +294,7 @@ function confirmForm()
 				}
 			});
 
-			var tmp = $("#qaCountString").val().trim().toLowerCase();
+			var tmp = jQuery.trim($("#qaCountString").val()).toLowerCase();
 			if ("all" != tmp && (!isAllDigits(tmp) || tmp < 1 || tmp > 99999))
             {
                 alert("Please input integer value [1 to 99999] or 'All' for Entry Count field.");
@@ -406,7 +406,8 @@ function validName()
                             String timeZoneId = (String)list.get(i);
 
                             out.println("<option value='" + timeZoneId + "'");
-                            if (TimeZone.getTimeZone(timeZoneId).getOffset(0) == TimeZone.getTimeZone(userCalendar).getOffset(0))               {
+                            if (TimeZone.getTimeZone(timeZoneId).getOffset(0) == TimeZone.getTimeZone(userCalendar).getOffset(0))
+                            {
                                 out.println(" selected ");
                             }
                             out.println(">" + timeZoneId + "  " + bundle.getString(timeZoneId) + "</option>");
@@ -459,42 +460,8 @@ function validName()
             <td class="standardText"><%= bundle.getString("lb_attribute_group")%>:</td>
             <td class="standardText"><div id="attributeSetName"></div></td>
         </tr>
-        <tr class="allowNone autoOption" id="anyAttrs">
-			<td class="standardText">Any</td>
-            <td class="standardText">
-                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
-                    <thead>
-                    <tr class="tableHeadingBasicTM">
-                        <td><%= bundle.getString("lb_attributename")%></td>
-                        <td><%= bundle.getString("lb_required")%></td>
-                        <td><%= bundle.getString("lb_type")%></td>
-                        <td><%= bundle.getString("lb_value")%></td>
-                    </tr>
-                    </thead>
-                    <tbody id="anyAttrData">
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-        <tr class="allowNone autoOption" id="hduAttrs">
-			<td class="standardText">HDU Workbook</td>
-            <td class="standardText">
-                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
-                    <thead>
-                    <tr class="tableHeadingBasicTM">
-                        <td><%= bundle.getString("lb_attributename")%></td>
-                        <td><%= bundle.getString("lb_required")%></td>
-                        <td><%= bundle.getString("lb_type")%></td>
-                        <td><%= bundle.getString("lb_value")%></td>
-                    </tr>
-                    </thead>
-                    <tbody id="hduAttrData">
-                    </tbody>
-                </table>
-            </td>
-        </tr>
         <tr class="allowNone autoOption" id="isheetAttrs">
-			<td class="standardText">ISheet</td>
+			<td class="standardText"><%= bundle.getString("lb_blaise_category_iSheet")%></td>
             <td class="standardText">
                 <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
                     <thead>
@@ -506,6 +473,91 @@ function validName()
                     </tr>
                     </thead>
                     <tbody id="isheetAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption" id="ownerManualAttrs">
+			<td class="standardText"><%= bundle.getString("lb_blaise_category_owner_manual")%></td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="ownerManualAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption" id="serviceManualAttrs">
+			<td class="standardText"><%= bundle.getString("lb_blaise_category_service_manual")%></td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="serviceManualAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption" id="edmAttrs">
+			<td class="standardText"><%= bundle.getString("lb_blaise_category_edm")%></td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="edmAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption" id="hduMiscLiteratureAttrs">
+			<td class="standardText"><%= bundle.getString("lb_blaise_category_hdu_misc_literature")%></td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="hduMiscLiteratureAttrData">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr class="allowNone autoOption" id="paAttrs">
+			<td class="standardText"><%= bundle.getString("lb_blaise_category_pa")%></td>
+            <td class="standardText">
+                <table name="ja" border="1" cellspacing="0" cellpadding="1" border="0" class="listborder standardText" style="width:600px;">
+                    <thead>
+                    <tr class="tableHeadingBasicTM">
+                        <td><%= bundle.getString("lb_attributename")%></td>
+                        <td><%= bundle.getString("lb_required")%></td>
+                        <td><%= bundle.getString("lb_type")%></td>
+                        <td><%= bundle.getString("lb_value")%></td>
+                    </tr>
+                    </thead>
+                    <tbody id="paAttrData">
                     </tbody>
                 </table>
             </td>
@@ -588,7 +640,7 @@ function validName()
                                 tdData += "class='falconProduct' ";
                             if (item.required)
                                 tdData += "data-rule=required ";
-                            tdData += "id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
+                            tdData += "id='isheetAttr" + item.attrId + "' name='isheetAttr" + item.attrId + "'>";
                             for (var k=0;k<eles.length;k++) {
                                 items = eles[k].split("$$");
                                 tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
@@ -598,7 +650,7 @@ function validName()
 						else if (tdType == "text") {
                             tdData += "<td class='standardText'>Text</td>";
                             tdData += "<td class='standardText'>";
-                            tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 ";
+                            tdData += "<input class='standardText' type='text' name='isheetAttr" + item.attrId + "' id='isheetAttr" + item.attrId + "' size=25 ";
                             if ($.trim(tmp) != "")
                                 tdData += " maxlength=" + tmp;
 							if (item.required)
@@ -608,7 +660,7 @@ function validName()
 						else if (tdType == "integer") {
                             tdData += "<td class='standardText'>Integer</td>";
                             tdData += "<td class='standardText'>";
-                            tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 data-rule=integer";
+                            tdData += "<input class='standardText' type='text' name='isheetAttr" + item.attrId + "' id='isheetAttr" + item.attrId + "' size=10 data-rule=integer";
                             if (item.required)
                                 tdData += ";required";
                             if ($.trim(tmp) != "") {
@@ -625,7 +677,7 @@ function validName()
                         else if (tdType == "float") {
                             tdData += "<td class='standardText'>Float</td>";
                             tdData += "<td class='standardText'>";
-                            tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 data-rule=range";
+                            tdData += "<input class='standardText' type='text' name='isheetAttr" + item.attrId + "' id='isheetAttr" + item.attrId + "' size=10 data-rule=range";
 							
                             if (item.required)
                                 tdData += ";required";
@@ -640,53 +692,52 @@ function validName()
                             }
                             tdData += " /></td>";
                         }
-                        /**
-                        else if (tdType == "date")
-                            tdData += "<td class='standardText'>Date</td>";
                         else if (tdType == "file")
-                            tdData += "<td class='standardText'>File</td>";
-
-						tdData += "<td class='standardText'>";
-						if (tdType == "choiceList") {
-							var tmp = item.value;
-							eles = tmp.split("@@");
-							tdData += "<select ";
-							if (isFalconProduct)
-							    tdData += "class='falconProduct' ";
-							tdData += "id='anyAttr" + item.attrId + "' name='anyAttr" + item.attrId + "'>";
-							for (var k=0;k<eles.length;k++) {
-								items = eles[k].split("$$");
-								tdData += "<option value='" +items[0] + "'>" + items[1] + "</option>";
-							}
-							tdData += "</select>";
-						} else {
-							tdData += "<input class='standardText' type='text' name='anyAttr" + item.attrId + "' id='anyAttr" + item.attrId + "' size=10 />";
-						}
-						tdData += "</td>";
-                         */
+                        {
+                        	tdData += "<td class='standardText'>File</td>";
+                        	tdData += "<td class='standardText'></td>";
+                        }
 						tdData += "</tr>";
 					});
-					$("#anyAttrData").empty().append(tdData);
-					var tdData1 = tdData.replace(/anyAttr/g, 'hduAttr');
-					$("#hduAttrData").empty().append(tdData1);
-					tdData1 = tdData.replace(/anyAttr/g, 'isheetAttr');
-					$("#isheetAttrData").empty().append(tdData1);
+					$("#isheetAttrData").empty().append(tdData);
+					tdData1 = tdData.replace(/isheetAttr/g, 'ownerManualAttr');
+					$("#ownerManualAttrData").empty().append(tdData1);
+					tdData1 = tdData.replace(/isheetAttr/g, 'serviceManualAttr');
+					$("#serviceManualAttrData").empty().append(tdData1);
+					tdData1 = tdData.replace(/isheetAttr/g, 'edmAttr');
+					$("#edmAttrData").empty().append(tdData1);
+					tdData1 = tdData.replace(/isheetAttr/g, 'hduMiscLiteratureAttr');
+					$("#hduMiscLiteratureAttrData").empty().append(tdData1);
+					tdData1 = tdData.replace(/isheetAttr/g, 'paAttr');
+					$("#paAttrData").empty().append(tdData1);
 					<%
 					if (typeAttributes != null) {
 						BlaiseConnectorAttribute typeAttr;
 						for (int i=0,size=typeAttributes.size();i<size;i++) {
 							typeAttr = typeAttributes.get(i);
-							if (typeAttr.getBlaiseJobType().equals("A")) {
-								%>
-								$("#anyAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
-								<%
-							} else if (typeAttr.getBlaiseJobType().equals("H")) {
-								%>
-								$("#hduAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
-								<%
-							} else if (typeAttr.getBlaiseJobType().equals("I")) {							
+							if ("I".equals(typeAttr.getBlaiseJobType())) {		
 								%>
 								$("#isheetAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if ("O".equals(typeAttr.getBlaiseJobType())) {
+								%>
+								$("#ownerManualAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if ("S".equals(typeAttr.getBlaiseJobType())) {
+								%>
+								$("#serviceManualAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if ("E".equals(typeAttr.getBlaiseJobType())) {
+								%>
+								$("#edmAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if ("H".equals(typeAttr.getBlaiseJobType())) {
+								%>
+								$("#hduMiscLiteratureAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
+								<%
+							} else if ("P".equals(typeAttr.getBlaiseJobType())) {
+								%>
+								$("#paAttr<%=typeAttr.getAttributeId()%>").val("<%=typeAttr.getAttributeValue()%>");
 								<%
 							}
 						}

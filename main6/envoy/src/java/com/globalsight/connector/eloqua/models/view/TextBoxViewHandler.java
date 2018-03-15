@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 public class TextBoxViewHandler implements ViewHandler
 {
@@ -46,9 +45,70 @@ public class TextBoxViewHandler implements ViewHandler
         start += "},value: \"".length();
         int end = content.indexOf("\",inlineStyles:");
         
-        values.add(content.substring(start, end));
+        String txt = content.substring(start, end);
+        txt = replaceEloquaTags(txt);
+        values.add(txt);
     }
 
+    private String replaceEloquaTag(String txt)
+    {
+        int n = txt.indexOf("<eloqua ");
+        if (n > 0)
+        {
+            int m = txt.indexOf(">", n + 1);
+            if (m > 0)
+            {
+                txt = txt.substring(0, n) + "&lt;gs" + txt.substring(n + 1, m) + "&gt;" + txt.substring(m + 1);
+            }
+        }
+        
+        return txt;
+    }
+    
+    /**
+     * For GBS-4820. eloqua content returned broken
+     * @param txt
+     * @return
+     */
+    private String replaceEloquaTags(String txt)
+    {
+        String txt2 = replaceEloquaTag(txt);
+        while (!txt2.equals(txt))
+        {
+            txt = txt2;
+            txt2 = replaceEloquaTag(txt);
+        }
+        
+        return txt2;
+    }
+    
+    private String replaceEloquaTagBack(String txt)
+    {
+        int n = txt.indexOf("&lt;gseloqua ");
+        if (n > 0)
+        {
+            int m = txt.indexOf("&gt;", n + 1);
+            if (m > 0)
+            {
+                txt = txt.substring(0, n) + "<" + txt.substring(n + 6, m) + ">" + txt.substring(m + 4);
+            }
+        }
+        
+        return txt;
+    }
+    
+    private String replaceEloquaTagsBack(String txt)
+    {
+        String txt2 = replaceEloquaTagBack(txt);
+        while (!txt2.equals(txt))
+        {
+            txt = txt2;
+            txt2 = replaceEloquaTagBack(txt);
+        }
+        
+        return txt2;
+    }
+    
     public List<String> getValues()
     {
         return values;
@@ -66,7 +126,9 @@ public class TextBoxViewHandler implements ViewHandler
         int start = 0;
         while (m.find(start))
         {
-            values.add(m.group(1));
+            String txt = m.group(1);
+            txt = replaceEloquaTagsBack(txt);
+            values.add(txt);
             start = m.end();
         }
     }

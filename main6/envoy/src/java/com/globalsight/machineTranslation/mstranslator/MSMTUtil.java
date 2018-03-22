@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.machineTranslation.mstranslator;
 
 import java.io.IOException;
@@ -14,6 +30,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.datacontract.schemas._2004._07.Microsoft_MT_Web_Service_V2.TranslateArrayResponse;
 
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
 import com.globalsight.util.StringUtil;
@@ -39,6 +56,27 @@ public class MSMTUtil implements MTProfileConstants
         }
 
         return accessToken;
+    }
+    
+    public static String getMsAccessToken(MSTranslateConfig config)
+    {
+        return getMsAccessToken(config.getMsClientId(), config.getMsClientSecret(),
+                config.getMsSubscriptionKey());
+    }
+    
+    public static String[] toArray(TranslateArrayResponse[] result)
+    {
+        if (result != null)
+        {
+            String[] results = new String[result.length];
+            for (int i = 0; i < result.length; i++)
+            {
+                results[i] = result[i].getTranslatedText();
+            }
+            return results;
+        }
+        
+        return null;
     }
 
     /**

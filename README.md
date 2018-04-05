@@ -35,6 +35,6 @@ Support
 -------
 The [GlobalSight forums](http://www.globalsight.com/forums/) are the best bet.
 
-You are also welcome to contact me (chase@spartansoftwareinc.com) with
+You are also welcome to contact me (tingley@gmail.com) with
 questions; however, I am not currently actively involved with GlobalSight
 development.

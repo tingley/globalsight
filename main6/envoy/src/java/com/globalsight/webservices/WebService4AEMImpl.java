@@ -17,6 +17,7 @@
 package com.globalsight.webservices;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,19 +25,27 @@ import javax.jws.WebService;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.costing.Cost;
+import com.globalsight.everest.costing.Currency;
+import com.globalsight.everest.costing.Money;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
+import com.globalsight.util.edit.EditUtil;
 
 @WebService(endpointInterface = "com.globalsight.webservices.WebService4AEM", serviceName = "WebService4AEM", portName = "WebService4AEMPort")
 public class WebService4AEMImpl extends Ambassador implements WebService4AEM
 {
     private static final Logger logger = Logger
             .getLogger(WebService4AEMImpl.class);
+    
+    private static HashMap<String, Long> dispatchJobs = new HashMap<>();
 
     @Override
     public String uploadFileForInitial(WrapHashMap map)
@@ -63,11 +72,72 @@ public class WebService4AEMImpl extends Ambassador implements WebService4AEM
 
         return jobId;
     }
+    
+    @Override
+    public String getStatus(String p_accessToken, String p_jobName) throws WebServiceException
+    {
+        checkAccess(p_accessToken, GET_STATUS);
+        checkPermission(p_accessToken, Permission.JOBS_VIEW);
+
+        String jobName = p_jobName;
+        WebServicesLog.Start activityStart = null;
+        try
+        {
+            String userName = getUsernameFromSession(p_accessToken);
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", userName);
+            activityArgs.put("jobName", p_jobName);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "getStatus(p_accessToken, p_jobName)", activityArgs);
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            Job job = queryJob(jobName, p_accessToken);
+            String status = job.getState();
+            xml.append("<jobStatus>\r\n");
+            xml.append("\t<jobName>").append(EditUtil.encodeXmlEntities(jobName))
+                    .append("</jobName>\r\n");
+            xml.append("\t<jobId>").append(job.getId()).append("</jobId>\r\n");
+            xml.append("\t<status>").append(status).append("</status>\r\n");
+            xml.append("</jobStatus>\r\n");
+            return xml.toString();
+        }
+        catch (Exception e)
+        {
+            if (!e.getMessage().startsWith(NOT_IN_DB))
+            {
+                logger.error("getStatus()", e);
+            }
+            String message = "Could not get information for job " + jobName;
+            message = makeErrorXml("getStatus", message);
+            throw new WebServiceException(message);
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
+    }
 
     @Override
     public String dispatchJob(String p_accessToken, String p_jobName)
             throws WebServiceException
     {
+        Long time = dispatchJobs.get(p_jobName);
+        Long now = new Date().getTime();
+        if (time != null) 
+        {
+            //For GBS-4824
+            if (now - time < 1000 * 30)
+            {
+                return null;
+            }
+        }
+        else
+        {
+            dispatchJobs.put(p_jobName, now);
+        }
+        
         String message = "";
         // Validate inputting parameters
         User user = null;

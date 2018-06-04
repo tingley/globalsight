@@ -426,7 +426,7 @@ public class Ambassador extends AbstractWebService
     // For "uploadFile...()" and "CreateJob...()" APIs only.
     private static Set<Long> cachedJobIds = Collections.synchronizedSet(new HashSet<Long>());
 
-    private static String NOT_IN_DB = "This job is not ready for query: ";
+    protected static String NOT_IN_DB = "This job is not ready for query: ";
 
     private final static String XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n";
 
@@ -7016,7 +7016,7 @@ public class Ambassador extends AbstractWebService
      * @return Job Return job object if there exist.
      * @exception WebServiceException
      */
-    private Job queryJob(String p_jobName, String p_accessToken) throws WebServiceException
+    protected Job queryJob(String p_jobName, String p_accessToken) throws WebServiceException
     {
         Connection connection = null;
         PreparedStatement query = null;

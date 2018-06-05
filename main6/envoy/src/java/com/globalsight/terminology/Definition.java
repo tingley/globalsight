@@ -51,8 +51,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
     static public final String s_definitionKey = "default_definition";
 
     static public final String s_defaultDefinition = "<definition><name></name><description></description>"
-            + "<languages></languages><fields></fields><indexes></indexes>"
-            + "</definition>";
+            + "<languages></languages><fields></fields><indexes></indexes>" + "</definition>";
 
     public final class Language
     {
@@ -89,8 +88,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
             {
                 Definition.Language other = (Definition.Language) p_other;
 
-                if (other.m_name.equals(m_name)
-                        && other.m_locale.equals(m_locale))
+                if (other.m_name.equals(m_name) && other.m_locale.equals(m_locale))
                 {
                     return true;
                 }
@@ -108,7 +106,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
 
             return ob;
         }
-        
+
         public String asXML()
         {
             StringBuffer result = new StringBuffer(128);
@@ -141,8 +139,8 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
         private boolean m_indexed;
         private String m_values;
 
-        public Field(String p_name, String p_type, String p_system,
-                String p_indexed, String p_values)
+        public Field(String p_name, String p_type, String p_system, String p_indexed,
+                String p_values)
         {
             m_name = p_name.trim();
             m_type = p_type.trim();
@@ -186,7 +184,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
             ob.put("values", m_values);
             return ob;
         }
-        
+
         public String asXML()
         {
             StringBuffer result = new StringBuffer(128);
@@ -273,7 +271,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
 
             return result.toString();
         }
-        
+
         public JSONObject asJson()
         {
             JSONObject ob = new JSONObject();
@@ -305,8 +303,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
         init(p_definition);
     }
 
-    protected Definition(String p_name, String p_definition)
-            throws TermbaseException
+    protected Definition(String p_name, String p_definition) throws TermbaseException
     {
         init(p_name, p_definition);
     }
@@ -355,26 +352,26 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
 
         return null;
     }
-    
+
     public List<Language> getLanguages(String p_names)
     {
-    	List<Language> langs = new ArrayList<Language>();
-    	String[] langStrs = p_names.split(",");
+        List<Language> langs = new ArrayList<Language>();
+        String[] langStrs = p_names.split(",");
         for (int i = 0, max = m_languages.size(); i < max; ++i)
         {
             Language lang = (Language) m_languages.get(i);
 
-            for(String langName : langStrs)
+            for (String langName : langStrs)
             {
-            	if (lang.getName().equalsIgnoreCase(langName))
-            	{
-            		langs.add(lang);
-            		break;
-            	}
+                if (lang.getName().equalsIgnoreCase(langName))
+                {
+                    langs.add(lang);
+                    break;
+                }
             }
         }
-        if(langs.size() > 0)
-        	return langs;
+        if (langs.size() > 0)
+            return langs;
 
         return null;
     }
@@ -422,17 +419,17 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
         // Thu Apr 01 22:30:23 2004 GSDEF 9929: Termbase uses new
         // language codes while all JDKs - and sometimes GlobalSight by
         // mistake - use the old codes. Fix the locale.
-        String locale = EditUtil.toRFC1766(p_locale);
+        String fixedLocale = EditUtil.toRFC1766(p_locale);
 
         // Case 1: the search locale is a major language. Only one
         // language (that contains terms) should exist.
-        if (locale.length() == 2)
+        if (fixedLocale.length() == 2)
         {
             for (int i = 0, max = m_languages.size(); i < max; ++i)
             {
                 Language lang = (Language) m_languages.get(i);
 
-                if (lang.hasTerms() && lang.getLocale().equals(locale))
+                if (lang.hasTerms() && lang.getLocale().equals(fixedLocale))
                 {
                     result.add(lang.getName());
                     break;
@@ -443,15 +440,16 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
         // Two languages (that contain terms) may exist.
         else
         {
-            String prefix = locale.substring(0, 2);
+            String prefix = fixedLocale.substring(0, 2);
             for (int i = 0, max = m_languages.size(); i < max; ++i)
             {
                 Language lang = (Language) m_languages.get(i);
+                String existingLocale = lang.getLocale();
 
-                if (lang.hasTerms()
-                        && (lang.getLocale().equals(locale)
-                                || lang.getLocale().equals(prefix) || lang
-                                .getLocale().equals(p_locale)))
+                // a fix for GBS-4822
+                if (lang.hasTerms() && (existingLocale.equals(fixedLocale)
+                        || existingLocale.equals(prefix) || existingLocale.equals(p_locale)
+                        || fixedLocale.equals(EditUtil.toRFC1766(existingLocale))))
                 {
                     result.add(lang.getName());
                 }
@@ -479,13 +477,13 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
 
         return false;
     }
-    
+
     public JSONObject getJson()
     {
         JSONObject ob = new JSONObject();
         ob.put("name", m_name);
         ob.put("description", m_description);
-        
+
         JSONArray languages = new JSONArray();
         SortUtil.sort(m_languages, new LanguageComparator(Locale.getDefault()));
         for (int i = 0, max = m_languages.size(); i < max; i++)
@@ -494,7 +492,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
             languages.add(lang.asJson());
         }
         ob.put("languages", languages);
-        
+
         JSONArray fields = new JSONArray();
         SortUtil.sort(m_fields, new FieldComparator(Locale.getDefault()));
         for (int i = 0, max = m_fields.size(); i < max; i++)
@@ -503,7 +501,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
             fields.add(field.asJson());
         }
         ob.put("fields", fields);
-        
+
         JSONArray indexes = new JSONArray();
         for (int i = 0, max = m_indexes.size(); i < max; i++)
         {
@@ -634,8 +632,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
 
             // Index type must be one that we know
             String type = index.getType();
-            if (!type.equals(Index.TYPE_FUZZY)
-                    && !type.equals(Index.TYPE_FULLTEXT))
+            if (!type.equals(Index.TYPE_FUZZY) && !type.equals(Index.TYPE_FULLTEXT))
             {
                 it.remove();
                 continue;
@@ -659,8 +656,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
      * Reads and validates a Termbase Definition given in an XML string and
      * overwrites any name in the Definition with the given name.
      */
-    private void init(String p_name, String p_definition)
-            throws TermbaseException
+    private void init(String p_name, String p_definition) throws TermbaseException
     {
         init(p_definition);
         m_name = p_name;
@@ -735,8 +731,8 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
                 String indexed = field.valueOf("indexed");
                 String values = field.valueOf("values");
 
-                if (name == null || type == null || system == null
-                        || indexed == null || values == null)
+                if (name == null || type == null || system == null || indexed == null
+                        || values == null)
                 {
                     error("incomplete field definition", null);
                 }
@@ -776,8 +772,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
     /**
      * Throws an INVALID_DEFINITION exception.
      */
-    private void error(String p_reason, Exception p_exception)
-            throws TermbaseException
+    private void error(String p_reason, Exception p_exception) throws TermbaseException
     {
         String[] args =
         { p_reason };
@@ -794,8 +789,7 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
     {
         try
         {
-            ResourceBundle res = ResourceBundle.getBundle(s_propertyFile,
-                    Locale.US);
+            ResourceBundle res = ResourceBundle.getBundle(s_propertyFile, Locale.US);
 
             String result = res.getString(s_definitionKey);
 
@@ -816,8 +810,8 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
         }
         catch (TermbaseException e)
         {
-            CATEGORY.warn("The default termbase definition in file "
-                    + s_propertyFile + " is not valid XML.");
+            CATEGORY.warn("The default termbase definition in file " + s_propertyFile
+                    + " is not valid XML.");
 
             return s_defaultDefinition;
         }

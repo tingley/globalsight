@@ -277,6 +277,7 @@ public class PtagPageGenerator
      * */
 	private void fixAttributeIX(OfflineSegmentData p_OSD)
 	{
+
 		Element sroot = getDom(
 				"<seg>" + p_OSD.getDisplaySourceText() + "</seg>")
 				.getRootElement();
@@ -335,10 +336,18 @@ public class PtagPageGenerator
 		int sEndIndex = sroot.asXML().length() - 6;
 		int tEndIndex = troot.asXML().length() - 6;
 		// Save the modified segments back into the tuvs.
-		p_OSD.setDisplaySourceText(sroot.asXML().substring(firstIndex,
-				sEndIndex));
-		p_OSD.setDisplayTargetText(troot.asXML().substring(firstIndex,
-				tEndIndex));
+		//
+		// GBS-4811 as <seg></seg> gets transformed to <seg/> for empty segments
+		// and thus string manipulation incorrect.
+		if(p_OSD.getDisplaySourceText().length() != 0)
+		{
+		p_OSD.setDisplaySourceText(sroot.asXML().substring(firstIndex,sEndIndex));
+		}
+
+		if(p_OSD.getDisplayTargetText().length() != 0)
+		{
+		p_OSD.setDisplayTargetText(troot.asXML().substring(firstIndex,tEndIndex));
+		}
 	}
 	
 	private static Document getDom(String p_xml)

@@ -1263,13 +1263,12 @@ session="true" %>
 									    <input type='button' value='<%= bundle.getString("lb_go") %>' onclick=sidFilter.goToPage(2)></input>
 									</div>
 								</div>
-						   <div id="div_button_sid_filter" style="margin-left:45px;margin-right:45px;margin-top:10px;margin-bottom:10px;">
-                                <center>
-                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveSidFilter()'/>                                
-                                    <input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('sidFilterDialog'); sidFilter.closeAllTagPopup()"/>
-                                </center>
-                            </div>
-                            </div>
+							    <div id="div_button_sid_filter" style="margin-left:45px;margin-right:45px;margin-top:10px;margin-bottom:10px;">
+	                                <center>
+	                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveSidFilter()'/>                                
+	                                    <input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('sidFilterDialog'); sidFilter.closeAllTagPopup()"/>
+	                                </center>
+	                            </div>
                             </div>
                         </div>
                     </div>

@@ -14,7 +14,7 @@
  *  limitations under the License.
  *  
  */
-package com.globalsight.machineTranslation.mstranslator;
+package com.globalsight.machineTranslation.mstranslator.v2;
 
 import java.util.Map;
 

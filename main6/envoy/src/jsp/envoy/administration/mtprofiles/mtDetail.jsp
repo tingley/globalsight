@@ -454,6 +454,30 @@
 		return submit;
 	}
 	
+	function updateTranslationMode()
+	{
+		String.prototype.endWith=function(endStr){
+		      var d=this.length-endStr.length;		 
+		      return (d>=0&&this.lastIndexOf(endStr)==d)		 
+		 }
+
+		var msTranslatorUrl = $.trim($("#idMsMtUrl").val());
+		if (msTranslatorUrl != null && msTranslatorUrl.toLocaleLowerCase().endWith(".svc"))
+		{
+			
+			$('#type1').attr("disabled",false);
+			$('#type2').attr("disabled",false);
+			//$("#msTransType").show();
+		}
+		else
+		{
+			$('#type1').attr("disabled",true);
+			$('#type1').attr('checked', 'checked');
+			$('#type2').attr("disabled",true);
+			//$("#msTransType").hide();
+		}
+	}
+	
 
 	function contorlMTOptionShowing()
 	{
@@ -491,6 +515,8 @@
 	    else if (selectedEngineName.toLowerCase() == "ms_translator") 
 		{
             msMtDiv.style.display='block';
+            
+            updateTranslationMode();
 	    }
 	    else if(selectedEngineName.toLowerCase() == "asia_online")
 	    {
@@ -983,7 +1009,9 @@
 									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtUrl"
 										NAME="<%=MTProfileConstants.MT_MS_URL%>"
 										value="<%=mtProfile4val.getUrl()%>" TYPE="text"
-										MAXLENGTH="99" SIZE="90" /></td>
+										MAXLENGTH="99" SIZE="90" 
+										onchange="updateTranslationMode()"
+										/></td>
 								</tr>
 								<tr><td colspan="3" align="left"><b>It is required to input value(s) for either 'Client ID', 
 								        'Client Secret' or 'Azure Subscription Key'.</b></td></tr>
@@ -1065,19 +1093,19 @@
 								</tr>
 								<% }
 							    } %>
-							     <tr>
+							     <tr id="msTransType">
 			                        <td  ALIGN="LEFT" STYLE="vertical-align: middle">
 			                        	<%=bundle.getString("lb_mt_ms_trans_type") %>:
 			                        </td>
 			                        <td>
 			                        	<INPUT CLASS="standardText"
 									NAME="<%= MTProfileConstants.MT_MS_TRANS_TYPE%>"
-									id="type1" VALUE= "1" TYPE="radio" <%="1".equals(mtProfile4val.getMsTransType()) ? "checked" : ""%>></input>
+									id="type1" VALUE= "1" TYPE="radio" <%="1".equals(mtProfile4val.getMsTransType())||mtProfile4val.getMsTransType()==null ? "checked" : ""%>></input>
 									<%=bundle.getString("lb_ms_text_between_tags")%>
 			                        	<br/>
 			                        	<INPUT CLASS="standardText"
 									NAME="<%=MTProfileConstants.MT_MS_TRANS_TYPE %>"
-									id="type2" VALUE= "2" TYPE="radio" <%="2".equals(mtProfile4val.getMsTransType())||mtProfile4val.getMsTransType()==null? "checked" : ""%>></input>
+									id="type2" VALUE= "2" TYPE="radio" <%="2".equals(mtProfile4val.getMsTransType())? "checked" : ""%>></input>
 									<%=bundle.getString("lb_ms_text_including_tags")%>
 			                        </td>
 		                        </tr>

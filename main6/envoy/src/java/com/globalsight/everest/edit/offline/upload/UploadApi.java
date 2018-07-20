@@ -16,19 +16,68 @@
  */
 package com.globalsight.everest.edit.offline.upload;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.everest.category.CategoryType;
-import com.globalsight.everest.comment.*;
+import com.globalsight.everest.comment.CommentManager;
+import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.comment.IssueHistory;
+import com.globalsight.everest.comment.IssueHistoryImpl;
+import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
-import com.globalsight.everest.edit.offline.*;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import com.globalsight.everest.edit.offline.OEMProcessStatus;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
+import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
+import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.page.*;
+import com.globalsight.everest.page.PageManager;
+import com.globalsight.everest.page.PrimaryFile;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.UnextractedFile;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
@@ -68,20 +117,6 @@ import com.sun.org.apache.regexp.internal.RE;
 import com.sun.org.apache.regexp.internal.RECompiler;
 import com.sun.org.apache.regexp.internal.REProgram;
 import com.sun.org.apache.regexp.internal.RESyntaxException;
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
-import java.io.*;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.*;
 
 /**
  * Contains methods responsible for error-checking and saving uploaded content.
@@ -187,15 +222,19 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private String scoreComment = null;
     private HashMap<String, Integer> scores = null;
     private static ResourceBundle m_resource;
-	
-	static{
-		try {
-			// GBS-4710 
-			m_resource = ResourceBundle.getBundle(AmbassadorDwUpConstants.OFFLINE_CONFIG_PROPERTY);
-		} catch (Throwable e) {
-			CATEGORY.error("UploadApi: Problem getting message from properties file ", e);
-		}
-	}
+
+    static
+    {
+        try
+        {
+            // GBS-4710
+            m_resource = ResourceBundle.getBundle(AmbassadorDwUpConstants.OFFLINE_CONFIG_PROPERTY);
+        }
+        catch (Throwable e)
+        {
+            CATEGORY.error("UploadApi: Problem getting message from properties file ", e);
+        }
+    }
 
     public OEMProcessStatus getStatus()
     {
@@ -911,23 +950,24 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             WorkflowImpl workflow = (WorkflowImpl) task.getWorkflow();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-          //GBS-4676 allows updates for any no.of upload TER 
+            // GBS-4676 allows updates for any no.of upload TER
             if (DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
                 adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
                 dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
-                
+
                 if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore))
                 {
                     workflow.setFluencyScore(fluencyScore);
                     workflow.setAdequacyScore(adequacyScore);
-                    //GBS-4710 
-    				//Max allowed characters is 4000 for DQF Comment field
-    				//If DQF Comment length is more than 4000 then split the value upto 4000 
-                    //characters.
-                    //update dqf comment always either empty or not 
+                    // GBS-4710
+                    // Max allowed characters is 4000 for DQF Comment field
+                    // If DQF Comment length is more than 4000 then split the
+                    // value upto 4000
+                    // characters.
+                    // update dqf comment always either empty or not
                     workflow.setTrimmedDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
@@ -1067,21 +1107,26 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 updatedText = EditUtil.removeU200F(updatedText);
 
             jobIds.add(jobIdText);
-            //GBS-4686 DQF: warning does not show when comment field empty
-            //Removed not null conditions for comment and comment status i.e  
-            //Case 1: anyone of comment or category or severity values are entered then insert the values in db.
-            //Case 2: While second time uploading with empty values of Severity or Category Failure then also we update the values in db.
-			if (StringUtil.isNotEmpty(segmentId)) {
-				if (StringUtil.isNotEmpty(updatedText)) {
-					segId2RequiredTranslation.put(segIdLong, updatedText);
-				}
-				if (StringUtil.isNotEmpty(requiredComment)) {
-					segId2Comment.put(segIdLong, requiredComment);
-				}
-				segId2CommentStatus.put(segIdLong, commentStatus);
-				segId2Severity.put(segIdLong, severity);
-				segId2FailureType.put(segIdLong, failureType);
-			}
+            // GBS-4686 DQF: warning does not show when comment field empty
+            // Removed not null conditions for comment and comment status i.e
+            // Case 1: anyone of comment or category or severity values are
+            // entered then insert the values in db.
+            // Case 2: While second time uploading with empty values of Severity
+            // or Category Failure then also we update the values in db.
+            if (StringUtil.isNotEmpty(segmentId))
+            {
+                if (StringUtil.isNotEmpty(updatedText))
+                {
+                    segId2RequiredTranslation.put(segIdLong, updatedText);
+                }
+                if (StringUtil.isNotEmpty(requiredComment))
+                {
+                    segId2Comment.put(segIdLong, requiredComment);
+                }
+                segId2CommentStatus.put(segIdLong, commentStatus);
+                segId2Severity.put(segIdLong, severity);
+                segId2FailureType.put(segIdLong, failureType);
+            }
             else
             {
                 m_errWriter.addFileErrorMsg("Segment id is lost in row " + (j + 1) + "\r\n");
@@ -1322,7 +1367,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String failureType = null;
         String commentStatus = null;
         String severity = null;
-     //   String translatorComment;
+        // String translatorComment;
 
         if (task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE))
         {
@@ -1330,21 +1375,22 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             WorkflowImpl workflow = (WorkflowImpl) task.getWorkflow();
             String tmpScoreComment = workflow.getScorecardComment();
             boolean isWorkflowChanged = false;
-            //GBS-4676 allows updates for any no.of upload RCR 
+            // GBS-4676 allows updates for any no.of upload RCR
             if (DQF_START_ROW > 0)
             {
                 // No DQF data before
                 fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
                 adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
                 dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
-                
+
                 if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore))
                 {
                     workflow.setFluencyScore(fluencyScore);
                     workflow.setAdequacyScore(adequacyScore);
-                    // GBS-4710 
-        			//Max allowed characters is 4000 for DQF Comment field
-        			//If DQF Comment length is more than 4000 then split the value upto 4000 characters.
+                    // GBS-4710
+                    // Max allowed characters is 4000 for DQF Comment field
+                    // If DQF Comment length is more than 4000 then split the
+                    // value upto 4000 characters.
                     workflow.setTrimmedDQFComment(dqfComment);
                     isWorkflowChanged = true;
                 }
@@ -1448,7 +1494,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (cancel)
                 return null;
 
-        //    translatorComment = ExcelUtil.getCellValue(sheet, k, 2);
+            // translatorComment = ExcelUtil.getCellValue(sheet, k, 2);
             reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
             if (EditUtil.isRTLLocale(tLocale))
                 reviewerComment = EditUtil.removeU200F(reviewerComment);
@@ -1484,23 +1530,24 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             TuvImpl tuvImpl = (TuvImpl) tuv;
             TargetPage targetPage = tuvImpl.getTargetPage(curJobId);
             pageId = new String(String.valueOf(targetPage.getId()));
-           //GBS-4686 DQF: warning does not show when comment field empty
-           //Removed not null conditions for comment and comment status i.e  
-           //Case 1: anyone of comment or category or severity values are entered then insert the values in db.
-           //Case 2: While second time uploading with empty values then also we update the values in db. 
-            if (segmentId != null && !segmentId.equals("") && pageId != null
-                    && !pageId.equals(""))
+            // GBS-4686 DQF: warning does not show when comment field empty
+            // Removed not null conditions for comment and comment status i.e
+            // Case 1: anyone of comment or category or severity values are
+            // entered then insert the values in db.
+            // Case 2: While second time uploading with empty values then also
+            // we update the values in db.
+            if (segmentId != null && !segmentId.equals("") && pageId != null && !pageId.equals(""))
             {
-				segId2PageId.put(segIdLong, new Long(Long.parseLong(pageId)));
-				segId2Comment.put(segIdLong, reviewerComment);
-				segId2CommentStatus.put(segIdLong, commentStatus);
-				segId2FailureType.put(segIdLong, failureType);
-				segId2Severity.put(segIdLong, severity);
+                segId2PageId.put(segIdLong, new Long(Long.parseLong(pageId)));
+                segId2Comment.put(segIdLong, reviewerComment);
+                segId2CommentStatus.put(segIdLong, commentStatus);
+                segId2FailureType.put(segIdLong, failureType);
+                segId2Severity.put(segIdLong, severity);
             }
             else
             {
-                m_errWriter.addFileErrorMsg(
-                        "Segment or Page id is lost in row " + (k + 1) + "\r\n");
+                m_errWriter
+                        .addFileErrorMsg("Segment or Page id is lost in row " + (k + 1) + "\r\n");
                 hasIdErro = true;
             }
         }
@@ -1673,12 +1720,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     }
 
     // Updated comment status.
-    private void updateCommentStatus(Issue p_issue, String commentStatus, String severity,String failureType)
+    private void updateCommentStatus(Issue p_issue, String commentStatus, String severity,
+            String failureType)
     {
         IssueImpl issue = HibernateUtil.get(IssueImpl.class, p_issue.getId());
         issue.setStatus(commentStatus);
-        //GBS-4686  
-        //update default failure category and severity values when RCR upload for second time
+        // GBS-4686
+        // update default failure category and severity values when RCR upload
+        // for second time
         issue.setCategory(failureType);
         issue.setSeverity(severity);
         HibernateUtil.update(issue);
@@ -1783,7 +1832,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             existIssues = cachedIssues.get(targetPageId + "_" + tuId + "_" + tuvId + "_");
             if (existIssues == null || existIssues.size() == 0)
             {
-                // If any one of failureType or comment or severity or commentStatus values are not null then only insert the issue
+                // If any one of failureType or comment or severity or
+                // commentStatus values are not null then only insert the issue
                 if (StringUtil.isNotEmpty(failureType) || StringUtil.isNotEmpty(comment)
                         || StringUtil.isNotEmpty(severity) || StringUtil.isNotEmpty(commentStatus))
                 {
@@ -1831,8 +1881,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                             }
                             else
                             {
-                            	//GBS-4686  
-                            	// To update failure category value added failureType as a parameter
+                                // GBS-4686
+                                // To update failure category value added
+                                // failureType as a parameter
                                 updateCommentStatus(issue, commentStatus, severity, failureType);
                             }
                         }
@@ -1841,8 +1892,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                             if (comment != null && !comment.equals(""))
                             {
                                 commentManager.replyToIssue(issue.getId(), issue.getTitle(),
-                                        issue.getPriority(), commentStatus, failureType.trim(), issue.getSeverity(), 
-                                        p_user.getUserId(), comment);
+                                        issue.getPriority(), commentStatus, failureType.trim(),
+                                        severity, p_user.getUserId(), comment);
                             }
                             else
                             {
@@ -2597,7 +2648,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             new_reader = new StringReader(content.toString());
 
             br.close();
-            
+
             // GBS-4716
             if (segmentMap != null && !segmentMap.isEmpty())
             {

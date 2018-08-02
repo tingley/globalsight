@@ -374,7 +374,8 @@ public class JobCreationMonitor
         {
             // Filter duplicated updating to same state
             String stateInDb = getJobStateInDb(job.getId());
-            if (state == null || state.equalsIgnoreCase(stateInDb))
+            // For GBS-4829 state extracting to calculating word counts fails to complete
+            if (state == null)
             {
                 return;
             }
@@ -384,7 +385,7 @@ public class JobCreationMonitor
             HibernateUtil.update(job);
 
             // Job state change posting...
-            if (job.getL10nProfile().getWfStatePostId() != -1)
+            if (!state.equalsIgnoreCase(stateInDb) && job.getL10nProfile().getWfStatePostId() != -1)
             {
                 new JobStatePostThread(job, stateInDb, state).start();
             }

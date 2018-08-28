@@ -160,6 +160,8 @@ public class MsTranslatorMTUtil
                 count++;
                 Response response = msTransClient.post(uri, content);
                 needTranslateAgain = false;
+                
+                // The token maybe changed.
                 accessToken = msTransClient.getAuthToken();
                 
                 result = getTransFromResponse(response);

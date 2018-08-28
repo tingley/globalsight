@@ -140,7 +140,7 @@ public class Client
                                 break;
                             }
                             
-                            if (line1.indexOf("\"code\":401000,") > 0 && error < 4)
+                            if ((line1.indexOf("\"code\":401000,") > 0 || line1.indexOf("\"code\":503000,") > 0) && error < 4)
                             {
                                 _authToken = MSMTUtil.getAccessToken(msSubscriptionKey);
                                 errReader.close();

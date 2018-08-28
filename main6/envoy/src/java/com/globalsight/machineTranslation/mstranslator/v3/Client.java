@@ -34,11 +34,20 @@ public class Client
     
     private String _authToken;
     private String _baseUrl;
+    private String msSubscriptionKey;
+    private int error = 0;
     
-    public Client(String apiKey, String url) 
+    public Client(String authToken, String url) 
     {
-        _baseUrl = url;     
-        _authToken = apiKey;
+        _baseUrl = url;
+        _authToken = authToken;
+    }
+    
+    public Client(String authToken, String msSubscriptionKey, String url) 
+    {
+        _baseUrl = url;
+        this.msSubscriptionKey = msSubscriptionKey;
+        _authToken = authToken;
     }
     
     public void setAuthToken (String authToken) 
@@ -130,10 +139,25 @@ public class Client
                             {
                                 break;
                             }
+                            
+                            if (line1.indexOf("\"code\":401000,") > 0 && error < 4)
+                            {
+                                _authToken = MSMTUtil.getAccessToken(msSubscriptionKey);
+                                errReader.close();
+                                conn.disconnect(); 
+                                error++;
+                                System.out.println(error);
+                                return execute(uri, method, body);
+                            }
+                            
                             logger.error(line1);
                         }
                         errReader.close();
                     }
+                }
+                else
+                {
+                    error = 0;
                 }
             }
             catch (Exception e)
@@ -218,6 +242,10 @@ public class Client
                         while ((line1 = errReader.readLine()) != null)
                         {
                             logger.error(line1);
+                            if (response.exception == null)
+                                response.exception = "";
+                            
+                            response.exception += line1;
                         }
                         errReader.close();
                     }
@@ -244,8 +272,16 @@ public class Client
         catch (Exception e) 
         {
             response.e = e;
-            response.exception = e.getMessage();
+            if (!(response.exception != null && response.exception.indexOf("The category parameter") > 0))
+            {
+                response.exception = e.getMessage();
+            }
         }
         return response;
+    }
+
+    public String getAuthToken()
+    {
+        return _authToken;
     }
 }

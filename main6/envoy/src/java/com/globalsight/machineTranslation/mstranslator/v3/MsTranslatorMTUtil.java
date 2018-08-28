@@ -35,7 +35,7 @@ public class MsTranslatorMTUtil
 {
     private static final Logger logger = Logger.getLogger(MsTranslatorMTUtil.class);
 
-    private String MSMT_ACCESS_TOKEN = null;
+    private String accessToken = null;
     private static final String MS_MT_EXPIRE_ERROR = "The incoming token has expired";
     public static final String MSMT_CONTENT_TYPE = "text/plain";
 
@@ -120,6 +120,11 @@ public class MsTranslatorMTUtil
         {
             params = params + "&category=" + msCategory;
         }
+        
+        if (segment.indexOf("<") > -1)
+        {
+            params += "&textType=html";
+        }
 
         List<RequestBody> objList = new ArrayList<RequestBody>();
         objList.add(new RequestBody(segment));
@@ -140,21 +145,23 @@ public class MsTranslatorMTUtil
 
         try
         {
-            if (MSMT_ACCESS_TOKEN == null)
+            if (accessToken == null)
             {
-                MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
+                accessToken = MSMTUtil.getAccessToken(msSubscriptionKey);
             }
 
-            Client msTransClient = new Client(MSMT_ACCESS_TOKEN, endpoint);
+            Client msTransClient = new Client(accessToken, msSubscriptionKey, endpoint);
 
             boolean needTranslateAgain = true;
             int count = 0;
             // try at most 3 times
-            while (MSMT_ACCESS_TOKEN != null && needTranslateAgain && count < 3)
+            while (accessToken != null && needTranslateAgain && count < 3)
             {
                 count++;
                 Response response = msTransClient.post(uri, content);
                 needTranslateAgain = false;
+                accessToken = msTransClient.getAuthToken();
+                
                 result = getTransFromResponse(response);
             }
         }
@@ -165,12 +172,13 @@ public class MsTranslatorMTUtil
             {
                 try
                 {
-                    MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
-                    Client msTransClient = new Client(MSMT_ACCESS_TOKEN, endpoint);
+                    accessToken = MSMTUtil.getAccessToken(msSubscriptionKey);
+                    Client msTransClient = new Client(accessToken, endpoint);
+                    accessToken = msTransClient.getAuthToken();
                     boolean needTranslateAgain = true;
                     int count = 0;
                     // try at most 3 times
-                    while (MSMT_ACCESS_TOKEN != null && needTranslateAgain && count < 3)
+                    while (accessToken != null && needTranslateAgain && count < 3)
                     {
                         count++;
                         Response response = msTransClient.post(uri, content);
@@ -196,11 +204,9 @@ public class MsTranslatorMTUtil
         return result;
     }
 
-    public static String Translate2(Client msTransClient, String msCategory, String sourceLang,
-            String targetLang, String segment) throws Exception
+    public static Response getResponse(Client msTransClient, String msCategory, String sourceLang,
+            String targetLang, String segment)
     {
-
-        String target = "";
         String params = "";
         String uri = "";
 
@@ -220,19 +226,29 @@ public class MsTranslatorMTUtil
         }
 
         uri = MS_MT_TRANSLATE_V3 + params;
+        if (segment.indexOf("<") > -1)
+        {
+            uri += "&textType=html";
+        }
 
         List<RequestBody> objList = new ArrayList<RequestBody>();
         objList.add(new RequestBody(segment));
         String content = new Gson().toJson(objList);
-
-        Response response = msTransClient.post2(uri, content);
-        target = getTransFromResponse(response);
+        
+        return msTransClient.post2(uri, content);
+    }
+    
+    public static String Translate2(Client msTransClient, String msCategory, String sourceLang,
+            String targetLang, String segment) throws Exception
+    {
+        Response response = getResponse(msTransClient, msCategory, sourceLang, targetLang, segment);
+        String target = getTransFromResponse(response);
 
         // return response.body;
         return target;
     }
 
-    private static String getTransFromResponse(Response response)
+    public static String getTransFromResponse(Response response)
     {
         String target = "";
 

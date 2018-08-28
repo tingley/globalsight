@@ -13,6 +13,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTPro
 
 public class MSMTUtil
 {
+    //https://docs.microsoft.com/en-us/azure/cognitive-services/translator/reference/v3-0-translate?tabs=curl
     private static final Logger logger = Logger.getLogger(MSMTUtil.class);
 
     public static String getAccessToken(String subscriptionKey)

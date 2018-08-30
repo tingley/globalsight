@@ -456,26 +456,7 @@
 	
 	function updateTranslationMode()
 	{
-		String.prototype.endWith=function(endStr){
-		      var d=this.length-endStr.length;		 
-		      return (d>=0&&this.lastIndexOf(endStr)==d)		 
-		 }
 
-		var msTranslatorUrl = $.trim($("#idMsMtUrl").val());
-		if (msTranslatorUrl != null && msTranslatorUrl.toLocaleLowerCase().endWith(".svc"))
-		{
-			
-			$('#type1').attr("disabled",false);
-			$('#type2').attr("disabled",false);
-			//$("#msTransType").show();
-		}
-		else
-		{
-			$('#type1').attr("disabled",true);
-			$('#type1').attr('checked', 'checked');
-			$('#type2').attr("disabled",true);
-			//$("#msTransType").hide();
-		}
 	}
 	
 

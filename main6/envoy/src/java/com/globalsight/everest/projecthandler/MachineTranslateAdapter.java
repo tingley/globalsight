@@ -46,6 +46,7 @@ import org.json.JSONObject;
 import org.tempuri.SoapService;
 import org.tempuri.SoapServiceLocator;
 
+import com.globalsight.connector.eloqua.util.Response;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -56,7 +57,7 @@ import com.globalsight.machineTranslation.globalese.Client;
 import com.globalsight.machineTranslation.globalese.GlobaleseEngine;
 import com.globalsight.machineTranslation.globalese.GlobaleseMTUtil;
 import com.globalsight.machineTranslation.iptranslator.IPTranslatorUtil;
-import com.globalsight.machineTranslation.mstranslator.MSMTUtil;
+import com.globalsight.machineTranslation.mstranslator.v3.MsTranslatorMTUtil;
 import com.globalsight.machineTranslation.promt.ProMtInvoker;
 import com.globalsight.machineTranslation.promt.ProMtPts9Invoker;
 import com.globalsight.machineTranslation.safaba.SafabaTranslateUtil;
@@ -495,7 +496,14 @@ public class MachineTranslateAdapter
         {
             mtProfile.setMsTransType(msTransType);
         }
+        
+        // The ms v3 not support the tag
+//        if (url != null && !url.toLowerCase().endsWith(".svc"))
+//        {
+//            mtProfile.setMsTransType("1");
+//        }
 
+        
         String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
         if (msMaxLength != null && !"".equals(msMaxLength.trim()))
         {
@@ -635,13 +643,38 @@ public class MachineTranslateAdapter
 
         try
         {
-            // Test if it is "public" URL
-            String accessToken = MSMTUtil.getMsAccessToken(clientId, clientSecret, subscriptionKey);
-
             String msMtUrl = mtProfile.getUrl();
-            SoapService soap = new SoapServiceLocator(msMtUrl);
-            LanguageService service = soap.getBasicHttpBinding_LanguageService();
-            service.translate(accessToken, "hello world", "en", "fr", MSMT_CONTENT_TYPE, category);
+            
+            if (msMtUrl.toLowerCase().endsWith(".svc"))
+            {
+                String accessToken = com.globalsight.machineTranslation.mstranslator.v2.MSMTUtil.getMsAccessToken(clientId, clientSecret, subscriptionKey);
+                SoapService soap = new SoapServiceLocator(msMtUrl);
+                LanguageService service = soap.getBasicHttpBinding_LanguageService();
+                service.translate(accessToken, "hello world", "en", "fr", MSMT_CONTENT_TYPE, category);
+            }
+            else
+            {
+                com.globalsight.machineTranslation.mstranslator.v3.Client msTransClient = new com.globalsight.machineTranslation.mstranslator.v3.Client(subscriptionKey, msMtUrl);
+                Response response = new MsTranslatorMTUtil().getResponse(msTransClient, category, "en", "fr", "hello world");
+                
+                int statusCode = response.statusCode;
+                if (response.exception != null && response.exception.indexOf("The category parameter") > -1)
+                {
+                    JSONObject jso = new JSONObject();
+                    jso.put("ExceptionInfo", "Invalid category. Please enter a valid category.");
+                    writer.write(jso.toString());
+                    return false;
+                }
+                
+                String target = MsTranslatorMTUtil.getTransFromResponse(response);
+                if (target.length() == 0)
+                {
+                    JSONObject jso = new JSONObject();
+                    jso.put("ExceptionInfo", "Invalid MS Translato URL or API key.");
+                    writer.write(jso.toString());
+                    return false;
+                }
+            }
         }
         catch (Exception exx)
         {

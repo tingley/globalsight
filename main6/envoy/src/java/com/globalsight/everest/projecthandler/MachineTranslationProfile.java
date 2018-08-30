@@ -183,7 +183,7 @@ public class MachineTranslationProfile implements java.io.Serializable
         this.mtProfileName = "";
         this.mtEngine = "MS_Translator";
         this.description = "";
-        this.url = "";
+        this.url = "https://api.cognitive.microsofttranslator.com";
         this.username = "";
         this.category = "";
         this.accountinfo = "";

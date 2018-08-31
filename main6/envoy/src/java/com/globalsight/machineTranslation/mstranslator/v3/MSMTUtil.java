@@ -1,6 +1,7 @@
 package com.globalsight.machineTranslation.mstranslator.v3;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -15,9 +16,34 @@ public class MSMTUtil
 {
     //https://docs.microsoft.com/en-us/azure/cognitive-services/translator/reference/v3-0-translate?tabs=curl
     private static final Logger logger = Logger.getLogger(MSMTUtil.class);
+    private static HashMap<String, RecordedToken> RECORDED_TOKENS = new HashMap<>();
 
+    private static String getRecordedToken(String subscriptionKey)
+    {
+        RecordedToken recordedToken = RECORDED_TOKENS.get(subscriptionKey);
+        if (recordedToken == null)
+            return null;
+        
+        // When expired, token will become null.
+        return recordedToken.getToken();
+    }
+    
+    private static void addRecordedToken(String subscriptionKey, String accessToken)
+    {
+        RecordedToken recordedToken = new RecordedToken();
+        recordedToken.setToken(accessToken);
+        RECORDED_TOKENS.put(subscriptionKey, recordedToken);
+    }
+    
     public static String getAccessToken(String subscriptionKey)
     {
+        String token = getRecordedToken(subscriptionKey);
+        if (token != null)
+        {
+            return token;
+        }
+        
+        
         String accessToken = null;
         int count = 0;
         boolean gotten = false;
@@ -39,6 +65,9 @@ public class MSMTUtil
                     String strResult = EntityUtils.toString(httpResponse.getEntity());
                     accessToken = "Bearer " + strResult;
                     gotten = true;
+                    
+                    // record token with time
+                    addRecordedToken(subscriptionKey, accessToken);
                 }
             }
             catch (Exception e)

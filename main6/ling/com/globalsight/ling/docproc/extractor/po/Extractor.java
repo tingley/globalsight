@@ -114,6 +114,10 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
             {
                 msgTranslatorNotesList.add(realContent);
             }
+	    else if (content.startsWith(POToken.COMMENT))
+            {
+		// blank skip to ensure comments do not cause premature end of unit
+            }	
             else if (content.startsWith(POToken.MSGSID))
             {
                 if (content.startsWith(POToken.MSGSID_PLURAL))

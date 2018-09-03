@@ -6,7 +6,7 @@
 #You have to explicitly list the host name, TCP/IP port and database name to which you want to connect 
 driver=com.mysql.jdbc.Driver
 #connect_string=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%
-connect_string=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%
+connect_string=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%?useUnicode=true&characterEncoding=UTF-8&useSSL=false&tcpKeepAlive=true
 user_name=%%database_username%%
 password=%%database_password%%
 maxConnections=800

@@ -17,7 +17,7 @@
 
 #-------- DataSource for MySql
 org.quartz.dataSource.amb_mysql.driver=com.mysql.jdbc.Driver
-org.quartz.dataSource.amb_mysql.URL=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+org.quartz.dataSource.amb_mysql.URL=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%?useUnicode=true&characterEncoding=UTF-8&useSSL=false&tcpKeepAlive=true
 org.quartz.dataSource.amb_mysql.user=%%database_username%%
 org.quartz.dataSource.amb_mysql.password=%%database_password%%
 
@@ -48,7 +48,7 @@ org.quartz.jobStore.dataSource=amb_mysql
 org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool
 org.quartz.threadPool.threadCount=5
 
-org.quartz.dataSource.amb_mysql.validationQuery=select id as id_from_quartz_c3p0_pool from company where id = 1
+org.quartz.dataSource.amb_mysql.validationQuery=select id as id_from_quartz_c3p0_pool from company where id = 1;
 org.quartz.dataSource.amb_mysql.idleConnectionValidationSeconds=50
 org.quartz.dataSource.amb_mysql.validateOnCheckout=true
 org.quartz.dataSource.amb_mysql.discardIdleConnectionsSeconds=1800

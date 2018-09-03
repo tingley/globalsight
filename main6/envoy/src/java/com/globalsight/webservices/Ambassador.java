@@ -12472,8 +12472,9 @@ public class Ambassador extends AbstractWebService
             String url = pr.getProperty("connect_string");
             String username = pr.getProperty("user_name");
             String password = pr.getProperty("password");
-            strReturn.append(url).append("?useUnicode=true&characterEncoding=UTF-8").append(",")
-                    .append(username).append(",").append(password);
+		//GBS-4836
+            //strReturn.append(url).append("?useUnicode=true&characterEncoding=UTF-8&useSSL=false&tcpKeepAlive=true").append(",")
+            strReturn.append(url).append(",").append(username).append(",").append(password);
         }
         catch (Exception e)
         {

@@ -40,7 +40,7 @@ hibernate.query.factory_class org.hibernate.hql.internal.ast.ASTQueryTranslatorF
 hibernate.dialect org.hibernate.dialect.MySQLInnoDBDialect
 #hibernate.dialect org.hibernate.dialect.MySQLMyISAMDialect
 hibernate.connection.driver_class com.mysql.jdbc.Driver
-hibernate.connection.url jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+hibernate.connection.url jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%?useUnicode=true&characterEncoding=UTF-8&useSSL=false&tcpKeepAlive=true
 hibernate.connection.username %%database_username%%
 hibernate.connection.password %%database_password%%
 

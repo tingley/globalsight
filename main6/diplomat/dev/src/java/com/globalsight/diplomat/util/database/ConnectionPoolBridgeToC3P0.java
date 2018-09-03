@@ -128,8 +128,9 @@ public class ConnectionPoolBridgeToC3P0
     private ConnectionPoolBridgeToC3P0() throws PropertyVetoException
     {
         String driver = s_props.getProperty(DRIVER);
-        String connect_string = s_props.getProperty(CONNECT_STRING)
-                + "?useUnicode=true&characterEncoding=UTF-8&useSSL=false";
+        String connect_string = s_props.getProperty(CONNECT_STRING);
+//                + "?useUnicode=true&characterEncoding=UTF-8&useSSL=false&tcpKeepAlive=true";
+//                dont hard code. Use the config files to encode the url string.
         String userName = s_props.getProperty(USER_NAME);
         String password = s_props.getProperty(PASSWORD);
 

@@ -101,6 +101,8 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
         List<String> msgStrList = new ArrayList<String>();
         List<String> msgCtxtList = new ArrayList<String>();
         List<String> msgTranslatorNotesList = new ArrayList<String>();
+        List<String> msgCommentBeforeNotesList = new ArrayList<String>();
+        List<String> msgCommentAfterNotesList = new ArrayList<String>();
 
         for (int i = 0; i < lineList.size(); i++)
         {
@@ -114,10 +116,17 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
             {
                 msgTranslatorNotesList.add(realContent);
             }
-	    else if (content.startsWith(POToken.COMMENT))
+            else if (content.startsWith(POToken.COMMENT2))
             {
-		// blank skip to ensure comments do not cause premature end of unit
-            }	
+                if (msgTranslatorNotesList.isEmpty())
+                {
+                    msgCommentBeforeNotesList.add(content);
+                }
+                else
+                {
+                    msgCommentAfterNotesList.add(content);
+                }
+            }
             else if (content.startsWith(POToken.MSGSID))
             {
                 if (content.startsWith(POToken.MSGSID_PLURAL))
@@ -172,7 +181,8 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
             else
             {
                 addMsgListAndComm(msgIDList, msgIDPluralList, output, msgStrList,
-                        msgTranslatorNotesList, msgCtxtList);
+                        msgTranslatorNotesList, msgCtxtList, msgCommentBeforeNotesList,
+                        msgCommentAfterNotesList);
                 if (content != null && (!content.startsWith(POToken.MSGSTR)))
                 {
                     output.addSkeleton(content + "\n");
@@ -185,7 +195,7 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
         }
 
         addMsgListAndComm(msgIDList, msgIDPluralList, output, msgStrList, msgTranslatorNotesList,
-                msgCtxtList);
+                msgCtxtList, msgCommentBeforeNotesList, msgCommentAfterNotesList);
 
         setTargetLanguage(msgIDList, msgIDPluralList, msgStrList, output, true);
     }
@@ -195,11 +205,13 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
      */
     private void addMsgListAndComm(List<String> p_msgIDList, List<String> p_msgIDPluralList,
             Output p_output, List<String> p_msgStrList, List<String> p_msgTranslatorNotesList,
-            List<String> p_msgCtxtList)
+            List<String> p_msgCtxtList, List<String> p_msgCommentBeforeNotesList,
+            List<String> p_msgCommentAfterNotesList)
     {
         if (p_msgIDList != null && p_msgIDList.size() > 0)
         {
-            outputTranslatorNotesAndCtxt(p_output, p_msgTranslatorNotesList, p_msgCtxtList);
+            outputTranslatorNotesAndCtxt(p_output, p_msgTranslatorNotesList, p_msgCtxtList,
+                    p_msgCommentBeforeNotesList, p_msgCommentAfterNotesList);
 
             if (p_msgIDPluralList != null && p_msgIDPluralList.size() > 0)
             {
@@ -257,16 +269,19 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
         // Detect the language of target/msgStr, which is used for creating tuv.
         setTargetLanguage(p_msgIDList, p_msgIDPluralList, p_msgStrList, p_output, false);
 
-        if (p_msgIDList != null)
-            p_msgIDList.clear();
-        if (p_msgIDPluralList != null)
-            p_msgIDPluralList.clear();
-        if (p_msgStrList != null)
-            p_msgStrList.clear();
-        if (p_msgTranslatorNotesList != null)
-            p_msgTranslatorNotesList.clear();
-        if (p_msgCtxtList != null)
-            p_msgCtxtList.clear();
+        clearList(p_msgIDList);
+        clearList(p_msgIDPluralList);
+        clearList(p_msgStrList);
+        clearList(p_msgTranslatorNotesList);
+        clearList(p_msgCtxtList);
+        clearList(p_msgCommentBeforeNotesList);
+        clearList(p_msgCommentAfterNotesList);
+    }
+
+    private void clearList(@SuppressWarnings("rawtypes") List list)
+    {
+        if (list != null)
+            list.clear();
     }
 
     /**
@@ -276,8 +291,15 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
      * @since GBS-4467
      */
     private void outputTranslatorNotesAndCtxt(Output p_output,
-            List<String> p_msgTranslatorNotesList, List<String> p_msgCtxtList)
+            List<String> p_msgTranslatorNotesList, List<String> p_msgCtxtList,
+            List<String> p_msgCommentBeforeNotesList, List<String> p_msgCommentAfterNotesList)
     {
+        for (String comment : p_msgCommentBeforeNotesList)
+        {
+            p_output.addSkeleton(comment);
+            p_output.addSkeleton("\n");
+        }
+
         for (String translatorNotes : p_msgTranslatorNotesList)
         {
             String internalBpt = "<bpt i=\"" + bptIndex + "\" internal=\"yes\"/>";
@@ -291,6 +313,13 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 
             bptIndex++;
         }
+
+        for (String comment : p_msgCommentAfterNotesList)
+        {
+            p_output.addSkeleton(comment);
+            p_output.addSkeleton("\n");
+        }
+
         for (String msgCtxt : p_msgCtxtList)
         {
             String internalBpt = "<bpt i=\"" + bptIndex + "\" internal=\"yes\"/>";

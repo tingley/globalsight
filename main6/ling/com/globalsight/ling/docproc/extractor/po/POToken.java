@@ -116,6 +116,7 @@ public class POToken
     public static final String QuotationMark = "\"";
     // GBS-4467
     public static final String TRANSLATOR_NOTES = "#.";
+    public static final String COMMENT2 = "#:";
 
     /**
      * <p>

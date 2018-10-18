@@ -56,7 +56,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             HashMap paramMap = getMtParameterMap();
             String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
 
-            if (endpoint != null && endpoint.toLowerCase().endsWith(".svc"))
+            if (endpoint != null && endpoint.toLowerCase().contains("soap.svc"))
                 version = 2;
             else
                 version = 3;

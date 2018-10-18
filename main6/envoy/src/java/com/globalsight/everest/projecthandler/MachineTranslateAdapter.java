@@ -496,14 +496,13 @@ public class MachineTranslateAdapter
         {
             mtProfile.setMsTransType(msTransType);
         }
-        
-        // The ms v3 not support the tag
-//        if (url != null && !url.toLowerCase().endsWith(".svc"))
-//        {
-//            mtProfile.setMsTransType("1");
-//        }
 
-        
+        // The ms v3 not support the tag
+        // if (url != null && !url.toLowerCase().endsWith(".svc"))
+        // {
+        // mtProfile.setMsTransType("1");
+        // }
+
         String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
         if (msMaxLength != null && !"".equals(msMaxLength.trim()))
         {
@@ -644,28 +643,33 @@ public class MachineTranslateAdapter
         try
         {
             String msMtUrl = mtProfile.getUrl();
-            
-            if (msMtUrl.toLowerCase().endsWith(".svc"))
+
+            if (msMtUrl.toLowerCase().contains("soap.svc"))
             {
-                String accessToken = com.globalsight.machineTranslation.mstranslator.v2.MSMTUtil.getMsAccessToken(clientId, clientSecret, subscriptionKey);
+                String accessToken = com.globalsight.machineTranslation.mstranslator.v2.MSMTUtil
+                        .getMsAccessToken(clientId, clientSecret, subscriptionKey);
                 SoapService soap = new SoapServiceLocator(msMtUrl);
                 LanguageService service = soap.getBasicHttpBinding_LanguageService();
-                service.translate(accessToken, "hello world", "en", "fr", MSMT_CONTENT_TYPE, category);
+                service.translate(accessToken, "hello world", "en", "fr", MSMT_CONTENT_TYPE,
+                        category);
             }
             else
             {
-                com.globalsight.machineTranslation.mstranslator.v3.Client msTransClient = new com.globalsight.machineTranslation.mstranslator.v3.Client(subscriptionKey, msMtUrl);
-                Response response = new MsTranslatorMTUtil().getResponse(msTransClient, category, "en", "fr", "hello world");
-                
+                com.globalsight.machineTranslation.mstranslator.v3.Client msTransClient = new com.globalsight.machineTranslation.mstranslator.v3.Client(
+                        subscriptionKey, msMtUrl);
+                Response response = new MsTranslatorMTUtil().getResponse(msTransClient, category,
+                        "en", "fr", "hello world");
+
                 int statusCode = response.statusCode;
-                if (response.exception != null && response.exception.indexOf("The category parameter") > -1)
+                if (response.exception != null
+                        && response.exception.indexOf("The category parameter") > -1)
                 {
                     JSONObject jso = new JSONObject();
                     jso.put("ExceptionInfo", "Invalid category. Please enter a valid category.");
                     writer.write(jso.toString());
                     return false;
                 }
-                
+
                 String target = MsTranslatorMTUtil.getTransFromResponse(response);
                 if (target.length() == 0)
                 {
@@ -770,7 +774,7 @@ public class MachineTranslateAdapter
                 writer.write(jso.toString());
                 return false;
             }
-            
+
             if (engine.getGroup() != groupId)
             {
                 JSONObject jso = new JSONObject();

@@ -125,7 +125,7 @@ public class DocumentUtil
         handleInternalStyle(document);
         handleHyperlink(document);
         handleComment(document);
-        handleBookmark(document);
+        //handleBookmark(document);
     }
     
     /**

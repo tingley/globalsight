@@ -1923,7 +1923,7 @@ public class StandardExtractor
             Map<String, String> comments = new HashMap<String, String>();
             while (commentStartIndex > -1 && commentEndIndex > -1)
             {
-                String key = keyPre + index;
+                String key = keyPre + index + "#";
                 String comment = sb_p.substring(commentStartIndex,
                         commentEndIndex + 3);
                 comments.put(key, comment);

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,6 +51,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
+import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
@@ -91,8 +93,7 @@ import com.globalsight.util.edit.SegmentUtil2;
  */
 public class UpdateLeverageHelper
 {
-    private static final Logger logger = Logger
-            .getLogger(UpdateLeverageHelper.class);
+    private static final Logger logger = Logger.getLogger(UpdateLeverageHelper.class);
 
     // Managers
     private static TuvManager tuvManager = ServerProxy.getTuvManager();
@@ -108,8 +109,8 @@ public class UpdateLeverageHelper
     {
         if (logger.isDebugEnabled())
         {
-            logger.debug("Begin getUntranslatedTuvs() for target page "
-                    + p_tp.getId() + ", source locale Id " + p_sourceLocaleId);            
+            logger.debug("Begin getUntranslatedTuvs() for target page " + p_tp.getId()
+                    + ", source locale Id " + p_sourceLocaleId);
         }
         if (p_tp == null || p_sourceLocaleId < 1)
         {
@@ -122,8 +123,8 @@ public class UpdateLeverageHelper
         {
             GlobalSightLocale targetLocale = p_tp.getGlobalSightLocale();
             Map<Long, Set<LeverageMatch>> myLMsMap = leverageMatchLingManager
-                    .getExactMatchesForDownLoadTmx(p_tp.getSourcePage()
-                            .getIdAsLong(), targetLocale.getIdAsLong());
+                    .getExactMatchesForDownLoadTmx(p_tp.getSourcePage().getIdAsLong(),
+                            targetLocale.getIdAsLong());
 
             // Touch to load all TUs and source TUVs for performance.
             tuvManager.getTus(p_tp.getSourcePage().getIdAsLong());
@@ -149,10 +150,8 @@ public class UpdateLeverageHelper
                     }
                 }
 
-                if (trgTuv.getState().getValue() == TuvState.NOT_LOCALIZED
-                        .getValue()
-                        && srcTuv.getGxml().equals(trgTuv.getGxml())
-                        && !hasExactMatch)
+                if (trgTuv.getState().getValue() == TuvState.NOT_LOCALIZED.getValue()
+                        && srcTuv.getGxml().equals(trgTuv.getGxml()) && !hasExactMatch)
                 {
                     untranslatedSrcTuvs.add(srcTuv);
                 }
@@ -160,15 +159,13 @@ public class UpdateLeverageHelper
 
             if (logger.isDebugEnabled())
             {
-                logger.debug("End getUntranslatedTuvs() for target page "
-                        + p_tp.getId() + ", source locale Id "
-                        + p_sourceLocaleId);
+                logger.debug("End getUntranslatedTuvs() for target page " + p_tp.getId()
+                        + ", source locale Id " + p_sourceLocaleId);
             }
         }
         catch (Exception e)
         {
-            logger.error("Error when get untranslated Tuvs for target page : "
-                    + p_tp.getId(), e);
+            logger.error("Error when get untranslated Tuvs for target page : " + p_tp.getId(), e);
             throw new EnvoyServletException(e);
         }
 
@@ -186,8 +183,8 @@ public class UpdateLeverageHelper
             return new ArrayList<Tuv>();
         }
 
-        MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
-                p_tp.getSourcePage(), p_tp.getGlobalSightLocale());
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                .getMtProfileBySourcePage(p_tp.getSourcePage(), p_tp.getGlobalSightLocale());
         if (mtProfile == null || !(mtProfile.isActive()))
         {
             return new ArrayList<Tuv>();
@@ -198,16 +195,16 @@ public class UpdateLeverageHelper
         try
         {
             GlobalSightLocale targetLocale = p_tp.getGlobalSightLocale();
-            MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
-                    .getMatchTypesForStatistics(p_tp.getSourcePage().getIdAsLong(),
-                            targetLocale.getIdAsLong(), 0);
-            
+            MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager.getMatchTypesForStatistics(
+                    p_tp.getSourcePage().getIdAsLong(), targetLocale.getIdAsLong(), 0);
+
             // Touch to load all TUs and source TUVs for performance.
             tuvManager.getTus(p_tp.getSourcePage().getIdAsLong());
             tuvManager.getSourceTuvsForStatistics(p_tp.getSourcePage());
             Collection<Tuv> targetTuvs = tuvManager.getTargetTuvsForStatistics(p_tp);
-
             long jobId = p_tp.getSourcePage().getJobId();
+            // GBS-4623 dont send repetitions to MT
+            List<Long> repetitionSourceTuvIds = findRepetitions(jobId, targetTuvs);
             for (Tuv trgTuv : targetTuvs)
             {
                 // Target TUV must be in "NOT_LOCALIZED" state.
@@ -218,6 +215,10 @@ public class UpdateLeverageHelper
                 Tuv srcTuv = trgTuv.getTu(jobId).getTuv(p_sourceLocaleId, jobId);
                 if (!srcTuv.getGxml().equals(trgTuv.getGxml()))
                     continue;
+                if (repetitionSourceTuvIds.contains(srcTuv.getId()))
+                {
+                    continue;
+                }
 
                 // Best TM match score must less than MT threshold.
                 Types type = tuvMatchTypes.getTypes(srcTuv.getId(), "0");
@@ -245,9 +246,8 @@ public class UpdateLeverageHelper
     /**
      * Update from specified jobs' in-progress translations.
      */
-    public static Map<Long, LeverageMatches> getInProgressTranslationFromJobs(
-            Workflow p_workflow, List<BaseTmTuv> p_sourceTuvs,
-            String[] p_selectedJobIds)
+    public static Map<Long, LeverageMatches> getInProgressTranslationFromJobs(Workflow p_workflow,
+            List<BaseTmTuv> p_sourceTuvs, String[] p_selectedJobIds)
     {
         logger.debug("Begin getInProgressTranslationFromJobs()...");
         GlobalSightLocale targetLocale = p_workflow.getTargetLocale();
@@ -290,19 +290,17 @@ public class UpdateLeverageHelper
                     LeverageMatches levMatches = null;
                     if (srcTuv.isTranslatable())
                     {
-                        levMatches = leverager.leverageTranslatableSegment(
-                                srcTuv, targetLocale, levOptions,
-                                jobIdsToUpdateFrom, tmIds);
+                        levMatches = leverager.leverageTranslatableSegment(srcTuv, targetLocale,
+                                levOptions, jobIdsToUpdateFrom, tmIds);
                     }
                     else
                     {
-                        levMatches = leverager.leverageLocalizableSegment(
-                                srcTuv, srcTuv.getLocale(), targetLocale,
-                                levOptions, jobIdsToUpdateFrom, tmIds);
+                        levMatches = leverager.leverageLocalizableSegment(srcTuv,
+                                srcTuv.getLocale(), targetLocale, levOptions, jobIdsToUpdateFrom,
+                                tmIds);
                     }
 
-                    if (levMatches != null
-                            && levMatches.getLeveragedTus().size() > 0)
+                    if (levMatches != null && levMatches.getLeveragedTus().size() > 0)
                     {
                         ipMatches.put(srcTuv.getId(), levMatches);
                     }
@@ -310,8 +308,8 @@ public class UpdateLeverageHelper
                 catch (Exception e)
                 {
                     logger.error(
-                            "Error to leverage from in-progress TM for TuvID : "
-                                    + srcTuv.getId(), e);
+                            "Error to leverage from in-progress TM for TuvID : " + srcTuv.getId(),
+                            e);
                     // throw new EnvoyServletException(e);
                 }
             }
@@ -332,12 +330,12 @@ public class UpdateLeverageHelper
     /**
      * Apply in progress TM penalty
      */
-    public static LeverageMatches applyInProgressTmPenalty(
-            LeverageMatches p_levMatches, TranslationMemoryProfile p_tmProfile,
-            GlobalSightLocale p_targetLocale, int p_intIpTmPenalty)
+    public static LeverageMatches applyInProgressTmPenalty(LeverageMatches p_levMatches,
+            TranslationMemoryProfile p_tmProfile, GlobalSightLocale p_targetLocale,
+            int p_intIpTmPenalty)
     {
-        if (p_levMatches == null || p_tmProfile == null
-                || p_targetLocale == null || p_intIpTmPenalty == 0)
+        if (p_levMatches == null || p_tmProfile == null || p_targetLocale == null
+                || p_intIpTmPenalty == 0)
         {
             return p_levMatches;
         }
@@ -370,8 +368,7 @@ public class UpdateLeverageHelper
                 }
             }
 
-            if (tu.getTuvList(p_targetLocale) != null
-                    && tu.getTuvList(p_targetLocale).size() > 0)
+            if (tu.getTuvList(p_targetLocale) != null && tu.getTuvList(p_targetLocale).size() > 0)
             {
                 newLevreagedTus.add(tu);
             }
@@ -399,27 +396,23 @@ public class UpdateLeverageHelper
         LeveragingLocales leveragingLocales = lp.getLeveragingLocales();
 
         LeveragingLocales newLeveragingLocales = new LeveragingLocales();
-        Set<GlobalSightLocale> levLocales = leveragingLocales
-                .getLeveragingLocales(targetLocale);
+        Set<GlobalSightLocale> levLocales = leveragingLocales.getLeveragingLocales(targetLocale);
         Set<GlobalSightLocale> newLevLocales = new HashSet<GlobalSightLocale>();
         newLevLocales.addAll(levLocales);
         newLeveragingLocales.setLeveragingLocale(targetLocale, newLevLocales);
 
-        LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
-                newLeveragingLocales);
+        LeverageOptions leverageOptions = new LeverageOptions(tmProfile, newLeveragingLocales);
 
         // Leverage reference TMs
         LeverageDataCenter leverageDataCenter = null;
         try
         {
-            leverageDataCenter = LingServerProxy.getTmCoreManager()
-                    .leverageSegments(p_sourceTuvs, sourceLocale, trgLocales,
-                            leverageOptions, p_workflow.getJob());
+            leverageDataCenter = LingServerProxy.getTmCoreManager().leverageSegments(p_sourceTuvs,
+                    sourceLocale, trgLocales, leverageOptions, p_workflow.getJob());
         }
         catch (Exception e)
         {
-            logger.error("Failed to leverage segments for workflow: "
-                    + p_workflow.getId(), e);
+            logger.error("Failed to leverage segments for workflow: " + p_workflow.getId(), e);
             throw new EnvoyServletException(e);
         }
 
@@ -433,8 +426,8 @@ public class UpdateLeverageHelper
      * @deprecated not in use since 8.6.5
      */
     public static Map<Long, LeverageMatches> removeMatchesExistedInDB(
-            Map<Long, LeverageMatches> p_leverageMatchesMap,
-            GlobalSightLocale p_targetLocale, long p_jobId)
+            Map<Long, LeverageMatches> p_leverageMatchesMap, GlobalSightLocale p_targetLocale,
+            long p_jobId)
     {
         if (p_leverageMatchesMap == null || p_leverageMatchesMap.size() == 0
                 || p_targetLocale == null)
@@ -456,44 +449,37 @@ public class UpdateLeverageHelper
                 Long originalSourceTuvId = (Long) entry.getKey();
                 LeverageMatches levMatches = (LeverageMatches) entry.getValue();
 
-                SegmentTmTuv originalSourceTuv = (SegmentTmTuv) levMatches
-                        .getOriginalTuv();
-                SegmentTmTu originalTu = (SegmentTmTu) originalSourceTuv
-                        .getTu();
+                SegmentTmTuv originalSourceTuv = (SegmentTmTuv) levMatches.getOriginalTuv();
+                SegmentTmTu originalTu = (SegmentTmTu) originalSourceTuv.getTu();
 
                 List<LeveragedTu> levreagedTus = levMatches.getLeveragedTus();
                 List<LeveragedTu> newLeveragedTus = new ArrayList<LeveragedTu>();
                 for (LeveragedTu leveragedTu : levreagedTus)
                 {
-                    Collection<BaseTmTuv> tuvList = leveragedTu
-                            .getTuvList(p_targetLocale);
+                    Collection<BaseTmTuv> tuvList = leveragedTu.getTuvList(p_targetLocale);
                     if (tuvList != null && tuvList.size() > 0)
                     {
                         Iterator tuvIter = tuvList.iterator();
                         boolean tuvIterRemoved = false;
                         while (tuvIter.hasNext())
                         {
-                            LeveragedTuv matchedTuv = (LeveragedTuv) tuvIter
-                                    .next();
+                            LeveragedTuv matchedTuv = (LeveragedTuv) tuvIter.next();
                             long tmId = leveragedTu.getTmId();
                             long matchedTuvId = matchedTuv.getId();
                             float score = matchedTuv.getScore();
                             String targetSegmentText = matchedTuv.getSegment();
 
                             SortedSet<LeverageMatch> tuvMatches;
-                            tuvMatches = leverageMatchLingManager
-                                    .getTuvMatches(originalSourceTuv.getId(),
-                                            p_targetLocale.getId(),
-                                            originalTu.getSubId(), false,
-                                            p_jobId);
+                            tuvMatches = leverageMatchLingManager.getTuvMatches(
+                                    originalSourceTuv.getId(), p_targetLocale.getId(),
+                                    originalTu.getSubId(), false, p_jobId);
                             for (LeverageMatch lmInDB : tuvMatches)
                             {
                                 int projectTmIndex = lmInDB.getProjectTmIndex();
                                 // from project TM duplicated
                                 boolean isProjectTmMatchDuplicated = false;
                                 boolean isInProgressTmMatchDuplicated = false;
-                                if (projectTmIndex >= -1
-                                        && lmInDB.getTmId() == tmId
+                                if (projectTmIndex >= -1 && lmInDB.getTmId() == tmId
                                         && lmInDB.getMatchedTuvId() == matchedTuvId)
                                 {
                                     isProjectTmMatchDuplicated = true;
@@ -502,34 +488,27 @@ public class UpdateLeverageHelper
                                 else if (projectTmIndex == com.globalsight.ling.tm2.leverage.Leverager.IN_PROGRESS_TM_PRIORITY
                                         && lmInDB.getTmId() == tmId // job id
                                         && targetSegmentText != null
-                                        && targetSegmentText.equals(lmInDB
-                                                .getMatchedText()))
+                                        && targetSegmentText.equals(lmInDB.getMatchedText()))
                                 {
                                     isInProgressTmMatchDuplicated = true;
                                 }
 
                                 // If duplicated, update the record in DB(always
                                 // pick latest) instead of saving new.
-                                if (isProjectTmMatchDuplicated
-                                        || isInProgressTmMatchDuplicated)
+                                if (isProjectTmMatchDuplicated || isInProgressTmMatchDuplicated)
                                 {
                                     // Update "scoreNum" and "matchType" (delete
                                     // then re-save).
                                     Collection<LeverageMatch> lmList = new ArrayList<LeverageMatch>();
                                     lmInDB.setScoreNum(score);
-                                    lmInDB.setMatchType(matchedTuv
-                                            .getMatchState().getName());
+                                    lmInDB.setMatchType(matchedTuv.getMatchState().getName());
                                     lmList.add(lmInDB);
-                                    leverageMatchLingManager
-                                            .deleteLeverageMatches(
-                                                    lmInDB.getOriginalSourceTuvId(),
-                                                    lmInDB.getSubId(),
-                                                    lmInDB.getTargetLocaleId(),
-                                                    new Long(lmInDB.getOrderNum()),
-                                                    p_jobId);
-                                    leverageMatchLingManager
-                                            .saveLeveragedMatches(lmList, conn,
-                                                    p_jobId);
+                                    leverageMatchLingManager.deleteLeverageMatches(
+                                            lmInDB.getOriginalSourceTuvId(), lmInDB.getSubId(),
+                                            lmInDB.getTargetLocaleId(),
+                                            new Long(lmInDB.getOrderNum()), p_jobId);
+                                    leverageMatchLingManager.saveLeveragedMatches(lmList, conn,
+                                            p_jobId);
                                     // Remove this TUV to avoid to be saved into
                                     // DB again.
                                     if (!tuvIterRemoved)
@@ -542,9 +521,9 @@ public class UpdateLeverageHelper
                         }
                     }
 
-                    // Do not save "STATISTICS_MATCH" into DB when update leverage.
-                    if (!MatchState.STATISTICS_MATCH.equals(leveragedTu
-                            .getMatchState()))
+                    // Do not save "STATISTICS_MATCH" into DB when update
+                    // leverage.
+                    if (!MatchState.STATISTICS_MATCH.equals(leveragedTu.getMatchState()))
                     {
                         newLeveragedTus.add(leveragedTu);
                     }
@@ -556,9 +535,7 @@ public class UpdateLeverageHelper
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Failed to detect duplicated matches while updating leverage.",
-                    e);
+            logger.error("Failed to detect duplicated matches while updating leverage.", e);
         }
         finally
         {
@@ -573,11 +550,9 @@ public class UpdateLeverageHelper
      * Populate exact matches into target TUVs.
      */
     public static boolean populateExactMatchesToTargetTuvs(
-            Map<Long, ArrayList<LeverageSegment>> exactMap,
-            Collection<Tuv> untranslatedSrcTuvs,
-            GlobalSightLocale p_targetLocale, String p_userId,
-            long sourcePageId, long p_jobId) throws TuvException,
-            RemoteException, GeneralException
+            Map<Long, ArrayList<LeverageSegment>> exactMap, Collection<Tuv> untranslatedSrcTuvs,
+            GlobalSightLocale p_targetLocale, String p_userId, long sourcePageId, long p_jobId)
+            throws TuvException, RemoteException, GeneralException
     {
         if (exactMap != null && exactMap.size() > 0)
         {
@@ -585,23 +560,19 @@ public class UpdateLeverageHelper
             try
             {
                 List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
-                InProgressTmManager ipTmMgr = LingServerProxy
-                        .getInProgressTmManager();
+                InProgressTmManager ipTmMgr = LingServerProxy.getInProgressTmManager();
                 for (Tuv srcTuv : untranslatedSrcTuvs)
                 {
                     Tu tu = srcTuv.getTu(p_jobId);
-                    long trgTuvId = tu.getTuv(p_targetLocale.getId(), p_jobId)
-                            .getId();
-                    Tuv trgTuv = tuvManager.getTuvForSegmentEditor(trgTuvId,
-                            p_jobId);
-                    ArrayList<LeverageSegment> lss = exactMap.get(srcTuv
-                            .getIdAsLong());
+                    long trgTuvId = tu.getTuv(p_targetLocale.getId(), p_jobId).getId();
+                    Tuv trgTuv = tuvManager.getTuvForSegmentEditor(trgTuvId, p_jobId);
+                    ArrayList<LeverageSegment> lss = exactMap.get(srcTuv.getIdAsLong());
                     if (lss != null && lss.size() > 0)
                     {
                         for (LeverageSegment segment : lss)
                         {
-                            boolean canBeModified = SegmentUtil2.canBeModified(
-                                    trgTuv, segment.getSegment(), p_jobId);
+                            boolean canBeModified = SegmentUtil2.canBeModified(trgTuv,
+                                    segment.getSegment(), p_jobId);
                             if (canBeModified)
                             {
                                 trgTuv = modifyTUV(trgTuv, segment);
@@ -642,8 +613,8 @@ public class UpdateLeverageHelper
             catch (Exception e)
             {
                 logger.error("Exception when getting the gxml for a leveraged segment.");
-                logger.error("+++The leverage match string is "
-                        + leverageSegment.getSegment() + "+++");
+                logger.error(
+                        "+++The leverage match string is " + leverageSegment.getSegment() + "+++");
                 return null;
             }
             tuv.setMatchType(leverageSegment.getMatchType());
@@ -659,15 +630,15 @@ public class UpdateLeverageHelper
 
     public static TranslationMemoryProfile getTMProfile(Task p_task)
     {
-        TranslationMemoryProfile tmProfile = p_task.getWorkflow().getJob()
-                .getL10nProfile().getTranslationMemoryProfile();
+        TranslationMemoryProfile tmProfile = p_task.getWorkflow().getJob().getL10nProfile()
+                .getTranslationMemoryProfile();
         return tmProfile;
     }
 
     public static TranslationMemoryProfile getTMProfile(Workflow p_workflow)
     {
-        TranslationMemoryProfile tmProfile = p_workflow.getJob()
-                .getL10nProfile().getTranslationMemoryProfile();
+        TranslationMemoryProfile tmProfile = p_workflow.getJob().getL10nProfile()
+                .getTranslationMemoryProfile();
         return tmProfile;
     }
 
@@ -689,8 +660,8 @@ public class UpdateLeverageHelper
      * @return
      * @throws Exception
      */
-    public static List<Long> filterWorkflowsByState(List<Long> p_wfIds,
-            String p_wfState) throws Exception
+    public static List<Long> filterWorkflowsByState(List<Long> p_wfIds, String p_wfState)
+            throws Exception
     {
         if (p_wfIds == null || p_wfIds.size() == 0)
         {
@@ -701,8 +672,7 @@ public class UpdateLeverageHelper
         for (Iterator it = p_wfIds.iterator(); it.hasNext();)
         {
             Long wfId = (Long) it.next();
-            Workflow wf = ServerProxy.getWorkflowManager()
-                    .getWorkflowById(wfId);
+            Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId);
             if (p_wfState != null && p_wfState.equals(wf.getState()))
             {
                 filteredWfIds.add(wfId);
@@ -736,12 +706,13 @@ public class UpdateLeverageHelper
         return wfIds;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     public static void applyMTMatches(SourcePage p_sourcePage, GlobalSightLocale p_sourceLocale,
             GlobalSightLocale p_targetLocale, Collection<Tuv> untranslatedSrcTuvs) throws Exception
     {
-        MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
-                p_sourcePage, p_targetLocale);
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
         if (mtProfile == null || !(mtProfile.isActive()))
         {
             return;
@@ -757,8 +728,9 @@ public class UpdateLeverageHelper
         paramMap.put(MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS, isXlf ? "true" : "false");
         paramMap.put(MachineTranslator.DATA_TYPE, MTHelper2.getDataType(p_sourcePage.getId()));
         paramMap.put(MachineTranslator.MT_PROFILE, mtProfile);
-        if (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(machineTranslator
-                .getEngineName()) && p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
+        if (MachineTranslator.ENGINE_MSTRANSLATOR
+                .equalsIgnoreCase(machineTranslator.getEngineName())
+                && p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
         {
             String srLang = mtProfile.getPreferedLangForSr(p_targetLocale.toString());
             paramMap.put(MachineTranslator.SR_LANGUAGE, srLang);
@@ -770,9 +742,12 @@ public class UpdateLeverageHelper
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
 
         HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
-        needHitMTTuTuvMap = formTuTuvMap(untranslatedSrcTuvs, sourceTuvMap, p_targetLocale, jobId);
+        // GBS-4623
+        HashMap<Tu, Tuv> repetitionMap = new HashMap<Tu, Tuv>();
+        needHitMTTuTuvMap = formTuTuvMap(untranslatedSrcTuvs, sourceTuvMap, p_targetLocale, jobId,
+                repetitionMap);
 
-//        XmlEntities xe = new XmlEntities();
+        // XmlEntities xe = new XmlEntities();
         // put all TUs into array.
         Object[] key_tus = needHitMTTuTuvMap.keySet().toArray();
         Tu[] tusInArray = new Tu[key_tus.length];
@@ -831,8 +806,8 @@ public class UpdateLeverageHelper
             if (isGetMTResult
                     && MTHelper.needCheckMTTranslationTag(machineTranslator.getEngineName()))
             {
-                tagMatched = SegmentUtil2
-                        .canBeModified(currentNewTuv, machineTranslatedGxml, jobId);
+                tagMatched = SegmentUtil2.canBeModified(currentNewTuv, machineTranslatedGxml,
+                        jobId);
             }
             // replace the content in target tuv with mt result
             if (isGetMTResult && tagMatched)
@@ -899,22 +874,181 @@ public class UpdateLeverageHelper
         LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(lmCollection, jobId);
 
         /****** END :: Hit MT to get matches if configured ******/
+        // GBS-4623
+        populateRepetitionsWithMt(mtProfile, tuvsToBeUpdated, jobId, repetitionMap);
 
         // Populate into target TUVs
         SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, jobId);
     }
 
+    /**
+     * Case 1, MT leverage match threshold set to 100% (in MT profile page).
+     * Populate the first MT repetition instance with MT. Do populate any
+     * subsequent repetitions with the translation from the first instance. Do
+     * not send repetition to MT. Count as repetition. Case 2, MT leverage match
+     * threshold below 100% (in MT profile page). Populate the first MT
+     * repetition instance with MT. Do not populate any subsequent repetitions.
+     * Do not send repetition to MT. Count as repetition.
+     * 
+     * @param jobId
+     * 
+     * @since GBS-4623
+     */
+    private static void populateRepetitionsWithMt(MachineTranslationProfile mtProfile,
+            List<TuvImpl> tuvsToBeUpdated, long jobId, HashMap<Tu, Tuv> repetitionToPopulateMap)
+    {
+        if (repetitionToPopulateMap.isEmpty() || 100 > mtProfile.getMtThreshold())
+        {
+            return;
+        }
+        List<TuvImpl> added = new ArrayList<TuvImpl>();
+        Set<Tu> repetitionTus = repetitionToPopulateMap.keySet();
+        for (Tu repetitionTu : repetitionTus)
+        {
+            TuvImpl repetitionSourceTuv = ((TuImpl) repetitionTu).getSourceTuv();
+            for (TuvImpl targetTuvToBeUpdated : tuvsToBeUpdated)
+            {
+                Tu tuToBeUpdated = targetTuvToBeUpdated.getTu(jobId);
+                TuvImpl sourceTuvToBeUpdated = ((TuImpl) tuToBeUpdated).getSourceTuv();
+                if (sourceTuvToBeUpdated.getExactMatchKey() == repetitionSourceTuv
+                        .getExactMatchKey())
+                {
+                    Tuv repetitionTargetTuv = repetitionToPopulateMap.get(repetitionTu);
+                    repetitionTargetTuv.setGxml(targetTuvToBeUpdated.getGxml());
+                    added.add((TuvImpl) repetitionTargetTuv);
+                }
+            }
+        }
+        for (TuvImpl addedTu : added)
+        {
+            tuvsToBeUpdated.add(addedTu);
+        }
+    }
+
+    /**
+     * Finds repetitions from target tuvs.
+     * 
+     * @since GBS-4623
+     */
+    private static List<Long> findRepetitions(long jobId, Collection<Tuv> targetTuvs)
+    {
+        List<Long> repetitionSourceTuvIds = new ArrayList<Long>();
+        Map<Long, List<Tu>> uniqueSegments = new HashMap<Long, List<Tu>>();
+        for (Tuv targetTuv : targetTuvs)
+        {
+            TuImpl tu = (TuImpl) targetTuv.getTu(jobId);
+            Tuv sourceTuv = tu.getSourceTuv();
+            List<Tu> uTus = uniqueSegments.get(sourceTuv.getExactMatchKey());
+            if (uTus == null)
+            {
+                uTus = new ArrayList<Tu>();
+                uniqueSegments.put(sourceTuv.getExactMatchKey(), uTus);
+            }
+
+            uTus.add(tu);
+        }
+
+        for (List<Tu> uTus : uniqueSegments.values())
+        {
+            if (uTus.size() < 2)
+                continue;
+
+            Collections.sort(uTus, new Comparator<Tu>()
+            {
+                @Override
+                public int compare(Tu o1, Tu o2)
+                {
+                    return (int) (o1.getOrder() - o2.getOrder());
+                }
+            });
+
+            for (int i = 1; i < uTus.size(); i++)
+            {
+                TuImpl tu = (TuImpl) uTus.get(i);
+                repetitionSourceTuvIds.add(tu.getSourceTuv().getId());
+            }
+        }
+        return repetitionSourceTuvIds;
+    }
+
+    /**
+     * Finds repetitions from the tu tuv map.
+     * 
+     * @since GBS-4623
+     */
+    private static void findRepetitions(HashMap<Tu, Tuv> result, HashMap<Tu, Tuv> p_sourceTuvMap,
+            HashMap<Tu, Tuv> repetitionMap)
+    {
+        Map<Long, List<Tu>> uniqueSegments = new HashMap<Long, List<Tu>>();
+        Set<Tu> tus = result.keySet();
+        for (Tu tu : tus)
+        {
+            Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(tu);
+            List<Tu> uTus = uniqueSegments.get(sourceTuv.getExactMatchKey());
+            if (uTus == null)
+            {
+                uTus = new ArrayList<Tu>();
+                uniqueSegments.put(sourceTuv.getExactMatchKey(), uTus);
+            }
+
+            uTus.add(tu);
+        }
+
+        for (List<Tu> uTus : uniqueSegments.values())
+        {
+            if (uTus.size() < 2)
+                continue;
+
+            Collections.sort(uTus, new Comparator<Tu>()
+            {
+                @Override
+                public int compare(Tu o1, Tu o2)
+                {
+                    return (int) (o1.getOrder() - o2.getOrder());
+                }
+            });
+
+            for (int i = 1; i < uTus.size(); i++)
+            {
+
+                repetitionMap.put(uTus.get(i), result.get(uTus.get(i)));
+            }
+        }
+    }
+
+    /**
+     * Removes repetitions from tu tuv map.
+     * 
+     * @since GBS-4623
+     */
+    private static void removeRepetitionsFromResult(HashMap<Tu, Tuv> result,
+            HashMap<Tu, Tuv> repetitionMap)
+    {
+        if (repetitionMap.isEmpty())
+        {
+            return;
+        }
+        Set<Tu> repetitionTus = repetitionMap.keySet();
+        for (Tu repetitionTu : repetitionTus)
+        {
+            result.remove(repetitionTu);
+        }
+    }
+
     private static HashMap<Tu, Tuv> formTuTuvMap(Collection<Tuv> untranslatedSrcTuvs,
-            HashMap<Tu, Tuv> sourceTuvMap, GlobalSightLocale p_targetLocale, long p_jobId) throws Exception, RemoteException, GeneralException
+            HashMap<Tu, Tuv> sourceTuvMap, GlobalSightLocale p_targetLocale, long p_jobId,
+            HashMap<Tu, Tuv> repetitionMap) throws Exception, RemoteException, GeneralException
     {
         HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
         for (Tuv srcTuv : untranslatedSrcTuvs)
         {
             Tu tu = srcTuv.getTu(p_jobId);
-            Tuv targetTuv = ServerProxy.getTuvManager().cloneToTarget(srcTuv,
-                    p_targetLocale);
+            Tuv targetTuv = ServerProxy.getTuvManager().cloneToTarget(srcTuv, p_targetLocale);
             result.put(tu, targetTuv);
         }
+        // GBS-4623 dont send repetitions to MT
+        findRepetitions(result, sourceTuvMap, repetitionMap);
+        removeRepetitionsFromResult(result, repetitionMap);
         return result;
     }
 
@@ -929,18 +1063,16 @@ public class UpdateLeverageHelper
     {
         boolean result = false;
 
-        if (machineTranslatedGxml != null
-                && !"".equals(machineTranslatedGxml)
-                && !"".equals(GxmlUtil.stripRootTag(machineTranslatedGxml)
-                        .trim()))
+        if (machineTranslatedGxml != null && !"".equals(machineTranslatedGxml)
+                && !"".equals(GxmlUtil.stripRootTag(machineTranslatedGxml).trim()))
         {
             // As the MT returned translation may be invalid XML string,it
             // should not fail the job creation process.
             try
             {
                 // Perhaps the MT results include nothing except for tags
-                String textValue = SegmentUtil2.getGxmlElement(
-                        machineTranslatedGxml).getTextValue();
+                String textValue = SegmentUtil2.getGxmlElement(machineTranslatedGxml)
+                        .getTextValue();
                 if (!"".equals(textValue.trim()))
                 {
                     result = true;
@@ -958,8 +1090,7 @@ public class UpdateLeverageHelper
     private static TranslationMemoryProfile getTmProfile(SourcePage p_sourcePage)
     {
         L10nProfile l10nProfile = p_sourcePage.getRequest().getL10nProfile();
-        TranslationMemoryProfile tmProfile = l10nProfile
-                .getTranslationMemoryProfile();
+        TranslationMemoryProfile tmProfile = l10nProfile.getTranslationMemoryProfile();
 
         return tmProfile;
     }
@@ -972,8 +1103,7 @@ public class UpdateLeverageHelper
 
         // Assume this page contains an extracted file, otherwise
         // wouldn't have reached this place in the code.
-        Iterator<LeverageGroup> it1 = getExtractedFile(p_sourcePage)
-                .getLeverageGroups().iterator();
+        Iterator<LeverageGroup> it1 = getExtractedFile(p_sourcePage).getLeverageGroups().iterator();
         List<Tuv> srcTuvList = new ArrayList<Tuv>();
         while (it1.hasNext())
         {
@@ -993,7 +1123,7 @@ public class UpdateLeverageHelper
 
         return result;
     }
-    
+
     /**
      * Returns the page's Extracted Primary File or NULL if it doesn't contain
      * an Extracted file.

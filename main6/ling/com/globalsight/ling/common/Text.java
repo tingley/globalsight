@@ -359,7 +359,7 @@ public final class Text
             if (inWhite)
             {
                 // GBS-4398 do not take '\n' as whitespace
-                if (ch == '\u00a0' || (Character.isWhitespace(ch) && '\n' != ch))
+                if (Character.isWhitespace(ch) && '\n' != ch)
                 {
                     continue;
                 }
@@ -369,7 +369,7 @@ public final class Text
             else
             {
                 // GBS-4398 do not take '\n' as whitespace
-                if (ch == '\u00a0' || (Character.isWhitespace(ch) && '\n' != ch))
+                if (Character.isWhitespace(ch) && '\n' != ch)
                 {
                     inWhite = true;
                     ch = ' ';
@@ -515,22 +515,23 @@ public final class Text
      */
     final static public boolean containsBidiChar(String p_string)
     {
-    	//GBS-4686
-    	//from me_comment.jsp, p_string value is coming as null
-    	if (StringUtil.isEmptyAndNull(p_string)) {
-    		return false;
-    	}
-    	for (int i = 0, max = p_string.length(); i < max; i++)
-    	{
-    		char ch = p_string.charAt(i);
+        // GBS-4686
+        // from me_comment.jsp, p_string value is coming as null
+        if (StringUtil.isEmptyAndNull(p_string))
+        {
+            return false;
+        }
+        for (int i = 0, max = p_string.length(); i < max; i++)
+        {
+            char ch = p_string.charAt(i);
 
-    		if (isBidiChar(ch))
-    		{
-    			return true;
-    		}
-    	}
+            if (isBidiChar(ch))
+            {
+                return true;
+            }
+        }
 
-    	return false;
+        return false;
     }
 
     final static public boolean isBidiChar(char p_ch)

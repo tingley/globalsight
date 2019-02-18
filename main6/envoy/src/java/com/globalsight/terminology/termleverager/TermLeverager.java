@@ -59,8 +59,7 @@ import com.globalsight.util.StringUtil;
  */
 public class TermLeverager
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(TermLeverager.class);
+    private static final Logger CATEGORY = Logger.getLogger(TermLeverager.class);
 
     //
     // Static Private Members
@@ -105,9 +104,8 @@ public class TermLeverager
     // Public Methods
     //
 
-    public TermLeverageResult leverageTerms(String p_segment,
-            TermLeverageOptions p_options) throws TermLeveragerException,
-            RemoteException
+    public TermLeverageResult leverageTerms(String p_segment, TermLeverageOptions p_options)
+            throws TermLeveragerException, RemoteException
     {
         TuvLing tuv = new TuvImpl();
         tuv.setGxml(p_segment);
@@ -118,17 +116,15 @@ public class TermLeverager
         return leverageTerms(dummyList, p_options);
     }
 
-    public TermLeverageResult leverageTerms(ArrayList p_tuvs,
-            TermLeverageOptions p_options) throws TermLeveragerException,
-            RemoteException
+    public TermLeverageResult leverageTerms(ArrayList p_tuvs, TermLeverageOptions p_options)
+            throws TermLeveragerException, RemoteException
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
         return leverageTerms(p_tuvs, p_options, companyId);
     }
 
-    public TermLeverageResult leverageTerms(ArrayList p_tuvs,
-            TermLeverageOptions p_options, String p_companyId)
-            throws TermLeveragerException, RemoteException
+    public TermLeverageResult leverageTerms(ArrayList p_tuvs, TermLeverageOptions p_options,
+            String p_companyId) throws TermLeveragerException, RemoteException
     {
         long start = System.currentTimeMillis();
 
@@ -143,8 +139,7 @@ public class TermLeverager
         {
             String tbname = (String) termbases.get(i);
 
-            leverageTermsInTermbase(tbname, p_tuvs, p_options, result,
-                    p_companyId);
+            leverageTermsInTermbase(tbname, p_tuvs, p_options, result, p_companyId);
         }
 
         // Now we have source terms in memory.
@@ -179,8 +174,7 @@ public class TermLeverager
         {
             long stop = System.currentTimeMillis();
 
-            CATEGORY.debug("Total time to leverage terminology: "
-                    + (stop - start) / 1000.0 + "s.");
+            CATEGORY.debug("Total time to leverage terminology: " + (stop - start) / 1000.0 + "s.");
         }
 
         return result;
@@ -191,8 +185,8 @@ public class TermLeverager
     //
 
     private void leverageTermsInTermbase(String p_tbname, ArrayList p_tuvs,
-            TermLeverageOptions p_options, TermLeverageResult p_result,
-            String p_companyId) throws TermLeveragerException, RemoteException
+            TermLeverageOptions p_options, TermLeverageResult p_result, String p_companyId)
+            throws TermLeveragerException, RemoteException
     {
         long tbid = s_manager.getTermbaseId(p_tbname, p_companyId);
         ITermbase tb = null;
@@ -200,13 +194,11 @@ public class TermLeverager
         try
         {
             // Connect to the termbase see if it's still there.
-            tb = s_manager.connect(p_tbname, ITermbase.SYSTEM_USER, "",
-                    p_companyId);
+            tb = s_manager.connect(p_tbname, ITermbase.SYSTEM_USER, "", p_companyId);
         }
         catch (TermbaseException ex)
         {
-            CATEGORY.debug("Can't leverage from termbase " + p_tbname + ": "
-                    + ex.getMessage());
+            CATEGORY.debug("Can't leverage from termbase " + p_tbname + ": " + ex.getMessage());
 
             return;
         }
@@ -228,8 +220,7 @@ public class TermLeverager
                 try
                 {
                     termMatchFormatString = tuv.getTermMatchFormat();
-                    Hitlist hits = tb.recognizeTerms(lang,
-                            termMatchFormatString, 30);
+                    Hitlist hits = tb.recognizeTerms(lang, termMatchFormatString, 30);
                     addSourceHits(p_result, tuv, hits, tbid);
 
                     ArrayList<Long> existedHits = new ArrayList<Long>();
@@ -246,24 +237,20 @@ public class TermLeverager
                     segment = tuv.getGxml();
                     if (containsInternalText(segment))
                     {
-                        hits = tb.recognizeTerms(
-                                lang,
-                                ignoreInternalText(segment,
-                                        termMatchFormatString), 30);
+                        hits = tb.recognizeTerms(lang,
+                                ignoreInternalText(segment, termMatchFormatString), 30);
                         if (existedHits.size() == 0)
                             addSourceHits(p_result, tuv, hits, tbid);
                         else
                         {
-                            addSourceHits(p_result, tuv, hits, tbid,
-                                    existedHits);
+                            addSourceHits(p_result, tuv, hits, tbid, existedHits);
                         }
                     }
                 }
                 catch (TermbaseException ex)
                 {
                     // language doesn't exist? index locked?
-                    CATEGORY.error("Could not leverage from index `" + lang
-                            + "', skipping.", ex);
+                    CATEGORY.error("Could not leverage from index `" + lang + "', skipping.", ex);
 
                     continue l_languages;
                 }
@@ -294,8 +281,7 @@ public class TermLeverager
      * @param termMatchFormatString
      * @return String String without any internal texts
      */
-    private String ignoreInternalText(String segment,
-            String termMatchFormatString)
+    private String ignoreInternalText(String segment, String termMatchFormatString)
     {
         int beginIndex = -1, endIndex = -1, tmpIndex = 0;
         String internalText = "";
@@ -303,8 +289,8 @@ public class TermLeverager
         int count = 0;
         try
         {
-            while ((beginIndex = segment.indexOf("<bpt internal=\"yes\"",
-                    tmpIndex)) > -1 && count < 2)
+            while ((beginIndex = segment.indexOf("<bpt internal=\"yes\"", tmpIndex)) > -1
+                    && count < 2)
             {
                 endIndex = segment.indexOf("</bpt>", beginIndex);
                 tmpIndex = segment.indexOf("<ept ", beginIndex);
@@ -316,12 +302,9 @@ public class TermLeverager
                 if (endIndex > -1 && tmpIndex > -1)
                 {
                     internalText = segment.substring(endIndex, tmpIndex);
-                    termMatchFormatString = termMatchFormatString.replace(" "
-                            + internalText, "");
-                    termMatchFormatString = termMatchFormatString.replace(
-                            internalText + " ", "");
-                    termMatchFormatString = termMatchFormatString.replace(
-                            internalText, "");
+                    termMatchFormatString = termMatchFormatString.replace(" " + internalText, "");
+                    termMatchFormatString = termMatchFormatString.replace(internalText + " ", "");
+                    termMatchFormatString = termMatchFormatString.replace(internalText, "");
                 }
 
                 count++;
@@ -330,9 +313,7 @@ public class TermLeverager
         }
         catch (Exception e)
         {
-            CATEGORY.warn(
-                    "Cannot handle internal text in term leverage correctly. "
-                            + segment, e);
+            CATEGORY.warn("Cannot handle internal text in term leverage correctly. " + segment, e);
             return oriTermMatchFormatString;
         }
     }
@@ -340,8 +321,8 @@ public class TermLeverager
     /**
      * Helper method to record source matches in result.
      */
-    private void addSourceHits(TermLeverageResult p_result, TuvLing p_tuv,
-            Hitlist p_hits, long p_tbid)
+    private void addSourceHits(TermLeverageResult p_result, TuvLing p_tuv, Hitlist p_hits,
+            long p_tbid)
     {
         ArrayList hits = p_hits.getHits();
 
@@ -349,17 +330,16 @@ public class TermLeverager
         {
             Hitlist.Hit hit = (Hitlist.Hit) hits.get(i);
 
-            p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(),
-                    hit.getTermId(), hit.getTerm().trim(), hit.getScore(),
-                    hit.getDescXML());
+            p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(), hit.getTermId(),
+                    hit.getTerm().trim(), hit.getScore(), hit.getDescXML());
         }
     }
 
     /**
      * Helper method to record source matches in result.
      */
-    private void addSourceHits(TermLeverageResult p_result, TuvLing p_tuv,
-            Hitlist p_hits, long p_tbid, ArrayList<Long> existedHits)
+    private void addSourceHits(TermLeverageResult p_result, TuvLing p_tuv, Hitlist p_hits,
+            long p_tbid, ArrayList<Long> existedHits)
     {
         ArrayList hits = p_hits.getHits();
         if (existedHits == null)
@@ -371,9 +351,8 @@ public class TermLeverager
 
             if (!existedHits.contains(hit.getTermId()))
             {
-                p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(),
-                        hit.getTermId(), hit.getTerm().trim(), hit.getScore(),
-                        hit.getDescXML());
+                p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(), hit.getTermId(),
+                        hit.getTerm().trim(), hit.getScore(), hit.getDescXML());
             }
         }
     }
@@ -402,9 +381,8 @@ public class TermLeverager
      * This is done per termbase, trading multiple calls for easier parameter
      * passing and shortcutting if a termbase generated no matches.
      */
-    private void loadTargetTerms(TermLeverageResult p_result,
-            TermLeverageOptions p_options, String p_companyId)
-            throws TermLeveragerException, RemoteException
+    private void loadTargetTerms(TermLeverageResult p_result, TermLeverageOptions p_options,
+            String p_companyId) throws TermLeveragerException, RemoteException
     {
         // Given the target languages to leverage from, retrieve the
         // list of locales as they are stored in the database (derived
@@ -433,8 +411,8 @@ public class TermLeverager
                 numberParams.clear();
                 stringParams.clear();
 
-                boolean hasMatches = buildStoredProcedureParams(numberParams,
-                        stringParams, tbid, p_result, targetLanguages);
+                boolean hasMatches = buildStoredProcedureParams(numberParams, stringParams, tbid,
+                        p_result, targetLanguages);
 
                 // If there were no matches from this termbase, skip.
                 if (!hasMatches)
@@ -442,8 +420,8 @@ public class TermLeverager
                     continue;
                 }
 
-                List list = StoredProcCaller.findTargetTerms(connection,
-                        numberParams, stringParams);
+                List list = StoredProcCaller.findTargetTerms(connection, numberParams,
+                        stringParams);
 
                 Iterator<TbTerm> ite = list.iterator();
 
@@ -460,13 +438,10 @@ public class TermLeverager
                     // String usage = results.getString("usage");
 
                     // Map lang_name to a termbase locale (language code only)
-                    if (p_options.getLocale(langname) != null
-                            && !StringUtil.isEmpty(term))
+                    if (p_options.getLocale(langname) != null && !StringUtil.isEmpty(term))
                     {
-                        String locale = p_options.getLocale(langname)
-                                .getLanguage();
-
-                        p_result.addTargetTerm(tbid, cid, tid, term, locale, "");
+                        // GBS-4846, change to store the entire locale string
+                        p_result.addTargetTerm(tbid, cid, tid, term, langname, "");
                     }
                 }
             }
@@ -478,8 +453,8 @@ public class TermLeverager
         }
     }
 
-    private long[] getTermbaseIds(TermLeverageOptions p_options,
-            String p_companyId) throws RemoteException
+    private long[] getTermbaseIds(TermLeverageOptions p_options, String p_companyId)
+            throws RemoteException
     {
         ArrayList tbs = p_options.getTermBases();
 
@@ -500,9 +475,9 @@ public class TermLeverager
     // number=cid,cid,... (no terminator or separator)
     // string=tbid,trglang,trglang,...,"" (terminator at end)
     // returns true if CIDs were found in this termbase.
-    private boolean buildStoredProcedureParams(Vector p_numberParams,
-            Vector p_stringParams, long p_tbid, TermLeverageResult p_result,
-            ArrayList p_targetLanguages) throws TermLeveragerException
+    private boolean buildStoredProcedureParams(Vector p_numberParams, Vector p_stringParams,
+            long p_tbid, TermLeverageResult p_result, ArrayList p_targetLanguages)
+            throws TermLeveragerException
     {
         boolean result = false;
 
@@ -554,8 +529,8 @@ public class TermLeverager
             {
                 ArrayList matches = p_matches.getMatchesForTuv(id);
 
-                System.out.println("Hits from fuzzy index: tuvid " + id + ": "
-                        + matches.size() + " matches");
+                System.out.println(
+                        "Hits from fuzzy index: tuvid " + id + ": " + matches.size() + " matches");
                 System.out.println("TUV '" + tuv.getTermMatchFormat() + "'");
 
                 for (int j = 0, maxj = matches.size(); j < maxj; j++)
@@ -563,11 +538,9 @@ public class TermLeverager
                     TermLeverageResult.MatchRecord tlm = (TermLeverageResult.MatchRecord) matches
                             .get(j);
 
-                    System.out.println(String.valueOf(j) + ": ["
-                            + tlm.getTermbaseId() + "," + tlm.getConceptId()
-                            + "," + tlm.getMatchedSourceTermId() + "] "
-                            + tlm.getMatchedSourceTerm() + " ("
-                            + tlm.getScore() + ")");
+                    System.out.println(String.valueOf(j) + ": [" + tlm.getTermbaseId() + ","
+                            + tlm.getConceptId() + "," + tlm.getMatchedSourceTermId() + "] "
+                            + tlm.getMatchedSourceTerm() + " (" + tlm.getScore() + ")");
 
                     ArrayList targets = tlm.getSourceTerm().getTargetTerms();
                     if (targets == null)
@@ -576,8 +549,8 @@ public class TermLeverager
                     {
                         TermLeverageResult.TargetTerm trg = (TermLeverageResult.TargetTerm) targets
                                 .get(k);
-                        System.out.println("\t" + trg.getMatchedTargetTerm()
-                                + " (" + trg.getLocale() + ")");
+                        System.out.println(
+                                "\t" + trg.getMatchedTargetTerm() + " (" + trg.getLocale() + ")");
                     }
                 }
             }
@@ -587,8 +560,7 @@ public class TermLeverager
     /**
      * Sort source matches best score first.
      */
-    private void reorderSourceTerms(TermLeverageResult p_result,
-            TermLeverageOptions p_options)
+    private void reorderSourceTerms(TermLeverageResult p_result, TermLeverageOptions p_options)
     {
         for (Iterator it = p_result.getRecordIterator(); it.hasNext();)
         {
@@ -613,8 +585,7 @@ public class TermLeverager
      * Sorts target terms by target locale and so that per locale the preferred
      * ones show up on top.
      */
-    private void reorderTargetTerms(TermLeverageResult p_result,
-            TermLeverageOptions p_options)
+    private void reorderTargetTerms(TermLeverageResult p_result, TermLeverageOptions p_options)
     {
         for (Iterator it = p_result.getRecordIterator(); it.hasNext();)
         {

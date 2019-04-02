@@ -71,18 +71,14 @@ public class WordExtractor extends AbstractExtractor
     private Boolean isHiddenTextTranslate = null;
     private Boolean isTableOfContentTranslate = null;
 
-    private static Pattern PATTERN_URL = Pattern
-            .compile(
-                    "https?://(\\w+(-\\w+)*)(\\.(\\w+(-\\w+)*))*((:\\d+)?)(/(\\w+(-\\w+)*))*(\\.?(\\w)*)(\\?)?(((\\w*%)*(\\w*\\?)*(\\w*:)*(\\w*\\+)*(\\w*\\.)*(\\w*&)*(\\w*-)*(\\w*=)*(\\w*%)*(\\w*\\?)*(\\w*:)*(\\w*\\+)*(\\w*\\.)*(\\w*&)*(\\w*-)*(\\w*=)*)*(\\w*)*)",
-                    Pattern.CASE_INSENSITIVE);
-    private static Pattern HYPERLINKE_RE = Pattern
-            .compile("HYPERLINK \"([^\"]*)\"");
+    private static Pattern PATTERN_URL = Pattern.compile(
+            "https?://(\\w+(-\\w+)*)(\\.(\\w+(-\\w+)*))*((:\\d+)?)(/(\\w+(-\\w+)*))*(\\.?(\\w)*)(\\?)?(((\\w*%)*(\\w*\\?)*(\\w*:)*(\\w*\\+)*(\\w*\\.)*(\\w*&)*(\\w*-)*(\\w*=)*(\\w*%)*(\\w*\\?)*(\\w*:)*(\\w*\\+)*(\\w*\\.)*(\\w*&)*(\\w*-)*(\\w*=)*)*(\\w*)*)",
+            Pattern.CASE_INSENSITIVE);
+    private static Pattern HYPERLINKE_RE = Pattern.compile("HYPERLINK \"([^\"]*)\"");
     private static Pattern O_RE = Pattern.compile("\\\\o \"([^\"]*)\"");
 
-    private static Pattern HYPERLINKE2_RE = Pattern
-            .compile("HYPERLINK &quot;([^\"]*?)&quot;");
-    private static Pattern O2_RE = Pattern
-            .compile("\\\\o &quot;([^\"]*?)&quot;");
+    private static Pattern HYPERLINKE2_RE = Pattern.compile("HYPERLINK &quot;([^\"]*?)&quot;");
+    private static Pattern O2_RE = Pattern.compile("\\\\o &quot;([^\"]*?)&quot;");
 
     private Boolean isUrlTranslate = null;
 
@@ -213,10 +209,10 @@ public class WordExtractor extends AbstractExtractor
             DocumentUtil dUtil = new DocumentUtil();
             dUtil.setWordExtractor(this);
             dUtil.handle(document);
-            // util.saveToFile(document, "e://a.xml");
+            // util.saveToFile(document,
+            // "D://work//welocalize//workspace//a-deploy//test.xml");
         }
-        else if ("c:chartSpace".equals(rootName)
-                || "dgm:dataModel".equals(rootName))
+        else if ("c:chartSpace".equals(rootName) || "dgm:dataModel".equals(rootName))
         {
             ChartSpaceUtil cUtil = new ChartSpaceUtil();
             cUtil.handle(document);
@@ -271,6 +267,32 @@ public class WordExtractor extends AbstractExtractor
 
             n = n.getNextSibling();
         }
+    }
+
+    /**
+     * Checks if there is any content for extraction under the node.
+     * 
+     * @since GBS-4854
+     */
+    private boolean hasContentForExtraction(Node node)
+    {
+        List<Node> ns = new ArrayList<Node>();
+        getTextNode(node, ns);
+        if (ns.size() > 0)
+        {
+            for (Node n : ns)
+            {
+                if (EXTRACT_NODE.contains(n.getNodeName()))
+                {
+                    if (!isEmpty(n.getTextContent()))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private boolean hasContent(Node node)
@@ -332,6 +354,12 @@ public class WordExtractor extends AbstractExtractor
 
         for (Node c : cs)
         {
+            if (c.getNodeType() == Node.TEXT_NODE && isPageNumberInFooter(c))
+            {
+                outputSkeleton(escapeString(c.getTextContent()));
+                continue;
+            }
+
             if (c.getNodeType() == Node.TEXT_NODE)
             {
                 sb.append(c.getTextContent());
@@ -405,8 +433,7 @@ public class WordExtractor extends AbstractExtractor
                 String attname = att.getNodeName();
                 String value = att.getNodeValue();
 
-                if ("w:val".equals(attname)
-                        && getInternals().indexOf(value) > -1)
+                if ("w:val".equals(attname) && getInternals().indexOf(value) > -1)
                     return true;
             }
         }
@@ -425,12 +452,11 @@ public class WordExtractor extends AbstractExtractor
     /**
      * Handles internal text.
      */
-    private String handleInternalText(String value, boolean isInline,
-            boolean isPreserveWS)
+    private String handleInternalText(String value, boolean isInline, boolean isPreserveWS)
     {
         int oriIndex = ++index;
-        List<String> handled = InternalTextHelper.handleStringWithListReturn(
-                value, internalTexts, getMainFormat());
+        List<String> handled = InternalTextHelper.handleStringWithListReturn(value, internalTexts,
+                getMainFormat());
 
         for (int i = 0; i < handled.size(); i++)
         {
@@ -448,12 +474,10 @@ public class WordExtractor extends AbstractExtractor
         return InternalTextHelper.listToString(handled);
     }
 
-    private String createSubTag(boolean isTranslatable, String type,
-            String dataFormat)
+    private String createSubTag(boolean isTranslatable, String type, String dataFormat)
     {
         String stuff = "<sub";
-        stuff += " locType=\""
-                + (isTranslatable ? "translatable" : "localizable") + "\"";
+        stuff += " locType=\"" + (isTranslatable ? "translatable" : "localizable") + "\"";
 
         if (type != null)
         {
@@ -474,8 +498,7 @@ public class WordExtractor extends AbstractExtractor
      */
     private void outputAttributesForOfficeXmlContentTag(OfficeXmlContentTag tag)
     {
-        List<OfficeXmlContentTag.Attribute> attributeList = tag
-                .getAttributeList();
+        List<OfficeXmlContentTag.Attribute> attributeList = tag.getAttributeList();
         if (attributeList.isEmpty())
         {
             return;
@@ -523,8 +546,7 @@ public class WordExtractor extends AbstractExtractor
     {
         if (postFilter != null)
         {
-            List<OfficeXmlContentTag> tagsInContent = postFilter
-                    .detectTags(pureText);
+            List<OfficeXmlContentTag> tagsInContent = postFilter.detectTags(pureText);
             for (OfficeXmlContentTag tag : tagsInContent)
             {
                 String tagName = tag.getName();
@@ -566,8 +588,7 @@ public class WordExtractor extends AbstractExtractor
                     stuff.append(">");
                     if (tag.isMerged())
                     {
-                        stuff.append(filterHelp.processText(tag.toString(),
-                                true, false));
+                        stuff.append(filterHelp.processText(tag.toString(), true, false));
                     }
                     else
                     {
@@ -615,8 +636,7 @@ public class WordExtractor extends AbstractExtractor
                     outputTranslatableTmx(stuff.toString());
 
                     // text after tag - new node value
-                    pureText = pureText.substring(tagIndex
-                            + tag.toString().length());
+                    pureText = pureText.substring(tagIndex + tag.toString().length());
                 }
             }
         }
@@ -660,8 +680,7 @@ public class WordExtractor extends AbstractExtractor
         String nodeType = getType(nodes);
         boolean isCommonStleTag = false;
 
-        sb.append("<bpt i=\"").append(n).append("\" type=\"")
-                .append(nodeType).append("\" ");
+        sb.append("<bpt i=\"").append(n).append("\" type=\"").append(nodeType).append("\" ");
 
         if (nodes.size() == 1)
         {
@@ -686,45 +705,117 @@ public class WordExtractor extends AbstractExtractor
             NamedNodeMap attrs = node.getAttributes();
 
             List<String> atts = getTranslateAttsMaps().get(name);
-
-            for (int j = 0; j < attrs.getLength(); ++j)
+            if (attrs != null)
             {
-                Node att = attrs.item(j);
-                String attname = att.getNodeName();
-                String value = att.getNodeValue();
-
-                sb.append(" ").append(attname).append("=\"");
-
-                if (atts != null && atts.indexOf(attname) > -1)
+                for (int j = 0; j < attrs.getLength(); ++j)
                 {
-                    sb.append("<sub locType=\"translatable\" >");
-                    sb.append(escapeString(value)).append("</sub>");
+                    Node att = attrs.item(j);
+                    String attname = att.getNodeName();
+                    String value = att.getNodeValue();
+
+                    sb.append(" ").append(attname).append("=\"");
+
+                    if (atts != null && atts.indexOf(attname) > -1)
+                    {
+                        sb.append("<sub locType=\"translatable\" >");
+                        sb.append(escapeString(value)).append("</sub>");
+                    }
+                    else
+                    {
+                        sb.append(escapeString(escapeString(value)));
+                    }
+                    sb.append("\"");
                 }
-                else
-                {
-                    sb.append(escapeString(escapeString(value)));
-                }
-                sb.append("\"");
             }
             sb.append("&gt;");
 
             if (TYPE.containsValue(nodeType) && nodes.size() == 1)
             {
-            	isCommonStleTag = true;
-            	sb.append("</bpt>");
-            	outputTranslatableTmx(sb.toString());
-            	sb = null;
+                isCommonStleTag = true;
+                sb.append("</bpt>");
+                outputTranslatableTmx(sb.toString());
+                sb = null;
             }
-            
+
             addFldStart(node, sb);
             addrprChild(node, sb);
         }
 
         if (!isCommonStleTag)
         {
-	        sb.append("</bpt>");
-	        outputTranslatableTmx(sb.toString());
+            sb.append("</bpt>");
+            outputTranslatableTmx(sb.toString());
         }
+    }
+
+    /**
+     * Checks if the text node is page number from footer xml. The page number
+     * format (merged in code) is like {@code<w:t>
+    <fldChar type="begin">
+    <w:r w:rsidRPr="00C716E3">
+    <w:rPr>
+    <w:rStyle w:val="PageNumber"/>
+    <w:rFonts w:asciiTheme="minorHAnsi" w:cs="Arial" w:hAnsiTheme="minorHAnsi"/>
+    <w:b/>
+    <w:sz w:val="20"/>
+    <w:szCs w:val="20"/>
+    </w:rPr>
+    <w:fldChar w:fldCharType="begin"/>
+    </w:r>
+    <w:r w:rsidRPr="00C716E3">
+    <w:rPr>
+    <w:rStyle w:val="PageNumber"/>
+    <w:rFonts w:asciiTheme="minorHAnsi" w:cs="Arial" w:hAnsiTheme="minorHAnsi"/>
+    <w:b/>
+    <w:sz w:val="20"/>
+    <w:szCs w:val="20"/>
+    </w:rPr>
+    <w:instrText xml:space="preserve">PAGE  </w:instrText>
+    </w:r>
+    <w:r w:rsidRPr="00C716E3">
+    <w:rPr>
+    <w:rStyle w:val="PageNumber"/>
+    <w:rFonts w:asciiTheme="minorHAnsi" w:cs="Arial" w:hAnsiTheme="minorHAnsi"/>
+    <w:b/>
+    <w:sz w:val="20"/>
+    <w:szCs w:val="20"/>
+    </w:rPr>
+    <w:fldChar w:fldCharType="separate"/>
+    </w:r>
+    </fldChar>
+    13
+    <fldChar type="end">
+    <w:r w:rsidRPr="00C716E3">
+    <w:rPr>
+    <w:rStyle w:val="PageNumber"/>
+    <w:rFonts w:asciiTheme="minorHAnsi" w:cs="Arial" w:hAnsiTheme="minorHAnsi"/>
+    <w:b/>
+    <w:sz w:val="20"/>
+    <w:szCs w:val="20"/>
+    </w:rPr>
+    <w:fldChar w:fldCharType="end"/>
+    </w:r>
+    </fldChar>
+    </w:t>}
+     * 
+     * @since GBS-4854
+     */
+    private boolean isPageNumberInFooter(Node c)
+    {
+        if ("w:ftr".equals(rootName))
+        {
+            Node previousNode = c.getPreviousSibling();
+            Node nextNode = c.getNextSibling();
+            if (previousNode != null && nextNode != null)
+            {
+                if ("fldChar".equals(previousNode.getNodeName())
+                        && "fldChar".equals(nextNode.getNodeName()))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean includeFld(Node node)
@@ -757,10 +848,13 @@ public class WordExtractor extends AbstractExtractor
         Node f = node.getFirstChild();
         handleFldCharStart(f, sb);
     }
-    
+
     private void addrprChild(Node node, StringBuilder sb)
     {
         Node f = node.getFirstChild();
+        if (f == null)
+            return;
+
         if ("rprChild".equals(f.getNodeName()))
         {
             util.getXmlString(f, sb);
@@ -839,7 +933,8 @@ public class WordExtractor extends AbstractExtractor
             flag = true;
             sb = new StringBuilder();
             index2 = ++index;
-            // sb.append("<bpt i=\"").append(index2).append("\" type=\"ref\" erasable=\"yes\">");
+            // sb.append("<bpt i=\"").append(index2).append("\" type=\"ref\"
+            // erasable=\"yes\">");
             sb.append("<bpt i=\"").append(index2).append("\" type=\"ref\" >");
         }
 
@@ -908,30 +1003,40 @@ public class WordExtractor extends AbstractExtractor
         }
         else if ("fldChar".equals(node.getNodeName()))
         {
-        	Element e = (Element) node;
-        	Node parent = node.getParentNode();
-        	
-            if (includeFld(parent))
+            Element e = (Element) node;
+            // from GBS-4854, do not ignore fldChar tag
+            // Node parent = node.getParentNode();
+            //
+            // if (includeFld(parent))
+            // {
+            // if (node.getPreviousSibling() == null || node.getNextSibling() ==
+            // null)
+            // {
+            // String pName = parent.getNodeName();
+            // if (TYPE.containsKey(pName) &&
+            // "end".equals(e.getAttribute("type")))
+            // {
+            // handleFldCharEnd(node, null);
+            // }
+            //
+            // return;
+            // }
+            // }
+            // GBS-4854
+            if (!hasContentForExtraction(node))
             {
-				if (node.getPreviousSibling() == null
-						|| node.getNextSibling() == null) {
-					String pName = parent.getNodeName();
-					if (TYPE.containsKey(pName)
-							&& "end".equals(e.getAttribute("type"))) {
-						handleFldCharEnd(node, null);
-					}
-
-					return;
-				}
-			}
-            
-            if ("begin".equals(e.getAttribute("type")))
-            {
-                handleFldCharStart(node, null);
+                outputSkeleton(node);
             }
             else
             {
-                handleFldCharEnd(node, null);
+                if ("begin".equals(e.getAttribute("type")))
+                {
+                    handleFldCharStart(node, null);
+                }
+                else
+                {
+                    handleFldCharEnd(node, null);
+                }
             }
             return;
         }
@@ -963,6 +1068,49 @@ public class WordExtractor extends AbstractExtractor
         outBpt(cs, n);
         handleChild(cs.get(cs.size() - 1));
         outEpt(cs, n);
+    }
+
+    /**
+     * Outputs the node to skeleton.
+     * 
+     * @since GBS-4854
+     */
+    private void outputSkeleton(Node node)
+    {
+        if (node.getNodeType() == Node.TEXT_NODE)
+        {
+            outputSkeleton(escapeString(node.getTextContent()));
+            return;
+        }
+        String name = node.getNodeName();
+        outputSkeleton("<" + name);
+        NamedNodeMap attrs = node.getAttributes();
+        if (attrs != null)
+        {
+            for (int i = 0; i < attrs.getLength(); ++i)
+            {
+                Node att = attrs.item(i);
+                String attname = att.getNodeName();
+                String value = att.getNodeValue();
+                outputSkeleton(" " + attname + "=\"" + escapeString(value) + "\"");
+            }
+        }
+        Node f = node.getFirstChild();
+        if (f != null)
+        {
+            outputSkeleton(">");
+            List<Node> cs = util.getChildNodes(node);
+
+            for (Node c : cs)
+            {
+                outputSkeleton(c);
+            }
+            outputSkeleton("</" + name + ">");
+        }
+        else
+        {
+            outputSkeleton("/>");
+        }
     }
 
     private boolean isSpecialNode(Node node)
@@ -1116,8 +1264,8 @@ public class WordExtractor extends AbstractExtractor
         MSOffice2010Filter filter = getFilter();
         if (filter != null)
         {
-            BaseFilter baseFilter = BaseFilterManager.getBaseFilterByMapping(
-                    filter.getId(), filter.getFilterTableName());
+            BaseFilter baseFilter = BaseFilterManager.getBaseFilterByMapping(filter.getId(),
+                    filter.getFilterTableName());
             try
             {
                 internalTexts = BaseFilterManager.getInternalTexts(baseFilter);
@@ -1137,12 +1285,10 @@ public class WordExtractor extends AbstractExtractor
             long contentPostFilterId = filter.getContentPostFilterId();
             if (contentPostFilterId > 0)
             {
-                HtmlFilter contentPostFilter = FilterHelper
-                        .getHtmlFilter(contentPostFilterId);
+                HtmlFilter contentPostFilter = FilterHelper.getHtmlFilter(contentPostFilterId);
                 if (contentPostFilter != null)
                 {
-                    postFilter = new OfficeXmlContentPostFilter(
-                            contentPostFilter);
+                    postFilter = new OfficeXmlContentPostFilter(contentPostFilter);
                 }
             }
         }
@@ -1150,8 +1296,7 @@ public class WordExtractor extends AbstractExtractor
 
     private boolean isUnextractLink(Node node)
     {
-        if (!isTableOfContentTranslate()
-                && "w:hyperlink".equals(node.getNodeName()))
+        if (!isTableOfContentTranslate() && "w:hyperlink".equals(node.getNodeName()))
         {
             NamedNodeMap attrs = node.getAttributes();
             for (int j = 0; j < attrs.getLength(); ++j)
@@ -1211,8 +1356,7 @@ public class WordExtractor extends AbstractExtractor
                         String attname = att.getNodeName();
                         String value = att.getNodeValue();
 
-                        if ("w:val".equals(attname)
-                                && unchar.indexOf(value) > -1)
+                        if ("w:val".equals(attname) && unchar.indexOf(value) > -1)
                             return true;
                     }
                 }
@@ -1245,8 +1389,7 @@ public class WordExtractor extends AbstractExtractor
                         String attname = att.getNodeName();
                         String value = att.getNodeValue();
 
-                        if ("w:val".equals(attname)
-                                && unParas.indexOf(value) > -1)
+                        if ("w:val".equals(attname) && unParas.indexOf(value) > -1)
                             return true;
                     }
                 }
@@ -1293,8 +1436,7 @@ public class WordExtractor extends AbstractExtractor
                 Matcher m = HYPERLINKE_RE.matcher(content);
                 if (m.find())
                 {
-                    outputSkeleton(escapeString(content
-                            .substring(0, m.start(1))));
+                    outputSkeleton(escapeString(content.substring(0, m.start(1))));
                     outputTranslatable(m.group(1));
 
                     content = content.substring(m.end(1));
@@ -1306,8 +1448,7 @@ public class WordExtractor extends AbstractExtractor
                 Matcher m = O_RE.matcher(content);
                 if (m.find())
                 {
-                    outputSkeleton(escapeString(content
-                            .substring(0, m.start(1))));
+                    outputSkeleton(escapeString(content.substring(0, m.start(1))));
                     outputTranslatable(m.group(1));
 
                     content = content.substring(m.end(1));
@@ -1404,8 +1545,7 @@ public class WordExtractor extends AbstractExtractor
      * Note that the <code>isInTranslatable</code> argument is not used.
      * </p>
      */
-    public void outputAttributes(NamedNodeMap attrs, List<String> atts)
-            throws ExtractorException
+    public void outputAttributes(NamedNodeMap attrs, List<String> atts) throws ExtractorException
     {
         if (attrs == null)
         {
@@ -1435,8 +1575,7 @@ public class WordExtractor extends AbstractExtractor
                 }
                 else
                 {
-                    outputSkeleton(" " + attname + "=\"" + escapeString(value)
-                            + "\"");
+                    outputSkeleton(" " + attname + "=\"" + escapeString(value) + "\"");
                 }
             }
 
@@ -1457,8 +1596,7 @@ public class WordExtractor extends AbstractExtractor
             }
             else
             {
-                outputSkeleton(" " + attname + "=\"" + escapeString(value)
-                        + "\"");
+                outputSkeleton(" " + attname + "=\"" + escapeString(value) + "\"");
             }
 
         }

@@ -232,6 +232,17 @@ public class MSTranslatorProxyV3 extends AbstractTranslator implements MachineTr
                 lang = "sr-Latn";
         }
 
+	//GBS-4859 for TA,no_NO and nb_NO
+	//mstranslator only does nb, and aliases no to nb.
+	if (lang.equalsIgnoreCase("no"))
+        {
+            if (country.equalsIgnoreCase("no"))
+            {
+                lang = "nb";
+            }
+        }
+
+
         return lang;
     }
 }

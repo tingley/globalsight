@@ -101,6 +101,8 @@ import com.globalsight.util.ReportStyle;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
 
 /**
  * Comments Analysis Report Generator Include Comments Analysis Report in popup
@@ -326,12 +328,13 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             File file = getFile(reportType + TAG_COMBINED, null, combinedWorkBook);
             addCriteriaSheet(combinedWorkBook, jobsList, stateSet, projectSet, data);
 
-			// GBS-4790 Create DQF Information sheet
-           if (isDQFEnabled) 
-			{  
-				Sheet dqfInfoSheet = combinedWorkBook.createSheet(bundle.getString("dqf_info_title"));
-				DQFInfoReport.generateDQFInfoSheet(combinedWorkBook, dqfInfoSheet, bundle);
-			}
+            // GBS-4790 Create DQF Information sheet
+            if (isDQFEnabled)
+            {
+                Sheet dqfInfoSheet = combinedWorkBook
+                        .createSheet(bundle.getString("dqf_info_title"));
+                DQFInfoReport.generateDQFInfoSheet(combinedWorkBook, dqfInfoSheet, bundle);
+            }
 
             FileOutputStream out = new FileOutputStream(file);
             combinedWorkBook.write(out);
@@ -403,8 +406,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat,
             HashMap<Long, List<DQFDataInCAR>> dqfInfo) throws Exception
-    {	
-		boolean addDQFInfo = false;
+    {
+        boolean addDQFInfo = false;
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
         for (GlobalSightLocale trgLocale : p_targetLocales)
         {
@@ -491,16 +494,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                         SEGMENT_START_ROW);
             }
 
-			if(isDQFEnabled) // even if enabled only on one sheet add DQF info
-					addDQFInfo = true;
+            if (isDQFEnabled) // even if enabled only on one sheet add DQF info
+                addDQFInfo = true;
         }
-			
+
         // GBS-4790 Create DQF Information sheet
-		 if (addDQFInfo && !isCombineAllJobs) 
-		  {  
-				Sheet dqfInfoSheet = p_workbook.createSheet(bundle.getString("dqf_info_title"));
-				DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, bundle);
-		  }
+        if (addDQFInfo && !isCombineAllJobs)
+        {
+            Sheet dqfInfoSheet = p_workbook.createSheet(bundle.getString("dqf_info_title"));
+            DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, bundle);
+        }
     }
 
     private int addDQFHeader(Workbook workbook, Sheet sheet, Job job,
@@ -890,8 +893,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     .getTermMatchesForPages(p_job.getSourcePages(), p_targetLocale);
 
             SourcePage sourcePage = null;
-            String sourceSegmentString = null;
-            String targetSegmentString = null;
             String sid = null;
             for (TargetPage targetPage : targetPages)
             {
@@ -924,10 +925,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-                    sourceSegmentString = sourceTuv.getGxmlElement()
-                            .getTextValueWithInternalTextMark();
-                    targetSegmentString = targetTuv.getGxmlElement()
-                            .getTextValueWithInternalTextMark();
                     sid = sourceTuv.getSid();
 
                     category = sourceTuv.getTu(jobId).getTuType();
@@ -1062,7 +1059,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     CellStyle srcStyle = rtlSourceLocale ? REPORT_STYLE.getRtlContentStyle()
                             : contentStyle;
                     cell = ExcelUtil.getCell(currentRow, col);
-                    ReportGeneratorUtil.setCellForInternalText(cell, sourceSegmentString,
+                    ReportGeneratorUtil.setCellForInternalText(cell, getSegment(sourceTuv),
                             rtlSourceLocale, REPORT_STYLE.getInternalFont(),
                             REPORT_STYLE.getContentFont());
                     cell.setCellStyle(srcStyle);
@@ -1072,7 +1069,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     CellStyle trgStyle = rtlTargetLocale ? REPORT_STYLE.getRtlContentStyle()
                             : contentStyle;
                     cell = ExcelUtil.getCell(currentRow, col);
-                    ReportGeneratorUtil.setCellForInternalText(cell, targetSegmentString,
+                    ReportGeneratorUtil.setCellForInternalText(cell, getSegment(targetTuv),
                             rtlTargetLocale, REPORT_STYLE.getInternalFont(),
                             REPORT_STYLE.getContentFont());
                     cell.setCellStyle(trgStyle);
@@ -1086,7 +1083,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
                     // Character count
                     cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(targetSegmentString.length());
+                    cell.setCellValue(getSegmentPureString(targetTuv).length());
                     cell.setCellStyle(contentStyle);
                     col++;
 
@@ -1196,6 +1193,59 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
 
         return p_row;
+    }
+
+    /**
+     * Gets segment including the sub segment.
+     * 
+     * @since GBS-4855
+     */
+    private String getSegment(Tuv tuv)
+    {
+        StringBuffer content = new StringBuffer();
+        List subFlows = tuv.getSubflowsAsGxmlElements();
+        long tuId = tuv.getTuId();
+
+        String mainSeg = tuv.getGxmlElement().getTextValueWithInternalTextMark();
+        content.append(mainSeg);
+
+        if (subFlows != null && subFlows.size() > 0)
+        {
+            for (int i = 0; i < subFlows.size(); i++)
+            {
+                GxmlElement sub = (GxmlElement) subFlows.get(i);
+                String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                content.append("\r\n#").append(tuId).append(":").append(subId).append("\n")
+                        .append(sub.getTextValue());
+            }
+        }
+
+        return content.toString();
+    }
+
+    /**
+     * Gets the segment pure string including the sub segment string.
+     * 
+     * @since GBS-4855
+     */
+    private String getSegmentPureString(Tuv tuv)
+    {
+        StringBuffer content = new StringBuffer();
+        List subFlows = tuv.getSubflowsAsGxmlElements();
+
+        String mainString = tuv.getGxmlElement().getTextValue();
+        content.append(mainString);
+
+        if (subFlows != null && subFlows.size() > 0)
+        {
+            for (int i = 0; i < subFlows.size(); i++)
+            {
+                GxmlElement sub = (GxmlElement) subFlows.get(i);
+                content.append(sub.getTextValue());
+            }
+        }
+
+        return content.toString();
     }
 
     private void addCriteriaSheet(Workbook p_workbook, List<Job> p_jobsList, Set<String> stateSet,

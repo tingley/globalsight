@@ -126,7 +126,7 @@ public class MSTranslatorProxyV3 extends AbstractTranslator implements MachineTr
         String targetLang = p_targetLocale.getLanguage();
         String targetCountry = p_targetLocale.getCountry();
         targetLang = checkLang(targetLang, targetCountry);
-        
+
         CATEGORY.info("Supported languages: " + LOCALES);
         return LOCALES.contains(sourceLang) && LOCALES.contains(targetLang);
     }
@@ -232,16 +232,15 @@ public class MSTranslatorProxyV3 extends AbstractTranslator implements MachineTr
                 lang = "sr-Latn";
         }
 
-	//GBS-4859 for TA,no_NO and nb_NO
-	//mstranslator only does nb, and aliases no to nb.
-	if (lang.equalsIgnoreCase("no"))
+        // GBS-4859 for TA,no_NO and nb_NO
+        // mstranslator only does nb, and aliases no to nb.
+        if (lang.equalsIgnoreCase("no"))
         {
             if (country.equalsIgnoreCase("no"))
             {
                 lang = "nb";
             }
         }
-
 
         return lang;
     }

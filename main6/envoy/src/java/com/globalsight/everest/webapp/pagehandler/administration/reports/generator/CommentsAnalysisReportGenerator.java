@@ -329,12 +329,13 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             addCriteriaSheet(combinedWorkBook, jobsList, stateSet, projectSet, data);
 
             // GBS-4790 Create DQF Information sheet
-            if (isDQFEnabled)
-            {
-                Sheet dqfInfoSheet = combinedWorkBook
-                        .createSheet(bundle.getString("dqf_info_title"));
-                DQFInfoReport.generateDQFInfoSheet(combinedWorkBook, dqfInfoSheet, bundle);
-            }
+            // GBS-4862 roll back DQF Information sheet
+            //if (isDQFEnabled)
+            // {
+            //    Sheet dqfInfoSheet = combinedWorkBook
+            //            .createSheet(bundle.getString("dqf_info_title"));
+            //    DQFInfoReport.generateDQFInfoSheet(combinedWorkBook, dqfInfoSheet, bundle);
+            // }
 
             FileOutputStream out = new FileOutputStream(file);
             combinedWorkBook.write(out);
@@ -499,11 +500,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         }
 
         // GBS-4790 Create DQF Information sheet
-        if (addDQFInfo && !isCombineAllJobs)
-        {
-            Sheet dqfInfoSheet = p_workbook.createSheet(bundle.getString("dqf_info_title"));
-            DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, bundle);
-        }
+        // GBS-4862 Roll back create DQF information sheet
+        //if (addDQFInfo && !isCombineAllJobs)
+        // {
+        //    Sheet dqfInfoSheet = p_workbook.createSheet(bundle.getString("dqf_info_title"));
+        //    DQFInfoReport.generateDQFInfoSheet(p_workbook, dqfInfoSheet, bundle);
+        // }
     }
 
     private int addDQFHeader(Workbook workbook, Sheet sheet, Job job,

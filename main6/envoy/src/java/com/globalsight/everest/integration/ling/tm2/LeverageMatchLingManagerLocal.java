@@ -454,16 +454,23 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                                 : tuv.getSegmentClob();
                         matchedGxml = TmUtil.composeCompleteText(segmengString, segmentMap);
 
-                        List<GxmlElement> subflows = tuv.getSubflowsAsGxmlElements();
-                        if (subflows != null && subflows.size() > 0)
+                        if (!"0".equals(rootLm.getSubId()))
                         {
-                            for (GxmlElement sub : subflows)
+                            hasExactMatchesForAllSubIds = false;
+                        }
+                        else
+                        {
+                            List<GxmlElement> subflows = tuv.getSubflowsAsGxmlElements();
+                            if (subflows != null && subflows.size() > 0)
                             {
-                                String subId = sub.getAttribute(GxmlNames.SUB_ID);
-                                if (segmentMap.get(subId) == null)
+                                for (GxmlElement sub : subflows)
                                 {
-                                    hasExactMatchesForAllSubIds = false;
-                                    break;
+                                    String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                                    if (segmentMap.get(subId) == null)
+                                    {
+                                        hasExactMatchesForAllSubIds = false;
+                                        break;
+                                    }
                                 }
                             }
                         }

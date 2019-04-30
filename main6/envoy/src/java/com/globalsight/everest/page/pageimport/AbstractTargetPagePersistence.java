@@ -629,6 +629,23 @@ public abstract class AbstractTargetPagePersistence implements TargetPagePersist
         Map<Long, ArrayList<LeverageSegment>> exactMap = leverageMatchLingManager
                 .getExactMatchesWithSetInside(p_sourcePage.getIdAsLong(),
                         p_targetLocale.getIdAsLong(), mode, tmProfile);
+        
+        List<LeverageMatch> exMatches = leverageMatchLingManager.getExactLeverageMatches(p_sourcePage.getIdAsLong(),
+                p_targetLocale.getIdAsLong());
+        Map<String, ArrayList<LeverageMatch>> tuv2exact = new HashMap();
+        for (LeverageMatch lm : exMatches)
+        {
+            String id = lm.getOriginalSourceTuvId() + "-" + lm.getSubId();
+            ArrayList<LeverageMatch> ls = tuv2exact.get(id);
+            if (ls == null)
+            {
+                ls = new ArrayList<>();
+                tuv2exact.put(id, ls);
+            }
+            
+            ls.add(lm);
+        }
+        
         // All fuzzy matches (<100)
         Map<Long, Set<LeverageMatch>> fuzzyLeverageMatchesMap = null;
         try
@@ -775,7 +792,21 @@ public abstract class AbstractTargetPagePersistence implements TargetPagePersist
 
             // Get max score_num for current TUV
             float maxScoreNum = 0f;
-            if (hasOneHundredMatch)
+            // for GBS-4849 MT: segment can't get TM when its sub-segment match is 100%
+            if (LeverageMatchType.UNKNOWN_NAME.equals(targetTuv.getMatchType()) && targetTuv.getSubflowsAsGxmlElements().size() > 0)
+            {
+                ArrayList<LeverageMatch> ls = tuv2exact.get(sourceTuv.getId() + "-" + 0);
+                if (ls != null && ls.size() > 0)
+                {
+                    maxScoreNum = 100;
+                }
+                else
+                {
+                    tuvGotChanged = false;
+                    maxScoreNum = getMaxScoreNum(fuzzyLeverageMatchesMap, sourceTuv, "0");
+                }
+            }
+            else if (hasOneHundredMatch)
             {
                 maxScoreNum = 100;
             }
@@ -783,6 +814,8 @@ public abstract class AbstractTargetPagePersistence implements TargetPagePersist
             {
                 maxScoreNum = getMaxScoreNum(fuzzyLeverageMatchesMap, sourceTuv, "0");
             }
+            
+           
 
             // Root segment must have matches &&
             // boolean rootSegmentHasLeverage = false;

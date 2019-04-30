@@ -525,11 +525,38 @@ public class StatisticsService
                 wordCount = 0;
             }
             totalWordCount += wordCount;
-            Types types = p_matches.getTypes(tuv.getId(), ((SegmentTmTu) tuv.getTu()).getSubId());
+            String subId = ((SegmentTmTu) tuv.getTu()).getSubId();
+            Types types = p_matches.getTypes(tuv.getId(), subId);
             boolean isMtTranslation = isMtTranslation(types);
             // Calculate threshold non-related word counts
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH
                     : types.getStatisticsMatchType();
+            
+            /*
+             * This part is used to calculate the word counts relative to
+             * threshold, they
+             * are:thresholdHiFuzzyWordCount,thresholdLowFuzzyWordCount
+             * ,thresholdMedFuzzyWordCount,
+             * thresholdMedHiFuzzyWordCount,thresholdNoMatchWordCount
+             */
+            int statisticsMatchTypeByThreshold = MatchTypeStatistics.THRESHOLD_NO_MATCH;
+            if (types != null)
+            {
+                statisticsMatchTypeByThreshold = types.getStatisticsMatchTypeByThreshold();
+            }
+            
+            // for GBS-4849 MT: segment can't get TM when its sub-segment match is 100%
+            // will use mt match even if the sub segment has tm exact match
+            if (matchType == MatchTypeStatistics.SEGMENT_TM_EXACT && !("0".equals(subId)))
+            {
+                Types types2 = p_matches.getTypes(tuv.getId(), "0");
+                if (isMtTranslation(types2))
+                {
+                    matchType = types2.getStatisticsMatchType();
+                    isMtTranslation = true;
+                    statisticsMatchTypeByThreshold = types2.getStatisticsMatchTypeByThreshold();
+                }
+            }
             ArrayList<SegmentTmTuv> identicalSegments = null;
             switch (matchType)
             {
@@ -664,19 +691,6 @@ public class StatisticsService
                         // mtRepetitionsWordCount += wordCount;
                     }
                     break;
-            }
-
-            /*
-             * This part is used to calculate the word counts relative to
-             * threshold, they
-             * are:thresholdHiFuzzyWordCount,thresholdLowFuzzyWordCount
-             * ,thresholdMedFuzzyWordCount,
-             * thresholdMedHiFuzzyWordCount,thresholdNoMatchWordCount
-             */
-            int statisticsMatchTypeByThreshold = MatchTypeStatistics.THRESHOLD_NO_MATCH;
-            if (types != null)
-            {
-                statisticsMatchTypeByThreshold = types.getStatisticsMatchTypeByThreshold();
             }
 
             switch (statisticsMatchTypeByThreshold)

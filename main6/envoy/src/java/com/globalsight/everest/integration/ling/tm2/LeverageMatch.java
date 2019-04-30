@@ -464,6 +464,11 @@ public class LeverageMatch extends PersistentObject implements Comparable,
             cmp = MatchState.getCompareKey(m_matchType)
                     - MatchState.getCompareKey(other.m_matchType);
         }
+        
+        if (cmp == 0)
+        {
+            return Integer.parseInt(this.getSubId()) - Integer.parseInt(other.getSubId());
+        }
 
         return cmp;
     }
@@ -618,6 +623,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         return false;
     }
 
+    @Override
     public boolean equals(Object p_obj)
     {
         if (p_obj instanceof LeverageMatch)
@@ -635,6 +641,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         return false;
     }
 
+    @Override
     public int hashCode()
     {
         HashCodeBuilder builder = new HashCodeBuilder(17, 37);

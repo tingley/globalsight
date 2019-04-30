@@ -2,10 +2,8 @@ GlobalSight Source Mirror
 -------------------------------------------------------------
 
 This is *not* the official GlobalSight git repository.  The official
-git repository is located at [http://222.175.146.53:7990/scm/globalsight/globalsightsource.git](http://222.175.146.53:7990/scm/globalsight/globalsightsource.git).
+git repository is located at [http://124.133.49.189:7990/scm/globalsight/globalsightsource.git](http://124.133.49.189:7990/scm/globalsight/globalsightsource.git).
 This repo is a mirror that I periodically update.
-
-(The official repository was previously at http://125.35.10.59:7990, but it has been migrated to a new host.)
 
 GlobalSight
 ===========

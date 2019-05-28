@@ -41,18 +41,18 @@ public class MSMTUtil implements MTProfileConstants
     private static final Logger logger = Logger.getLogger(MSMTUtil.class);
 
     public static String getMsAccessToken(String clientId, String clientSecret,
-            String subscriptionKey)
+            String subscriptionKey, String tokenUrl)
     {
         String accessToken = null;
         // Old way, to be abandoned.
         if (StringUtil.isNotEmpty(clientId) && StringUtil.isNotEmpty(clientSecret))
         {
-            accessToken = getAccessToken(clientId, clientSecret);
+            accessToken = getAccessTokenOld(clientId, clientSecret);
         }
         // New way
         else if (StringUtil.isNotEmpty(subscriptionKey))
         {
-            accessToken = getAccessToken(subscriptionKey);
+            accessToken = getAccessToken(subscriptionKey, tokenUrl);
         }
 
         return accessToken;
@@ -61,7 +61,7 @@ public class MSMTUtil implements MTProfileConstants
     public static String getMsAccessToken(MSTranslateConfig config)
     {
         return getMsAccessToken(config.getMsClientId(), config.getMsClientSecret(),
-                config.getMsSubscriptionKey());
+                config.getMsSubscriptionKey(), config.getMsTokenUrl());
     }
     
     public static String[] toArray(TranslateArrayResponse[] result)
@@ -87,7 +87,7 @@ public class MSMTUtil implements MTProfileConstants
      * @return String
      * 
      */
-    public static String getAccessToken(String clientId, String clientSecret)
+    public static String getAccessTokenOld(String clientId, String clientSecret)
     {
         String accessToken = null;
         int count = 0;
@@ -130,7 +130,7 @@ public class MSMTUtil implements MTProfileConstants
         return accessToken;
     }
 
-    public static String getAccessToken(String subscriptionKey)
+    public static String getAccessToken(String subscriptionKey, String tokenUrl)
     {
         String accessToken = null;
         int count = 0;
@@ -142,7 +142,7 @@ public class MSMTUtil implements MTProfileConstants
             CloseableHttpClient httpclient = null;
             try
             {
-                HttpPost post = new HttpPost(MT_MS_GET_ACCESS_TOKEN_URL);
+                HttpPost post = new HttpPost(tokenUrl);
                 post.setHeader(MT_MS_SUBSCRIPTION_KEY_HEADER, subscriptionKey);
 
                 httpclient = HttpClients.custom().build();

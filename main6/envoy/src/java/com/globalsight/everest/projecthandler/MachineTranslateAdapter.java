@@ -57,6 +57,7 @@ import com.globalsight.machineTranslation.globalese.Client;
 import com.globalsight.machineTranslation.globalese.GlobaleseEngine;
 import com.globalsight.machineTranslation.globalese.GlobaleseMTUtil;
 import com.globalsight.machineTranslation.iptranslator.IPTranslatorUtil;
+import com.globalsight.machineTranslation.mstranslator.v3.MSMTUtil;
 import com.globalsight.machineTranslation.mstranslator.v3.MsTranslatorMTUtil;
 import com.globalsight.machineTranslation.promt.ProMtInvoker;
 import com.globalsight.machineTranslation.promt.ProMtPts9Invoker;
@@ -430,6 +431,14 @@ public class MachineTranslateAdapter
         String clientSecret = p_request.getParameter(MTProfileConstants.MT_MS_CLIENT_SECRET);
         String subscriptionKey = p_request.getParameter(MTProfileConstants.MT_MS_SUBSCRIPTION_KEY);
         String category = p_request.getParameter(MTProfileConstants.MT_MS_CATEGORY);
+        String version = p_request.getParameter(MTProfileConstants.MT_MS_VERSION);
+        String tokenUrl = p_request.getParameter(MTProfileConstants.MT_MS_ACCESS_TOKEN_URL);
+        
+        if (StringUtil.isEmpty(tokenUrl)) 
+        {
+            tokenUrl = MTProfileConstants.MT_MS_GET_ACCESS_TOKEN_URL;
+        }
+        
 
         if (url != null && !"".equals(url.trim()))
         {
@@ -512,6 +521,8 @@ public class MachineTranslateAdapter
         {
             mtProfile.setMsMaxLength(1000);
         }
+        mtProfile.setMsTransVersion(version);
+        mtProfile.setMsTokenUrl(tokenUrl);
     }
 
     /**
@@ -644,10 +655,10 @@ public class MachineTranslateAdapter
         {
             String msMtUrl = mtProfile.getUrl();
 
-            if (msMtUrl.toLowerCase().contains("soap.svc"))
+            if (!mtProfile.isV3())
             {
                 String accessToken = com.globalsight.machineTranslation.mstranslator.v2.MSMTUtil
-                        .getMsAccessToken(clientId, clientSecret, subscriptionKey);
+                        .getMsAccessToken(clientId, clientSecret, subscriptionKey, mtProfile.getMsTokenUrl());
                 SoapService soap = new SoapServiceLocator(msMtUrl);
                 LanguageService service = soap.getBasicHttpBinding_LanguageService();
                 service.translate(accessToken, "hello world", "en", "fr", MSMT_CONTENT_TYPE,
@@ -655,8 +666,16 @@ public class MachineTranslateAdapter
             }
             else
             {
+            	String accessToken = MSMTUtil.getAccessToken(subscriptionKey, mtProfile.getMsTokenUrl());
+            	if (accessToken == null) 
+            	{
+            	    JSONObject jso = new JSONObject();
+                    jso.put("ExceptionInfo", "Invalid MS Translator Authorization URL. ");
+                    writer.write(jso.toString());
+                    return false;
+            	}
                 com.globalsight.machineTranslation.mstranslator.v3.Client msTransClient = new com.globalsight.machineTranslation.mstranslator.v3.Client(
-                        subscriptionKey, msMtUrl);
+                        accessToken, subscriptionKey, msMtUrl, mtProfile.getMsTokenUrl());
                 Response response = new MsTranslatorMTUtil().getResponse(msTransClient, category,
                         "en", "fr", "hello world");
 

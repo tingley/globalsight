@@ -39,6 +39,7 @@ public class MSTranslateConfig
     private String msSubscriptionKey;
     private LanguageService service;
     private String accessToken;
+    private String msTokenUrl;
     
     private TranslateOptions options = null;
     
@@ -51,6 +52,7 @@ public class MSTranslateConfig
         msClientSecret = (String) paramMap.get(MachineTranslator.MSMT_CLIENT_SECRET);
         msSubscriptionKey = (String) paramMap.get(MachineTranslator.MSMT_SUBSCRIPTION_KEY);
         accessToken = MSMTUtil.getMsAccessToken(this);
+        msTokenUrl = (String) paramMap.get(MachineTranslator.MSMT_TOKEN_URL);
     }
     
     public String getEndpoint()
@@ -165,5 +167,15 @@ public class MSTranslateConfig
     public String getAccessToken()
     {
         return accessToken;
+    }
+
+    public String getMsTokenUrl()
+    {
+        return msTokenUrl;
+    }
+
+    public void setMsTokenUrl(String msTokenUrl)
+    {
+        this.msTokenUrl = msTokenUrl;
     }
 }

@@ -1630,6 +1630,8 @@ CREATE TABLE mt_profile (
   `MS_MAX_LENGTH` bigint(20) DEFAULT 1000,
   `MT_IDENTIFIER_LEADING` varchar(20) DEFAULT NULL,
   `MT_IDENTIFIER_TRAILING` varchar(20) DEFAULT NULL,
+  `MS_TRANS_VERSION` VARCHAR(10),
+  `MS_TOKEN_URL` VARCHAR(100) DEFAULT 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken',
   `IS_ACTIVE` char(1) DEFAULT NULL,
   `EXTENT_JSON_INFO` longtext,
   PRIMARY KEY (`ID`)

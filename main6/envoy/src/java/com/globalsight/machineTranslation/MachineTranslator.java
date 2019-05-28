@@ -49,6 +49,7 @@ public interface MachineTranslator
     public static final String MSMT_CLIENTID = "msMtClientID";
     public static final String MSMT_CLIENT_SECRET = "msMtClientSecret";
     public static final String MSMT_SUBSCRIPTION_KEY = "msMtSubscriptionKey";
+    public static final String MSMT_TOKEN_URL = "msTokenUrl";
     
     public static final String AO_URL = "aoMtUrl";
     public static final String AO_PORT = "aoMtPort";

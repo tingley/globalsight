@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.connector.eloqua.util.Response;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.StringUtil;
 import com.google.gson.Gson;
@@ -139,7 +140,7 @@ public class MsTranslatorMTUtil
 
         String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
         String msSubscriptionKey = (String) paramMap.get(MachineTranslator.MSMT_SUBSCRIPTION_KEY);
-
+        MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap.get(MachineTranslator.MT_PROFILE);
         // uri = /translate?api-version=3.0&from=en&to=de&category=generalNN
         String uri = MS_MT_TRANSLATE_V3 + params;
 
@@ -147,10 +148,10 @@ public class MsTranslatorMTUtil
         {
             if (accessToken == null)
             {
-                accessToken = MSMTUtil.getAccessToken(msSubscriptionKey);
+                accessToken = MSMTUtil.getAccessToken(msSubscriptionKey, mtProfile.getMsTokenUrl());
             }
 
-            Client msTransClient = new Client(accessToken, msSubscriptionKey, endpoint);
+            Client msTransClient = new Client(accessToken, msSubscriptionKey, endpoint, mtProfile.getMsTokenUrl());
 
             boolean needTranslateAgain = true;
             int count = 0;
@@ -174,8 +175,8 @@ public class MsTranslatorMTUtil
             {
                 try
                 {
-                    accessToken = MSMTUtil.getAccessToken(msSubscriptionKey);
-                    Client msTransClient = new Client(accessToken, endpoint);
+                    accessToken = MSMTUtil.getAccessToken(msSubscriptionKey, mtProfile.getMsTokenUrl());
+                    Client msTransClient = new Client(accessToken, endpoint, mtProfile.getMsTokenUrl());
                     accessToken = msTransClient.getAuthToken();
                     boolean needTranslateAgain = true;
                     int count = 0;
@@ -237,7 +238,7 @@ public class MsTranslatorMTUtil
         objList.add(new RequestBody(segment));
         String content = new Gson().toJson(objList);
         
-        return msTransClient.post2(uri, content);
+        return msTransClient.post(uri, content);
     }
     
     public static String Translate2(Client msTransClient, String msCategory, String sourceLang,

@@ -34,20 +34,23 @@ public class Client
     
     private String _authToken;
     private String _baseUrl;
+    private String tokenUrl;
     private String msSubscriptionKey;
     private int error = 0;
     
-    public Client(String authToken, String url) 
+    public Client(String authToken, String url, String tokenUrl) 
     {
         _baseUrl = url;
         _authToken = authToken;
+        this.tokenUrl = tokenUrl;
     }
     
-    public Client(String authToken, String msSubscriptionKey, String url) 
+    public Client(String authToken, String msSubscriptionKey, String url, String tokenUrl) 
     {
         _baseUrl = url;
         this.msSubscriptionKey = msSubscriptionKey;
         _authToken = authToken;
+        this.tokenUrl = tokenUrl;
     }
     
     public void setAuthToken (String authToken) 
@@ -142,7 +145,7 @@ public class Client
                             
                             if ((line1.indexOf("\"code\":401000,") > 0 || line1.indexOf("\"code\":503000,") > 0) && error < 4)
                             {
-                                _authToken = MSMTUtil.getAccessToken(msSubscriptionKey);
+                                _authToken = MSMTUtil.getAccessToken(msSubscriptionKey, tokenUrl);
                                 errReader.close();
                                 conn.disconnect(); 
                                 error++;
@@ -201,7 +204,7 @@ public class Client
         case 4:  methodString = "DELETE";
                 break;
         }
-        
+        int i;
         try 
         {
             URL url = new URL(_baseUrl + uri);
@@ -283,5 +286,15 @@ public class Client
     public String getAuthToken()
     {
         return _authToken;
+    }
+
+    public String getTokenUrl()
+    {
+        return tokenUrl;
+    }
+
+    public void setTokenUrl(String tokenUrl)
+    {
+        this.tokenUrl = tokenUrl;
     }
 }

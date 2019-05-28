@@ -72,6 +72,10 @@ public class MTExportHelper implements ConfigConstants
                 .append(mtp.getMtThreshold()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId()).append(".URL=")
                 .append(mtp.getUrl()).append(NEW_LINE);
+        buffer.append("MachineTranslationProfile.").append(mtp.getId()).append(".MS_TRANS_VERSION=")
+                .append(mtp.getMsVersion()).append(NEW_LINE);
+        buffer.append("MachineTranslationProfile.").append(mtp.getId()).append(".MS_TOKEN_URL=")
+                .append(mtp.getMsTokenUrl()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId()).append(".PORT=")
                 .append(mtp.getPort()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId()).append(".USERNAME=")

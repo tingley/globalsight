@@ -73,6 +73,7 @@
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/jquery.form.js"></SCRIPT>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/jquery.loadmask.min.js"></SCRIPT>
+<script SRC="/globalsight/includes/vue/vue.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <%@ include file="/envoy/common/warning.jspIncl"%>
 
@@ -118,6 +119,8 @@
 		}
 	});
 	  
+	var app;
+	
 	$(function(){
 		contorlMTOptionShowing();
 		$("input").each(function(){
@@ -146,6 +149,7 @@
 		 	$(key).val(val);
 		 });
 		
+		 
 	})
 	
 	function submitForm(formAction)
@@ -710,15 +714,14 @@
 </SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
-
+ 
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" ONLOAD="loadGuides()">
 <%@ include file="/envoy/common/header.jspIncl"%>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
 	<DIV ID="contentLayer"
-		STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 850px; TOP: 108px">
-
+		STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 950px; TOP: 108px">
 		<DIV CLASS="mainHeading" id="idHeading"><%=title%></DIV>
 
 		<FORM NAME="MTOptionsForm" id="MTOptionsForm" METHOD="POST" action="">
@@ -984,33 +987,32 @@
 								<tr>
 									<td colspan="3"><b><%=bundle.getString("lb_tm_ms_mt_title")%></b></td>
 								</tr>
+                                <tr style="display:none"> <!-- We can open it if we need to set it manually. --> 
+                                  <td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_version")%><font
+                                    color="red">*</font>:</td>
+                                  <td colspan="2"><SELECT CLASS="standardText" NAME="<%=MTProfileConstants.MT_MS_VERSION%>" v-model="version">
+											<OPTION VALUE="2">v2</OPTION>
+											<OPTION VALUE="3">v3</OPTION>
+										</SELECT></td>
+                                </tr>
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_url")%><font
 										color="red">*</font>:</td>
 									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtUrl"
 										NAME="<%=MTProfileConstants.MT_MS_URL%>"
-										value="<%=mtProfile4val.getUrl()%>" TYPE="text"
-										MAXLENGTH="99" SIZE="90" 
-										onchange="updateTranslationMode()"
-										/></td>
+										TYPE="text" v-model="url"
+										MAXLENGTH="99" SIZE="90" 										
+										/> <label style="width:200px;">{{versionTxt}}</label>
+                                    </td>
 								</tr>
-								<tr><td colspan="3" align="left"><b>It is required to input value(s) for either 'Client ID', 
-								        'Client Secret' or 'Azure Subscription Key'.</b></td></tr>
-								<tr>
-									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_id")%>:</td>
-									<td colspan="2" style="white-space:nowrap"><INPUT CLASS="standardText" ID="idMsMtClientid"
-										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
-										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
-										MAXLENGTH="100" SIZE="90"></input>
-									</td>
-								</tr>
-								<tr>
-									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_secret")%>:</td>
-									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtClientSecret"
-										NAME="<%=MTProfileConstants.MT_MS_CLIENT_SECRET%>"
-										value="<%=mtProfile4val.getPassword()%>" TYPE="password"
-										MAXLENGTH="100" SIZE="90" /></td>
-								</tr>
+                                <tr>
+                                  <td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_token_url")%><font
+                                    color="red">*</font>:</td>
+                                  <td colspan="2"><INPUT CLASS="standardText"
+                                    NAME="<%=MTProfileConstants.MT_MS_ACCESS_TOKEN_URL%>"
+                                    value="<%=mtProfile4val.getMsTokenUrl()%>" TYPE="text"
+                                    MAXLENGTH="99" SIZE="90" /></td>
+                                </tr>
 								<tr>
 								    <td align="left"><%=bundle.getString("lb_mt_ms_mt_subscription_key")%>:</td>
 								    <td colspan="2" style="white-space:nowrap">
@@ -1345,6 +1347,24 @@
 		</FORM>
 
 	</DIV>
-
+<script type="text/javascript">
+var app = new Vue({
+	  el: '#contentLayer',
+	  data: {
+	    version: <%=mtProfile.getMsVersion()%>,
+	    url: '<%=mtProfile.getUrl()%>'
+	  },
+	  computed: {
+	    versionTxt: function () {
+	      return this.version == 2 ? "<%=bundle.getString("lb_tm_ms_version_v2")%>" : "<%=bundle.getString("lb_tm_ms_version_v3")%>";
+	    }
+	  },
+	  watch: {
+		  url: function (val, old) {
+			  this.version = this.url.toLowerCase().indexOf('soap.svc') > -1 ? 2 : 3;
+		  }		    
+	  }
+	});
+     </script>
 </BODY>
 </HTML>

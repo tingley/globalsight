@@ -28,16 +28,16 @@ public class MSMTUtil
         return recordedToken.getToken();
     }
     
-    private static void addRecordedToken(String subscriptionKey, String accessToken)
+    private static void addRecordedToken(String subscriptionKey, String accessToken, String tokenUrl)
     {
         RecordedToken recordedToken = new RecordedToken();
         recordedToken.setToken(accessToken);
-        RECORDED_TOKENS.put(subscriptionKey, recordedToken);
+        RECORDED_TOKENS.put(subscriptionKey + tokenUrl, recordedToken);
     }
     
-    public static String getAccessToken(String subscriptionKey)
+    public static String getAccessToken(String subscriptionKey, String tokenUrl)
     {
-        String token = getRecordedToken(subscriptionKey);
+        String token = getRecordedToken(subscriptionKey + tokenUrl);
         if (token != null)
         {
             return token;
@@ -54,7 +54,7 @@ public class MSMTUtil
             CloseableHttpClient httpclient = null;
             try
             {
-                HttpPost post = new HttpPost(MTProfileConstants.MT_MS_GET_ACCESS_TOKEN_URL);
+                HttpPost post = new HttpPost(tokenUrl);
                 post.setHeader(MTProfileConstants.MT_MS_SUBSCRIPTION_KEY_HEADER, subscriptionKey);
 
                 httpclient = HttpClients.custom().build();
@@ -67,7 +67,7 @@ public class MSMTUtil
                     gotten = true;
                     
                     // record token with time
-                    addRecordedToken(subscriptionKey, accessToken);
+                    addRecordedToken(subscriptionKey, accessToken, tokenUrl);
                 }
             }
             catch (Exception e)

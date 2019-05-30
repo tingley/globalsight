@@ -71,13 +71,14 @@ public class MSTranslatorProxyV2 extends AbstractTranslator implements MachineTr
         String msClientId = (String) paramMap.get(MachineTranslator.MSMT_CLIENTID);
         String msClientSecret = (String) paramMap.get(MachineTranslator.MSMT_CLIENT_SECRET);
         String msSubscriptionKey = (String) paramMap.get(MachineTranslator.MSMT_SUBSCRIPTION_KEY);
+        MachineTranslationProfile mtProfile =  (MachineTranslationProfile) paramMap.get(MachineTranslator.MT_PROFILE);
         LanguageService service = null;
         try
         {
             if (MSMT_ACCESS_TOKEN == null)
             {
                 MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
-                        msSubscriptionKey);
+                        msSubscriptionKey, mtProfile.getMsTokenUrl());
             }
             SoapService soap = new SoapServiceLocator(endpoint);
             service = soap.getBasicHttpBinding_LanguageService();
@@ -103,7 +104,7 @@ public class MSTranslatorProxyV2 extends AbstractTranslator implements MachineTr
                 try
                 {
                     MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
-                            msSubscriptionKey);
+                            msSubscriptionKey, mtProfile.getMsTokenUrl());
                     String[] languageArray = service.getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
 
                     Vector<String> langs = new Vector<String>();
@@ -149,7 +150,7 @@ public class MSTranslatorProxyV2 extends AbstractTranslator implements MachineTr
         String msClientId = (String) paramMap.get(MachineTranslator.MSMT_CLIENTID);
         String msClientSecret = (String) paramMap.get(MachineTranslator.MSMT_CLIENT_SECRET);
         String msSubscriptionKey = (String) paramMap.get(MachineTranslator.MSMT_SUBSCRIPTION_KEY);
-
+        MachineTranslationProfile mtProfile =  (MachineTranslationProfile) paramMap.get(MachineTranslator.MT_PROFILE);
    		LanguageService service = null;
    		String exceptionMsg = null;
    		try 
@@ -157,7 +158,7 @@ public class MSTranslatorProxyV2 extends AbstractTranslator implements MachineTr
    		    if (MSMT_ACCESS_TOKEN == null)
    		    {
                 MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
-                        msSubscriptionKey);
+                        msSubscriptionKey, mtProfile.getMsTokenUrl());
    		    }
    		    SoapService soap = new SoapServiceLocator(endpoint);
    		    service = soap.getBasicHttpBinding_LanguageService();
@@ -181,7 +182,7 @@ public class MSTranslatorProxyV2 extends AbstractTranslator implements MachineTr
                 try
                 {
                     MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
-                            msSubscriptionKey);
+                            msSubscriptionKey, mtProfile.getMsTokenUrl());
                     boolean needTranslateAgain = true;
                     int count = 0;
                     // try at most 3 times
@@ -284,7 +285,7 @@ public class MSTranslatorProxyV2 extends AbstractTranslator implements MachineTr
     	
     	MSTranslateConfig config = new MSTranslateConfig();
     	config.init(paramMap);
-
+    	config.setMsTokenUrl(mtProfile.getMsTokenUrl());
         config.setSourceLang(checkLang(p_sourceLocale.getLanguage(), p_sourceLocale.getCountry()));
         config.setTargetLang(checkLang(p_targetLocale.getLanguage(), p_targetLocale.getCountry()));
         results = batchTranslation(config, segments, 3);

@@ -42,6 +42,7 @@ import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -215,7 +216,7 @@ public class PageJobData
 
         tuList = getTusByState(excludeStates, EXCLUDE_STATE);
 
-        tuList = filterData(tuList, p_saveLocalized, p_saveMTedSeg);
+        tuList = filterData(tuList, p_saveLocalized, p_saveMTedSeg, saveWhollyInternalText);
 
         // GBS-4808, save multiple 100% match with sid available when "save
         // approved segments to TM"
@@ -231,9 +232,9 @@ public class PageJobData
     }
 
     private Collection<PageTmTu> filterData(Collection<PageTmTu> tuList, boolean p_saveLocalized,
-            boolean p_saveMTedSeg)
+            boolean p_saveMTedSeg, boolean p_saveWhollyInternalText)
     {
-        if (p_saveMTedSeg && p_saveLocalized)
+        if (p_saveMTedSeg && p_saveLocalized && p_saveWhollyInternalText)
             return tuList;
 
         ArrayList<PageTmTu> returnTuList = new ArrayList<PageTmTu>();
@@ -252,6 +253,15 @@ public class PageJobData
                     continue;
                 }
 
+                // GBS-4853
+                if (InternalTextUtil.isInternalText(tuv.getSegmentNoTopTag()))
+                {
+                    if (p_saveWhollyInternalText)
+                    {
+                        clonedTu.addTuv(tuv);
+                    }
+                    continue;
+                }
                 if (!TuvState.LOCALIZED.getName().equalsIgnoreCase(tuv.getState()))
                 {
                     clonedTu.addTuv(tuv);

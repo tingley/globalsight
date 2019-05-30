@@ -185,6 +185,8 @@ public interface MTProfileConstants
     public static final String MT_MS_SUBSCRIPTION_KEY_HEADER = "Ocp-Apim-Subscription-Key";
     public static final String MT_MS_GET_ACCESS_TOKEN_URL = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken";
     public static final String MT_MS_CATEGORY = "ms_mt_category";
+    public static final String MT_MS_VERSION = "ms_mt_version";
+    public static final String MT_MS_ACCESS_TOKEN_URL = "ms_mt_token_url";
     public static final int MT_MS_MAX_CHARACTER_NUM = 1000;
     /**
      * @deprecated

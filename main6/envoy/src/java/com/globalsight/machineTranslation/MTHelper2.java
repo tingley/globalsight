@@ -158,6 +158,7 @@ public class MTHelper2
 						.getTargetLocale().toString());
 				hashMap.put(MachineTranslator.SR_LANGUAGE, srLang);
 			}
+			hashMap.put(MachineTranslator.MT_PROFILE, mtProfile);
 			mt.setMtParameterMap(hashMap);
 		}
 

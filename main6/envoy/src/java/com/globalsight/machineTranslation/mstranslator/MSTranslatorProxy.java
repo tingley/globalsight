@@ -22,6 +22,7 @@ import java.util.Locale;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
@@ -54,9 +55,9 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         if (version == 0)
         {
             HashMap paramMap = getMtParameterMap();
-            String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap.get(MachineTranslator.MT_PROFILE);
 
-            if (endpoint != null && endpoint.toLowerCase().contains("soap.svc"))
+            if (!mtProfile.isV3())
                 version = 2;
             else
                 version = 3;

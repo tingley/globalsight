@@ -532,6 +532,7 @@ public class MTProfileImportHandler extends PageHandler
             dateFormat.setLenient(false);
             MachineTranslationProfile mtp = new MachineTranslationProfile();
             mtp.setMtEngine("");
+            mtp.setMsTransVersion(null);
             String keyField = null;
             String valueField = null;
             Set<String> valueKey = valueMap.keySet();
@@ -570,6 +571,14 @@ public class MTProfileImportHandler extends PageHandler
                 else if (keyField.equalsIgnoreCase("URL"))
                 {
                     mtp.setUrl(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("MS_TRANS_VERSION"))
+                {
+                    mtp.setMsTransVersion(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("MS_TOKEN_URL"))
+                {
+                    mtp.setMsTokenUrl(valueField);
                 }
                 else if (keyField.equalsIgnoreCase("PORT"))
                 {
@@ -652,6 +661,10 @@ public class MTProfileImportHandler extends PageHandler
                         mtp.setJsonInfo(valueField);
                     }
                 }
+            }
+            
+            if (mtp.getMsTransVersion() == null) {
+                mtp.setMsTransVersion(mtp.getMsVersion());
             }
             return mtp;
         }

@@ -64,6 +64,10 @@
 		not-null="false" />
 		<property name="msTransType" column="MS_TRANS_TYPE" type="string"
 		not-null="false" />
+		<property name="msTransVersion" column="MS_TRANS_VERSION" type="string"
+		not-null="false" />
+		<property name="msTokenUrl" column="MS_TOKEN_URL" type="string"
+		not-null="false" />
 		<set name="exInfo" table="mt_profile_extent_info" cascade="all">
 			<key column="MT_PROFILE_ID"></key>
 

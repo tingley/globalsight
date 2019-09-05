@@ -38,11 +38,12 @@ public class TextBoxViewHandler implements ViewHandler
     @Override
     public void handContent(String content) throws JSONException
     {
-        int start = content.indexOf("},value: \"");
+        
+        int start = content.indexOf(",value: \"");
         if (start < 0)
             return;
         
-        start += "},value: \"".length();
+        start += ",value: \"".length();
         int end = content.indexOf("\",inlineStyles:");
         
         String txt = content.substring(start, end);
@@ -136,11 +137,11 @@ public class TextBoxViewHandler implements ViewHandler
     @Override
     public String updateContentFromFile(String content) throws JSONException
     {
-        int start = content.indexOf("},value: \"");
+        int start = content.indexOf(",value: \"");
         if (start < 0)
             return content;
         
-        start += "},value: \"".length();
+        start += ",value: \"".length();
         int end = content.indexOf("\",inlineStyles:");
         String value = values.remove(0);
         value = value.replace("&amp;gt;", "&gt;");

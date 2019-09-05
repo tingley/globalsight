@@ -60,6 +60,35 @@ public class Email extends EloquaObject
         return subject;
     }
     
+//    @Override
+//    public void setHtml(String html)
+//    {
+//        this.html = html;
+//
+//        if (json != null)
+//        {
+//            try
+//            {
+//                JSONObject t = (JSONObject) json.get("htmlContent");
+//                if (t.has("contentSource") && t.has("htmlBody") && "responsive".equalsIgnoreCase(t.getString("contentSource")))
+//                {
+//                    t.put("htmlBody", html);
+//                }
+//                else
+//                {
+//                    JSONObject content = new JSONObject();
+//                    content.put("type", "RawHtmlContent");
+//                    content.put("html", html);
+//                    json.put("htmlContent", content);
+//                }
+//            }
+//            catch (JSONException e)
+//            {
+//                logger.error(e);
+//            }
+//        }
+//    }
+    
     public void saveToFile(File f)
     {
         try
@@ -102,7 +131,7 @@ public class Email extends EloquaObject
      * Update the translated name, subject and html body
      * @param f
      */
-    public boolean updateFromFile(File f, boolean uploaded, String targetLocale)
+    public boolean updateFromFile(File f, boolean uploaded, String targetLocale, String sourceFolder, String targetFolder)
     {
         String content;
         try
@@ -133,7 +162,7 @@ public class Email extends EloquaObject
                 
                 EloquaHelper eh = new EloquaHelper(getConnect());
                 ViewUtil util = new ViewUtil(root, eh);
-                String newRoot = util.updateFromFile(content, uploaded, targetLocale);
+                String newRoot = util.updateFromFile(content, uploaded, targetLocale, sourceFolder, targetFolder);
                 cont.put("root", newRoot);
                 cont.remove("htmlBody");
                 

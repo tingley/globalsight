@@ -16,6 +16,7 @@
  */
 package com.globalsight.connector.eloqua.models.view;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.globalsight.connector.eloqua.util.EloquaHelper;
+import com.globalsight.util.FileUtil;
 
 public class ViewUtil
 {
@@ -51,7 +53,25 @@ public class ViewUtil
         addTextBoxView(sb);
         addImgTitle(sb);
         addReplaceableContentView(sb, eh);
+//        addFormView(sb, eh, f.getParentFile());
         sb.append("</body>");
+        return sb.toString();
+    }
+    
+    public String generateHtml(File f) throws Exception
+    {
+        StringBuffer sb = new StringBuffer("<body>").append("\n");
+        
+        if (subject != null){
+            sb.append("<eloquaSubject>").append(subject).append("</eloquaSubject>").append("\n");
+        }
+        
+        addTextBoxView(sb);
+        addImgTitle(sb);
+        addReplaceableContentView(sb, eh);
+        addFormView(sb, eh, f.getParentFile());
+        sb.append("</body>");
+        FileUtil.writeFile(f, sb.toString(), "utf-8");
         return sb.toString();
     }
     
@@ -92,22 +112,21 @@ public class ViewUtil
         this.subject = subject;
     }
     
-//    public void addFormView(StringBuffer sb, EloquaHelper eh)
-//            throws JSONException
-//    {
-//        FormViewHandler handler = new FormViewHandler();
-//        addView(root, handler);
-//
-//        sb.append("<eloquaForms>").append("\n");
-//        for (String id : handler.getValues())
-//        {
-//            JSONObject jo = eh.get(id, "form");
-//            sb.append("<eloquaForm>");
-//            sb.append(jo.getString("html"));
-//            sb.append("</eloquaForm>").append("\n");
-//        }
-//        sb.append("</eloquaForms>").append("\n");
-//    }
+    public void addFormView(StringBuffer sb, EloquaHelper eh, File f)
+            throws JSONException
+    {
+        FormViewHandler handler = new FormViewHandler();
+        handler.setEh(eh);
+        handler.setRoot(f.getAbsolutePath());
+        addView(root, handler);
+
+        sb.append("<eloquaGsForms>").append("\n");
+        for (String form : handler.getValues())
+        {
+            sb.append(form);
+        }
+        sb.append("</eloquaGsForms>").append("\n");
+    }
 
     public void addReplaceableContentView(StringBuffer sb, EloquaHelper eh)
             throws JSONException
@@ -159,7 +178,7 @@ public class ViewUtil
         sb.append("</eloquaSignatureLayouts>").append("\n");
     }
 
-    public String updateFromFile(String fileContent, boolean uploaded, String targetLocale)
+    public String updateFromFile(String fileContent, boolean uploaded, String targetLocale, String sourceFolder, String targetFolder)
             throws JSONException
     {
         ReplaceableContentViewHandler replaceableHandler = new ReplaceableContentViewHandler();
@@ -170,12 +189,14 @@ public class ViewUtil
 //        FormViewHandler formHandler = new FormViewHandler();
 //        formHandler.setUploaded(uploaded);
 //        formHandler.setEh(eh);
+//        formHandler.setSourceFolder(sourceFolder);
+//        formHandler.setTargetFolder(targetFolder);
 //        formHandler.setTargetLocale(targetLocale);
 
         root = updateFromFile(fileContent, new TextBoxViewHandler());
         root = updateFromFile(fileContent, new ImageViewHandler());
         root = updateFromFile(fileContent, replaceableHandler);
-//        root = updateFromFile(fileContent, formHandler);
+        //root = updateFromFile(fileContent, formHandler);
 
         return root;
     }

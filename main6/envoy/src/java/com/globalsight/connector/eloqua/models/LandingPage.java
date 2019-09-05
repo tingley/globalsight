@@ -25,17 +25,16 @@ import com.globalsight.connector.eloqua.models.view.ViewUtil;
 import com.globalsight.connector.eloqua.util.EloquaHelper;
 import com.globalsight.util.FileUtil;
 
-
 public class LandingPage extends EloquaObject
 {
     static private final Logger logger = Logger.getLogger(LandingPage.class);
-    
+
     @Override
     public String getDisplayId()
     {
         return "p" + getId();
     }
-   
+
     public void saveToFile(File f)
     {
         try
@@ -44,18 +43,19 @@ public class LandingPage extends EloquaObject
             {
                 String path = f.getAbsolutePath() + ".preview.html";
                 FileUtil.writeFile(new File(path), html, "utf-8");
-                
+
                 JSONObject js = getJson();
                 JSONObject cont = js.getJSONObject("htmlContent");
                 String root = cont.getString("root");
-                
+
                 EloquaHelper eh = new EloquaHelper(getConnect());
                 ViewUtil util = new ViewUtil(root, eh);
-                String html = util.generateHtml();
-                FileUtil.writeFile(f, html, "utf-8");
+                util.generateHtml(f);
             }
             else
             {
+                EloquaHelper eh = new EloquaHelper(getConnect());
+                updateForm(eh, f.getParent());
                 FileUtil.writeFile(f, html, "utf-8");
             }
         }
@@ -64,12 +64,13 @@ public class LandingPage extends EloquaObject
             logger.error(e);
         }
     }
-    
+
     /**
      * Update the translated name, subject and html body
+     * 
      * @param f
      */
-    public boolean updateFromFile(File f, boolean uploaded, String targetLocale)
+    public boolean updateFromFile(File f, boolean uploaded, String targetLocale, String sourceFolder, String targetFolder)
     {
         String content;
         try
@@ -80,26 +81,35 @@ public class LandingPage extends EloquaObject
                 JSONObject js = getJson();
                 JSONObject cont = js.getJSONObject("htmlContent");
                 String root = cont.getString("root");
-                
+
                 EloquaHelper eh = new EloquaHelper(getConnect());
                 ViewUtil util = new ViewUtil(root, eh);
-                String newRoot = util.updateFromFile(content, uploaded, targetLocale);
+                String newRoot = util.updateFromFile(content, uploaded, targetLocale, sourceFolder, targetFolder);
                 cont.put("root", newRoot);
                 cont.remove("htmlBody");
-                
+
                 return false;
             }
-            else 
+            else
             {
                 setHtml(content);
             }
-            
+
         }
         catch (Exception e)
         {
             logger.error(e);
         }
-        
+
         return true;
     }
+
+    public void updateForm(EloquaHelper h, String root)
+    {
+        if (isRawHtml() && json.has("forms"))
+        {
+            html = Form.addAllForms(json, html, h, root);
+        }
+    }
+
 }

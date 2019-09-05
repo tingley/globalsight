@@ -844,7 +844,7 @@ public class Exporter
 
                         String targetLocale = wf.getTargetLocale().toString();
 
-                        boolean isHtml = m.updateFromFile(emailFile, uploaded, targetLocale);
+                        boolean isHtml = m.updateFromFile(emailFile, uploaded, targetLocale, sourceFolder, targetFolder);
                         if (isHtml)
                         {
                             String html = m.getHtml();
@@ -852,6 +852,12 @@ public class Exporter
                             m.setHtml(newContent);
                         }
 
+                        String sourceLocale = m_displayName.substring(0,
+                                m_displayName.indexOf(File.separator));
+                        Email sourceEmail = new Email();
+                        sourceEmail.loadFromFile(new File(sourceFolder, name + ".obj"));
+                        EloquaHelper.updateEmailHeaderFooter(sourceEmail, m, sourceLocale, targetLocale);
+                        
                         if (uploaded && h.getEmail(m.getId()) != null)
                         {
                             h.updateEmail(m);
@@ -885,7 +891,7 @@ public class Exporter
                     if (m.getName() != null)
                     {
                         String targetLocale = wf.getTargetLocale().toString();
-                        boolean isHtml = m.updateFromFile(saveFile, uploaded, targetLocale);
+                        boolean isHtml = m.updateFromFile(saveFile, uploaded, targetLocale, sourceFolder, targetFolder);
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
 

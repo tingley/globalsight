@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<eloquaConnectorMapping>
+    <!--headers>
+        <sourceId>817</sourceId>
+        <target>
+            <id>828</id>
+            <language>fr_FR</language>
+        </target>
+        <target>
+            <id>818</id>
+            <language>de_DE</language>
+        </target>
+    </headers>
+    <headers>
+        <sourceId>2</sourceId>
+        <target>
+            <id>828</id>
+            <language>fr_FR</language>
+        </target>
+        <target>
+            <id>818</id>
+            <language>de_DE</language>
+        </target>
+    </headers>
+	<footers>
+        <sourceId>2</sourceId>
+        <target>
+            <id>828</id>
+            <language>fr_FR</language>
+        </target>
+        <target>
+            <id>818</id>
+            <language>de_DE</language>
+        </target>
+    </footers-->
+    <autoMapping open="true">
+        <languageMapping>
+            <eloquaLanguage>EN</eloquaLanguage>
+            <globalSightLanguage>en_US</globalSightLanguage>
+        </languageMapping>
+		<languageMapping>
+            <eloquaLanguage>FR</eloquaLanguage>
+            <globalSightLanguage>fr_FR</globalSightLanguage>
+        </languageMapping>
+    </autoMapping>
+</eloquaConnectorMapping>

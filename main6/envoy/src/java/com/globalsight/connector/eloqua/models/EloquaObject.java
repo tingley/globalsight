@@ -79,6 +79,23 @@ public abstract class EloquaObject
     {
         return json;
     }
+    
+    public boolean isRawHtml()
+    {
+        JSONObject content;
+        try
+        {
+            content = json.getJSONObject("htmlContent");
+            String type = content.getString("type");
+            return "RawHtmlContent".equalsIgnoreCase(type);
+        }
+        catch (JSONException e)
+        {
+            logger.error(e);
+        }
+        
+        return false;
+    }
 
     public void setJson(JSONObject json, boolean fromList)
     {
@@ -92,9 +109,7 @@ public abstract class EloquaObject
             try
             {
                 content = json.getJSONObject("htmlContent");
-                String type = content.getString("type");
-
-                if ("RawHtmlContent".equalsIgnoreCase(type))
+                if (isRawHtml())
                 {
                     html = content.getString("html");
                 }

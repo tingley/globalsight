@@ -67,8 +67,7 @@ import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
 public class CreateEloquaJobThread implements Runnable
 {
-    static private final Logger logger = Logger
-            .getLogger(CreateEloquaJobThread.class);
+    static private final Logger logger = Logger.getLogger(CreateEloquaJobThread.class);
     private User user;
     private String currentCompanyId;
     private EloquaConnector conn;
@@ -78,10 +77,10 @@ public class CreateEloquaJobThread implements Runnable
     private String attachmentName;
     private String attribute;
     private String uuid;
-    
-    public CreateEloquaJobThread(User user, String currentCompanyId,
-            EloquaConnector conn, File attachment, CreateEloquaForm eForm,
-            String[] targetLocales, String attachmentName, String attribute, String uuid)
+
+    public CreateEloquaJobThread(User user, String currentCompanyId, EloquaConnector conn,
+            File attachment, CreateEloquaForm eForm, String[] targetLocales, String attachmentName,
+            String attribute, String uuid)
     {
         super();
         this.user = user;
@@ -102,7 +101,7 @@ public class CreateEloquaJobThread implements Runnable
             String jobName = eForm.getJobName();
             String comment = eForm.getComment();
             String priority = eForm.getPriority();
-            
+
             String randomStr = String.valueOf((new Random()).nextInt(999999999));
             while (randomStr.length() < 9)
             {
@@ -122,30 +121,25 @@ public class CreateEloquaJobThread implements Runnable
                 String[] f = ff.split("-");
                 files.add(f[0]);
                 fps.add(f[1]);
-                fileProfileList.add(HibernateUtil.get(FileProfileImpl.class,
-                        Long.parseLong(f[1])));
+                fileProfileList.add(HibernateUtil.get(FileProfileImpl.class, Long.parseLong(f[1])));
             }
 
             long l10Id = fileProfileList.get(0).getL10nProfileId();
-            BasicL10nProfile l10Profile = HibernateUtil.get(
-                    BasicL10nProfile.class, l10Id);
+            BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class, l10Id);
             // init files and file profiles infomation
             List<String> descList = new ArrayList<String>();
 
             // init target locale infomation
             String locs = this.initTargetLocale(targetLocales);
-			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
-					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
-					Job.JOB_TYPE_ELOQUA);
-            String sourceLocaleName = l10Profile.getSourceLocale()
-                    .getLocaleCode();
+            Job job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(), l10Id,
+                    priority, Job.IN_QUEUE, Job.JOB_TYPE_ELOQUA);
+            String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
             initDescAndFileProfile(descList, job, files, sourceLocaleName);
-            Map<String, long[]> filesToFpId = FileProfileUtil.excuteScriptOfFileProfile(
-                    descList, fileProfileList, job);
+            Map<String, long[]> filesToFpId = FileProfileUtil.excuteScriptOfFileProfile(descList,
+                    fileProfileList, job);
             Set<String> fileNames = filesToFpId.keySet();
             Integer pageCount = new Integer(fileNames.size());
-            List<JobAttribute> jobAttribtues = getJobAttributes(attribute,
-                    l10Profile);
+            List<JobAttribute> jobAttribtues = getJobAttributes(attribute, l10Profile);
             // cache job attributes if there are any
             if (jobAttribtues != null && jobAttribtues.size() != 0)
             {
@@ -162,9 +156,8 @@ public class CreateEloquaJobThread implements Runnable
 
                 String key = jobName + fileName + ++count;
                 CxeProxy.setTargetLocales(key, locs);
-                CxeProxy.importFromFileSystem(fileName,
-                        String.valueOf(job.getId()), jobName, fileProfileId,
-                        pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
+                CxeProxy.importFromFileSystem(fileName, String.valueOf(job.getId()), jobName,
+                        fileProfileId, pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
                         CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
             }
 
@@ -175,15 +168,11 @@ public class CreateEloquaJobThread implements Runnable
             }
 
             // save job comment
-            if (!StringUtils.isEmpty(comment)
-                    || !StringUtils.isEmpty(attachmentName))
+            if (!StringUtils.isEmpty(comment) || !StringUtils.isEmpty(attachmentName))
             {
-                String dir = convertFilePath(AmbFileStoragePathUtils
-                        .getFileStorageDirPath(currentCompanyId))
-                        + File.separator
-                        + "GlobalSight"
-                        + File.separator
-                        + "CommentReference"
+                String dir = convertFilePath(
+                        AmbFileStoragePathUtils.getFileStorageDirPath(currentCompanyId))
+                        + File.separator + "GlobalSight" + File.separator + "CommentReference"
                         + File.separator + "tmp" + File.separator + uuid;
                 File src = new File(dir + File.separator + attachmentName);
                 if (attachment != null)
@@ -192,8 +181,8 @@ public class CreateEloquaJobThread implements Runnable
                     attachment.delete();
                 }
 
-                SaveCommentThread sct = new SaveCommentThread(jobName, comment,
-                        attachmentName, user.getUserId(), dir);
+                SaveCommentThread sct = new SaveCommentThread(jobName, comment, attachmentName,
+                        user.getUserId(), dir);
                 sct.start();
             }
         }
@@ -217,8 +206,7 @@ public class CreateEloquaJobThread implements Runnable
     {
         if (path != null)
         {
-            return path.replace("\\", File.separator).replace("/",
-                    File.separator);
+            return path.replace("\\", File.separator).replace("/", File.separator);
         }
         else
         {
@@ -235,11 +223,11 @@ public class CreateEloquaJobThread implements Runnable
      * @param l10Profile
      * @throws ParseException
      */
-    private void saveAttributes(List<JobAttribute> jobAttributeList,
-            String currentCompanyId, Job job)
+    private void saveAttributes(List<JobAttribute> jobAttributeList, String currentCompanyId,
+            Job job)
     {
-        AddJobAttributeThread thread = new AddJobAttributeThread(
-                ((JobImpl) job).getUuid(), currentCompanyId);
+        AddJobAttributeThread thread = new AddJobAttributeThread(((JobImpl) job).getUuid(),
+                currentCompanyId);
         thread.setJobAttributes(jobAttributeList);
         thread.createJobAttributes();
     }
@@ -258,8 +246,7 @@ public class CreateEloquaJobThread implements Runnable
      * @throws Exception
      */
 
-    private List<JobAttribute> getJobAttributes(String attributeString,
-            BasicL10nProfile l10Profile)
+    private List<JobAttribute> getJobAttributes(String attributeString, BasicL10nProfile l10Profile)
     {
         List<JobAttribute> jobAttributeList = new ArrayList<JobAttribute>();
 
@@ -277,15 +264,13 @@ public class CreateEloquaJobThread implements Runnable
                 {
                     String attributeId = ele.substring(ele.indexOf(",.,") + 3,
                             ele.lastIndexOf(",.,"));
-                    String attributeValue = ele.substring(ele
-                            .lastIndexOf(",.,") + 3);
+                    String attributeValue = ele.substring(ele.lastIndexOf(",.,") + 3);
 
                     Attribute attribute = HibernateUtil.get(Attribute.class,
                             Long.parseLong(attributeId));
                     JobAttribute jobAttribute = new JobAttribute();
                     jobAttribute.setAttribute(attribute.getCloneAttribute());
-                    if (attribute != null
-                            && StringUtils.isNotEmpty(attributeValue))
+                    if (attribute != null && StringUtils.isNotEmpty(attributeValue))
                     {
                         Condition condition = attribute.getCondition();
                         if (condition instanceof TextCondition)
@@ -294,20 +279,16 @@ public class CreateEloquaJobThread implements Runnable
                         }
                         else if (condition instanceof IntCondition)
                         {
-                            jobAttribute.setIntegerValue(Integer
-                                    .parseInt(attributeValue));
+                            jobAttribute.setIntegerValue(Integer.parseInt(attributeValue));
                         }
                         else if (condition instanceof FloatCondition)
                         {
-                            jobAttribute.setFloatValue(Float
-                                    .parseFloat(attributeValue));
+                            jobAttribute.setFloatValue(Float.parseFloat(attributeValue));
                         }
                         else if (condition instanceof DateCondition)
                         {
-                            SimpleDateFormat sdf = new SimpleDateFormat(
-                                    DateCondition.FORMAT);
-                            jobAttribute
-                                    .setDateValue(sdf.parse(attributeValue));
+                            SimpleDateFormat sdf = new SimpleDateFormat(DateCondition.FORMAT);
+                            jobAttribute.setDateValue(sdf.parse(attributeValue));
                         }
                         else if (condition instanceof ListCondition)
                         {
@@ -326,8 +307,8 @@ public class CreateEloquaJobThread implements Runnable
         }
         else
         {
-            List<Attribute> attsList = l10Profile.getProject()
-                    .getAttributeSet().getAttributeAsList();
+            List<Attribute> attsList = l10Profile.getProject().getAttributeSet()
+                    .getAttributeAsList();
             for (Attribute att : attsList)
             {
                 JobAttribute jobAttribute = new JobAttribute();
@@ -351,8 +332,7 @@ public class CreateEloquaJobThread implements Runnable
      * @throws GeneralException
      */
     private String initTargetLocale(String[] targetLocales)
-            throws LocaleManagerException, NumberFormatException,
-            RemoteException, GeneralException
+            throws LocaleManagerException, NumberFormatException, RemoteException, GeneralException
     {
         StringBuffer targetLocaleString = new StringBuffer();
         for (int i = 0; i < targetLocales.length; i++)
@@ -368,28 +348,27 @@ public class CreateEloquaJobThread implements Runnable
         }
         return targetLocaleString.toString();
     }
-    
+
     private String getFileName(String name)
     {
-    	if (name.length() > 100)
-     	   name = name.substring(0, 100);
-    	
-     	name = name.replace("\\", "");
-     	name = name.replace("/", "");
-     	name = name.replace(":", "");
-     	name = name.replace("*", "");
-     	name = name.replace("?", "");
-     	name = name.replace("\"", "");
-     	name = name.replace("<", "");
-     	name = name.replace(">", "");
-     	name = name.replace("|", "");
-     	
-     	return name;
+        if (name.length() > 100)
+            name = name.substring(0, 100);
+
+        name = name.replace("\\", "");
+        name = name.replace("/", "");
+        name = name.replace(":", "");
+        name = name.replace("*", "");
+        name = name.replace("?", "");
+        name = name.replace("\"", "");
+        name = name.replace("<", "");
+        name = name.replace(">", "");
+        name = name.replace("|", "");
+
+        return name;
     }
 
-    private void initDescAndFileProfile(List<String> descList, Job job,
-            List<String> files, String sorceLocale)
-            throws FileNotFoundException, Exception
+    private void initDescAndFileProfile(List<String> descList, Job job, List<String> files,
+            String sorceLocale) throws FileNotFoundException, Exception
     {
         EloquaHelper eh = new EloquaHelper(conn);
         for (String f : files)
@@ -399,23 +378,23 @@ public class CreateEloquaJobThread implements Runnable
                 f = f.substring(1);
                 Email e = eh.getEmail(f);
                 e.setConnect(conn);
-                
+
                 if (f.equals(e.getId()))
                 {
-                	// the name may be like ~!@#$%^&*()_+|}{":?"<>,./;'[]\\` 
-                	String name = "(" + e.getId() + ")" +  e.getDisplayName();
-                	name = getFileName(name);
-                	
-                    String file = sorceLocale + File.separator + job.getId()
-                            + File.separator + name + ".email.html";
-                    String file2 = sorceLocale + File.separator + job.getId()
-                            + File.separator + name + ".obj";
-                    File f1 = new File(AmbFileStoragePathUtils.getCxeDocDir()
-                            + File.separator + file);
-                    
-                    File f2 = new File(AmbFileStoragePathUtils.getCxeDocDir()
-                            + File.separator + file2);
-                    
+                    // the name may be like ~!@#$%^&*()_+|}{":?"<>,./;'[]\\`
+                    String name = "(" + e.getId() + ")" + e.getDisplayName();
+                    name = getFileName(name);
+
+                    String file = sorceLocale + File.separator + job.getId() + File.separator + name
+                            + ".email.html";
+                    String file2 = sorceLocale + File.separator + job.getId() + File.separator
+                            + name + ".obj";
+                    File f1 = new File(
+                            AmbFileStoragePathUtils.getCxeDocDir() + File.separator + file);
+
+                    File f2 = new File(
+                            AmbFileStoragePathUtils.getCxeDocDir() + File.separator + file2);
+
                     e.saveToFile(f1);
                     e.saveJsonToFile(f2);
                     descList.add(file);
@@ -426,27 +405,30 @@ public class CreateEloquaJobThread implements Runnable
                 f = f.substring(1);
                 LandingPage p = eh.getLandingPage(f);
                 p.setConnect(conn);
-                
+
                 if (f.equals(p.getId()))
                 {
-                	String name = "(" + p.getId() + ")" +  p.getDisplayName();
-                	name = getFileName(name);
-                	
-                    String file = sorceLocale + File.separator + job.getId()
-                            + File.separator + name + ".landingPage.html";
-                    String file2 = sorceLocale + File.separator + job.getId()
-                            + File.separator + name + ".obj";
-                    File f1 = new File(AmbFileStoragePathUtils.getCxeDocDir()
-                            + File.separator + file);
-                    File f2 = new File(AmbFileStoragePathUtils.getCxeDocDir()
-                            + File.separator + file2);
-                    
+                    String name = "(" + p.getId() + ")" + p.getDisplayName();
+                    name = getFileName(name);
+
+//                    p.updateForm(new EloquaHelper(conn), AmbFileStoragePathUtils.getCxeDocDir() + File.separator +
+//                            sorceLocale + File.separator + job.getId() + File.separator);
+
+                    String file = sorceLocale + File.separator + job.getId() + File.separator + name
+                            + ".landingPage.html";
+                    String file2 = sorceLocale + File.separator + job.getId() + File.separator
+                            + name + ".obj";
+                    File f1 = new File(
+                            AmbFileStoragePathUtils.getCxeDocDir() + File.separator + file);
+                    File f2 = new File(
+                            AmbFileStoragePathUtils.getCxeDocDir() + File.separator + file2);
+
                     p.saveToFile(f1);
                     p.saveJsonToFile(f2);
                     descList.add(file);
                 }
             }
-            else 
+            else
             {
                 logger.error("Don't know how to handle the eloqua file with id " + f);
             }

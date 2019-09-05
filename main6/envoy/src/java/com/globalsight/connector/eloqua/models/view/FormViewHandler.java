@@ -16,15 +16,23 @@
  */
 package com.globalsight.connector.eloqua.models.view;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.globalsight.connector.eloqua.models.Form;
+import com.globalsight.connector.eloqua.models.form.EloquaGsForm;
 import com.globalsight.connector.eloqua.util.EloquaHelper;
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.util.FileUtil;
 
 /**
  * 
@@ -33,13 +41,20 @@ import com.globalsight.connector.eloqua.util.EloquaHelper;
  */
 public class FormViewHandler implements ViewHandler
 {
+    static private final Logger logger = Logger.getLogger(FormViewHandler.class);
+
     private EloquaHelper eh;
     private boolean uploaded;
     private String targetLocale;
-    private static Pattern P = Pattern.compile("<eloquaForm>([\\d\\D]*?)</eloquaForm>");
-    
-    List<String> values = new ArrayList<String>();
-    
+    private String sourceFolder;
+    private String targetFolder;
+    private static Pattern P = Pattern
+            .compile("<eloquaGsForm id=\"[^\"]*\" newId=\"[^\"]*\">[\\d\\D]*?</eloquaGsForm>");
+    private String root;
+
+    private List<String> values = new ArrayList<>();
+    private List<EloquaGsForm> forms = new ArrayList<>();
+
     @Override
     public String getTyle()
     {
@@ -50,7 +65,36 @@ public class FormViewHandler implements ViewHandler
     public void handContent(String content) throws JSONException
     {
         JSONObject tt = new JSONObject(content);
-        values.add(tt.getString("contentId"));
+        if (tt.has("contentId"))
+        {
+            String id = tt.getString("contentId");
+            Form f = eh.getForm(id);
+            JSONObject ob = f.getJson();
+            try
+            {
+                FileUtil.writeFile(new File(root, id + ".form"), ob.toString(1), "utf-8");
+            }
+            catch (IOException e)
+            {
+                logger.error(e);
+            }
+
+            if (ob.has("elements"))
+            {
+                JSONArray els = ob.getJSONArray("elements");
+
+                EloquaGsForm xml = new EloquaGsForm();
+                xml.setId(id);
+                for (int j = 0; j < els.length(); j++)
+                {
+                    JSONObject el = els.getJSONObject(j);
+                    Form.addAllElements(el, xml, eh);
+                }
+                String xml2 = XmlUtil.object2String(xml, true);
+                xml2 = xml2.substring(xml2.indexOf("<", 5));
+                values.add(xml2);
+            }
+        }
     }
 
     public List<String> getValues()
@@ -70,7 +114,7 @@ public class FormViewHandler implements ViewHandler
         int start = 0;
         while (m.find(start))
         {
-            values.add(m.group(1));
+            forms.add(XmlUtil.string2Object(EloquaGsForm.class, m.group()));
             start = m.end();
         }
     }
@@ -78,10 +122,63 @@ public class FormViewHandler implements ViewHandler
     @Override
     public String updateContentFromFile(String content) throws JSONException
     {
-        int start = content.indexOf("},value: \"") + "},value: \"".length();
-        int end = content.indexOf("\",inlineStyles:");
-        
-        return content.substring(0, start - 1) + JSONObject.quote(values.remove(0)) + content.substring(end + 1);
+        boolean isNew = false;
+        JSONObject tt = new JSONObject(content);
+        if (tt.has("contentId"))
+        {
+            String id = tt.getString("contentId");
+            File form = new File(targetFolder, id + ".form");
+            if (!form.exists())
+            {
+                form = new File(sourceFolder, id + ".form");
+                isNew = true;
+            }
+            
+            String formContent = "";
+            Form f = new Form();
+            JSONObject obf = null;
+            try
+            {
+                formContent = FileUtil.readFile(form, "utf-8");
+                obf = new JSONObject(formContent);
+            }
+            catch (IOException e1)
+            {
+                logger.error(e1);
+                return content;
+            }
+
+            f.setJson(obf);
+
+            for (EloquaGsForm f1 : forms)
+            {
+               
+                    if (f1.getId().equalsIgnoreCase(id))
+                    {
+                        try
+                        {
+                            JSONObject ob = Form.updateForm(XmlUtil.object2String(f1), eh, sourceFolder, targetFolder,
+                                    targetLocale);
+                           
+                            if (isNew)
+                            {
+                                if (ob != null && ob.has("id"))
+                                {
+                                    String newId = ob.getString("id");
+                                    tt.put("contentId", newId);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            logger.error(e);
+                        }
+                        break;
+                    }
+            }
+        }
+
+        return tt.toString();
     }
 
     public EloquaHelper getEh()
@@ -112,5 +209,35 @@ public class FormViewHandler implements ViewHandler
     public void setTargetLocale(String targetLocale)
     {
         this.targetLocale = targetLocale;
+    }
+
+    public String getRoot()
+    {
+        return root;
+    }
+
+    public void setRoot(String root)
+    {
+        this.root = root;
+    }
+
+    public String getSourceFolder()
+    {
+        return sourceFolder;
+    }
+
+    public void setSourceFolder(String sourceFolder)
+    {
+        this.sourceFolder = sourceFolder;
+    }
+
+    public String getTargetFolder()
+    {
+        return targetFolder;
+    }
+
+    public void setTargetFolder(String targetFolder)
+    {
+        this.targetFolder = targetFolder;
     }
 }

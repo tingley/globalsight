@@ -16,6 +16,9 @@
  */
 package com.globalsight.connector.eloqua.util;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -36,7 +40,16 @@ import com.globalsight.connector.eloqua.models.Email;
 import com.globalsight.connector.eloqua.models.Form;
 import com.globalsight.connector.eloqua.models.LandingPage;
 import com.globalsight.connector.eloqua.models.SearchResponse;
+import com.globalsight.connector.eloqua.util.config.AutoMapping;
+import com.globalsight.connector.eloqua.util.config.AutoMappingObj;
+import com.globalsight.connector.eloqua.util.config.EloquaConnectorMapping;
+import com.globalsight.connector.eloqua.util.config.Mapping;
+import com.globalsight.connector.eloqua.util.config.MappingObj;
 import com.globalsight.cxe.entity.eloqua.EloquaConnector;
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 //import com.google.gson.Gson;
 
@@ -48,12 +61,17 @@ public class EloquaHelper
     private final String DYNAMIC_CONTENT = "dynamicContent";
     private static final Logger logger = Logger.getLogger(EloquaHelper.class);
     public static Map<String, String> USERS = new HashMap<String, String>();
+    
+    private static final String CONFIG_FILE = "/properties/EloquaConnectorMapping.xml";
+    private static EloquaConnectorMapping CONFIG = new EloquaConnectorMapping();
+    private static long CONFIG_LAST = 0;
+    
 //    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span )(elqid=\"[^\"]*\" elqtype=\"DynamicContent\")([^>]*>[\\d\\D]*?</span><)");
     private static Pattern DYNAMIC_PATTERN = Pattern.compile("(<span )elqid=\"[^\"]*\" elqtype=\"DynamicContent\"([^>]*>)([\\d\\D]*?)</span>");
 //    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span elqid=\")([^\"]*)(\" elqtype=\"DynamicContent\"[^>]*>)([\\d\\D]*?)(</span><)");
     private EloquaConnector conn;
     // api document:http://docs.oracle.com/cloud/latest/marketingcs_gs/OMCAB/index.html#Developers/RESTAPI/REST-API.htm%3FTocPath%3D%2520REST%2520API%7C_____0
-    
+   
     static
     {
         USERS.put("--", "--");
@@ -158,6 +176,46 @@ public class EloquaHelper
         return null;
     }
     
+    public JSONObject getAllHeaders()
+    {
+        return getObjectAll("email/header");
+    }
+    
+    public JSONObject getAllFooters()
+    {
+        return getObjectAll("email/footer");
+    } 
+    
+    public JSONObject getObjectAll(String className)
+    {
+        int i = 1;
+        JSONObject ob = getAll(className, i++, 1000);
+        try
+        {
+            JSONArray els = ob.getJSONArray("elements");
+            while(true) 
+            {
+                JSONObject ob2 = getAll(className, i++, 1000);
+                if (ob2 == null)
+                    break;
+                
+                JSONArray els2 = ob2.getJSONArray("elements");
+                if (els2.length() == 0)
+                    break;
+                
+                for (int j = 0; j < els2.length(); j++)
+                {
+                    els.put(els2.get(j));
+                }
+            }
+        }
+        catch (JSONException e)
+        {
+            logger.error(e);
+        }
+        return ob;
+    }
+    
     public JSONObject getAll(String className, int page, int count)
     {
         Response response = _client.get("/assets/" + className + "s?page=" + page + "&count=" + count);
@@ -255,7 +313,11 @@ public class EloquaHelper
             try
             {
                 f.setId(ob.getString("id"));
-                f.setHtml(ob.getString("html"));
+                if (ob.has("html"))
+                {
+                    f.setHtml(ob.getString("html"));
+                }
+                
                 return f;
             }
             catch (JSONException e)
@@ -293,6 +355,7 @@ public class EloquaHelper
         
         LandingPage p = new LandingPage();
         p.setJson(ob, false);
+//        p.updateForm(ob, new EloquaHelper(conn));
         return p;
     }
     
@@ -460,7 +523,7 @@ public class EloquaHelper
 
     public Email saveEmail(Email email)
     {
-        Response response = _client.post("/assets/email", email.getJson().toString());
+        Response response = _client.post("assets/email", email.getJson().toString());
         try
         {
             Email e = new Email();
@@ -599,5 +662,213 @@ public class EloquaHelper
             logger.error(e);
         }
         return emails;
+    }
+    
+    public static void updateEmailHeaderFooter(Email sourceEmail, Email targetEmail,
+            String sourceLocale, String targetLocale)
+    {
+        updateEmailHeaderFooter("emailHeaderId", sourceEmail, targetEmail, sourceLocale,
+                targetLocale);
+        updateEmailHeaderFooter("emailFooterId", sourceEmail, targetEmail, sourceLocale,
+                targetLocale);
+    }
+
+    public static void updateEmailHeaderFooter(String name, Email sourceEmail, Email targetEmail,
+            String sourceLocale, String targetLocale)
+    {
+        JSONObject src = sourceEmail.getJson();
+        JSONObject trg = targetEmail.getJson();
+        EloquaConnectorMapping config = getConfig();
+
+        if (src.has(name))
+        {
+            try
+            {
+                String footerId = (String) src.get(name);
+                List<Mapping> mappings;
+
+                boolean isFooter = name.equals("emailFooterId");
+                if (isFooter)
+                {
+                    mappings = config.getFooters();
+                }
+                else
+                {
+                    mappings = config.getHeaders();
+                }
+
+                boolean found = false;
+                for (Mapping f : mappings)
+                {
+                    if (f.getSourceId() == Integer.parseInt(footerId))
+                    {
+                        List<MappingObj> tOjbs = f.getTarget();
+                        for (MappingObj t : tOjbs)
+                        {
+                            if (t.getLanguage().equalsIgnoreCase(targetLocale))
+                            {
+                                trg.put(name, t.getId());
+                                found = true;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                
+                //auto mapping
+                if (!found)
+                {
+                    AutoMapping autoMapping = config.getAutoMapping();
+                    if (autoMapping.getOpen())
+                    {
+                        EloquaConnector conn = sourceEmail.getConnect();
+                        EloquaHelper h = new EloquaHelper(conn);
+                        
+                        JSONObject srcObj = isFooter ? h.get(footerId, "email/footer") : h.get(footerId, "email/header");
+                        if (srcObj == null)
+                            return;
+                        
+                        String srcName = srcObj.getString("name").toLowerCase();
+                        
+                        LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
+                        try
+                        {
+                            // find the prefix of the name if the name if "prefix+locale" format
+                            String prefix = null;
+                            
+                            // if the name is end with source locale
+                            if (srcName.endsWith(sourceLocale.toLowerCase()))
+                            {
+                                prefix = srcName.substring(0, srcName.length() - sourceLocale.length());
+                            }
+                            
+                            // if the name is end with eloqua locale
+                            if (prefix == null)
+                            {
+                                List<AutoMappingObj> objs = autoMapping.getLanguageMapping();
+                                for (AutoMappingObj ob :objs)
+                                {
+                                    if (srcName.endsWith(ob.getEloquaLanguage().toLowerCase()))
+                                    {
+                                        prefix = srcName.substring(0, srcName.length() - ob.getEloquaLanguage().length());
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // if the name is end with any gs locale
+                            if (prefix == null)
+                            {
+                                Vector<GlobalSightLocale> locales = localeMgr.getAvailableLocales();
+                                for (GlobalSightLocale local : locales)
+                                {
+                                    String localName = local.toString().toLowerCase();
+                                    if (srcName.endsWith(localName))
+                                    {
+                                        prefix = srcName.substring(0, srcName.length() - localName.length());
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (prefix != null)
+                            {
+                                JSONObject targetObj = null;
+                                
+                                // search all footers or headers
+                                JSONObject obs = isFooter ? h.getAllFooters() : h.getAllHeaders();
+                                JSONArray els = obs.getJSONArray("elements");
+                                for (int i = 0; i < els.length(); i++)
+                                {
+                                    JSONObject obj = els.getJSONObject(i);
+                                    String objName = obj.getString("name").toLowerCase();
+                                    
+                                    // start with prefix
+                                    if (objName.startsWith(prefix))
+                                    {
+                                        // if end with the gs target locale.
+                                        String suffix = objName.substring(prefix.length());
+                                        if (suffix.equalsIgnoreCase(targetLocale))
+                                        {
+                                            targetObj = obj;
+                                        }
+                                        else
+                                        {
+                                            // if end with the eloqua target local.
+                                            List<AutoMappingObj> objs = autoMapping.getLanguageMapping();
+                                            for (AutoMappingObj ob :objs)
+                                            {
+                                                if (ob.getGlobalSightLanguage().equalsIgnoreCase(targetLocale) && ob.getEloquaLanguage().equalsIgnoreCase(suffix))
+                                                {
+                                                    targetObj = obj;
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            if (targetObj != null)
+                                                break;
+                                        }
+                                    }
+                                }
+                                
+                                // if found. update the id.
+                                if (targetObj != null)
+                                {
+                                    trg.put(name, targetObj.getString("id"));
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            logger.error(e);
+                        }
+                    }
+                }
+            }
+            catch (JSONException e)
+            {
+                logger.error(e);
+            }
+        }
+    }
+    
+    public static EloquaConnectorMapping getConfig()
+    {
+        File f = getConfigFile();
+        if (f == null)
+            return CONFIG;
+        
+        long t = f.lastModified();
+        if (t != CONFIG_LAST)
+        {
+            CONFIG = XmlUtil.load(EloquaConnectorMapping.class, f.getAbsolutePath());
+            CONFIG_LAST = t;
+        }
+        
+        return CONFIG;
+    }
+    
+    private static File getConfigFile()
+    {
+       
+        URL url = EloquaHelper.class.getResource(CONFIG_FILE);
+
+        if (url == null)
+        {
+            logger.error("File " + CONFIG_FILE
+                    + " not found");
+            return null;
+        }
+
+        try
+        {
+            return new File(url.toURI().getPath());
+        }
+        catch (URISyntaxException e)
+        {
+            logger.error(e);
+            return null;
+        }
     }
 }
